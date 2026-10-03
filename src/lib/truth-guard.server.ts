@@ -150,6 +150,19 @@ export function guardResume(result: TailoredResume, source: string): { result: T
     }))
     .filter((s) => s.items.length > 0);
 
+  // Education: never repeat the school inside the degree, and drop explanatory
+  // brackets such as "(three-year undergraduate degree)" that the source never had.
+  const education = result.education.map((ed) => {
+    let credential = ed.credential;
+    const inst = (ed.institution || "").trim();
+    if (inst) {
+      const esc = inst.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      credential = credential.replace(new RegExp(`\\s*(?:,|-|–|—|at|from)?\\s*${esc}\\s*$`, "i"), "").trim();
+    }
+    credential = credential.replace(/\s*\(([^)]*)\)/g, (m, inner) => (skillSupported(inner, src) ? m : (note("education note", inner), ""))).trim();
+    return credential && credential !== ed.credential ? { ...ed, credential } : ed;
+  });
+
   // The headline must not claim a title the source never held.
   let headline = result.headline;
   const srcRoles = result.experience.map((e) => e.role);
@@ -159,7 +172,7 @@ export function guardResume(result: TailoredResume, source: string): { result: T
   }
 
   return {
-    result: { ...result, contacts, summary, coverLetter, skills, skillGroups, keyAchievements, experience, projects, additionalSections, headline },
+    result: { ...result, contacts, summary, coverLetter, skills, skillGroups, keyAchievements, experience, projects, additionalSections, headline, education },
     removed,
   };
 }
