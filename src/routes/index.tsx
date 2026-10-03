@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { WipSplash } from "@/components/WipSplash";
+import { WIP_ENABLED, WIP_HEAD_SCRIPT } from "@/lib/wip";
 import {
   ArrowRight,
   BellRing,
@@ -56,6 +58,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: "https://gotaofferr.com/" }],
     scripts: [
+      ...(WIP_ENABLED ? [{ children: WIP_HEAD_SCRIPT }] : []),
       {
         type: "application/ld+json",
         children: JSON.stringify({
@@ -166,6 +169,7 @@ const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi)
 function Index() {
   return (
     <main>
+      <WipSplash />
       {/* Hero */}
       <section className="bg-hero relative isolate overflow-hidden text-foreground">
         <HeroBackdrop />
