@@ -106,6 +106,11 @@ function securityHeaders(nonce?: string, hostname?: string): Record<string, stri
 const securityHeadersMiddleware = createMiddleware().server(async ({ next, request }) => {
   const requestUrl = new URL(request.url);
   const pathname = requestUrl.pathname;
+  // Send any plain-HTTP visit to HTTPS (HSTS covers repeat visits; this covers the first one).
+  if (!IS_DEV && requestUrl.protocol === "http:" && requestUrl.hostname !== "localhost") {
+    requestUrl.protocol = "https:";
+    return new Response(null, { status: 301, headers: { location: requestUrl.toString() } });
+  }
   // Internal Lovable routes (email preview/webhooks) authenticate themselves.
   if (pathname.startsWith("/lovable/")) {
     return next();
