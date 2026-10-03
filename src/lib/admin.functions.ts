@@ -22,8 +22,16 @@ async function hasAdminRole(context: { supabase: any; userId: string }) {
 }
 
 async function assertAdmin(context: AdminCtx) {
-  if (!(await hasAdminRole(context))) throw new Error("Forbidden");
-  if (!hasSecondFactor(context)) throw new Error("Forbidden: two-factor required");
+  // Audit trail: every admin data access, and every refused attempt, goes to the Worker logs.
+  if (!(await hasAdminRole(context))) {
+    console.warn(`[audit] admin access refused: not an admin user=${context.userId}`);
+    throw new Error("Forbidden");
+  }
+  if (!hasSecondFactor(context)) {
+    console.warn(`[audit] admin access refused: no second factor user=${context.userId}`);
+    throw new Error("Forbidden: two-factor required");
+  }
+  console.info(`[audit] admin data access user=${context.userId}`);
 }
 
 export const checkIsAdmin = createServerFn({ method: "GET" })
