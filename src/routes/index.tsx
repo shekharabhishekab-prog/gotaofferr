@@ -46,12 +46,12 @@ export const Route = createFileRoute("/")({
       {
         property: "og:image",
         content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/886795dc-6954-4558-aa80-d7fcd174d5f3/id-preview-f697b4c3--224ae01b-cc1a-49d9-b757-c96ec9ff2ff9.lovable.app-1785425966280.png",
+          "https://gotaofferr.com/og-image.png",
       },
       {
         name: "twitter:image",
         content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/886795dc-6954-4558-aa80-d7fcd174d5f3/id-preview-f697b4c3--224ae01b-cc1a-49d9-b757-c96ec9ff2ff9.lovable.app-1785425966280.png",
+          "https://gotaofferr.com/og-image.png",
       },
     ],
     links: [{ rel: "canonical", href: "https://gotaofferr.com/" }],
