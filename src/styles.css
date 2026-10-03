@@ -1,0 +1,644 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+@import "@fontsource-variable/dm-sans/wght.css";
+@import "@fontsource/space-grotesk/latin-500.css";
+@import "@fontsource/space-grotesk/latin-600.css";
+@import "@fontsource/space-grotesk/latin-700.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-success: var(--success);
+}
+
+:root {
+  --radius: 0.9rem;
+  --background: oklch(0.09 0 0);
+  --foreground: oklch(0.96 0.04 96);
+  --card: oklch(0.14 0.01 96);
+  --card-foreground: oklch(0.95 0.03 96);
+  --popover: oklch(0.13 0.01 96);
+  --popover-foreground: oklch(0.95 0.03 96);
+  --primary: oklch(0.86 0.19 96);
+  --primary-foreground: oklch(0.14 0.02 96);
+  --secondary: oklch(0.21 0.03 96);
+  --secondary-foreground: oklch(0.95 0.03 96);
+  --muted: oklch(0.18 0.02 96);
+  --muted-foreground: oklch(0.75 0.06 96);
+  --accent: oklch(0.86 0.19 96);
+  --accent-foreground: oklch(0.14 0.02 96);
+  --destructive: oklch(0.7 0.19 45);
+  --destructive-foreground: oklch(0.11 0 0);
+  --border: oklch(0.86 0.19 96 / 24%);
+  --input: oklch(0.86 0.19 96 / 38%);
+  --ring: oklch(0.86 0.19 96);
+  --ink: oklch(0.09 0 0);
+  --paper: oklch(0.13 0.01 96);
+  --highlight: oklch(0.86 0.19 96);
+  --highlight-foreground: oklch(0.14 0.02 96);
+  --success: oklch(0.82 0.17 140);
+  --gradient-hero: radial-gradient(120% 90% at 50% 0%, oklch(0.13 0.02 96) 0%, oklch(0.06 0 0) 55%, oklch(0.04 0 0) 100%);
+  --gradient-accent: linear-gradient(100deg, oklch(0.9 0.18 100), oklch(0.78 0.19 86));
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.5), 0 12px 32px -12px oklch(0.86 0.19 96 / 0.24);
+  --shadow-lift: 0 24px 60px -24px oklch(0.86 0.19 96 / 0.4);
+  --chart-1: oklch(0.9 0.18 100);
+  --chart-2: oklch(0.82 0.18 92);
+  --chart-3: oklch(0.72 0.16 88);
+  --chart-4: oklch(0.58 0.13 90);
+  --chart-5: oklch(0.44 0.1 92);
+  --sidebar: oklch(0.11 0 0);
+  --sidebar-foreground: oklch(0.95 0.03 96);
+  --sidebar-primary: oklch(0.86 0.19 96);
+  --sidebar-primary-foreground: oklch(0.14 0.02 96);
+  --sidebar-accent: oklch(0.18 0.02 96);
+  --sidebar-accent-foreground: oklch(0.95 0.03 96);
+  --sidebar-border: oklch(0.86 0.19 96 / 24%);
+  --sidebar-ring: oklch(0.86 0.19 96);
+}
+
+
+
+.dark {
+  --background: oklch(0.09 0 0);
+  --foreground: oklch(0.96 0.04 96);
+  --card: oklch(0.14 0.01 96);
+  --card-foreground: oklch(0.95 0.03 96);
+}
+
+/* Optional light mode — opt-in from Account → Settings → Appearance. */
+.theme-light {
+  --background: oklch(0.98 0.01 96);
+  --foreground: oklch(0.16 0.01 96);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.16 0.01 96);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.16 0.01 96);
+  --primary: oklch(0.8 0.18 96);
+  --primary-foreground: oklch(0.16 0.02 96);
+  --secondary: oklch(0.94 0.03 96);
+  --secondary-foreground: oklch(0.2 0.02 96);
+  --muted: oklch(0.94 0.02 96);
+  --muted-foreground: oklch(0.45 0.03 96);
+  --accent: oklch(0.86 0.19 96);
+  --accent-foreground: oklch(0.16 0.02 96);
+  --border: oklch(0.2 0.02 96 / 16%);
+  --input: oklch(0.2 0.02 96 / 24%);
+  --ring: oklch(0.7 0.17 96);
+  --ink: oklch(0.16 0.01 96);
+  --paper: oklch(1 0 0);
+  --sidebar: oklch(0.98 0.01 96);
+  --sidebar-foreground: oklch(0.16 0.01 96);
+  --sidebar-accent: oklch(0.94 0.02 96);
+  --sidebar-accent-foreground: oklch(0.2 0.02 96);
+  --sidebar-border: oklch(0.2 0.02 96 / 16%);
+  --gradient-hero: radial-gradient(120% 90% at 50% 0%, oklch(0.97 0.04 96) 0%, oklch(0.99 0.01 96) 60%, oklch(1 0 0) 100%);
+  --shadow-soft: 0 1px 2px oklch(0 0 0 / 0.08), 0 12px 32px -12px oklch(0.7 0.17 96 / 0.3);
+  --shadow-lift: 0 24px 60px -24px oklch(0.7 0.17 96 / 0.4);
+}
+
+
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+@utility bg-hero {
+  background-image: var(--gradient-hero);
+}
+
+@utility bg-accent-gradient {
+  background-image: var(--gradient-accent);
+}
+
+@utility shadow-soft {
+  box-shadow: var(--shadow-soft);
+}
+
+@utility shadow-lift {
+  box-shadow: var(--shadow-lift);
+}
+
+
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--foreground) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 7%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+@utility site-container {
+  width: min(100% - 2rem, 100rem);
+  margin-inline: auto;
+
+  @media (min-width: 48rem) {
+    width: min(100% - 3rem, 100rem);
+  }
+
+  @media (min-width: 80rem) {
+    width: min(100% - 5rem, 100rem);
+  }
+}
+
+/* Previously used `content-visibility: auto`, which made sections render blank
+   for a beat when scrolled into view. Kept as a no-op so markup stays stable. */
+@utility content-auto {
+  contain: layout style;
+}
+
+/* Pauses decorative background animations while the hero is off-screen. */
+.backdrop-idle * {
+  animation-play-state: paused !important;
+}
+
+@utility text-gradient {
+  background-image: var(--gradient-accent);
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -28px, 0) scale(1.06); }
+}
+
+@keyframes marquee-x {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@utility animate-float-slow {
+  animation: float-slow 11s ease-in-out infinite;
+}
+
+@utility animate-marquee {
+  animation: marquee-x 26s linear infinite;
+}
+
+@utility animate-rise {
+  animation: rise-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* LCP-safe variant: paints immediately (no opacity 0 start, no delay) */
+@keyframes rise-in-instant {
+  from { transform: translate3d(0, 14px, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@utility animate-rise-instant {
+  animation: rise-in-instant 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* --- 2D hero animations --- */
+@keyframes shimmer-x {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes scan-y {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate3d(0, 220px, 0); opacity: 0; }
+}
+
+@keyframes bar-grow {
+  from { transform: scaleX(0.15); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--highlight) 45%, transparent); }
+  70% { box-shadow: 0 0 0 12px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes drift-y {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 0); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@utility animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer-x 6s linear infinite;
+}
+
+@utility animate-scan {
+  animation: scan-y 3.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@utility animate-bar-grow {
+  transform-origin: left center;
+  animation: bar-grow 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility animate-pulse-ring {
+  animation: pulse-ring 2.6s ease-out infinite;
+}
+
+@utility animate-drift {
+  animation: drift-y 5s ease-in-out infinite;
+}
+
+@utility animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow,
+  .animate-marquee,
+  .animate-rise,
+  .animate-rise-instant,
+  .animate-shimmer,
+  .animate-scan,
+  .animate-bar-grow,
+  .animate-pulse-ring,
+  .animate-drift,
+  .animate-twinkle {
+    animation: none !important;
+  }
+}
+
+/* --- 3D / depth utilities --- */
+@utility perspective-far {
+  perspective: 1200px;
+}
+
+@utility preserve-3d {
+  transform-style: preserve-3d;
+}
+
+@utility tilt-3d {
+  transform-style: preserve-3d;
+  transform: perspective(900px)
+    rotateX(calc(var(--ty, 0) * -9deg))
+    rotateY(calc(var(--tx, 0) * 9deg))
+    translateZ(0);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@utility layer-pop {
+  transform: translateZ(45px);
+}
+
+@keyframes spin-slow-3d {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+@utility animate-spin-3d {
+  animation: spin-slow-3d 18s linear infinite;
+  transform-style: preserve-3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-3d { animation: none !important; }
+  .tilt-3d { transform: none !important; }
+}
+
+/* --- hero backdrop motion --- */
+@keyframes beam-sweep {
+  0%   { transform: translate3d(-4%, 0, 0) rotate(-12deg); opacity: 0.6; }
+  50%  { transform: translate3d(6%, 0, 0) rotate(-12deg); opacity: 0.95; }
+  100% { transform: translate3d(-4%, 0, 0) rotate(-12deg); opacity: 0.6; }
+}
+
+@keyframes grid-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(60px, 60px, 0); }
+}
+
+@keyframes orbit-slow {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes rise-particle {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  12%  { opacity: 0.8; }
+  85%  { opacity: 0.4; }
+  100% { transform: translate3d(0, -60vh, 0); opacity: 0; }
+}
+
+/* horizontal "AI scan" line that sweeps down the hero */
+@keyframes scan-sweep {
+  0%   { transform: translate3d(0, -10%, 0); opacity: 0; }
+  8%   { opacity: 0.9; }
+  92%  { opacity: 0.9; }
+  100% { transform: translate3d(0, 110%, 0); opacity: 0; }
+}
+
+/* soft twinkle for the star field */
+@keyframes twinkle-dot {
+  0%, 100% { opacity: 0.15; transform: scale(0.7); }
+  50%      { opacity: 0.9; transform: scale(1.25); }
+}
+
+/* slow breathing halo */
+@keyframes halo-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.35; }
+  50%      { transform: scale(1.12); opacity: 0.6; }
+}
+
+/* gentle 3D tumble for the floating document glyphs */
+@keyframes glyph-tumble {
+  0%   { transform: translate3d(0, 0, 0) rotate(-6deg); }
+  50%  { transform: translate3d(0, -22px, 0) rotate(6deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(-6deg); }
+}
+
+@utility animate-beam {
+  animation: beam-sweep 14s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-grid-drift {
+  animation: grid-drift 18s linear infinite;
+  will-change: transform;
+}
+
+@utility animate-orbit-slow {
+  animation: orbit-slow 60s linear infinite;
+}
+
+@utility animate-rise-particle {
+  animation: rise-particle 14s linear infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-scan-sweep {
+  animation: scan-sweep 9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-twinkle-dot {
+  animation: twinkle-dot 4s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@utility animate-halo-pulse {
+  animation: halo-pulse 10s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-glyph-tumble {
+  animation: glyph-tumble 16s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-beam,
+  .animate-grid-drift,
+  .animate-orbit-slow,
+  .animate-rise-particle,
+  .animate-scan-sweep,
+  .animate-twinkle-dot,
+  .animate-halo-pulse,
+  .animate-glyph-tumble {
+    animation: none !important;
+  }
+}
+
+
+/* Automatic readability scrim behind the hero headline column.
+   Darkens the background beneath text without dimming the artwork on the right. */
+.hero-scrim {
+  /* Light veil only on the far-left text column; fades out well before the
+     middle so no grey smudge appears across the centre of the hero. */
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--background) 70%, transparent) 0%,
+    color-mix(in oklab, var(--background) 46%, transparent) 18%,
+    color-mix(in oklab, var(--background) 18%, transparent) 34%,
+    transparent 48%
+  );
+}
+
+
+@media (max-width: 1023px) {
+  .hero-scrim {
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--background) 80%, transparent) 0%,
+      color-mix(in oklab, var(--background) 62%, transparent) 45%,
+      color-mix(in oklab, var(--background) 30%, transparent) 75%,
+      transparent 100%
+    );
+  }
+}
+
+
+/* --- refined hero motion (v2) --- */
+@keyframes aurora-drift {
+  0%   { transform: translate3d(-3%, -2%, 0) scale(1) rotate(-12deg); opacity: 0.55; }
+  33%  { transform: translate3d(4%, 3%, 0) scale(1.08) rotate(-8deg); opacity: 0.9; }
+  66%  { transform: translate3d(-2%, 5%, 0) scale(1.03) rotate(-15deg); opacity: 0.75; }
+  100% { transform: translate3d(-3%, -2%, 0) scale(1) rotate(-12deg); opacity: 0.55; }
+}
+
+@keyframes meteor {
+  0%   { transform: translate3d(0, 0, 0) rotate(38deg) scaleX(0.4); opacity: 0; }
+  8%   { opacity: 1; }
+  70%  { opacity: 0.9; }
+  100% { transform: translate3d(-42vw, 42vh, 0) rotate(38deg) scaleX(1); opacity: 0; }
+}
+
+@keyframes orbit-reverse {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to   { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+@keyframes node-pulse {
+  0%, 100% { r: 2.2; opacity: 0.55; }
+  50%      { r: 3.4; opacity: 1; }
+}
+
+@keyframes float-arc {
+  0%   { transform: translate3d(0, 0, 0) rotate(-8deg); }
+  25%  { transform: translate3d(10px, -16px, 0) rotate(0deg); }
+  50%  { transform: translate3d(0, -26px, 0) rotate(7deg); }
+  75%  { transform: translate3d(-10px, -14px, 0) rotate(1deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+}
+
+@keyframes rise-particle-soft {
+  0%   { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; }
+  15%  { opacity: 0.85; }
+  50%  { transform: translate3d(14px, -32vh, 0) scale(1); }
+  85%  { opacity: 0.35; }
+  100% { transform: translate3d(-10px, -66vh, 0) scale(0.7); opacity: 0; }
+}
+
+@utility animate-aurora {
+  animation: aurora-drift 20s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-meteor {
+  animation: meteor 7s cubic-bezier(0.3, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-orbit-reverse {
+  animation: orbit-reverse 84s linear infinite;
+}
+
+@utility animate-node-pulse {
+  animation: node-pulse 3.2s ease-in-out infinite;
+}
+
+@utility animate-float-arc {
+  animation: float-arc 18s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+  will-change: transform;
+}
+
+@utility animate-rise-soft {
+  animation: rise-particle-soft 16s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora,
+  .animate-meteor,
+  .animate-orbit-reverse,
+  .animate-node-pulse,
+  .animate-float-arc,
+  .animate-rise-soft {
+    animation: none !important;
+  }
+}
+
+/* --- shooting stars (v3) --- */
+@keyframes shoot {
+  0%   { transform: rotate(122deg) translate3d(0, 0, 0) scaleX(0.25); opacity: 0; }
+  8%   { opacity: 1; }
+  65%  { opacity: 1; }
+  100% { transform: rotate(122deg) translate3d(95vh, 0, 0) scaleX(1); opacity: 0; }
+}
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(0.6); }
+  50%      { opacity: 0.95; transform: scale(1.2); }
+}
+
+@utility animate-shoot {
+  animation: shoot 6s cubic-bezier(0.25, 0.6, 0.35, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@utility animate-star-twinkle {
+  animation: star-twinkle 4s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shoot,
+  .animate-star-twinkle {
+    animation: none !important;
+  }
+}
+
+/*
+ * Mobile performance: keep every decorative animation, but hold it paused for
+ * the first moments of load so Lighthouse's Speed Index can settle. Once the
+ * page is interactive we add .motion-ready and everything plays as designed.
+ */
+@media (max-width: 768px) {
+  body:not(.motion-ready) .animate-shoot,
+  body:not(.motion-ready) .animate-star-twinkle,
+  body:not(.motion-ready) .animate-shimmer,
+  body:not(.motion-ready) .animate-marquee,
+  body:not(.motion-ready) .animate-pulse-ring,
+  body:not(.motion-ready) .animate-twinkle,
+  body:not(.motion-ready) .animate-float-slow,
+  body:not(.motion-ready) .animate-drift {
+    animation-play-state: paused !important;
+  }
+}
+

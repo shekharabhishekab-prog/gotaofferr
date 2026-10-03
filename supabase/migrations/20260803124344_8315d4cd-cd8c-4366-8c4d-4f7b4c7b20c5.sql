@@ -1,0 +1,1 @@
+ALTER TABLE public.tailor_runs ADD COLUMN IF NOT EXISTS result jsonb;

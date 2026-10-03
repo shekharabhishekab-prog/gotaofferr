@@ -1,0 +1,1 @@
+GRANT SELECT, INSERT, UPDATE ON public.rate_limits TO service_role;

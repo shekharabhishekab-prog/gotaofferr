@@ -1,0 +1,3 @@
+ALTER TABLE public.job_alerts
+  ADD COLUMN IF NOT EXISTS timezone text NOT NULL DEFAULT 'UTC',
+  ADD COLUMN IF NOT EXISTS local_hour integer NOT NULL DEFAULT 9 CHECK (local_hour BETWEEN 0 AND 23);

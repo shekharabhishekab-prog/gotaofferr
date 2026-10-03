@@ -1,0 +1,828 @@
+import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
+import {
+  AlertCircle,
+  ArrowRight,
+  BadgeCheck,
+  CheckCircle2,
+  Download,
+  FileText,
+  Lightbulb,
+  Loader2,
+  Mail,
+  Sparkles,
+  Target,
+  Upload,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { assertLooksLikeResume, assertValidResumeFile, extractPdfText, isPdfFile } from "@/lib/extract-pdf";
+import { buildCoverLetterPdf, buildResumePdf, slug } from "@/lib/resume-pdf";
+import { getUsage, tailorResume, type TailoredResume } from "@/lib/tailor.functions";
+import { runQueued, queueMessage } from "@/lib/ai-queue";
+
+import { tailorResumeAnonymous, captureLeadEmail } from "@/lib/anon-tailor.functions";
+import { getDeviceId } from "@/lib/device-id";
+import { useSession } from "@/hooks/useSession";
+import { useSubscription } from "@/hooks/useSubscription";
+import { ResultSkeleton, TailorProgress, type TailorStage } from "@/components/TailorProgress";
+import { UsageMeter } from "@/components/UsageMeter";
+import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
+
+const ANON_USED_KEY = "gao_anon_used";
+// Downloads unlock with a boolean flag only — the email itself is never kept
+// in localStorage, where any injected script could read it.
+const ANON_UNLOCK_KEY = "gao_anon_unlocked";
+const LEGACY_ANON_EMAIL_KEY = "gao_anon_email";
+
+type Usage = { used: number; limit: number; remaining: number };
+
+
+export function ResumeTailor() {
+  const run = useServerFn(tailorResume);
+  const runAnon = useServerFn(tailorResumeAnonymous);
+  const saveEmail = useServerFn(captureLeadEmail);
+  const loadUsage = useServerFn(getUsage);
+
+  const { session, loading: sessionLoading } = useSession();
+  const { isSubscribed, tier, loading: subLoading } = useSubscription();
+
+  const [usage, setUsage] = useState<Usage | null>(null);
+
+  useEffect(() => {
+    if (!session) {
+      setUsage(null);
+      return;
+    }
+    loadUsage({}).then(setUsage).catch(() => setUsage(null));
+  }, [session, loadUsage]);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const [resume, setResume] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [company, setCompany] = useState("");
+  const [role, setRole] = useState("");
+  const [parsing, setParsing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [queueNote, setQueueNote] = useState<string | null>(null);
+
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [stage, setStage] = useState<TailorStage>("upload");
+  const [downloading, setDownloading] = useState<"resume" | "cover" | null>(null);
+  const [result, setResult] = useState<TailoredResume | null>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // Logged-out ("anonymous") one-free-rewrite state
+  const [anonUsed, setAnonUsed] = useState(false);
+  const [anonUnlocked, setAnonUnlocked] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailValue, setEmailValue] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
+  const pendingDownload = useRef<"resume" | "cover" | null>(null);
+
+  useEffect(() => {
+    try {
+      setAnonUsed(window.localStorage.getItem(ANON_USED_KEY) === "1");
+      const legacyEmail = window.localStorage.getItem(LEGACY_ANON_EMAIL_KEY);
+      if (legacyEmail) window.localStorage.removeItem(LEGACY_ANON_EMAIL_KEY);
+      setAnonUnlocked(window.localStorage.getItem(ANON_UNLOCK_KEY) === "1" || Boolean(legacyEmail));
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
+
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+
+  async function onFile(file: File | undefined) {
+    if (!file) return;
+    setParsing(true);
+    try {
+      // Type, size and real content are all checked before we parse anything.
+      await assertValidResumeFile(file);
+      const text = isPdfFile(file) ? await extractPdfText(file) : await file.text();
+      if (text.trim().length < 30) throw new Error("Almost no text found — is this a scanned PDF?");
+      assertLooksLikeResume(text);
+      setResume(text);
+      setFileName(file.name);
+      toast.success(`Loaded ${file.name}`);
+    } catch (e) {
+      toast.error(
+        e instanceof Error && e.message
+          ? e.message
+          : "Could not read that file — try pasting your resume text instead.",
+      );
+    } finally {
+      setParsing(false);
+    }
+  }
+
+  async function onGenerate() {
+    if (resume.trim().length < 30) return toast.error("Add your current resume first.");
+    if (jobDescription.trim().length < 20) return toast.error("Paste the job description.");
+    setLoading(true);
+    setResult(null);
+    setStage("upload");
+    timers.current.forEach(clearTimeout);
+    timers.current = [
+      setTimeout(() => setStage("analyze"), 700),
+      setTimeout(() => setStage("rewrite"), 3500),
+      setTimeout(() => setStage("format"), 11000),
+    ];
+    setTimeout(
+      () => document.getElementById("progress")?.scrollIntoView({ behavior: "smooth", block: "center" }),
+      80,
+    );
+    setQueueNote(null);
+    try {
+
+      if (!session) {
+        const out = await runAnon({
+          data: {
+            resume,
+            jobDescription,
+            company: company || undefined,
+            role: role || undefined,
+            deviceId: getDeviceId(),
+            turnstileToken: captchaToken ?? undefined,
+          },
+        });
+        // Tokens are single-use — clear and re-issue after every attempt.
+        setCaptchaToken(null);
+        resetTurnstile();
+        timers.current.forEach(clearTimeout);
+        setStage("done");
+        setResult(out.result);
+        setAnonUsed(true);
+        try {
+          window.localStorage.setItem(ANON_USED_KEY, "1");
+        } catch {
+          /* storage unavailable */
+        }
+      } else {
+        // Under heavy load the AI gateway can answer with overload/timeout
+        // errors — hold the request in a client-side queue instead of failing.
+        const out = await runQueued(
+          () =>
+            run({
+              data: { resume, jobDescription, company: company || undefined, role: role || undefined },
+            }),
+          {
+            onWait: (info) => setQueueNote(queueMessage(info)),
+            onResolved: () => setQueueNote(null),
+          },
+        );
+
+        timers.current.forEach(clearTimeout);
+        setStage("done");
+        setResult(out.result);
+        setUsage(out.usage);
+      }
+      toast.success("Your tailored resume is ready");
+      setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }), 100);
+    } catch (e) {
+      timers.current.forEach(clearTimeout);
+      if (!session) {
+        setCaptchaToken(null);
+        resetTurnstile();
+      }
+      const message = e instanceof Error ? e.message : "Something went wrong";
+      if (!session && /free rewrite/i.test(message)) {
+        setAnonUsed(true);
+        try {
+          window.localStorage.setItem(ANON_USED_KEY, "1");
+        } catch {
+          /* storage unavailable */
+        }
+      }
+      toast.error(message);
+    } finally {
+      setLoading(false);
+      setQueueNote(null);
+    }
+  }
+
+  async function buildAndSave(kind: "resume" | "cover") {
+    if (!result) return;
+    setDownloading(kind);
+    try {
+      const doc =
+        kind === "resume"
+          ? await buildResumePdf(result)
+          : await buildCoverLetterPdf(result, company, role);
+      doc.save(`${base}-${kind === "resume" ? "resume" : "cover-letter"}.pdf`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not build the PDF");
+    } finally {
+      setDownloading(null);
+    }
+  }
+
+  async function download(kind: "resume" | "cover") {
+    if (!result) return;
+    // Logged-out visitors unlock downloads with an email, not a full sign-up.
+    if (!session && !anonUnlocked) {
+      pendingDownload.current = kind;
+      setEmailOpen(true);
+      return;
+    }
+    await buildAndSave(kind);
+  }
+
+  async function onSubmitEmail(e: React.FormEvent) {
+    e.preventDefault();
+    const email = emailValue.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast.error("Enter a valid email address.");
+    setSavingEmail(true);
+    try {
+      await saveEmail({ data: { email, deviceId: getDeviceId(), source: "anonymous_tailor" } });
+      setAnonUnlocked(true);
+      try {
+        window.localStorage.setItem(ANON_UNLOCK_KEY, "1");
+      } catch {
+        /* storage unavailable */
+      }
+      setEmailOpen(false);
+      const kind = pendingDownload.current;
+      pendingDownload.current = null;
+      if (kind) await buildAndSave(kind);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save your email");
+    } finally {
+      setSavingEmail(false);
+    }
+  }
+
+
+  const base = `${slug(result?.name || "resume")}-${slug(company || role || "tailored")}`;
+
+  return (
+    <div className="site-container w-full pb-24">
+      <div className="grid items-stretch gap-5 lg:grid-cols-2">
+        <Card className="flex flex-col border-border/70 p-6 shadow-soft">
+
+          <div className="mb-4 flex items-center gap-2">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+              <FileText className="size-4" />
+            </span>
+            <div>
+              <h2 className="text-base font-semibold">Your current resume</h2>
+              <p className="text-xs text-muted-foreground">Upload a PDF or paste the text</p>
+            </div>
+          </div>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/pdf,text/plain,.pdf,.txt,.md"
+            className="hidden"
+            onChange={(e) => onFile(e.target.files?.[0])}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="mb-3 flex w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-muted"
+          >
+            {parsing ? (
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            ) : (
+              <Upload className="size-5 text-muted-foreground" />
+            )}
+            <span className="text-sm font-medium">
+              {fileName || (parsing ? "Reading file…" : "Upload resume PDF")}
+            </span>
+            <span className="text-xs text-muted-foreground">PDF, TXT or MD</span>
+          </button>
+
+          <Textarea
+            aria-label="Current resume text"
+            value={resume}
+            onChange={(e) => setResume(e.target.value)}
+            placeholder="…or paste your resume text here"
+            className="min-h-56 flex-1 resize-y text-sm"
+          />
+        </Card>
+
+        <Card className="flex flex-col border-border/70 p-6 shadow-soft">
+          <div className="mb-4 flex items-center gap-2">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+              <Target className="size-4" />
+            </span>
+            <div>
+              <h2 className="text-base font-semibold">The job you want</h2>
+              <p className="text-xs text-muted-foreground">Paste the posting from the company</p>
+            </div>
+          </div>
+
+          <div className="mb-3 grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="company" className="text-xs">
+                Company / brand
+              </Label>
+              <Input
+                id="company"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="e.g. Stripe"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="role" className="text-xs">
+                Role
+              </Label>
+              <Input
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="e.g. Frontend Engineer"
+              />
+            </div>
+          </div>
+
+          <Textarea
+            aria-label="Target job description"
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            placeholder="Paste the full job description, responsibilities and requirements…"
+            className="min-h-56 flex-1 resize-y text-sm"
+          />
+        </Card>
+      </div>
+
+      <div className="mt-6 flex flex-col items-center gap-2">
+        {!sessionLoading && !session ? (
+          anonUsed && !loading ? (
+            <div className="mx-auto flex w-full max-w-md flex-col items-center">
+              <Button variant="hero" size="xl" asChild>
+                <Link to="/auth" search={{ redirect: "/tailor" }}>
+                  <Sparkles /> Create a free account to keep tailoring
+                </Link>
+              </Button>
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                You've used your free rewrite. A free account gives you 3 tailored resumes and cover
+                letters every month.
+              </p>
+            </div>
+          ) : (
+            <div className="mx-auto flex w-full max-w-md flex-col items-stretch">
+              <TurnstileWidget onToken={setCaptchaToken} className="mb-3 flex justify-center" />
+              <Button
+                variant="hero"
+                size="xl"
+                className="w-full rounded-full shadow-[0_0_40px_-10px_color-mix(in_oklab,var(--primary)_45%,transparent)]"
+                onClick={onGenerate}
+                disabled={loading || parsing}
+              >
+                {loading ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter — free"}
+              </Button>
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                No account needed for your first rewrite. Takes ~15 seconds.
+              </p>
+            </div>
+          )
+        ) : (
+
+          <div className="mx-auto flex w-full max-w-md flex-col items-stretch">
+            {usage ? <UsageMeter usage={usage} /> : null}
+            <Button
+              variant="hero"
+              size="xl"
+              className="mt-3 w-full rounded-full shadow-[0_0_40px_-10px_color-mix(in_oklab,var(--primary)_45%,transparent)]"
+              onClick={onGenerate}
+              disabled={loading || parsing || (!isSubscribed && usage?.remaining === 0)}
+            >
+              {loading ? <Loader2 className="animate-spin" /> : <Sparkles />}
+              {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter"}
+            </Button>
+            {!subLoading && !isSubscribed && usage && usage.remaining === 0 ? (
+              <p className="mt-4 text-center text-xs text-muted-foreground">
+                You have tailored {usage.used} of {usage.limit} this month.{" "}
+                <Link to="/pricing" className="underline">
+                  Upgrade for 200 rewrites and a saved master resume.
+                </Link>
+              </p>
+            ) : (
+              <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                {isSubscribed
+                  ? tier === "career_pro"
+                    ? "400 rewrites included per month"
+                    : "200 rewrites included per month"
+                  : "Takes ~15 seconds"}
+              </p>
+            )}
+
+          </div>
+        )}
+
+      </div>
+
+      {loading && (
+        <div id="progress" className="scroll-mt-8">
+          {queueNote && (
+            <div className="mb-4 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
+              {queueNote}
+            </div>
+          )}
+          <TailorProgress stage={stage} />
+          <ResultSkeleton />
+        </div>
+      )}
+
+
+      {result && !loading && (
+        <div id="result" className="mt-12 scroll-mt-8">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex size-14 flex-col items-center justify-center rounded-xl bg-hero text-foreground">
+                <span className="font-display text-lg leading-none font-bold">
+                  {Math.round(result.matchScore)}
+                </span>
+                <span className="text-[9px] tracking-wide uppercase opacity-80">match</span>
+              </div>
+              <div
+                className="flex h-14 w-16 flex-col items-center justify-center rounded-xl border border-highlight/40 bg-highlight/10 px-2 text-highlight"
+                title="ATS parseability score based on format, sections, and keyword alignment"
+              >
+                <span className="font-display text-lg leading-none font-bold">
+                  {Math.round(result.atsScore)}%
+                </span>
+                <span className="text-[9px] tracking-wide uppercase opacity-90">ATS</span>
+                <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-highlight/20">
+                  <div
+                    className="h-full rounded-full bg-highlight"
+                    style={{ width: `${Math.min(100, Math.max(0, result.atsScore))}%` }}
+                  />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">Tailored for {company || "this role"}</h2>
+                <p className="text-sm text-muted-foreground">
+                  Rewritten resume and cover letter, ready to download.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ink" disabled={downloading !== null} onClick={() => download("resume")}>
+                {downloading === "resume" ? <Loader2 className="animate-spin" /> : <Download />}
+                {downloading === "resume" ? "Building PDF…" : "Resume PDF"}
+              </Button>
+              <Button
+                variant="outline"
+                disabled={downloading !== null}
+                onClick={() => download("cover")}
+              >
+                {downloading === "cover" ? <Loader2 className="animate-spin" /> : <Mail />}
+                {downloading === "cover" ? "Building PDF…" : "Cover letter PDF"}
+              </Button>
+            </div>
+
+          </div>
+
+          <Tabs defaultValue="resume">
+            <TabsList>
+              <TabsTrigger value="resume">Resume</TabsTrigger>
+              <TabsTrigger value="cover">Cover letter</TabsTrigger>
+              <TabsTrigger value="insights">Insights</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="resume">
+              <Card className="p-8 shadow-soft sm:p-10">
+                <header className="border-b border-border pb-4">
+                  <h3 className="text-2xl font-bold text-primary">{result.name}</h3>
+                  <p className="text-sm text-muted-foreground">{result.headline}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{result.contacts.join("  •  ")}</p>
+                </header>
+
+                <Section title="Professional summary">
+                  <p className="text-sm leading-relaxed">{result.summary}</p>
+                </Section>
+
+                {result.skills.length > 0 && (
+                  <Section title="Core skills">
+                    <div className="flex flex-wrap gap-1.5">
+                      {result.skills.map((s) => (
+                        <Badge key={s} variant="secondary" className="font-normal">
+                          {s}
+                        </Badge>
+                      ))}
+                    </div>
+                  </Section>
+                )}
+
+                {result.keyAchievements?.length > 0 && (
+                  <Section title="Key achievements">
+                    <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
+                      {result.keyAchievements.map((a, i) => (
+                        <li key={i}>{a}</li>
+                      ))}
+                    </ul>
+                  </Section>
+                )}
+
+                {result.experience.length > 0 && (
+                  <Section title="Experience">
+                    <div className="space-y-5">
+                      {result.experience.map((e, i) => (
+                        <div key={i}>
+                          <div className="flex flex-wrap items-baseline justify-between gap-2">
+                            <p className="font-semibold">
+                              {e.role}
+                              {e.company ? ` — ${e.company}` : ""}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{e.dates}</p>
+                          </div>
+                          {(e.context || e.location) && (
+                            <p className="text-xs text-muted-foreground italic">
+                              {[e.context, e.location].filter(Boolean).join("  |  ")}
+                            </p>
+                          )}
+
+                          <ul className="mt-1.5 space-y-1">
+                            {e.bullets.map((b, j) => (
+                              <li key={j} className="flex gap-2 text-sm leading-relaxed">
+                                <span className="text-highlight">•</span>
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </Section>
+                )}
+
+                {result.projects.length > 0 && (
+                  <Section title="Projects">
+                    <div className="space-y-4">
+                      {result.projects.map((p, i) => (
+                        <div key={i}>
+                          <p className="font-semibold">{p.name}</p>
+                          <p className="text-sm text-muted-foreground">{p.description}</p>
+                          <ul className="mt-1 space-y-1">
+                            {p.bullets.map((b, j) => (
+                              <li key={j} className="flex gap-2 text-sm">
+                                <span className="text-highlight">•</span>
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </Section>
+                )}
+
+                {result.education.length > 0 && (
+                  <Section title="Education">
+                    {result.education.map((e, i) => (
+                      <div key={i} className="flex flex-wrap items-baseline justify-between gap-2">
+                        <p className="text-sm font-medium">
+                          {e.credential}
+                          <span className="font-normal text-muted-foreground"> — {e.institution}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">{e.dates}</p>
+                      </div>
+                    ))}
+                  </Section>
+                )}
+
+                {result.certifications.length > 0 && (
+                  <Section title="Certifications">
+                    <ul className="space-y-1">
+                      {result.certifications.map((c, i) => (
+                        <li key={i} className="flex gap-2 text-sm">
+                          <span className="text-highlight">•</span>
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Section>
+                )}
+
+                {result.skillGroups?.length > 0 && (
+                  <Section title="Skills & tools">
+                    <div className="space-y-1.5">
+                      {result.skillGroups.map((g, i) => (
+                        <p key={i} className="text-sm leading-relaxed">
+                          <span className="font-semibold">{g.label}: </span>
+                          <span className="text-muted-foreground">{g.items.join(", ")}</span>
+                        </p>
+                      ))}
+                    </div>
+                  </Section>
+                )}
+
+
+
+                {result.additionalSections?.map((section) =>
+                  section.items.length > 0 ? (
+                    <Section key={section.title} title={section.title}>
+                      <ul className="space-y-1">
+                        {section.items.map((item, index) => (
+                          <li key={`${section.title}-${index}`} className="flex gap-2 text-sm leading-relaxed">
+                            <span className="text-highlight">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </Section>
+                  ) : null,
+                )}
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="cover">
+              <Card className="p-8 shadow-soft sm:p-10">
+                <div className="space-y-4 text-sm leading-relaxed whitespace-pre-wrap">
+                  {result.coverLetter}
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="insights">
+              <div className="grid gap-4 md:grid-cols-2">
+                {result.fitWarning && (
+                  <Card className="border-destructive/40 bg-destructive/5 p-6 shadow-soft md:col-span-2">
+                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                      <AlertCircle className="size-4 text-destructive" /> Honest read on fit
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{result.fitWarning}</p>
+                  </Card>
+                )}
+                {result.scoreBreakdown && (
+                  <Card className="p-6 shadow-soft md:col-span-2">
+                    <h4 className="mb-3 text-sm font-semibold">How the {Math.round(result.matchScore)} match score is built</h4>
+                    <div className="space-y-2.5">
+                      {[
+                        { label: "Keyword match", value: result.scoreBreakdown.keywordMatch, max: 40 },
+                        { label: "Title & seniority alignment", value: result.scoreBreakdown.titleAlignment, max: 15 },
+                        { label: "Formatting & parseability", value: result.scoreBreakdown.formatting, max: 20 },
+                        { label: "Experience relevance", value: result.scoreBreakdown.experienceRelevance, max: 15 },
+                        { label: "Quantified impact", value: result.scoreBreakdown.quantifiedImpact, max: 10 },
+                      ].map((row) => (
+                        <div key={row.label}>
+                          <div className="flex justify-between text-xs">
+                            <span>{row.label}</span>
+                            <span className="text-muted-foreground">
+                              {Math.round(row.value)}/{row.max}
+                            </span>
+                          </div>
+                          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+                            <div
+                              className="h-full rounded-full bg-highlight"
+                              style={{ width: `${Math.min(100, (row.value / row.max) * 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+                <Card className="p-6 shadow-soft">
+
+                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                    <CheckCircle2 className="size-4 text-success" /> Keywords you match
+                  </h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {result.matchedKeywords.map((k) => (
+                      <Badge key={k} variant="secondary" className="font-normal">
+                        {k}
+                      </Badge>
+                    ))}
+                  </div>
+                </Card>
+                <Card className="p-6 shadow-soft">
+                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                    <AlertCircle className="size-4 text-destructive" /> Gaps to address
+                  </h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {result.missingKeywords.map((k) => (
+                      <Badge key={k} variant="outline" className="font-normal">
+                        {k}
+                      </Badge>
+                    ))}
+                  </div>
+                </Card>
+                <Card className="p-6 shadow-soft md:col-span-2">
+                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                    <Lightbulb className="size-4 text-highlight" /> How to strengthen this application
+                  </h4>
+                  <ul className="space-y-2">
+                    {result.tips.map((t, i) => (
+                      <li key={i} className="flex gap-2 text-sm">
+                        <ArrowRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                        <span>{t}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+                {result.consistencyFlags?.length > 0 && (
+                  <Card className="p-6 shadow-soft">
+                    <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                      <AlertCircle className="size-4 text-destructive" /> Things to double-check
+                    </h4>
+                    <ul className="space-y-2">
+                      {result.consistencyFlags.map((f, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
+                {result.regionAdaptations?.length > 0 && (
+                  <Card className="p-6 shadow-soft">
+                    <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                      <CheckCircle2 className="size-4 text-success" /> Adapted for the hiring market
+                    </h4>
+                    <ul className="space-y-2">
+                      {result.regionAdaptations.map((a, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">
+                          {a}
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
+              </div>
+
+            </TabsContent>
+          </Tabs>
+          {!session ? (
+            <Card className="mt-6 flex flex-col items-center gap-3 border-primary/30 p-6 text-center shadow-soft">
+              <p className="text-sm font-semibold">That was your free rewrite.</p>
+              <p className="text-xs text-muted-foreground">
+                Create a free account to keep tailoring — 3 resumes and cover letters every month.
+              </p>
+              <Button variant="hero" asChild>
+                <Link to="/auth" search={{ redirect: "/tailor" }}>
+                  <Sparkles /> Create free account
+                </Link>
+              </Button>
+            </Card>
+          ) : !subLoading && !isSubscribed && usage && usage.remaining === 0 ? (
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              You have tailored {usage.used} of {usage.limit} this month.{" "}
+              <Link to="/pricing" className="underline">
+                Upgrade for 200 rewrites and a saved master resume.
+              </Link>
+            </p>
+          ) : null}
+        </div>
+      )}
+
+      <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Enter your email to download</DialogTitle>
+            <DialogDescription>
+              We'll unlock both PDFs right away. No account needed.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={onSubmitEmail} className="space-y-3">
+            <Input
+              type="email"
+              autoFocus
+              required
+              value={emailValue}
+              onChange={(e) => setEmailValue(e.target.value)}
+              placeholder="you@email.com"
+              aria-label="Email address"
+            />
+            <Button type="submit" variant="hero" className="w-full" disabled={savingEmail}>
+              {savingEmail ? <Loader2 className="animate-spin" /> : <Download />}
+              {savingEmail ? "Unlocking…" : "Unlock downloads"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-6">
+      <h4 className="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">{title}</h4>
+      {children}
+    </section>
+  );
+}

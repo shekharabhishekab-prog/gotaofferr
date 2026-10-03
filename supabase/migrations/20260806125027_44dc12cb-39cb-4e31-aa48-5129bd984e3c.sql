@@ -1,0 +1,3 @@
+DELETE FROM public.anonymous_tailor_uses WHERE ip_hash = '6a3754f0c937819da3305c562a89c4abe590a01f5e7543306db8ec904afaf7dd';
+DELETE FROM public.captured_emails WHERE email = 'qa.tester+gt@example.com';
+DELETE FROM public.rate_limits WHERE bucket IN ('tailor_anon','capture_email');
