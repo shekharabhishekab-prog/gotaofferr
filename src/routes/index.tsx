@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { WipSplash } from "@/components/WipSplash";
 import { WIP_ENABLED, WIP_HEAD_SCRIPT } from "@/lib/wip";
 import {
@@ -179,6 +180,10 @@ const HERO_HAND_CSS = `
 .hero-hand .hh-w:nth-child(8){animation-delay:1.45s,4.3s}
 @keyframes hhIn{to{opacity:1;transform:none}}
 @keyframes hhBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-.05em) rotate(-.6deg)}}
+.hero-v2 .hero-hand{transform-style:preserve-3d;text-shadow:0 1px 0 rgba(0,0,0,.18),0 2px 0 rgba(0,0,0,.14),0 3px 0 rgba(0,0,0,.1),0 8px 18px rgba(0,0,0,.25)}
+@keyframes hv2Sway{0%,100%{transform:perspective(900px) rotateX(2deg) rotateY(-4deg)}50%{transform:perspective(900px) rotateX(-2deg) rotateY(4deg)}}
+@media (hover:none){.hero-v2 .hv2-sway{animation:hv2Sway 7s ease-in-out infinite;will-change:transform}}
+@media (prefers-reduced-motion:reduce){.hero-v2 .hv2-sway{animation:none}}
 @media (prefers-reduced-motion:reduce){.hero-hand .hh-w{animation:none;opacity:1;transform:none}}
 `;
 
@@ -196,6 +201,10 @@ function HandWords({ text, className }: { text: string; className?: string }) {
 }
 
 function Index() {
+  const [v2, setV2] = useState(false);
+  useEffect(() => {
+    setV2(new URLSearchParams(window.location.search).get("v") === "2");
+  }, []);
   return (
     <main>
       <WipSplash />
@@ -210,11 +219,25 @@ function Index() {
               <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Tailor
               resume · Apply — 3 free a month
             </span>
+            <div className={v2 ? "hero-v2" : undefined}>
+              {v2 ? (
+                <Tilt3D max={1}>
+                  <div className="hv2-sway">
             <h1 className="hero-hand animate-rise-instant mx-auto mt-6 max-w-[16ch] text-[2.9rem] leading-[1.08] text-balance sm:max-w-[20ch] sm:text-[4rem] xl:text-[5rem]">
               <HandWords text="Find the jobs." />{" "}
               <HandWords text="Tailor the resume." className="text-gradient" />{" "}
               <HandWords text="Apply in one click." />
             </h1>
+                  </div>
+                </Tilt3D>
+              ) : (
+            <h1 className="hero-hand animate-rise-instant mx-auto mt-6 max-w-[16ch] text-[2.9rem] leading-[1.08] text-balance sm:max-w-[20ch] sm:text-[4rem] xl:text-[5rem]">
+              <HandWords text="Find the jobs." />{" "}
+              <HandWords text="Tailor the resume." className="text-gradient" />{" "}
+              <HandWords text="Apply in one click." />
+            </h1>
+              )}
+            </div>
 
             <p className="animate-rise-instant mt-6 mx-auto max-w-xl text-base opacity-80 sm:text-lg">
               Stop hunting across ten job sites and rewriting your CV for every company. Drop in
