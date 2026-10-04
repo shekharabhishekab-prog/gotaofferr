@@ -25,7 +25,7 @@ const IS_DEV = process.env.NODE_ENV !== "production";
 // Vite's dev/HMR client needs eval(); the production bundle never does, so
 // 'unsafe-eval' is only granted in development.
 const SCRIPT_ORIGINS =
-  "blob: https://checkout.razorpay.com https://*.razorpay.com https://*.lovable.app https://*.lovable.dev https://www.googletagmanager.com https://www.google-analytics.com https://challenges.cloudflare.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://partner.googleadservices.com https://adservice.google.com";
+  "blob: https://checkout.razorpay.com https://*.razorpay.com https://*.lovable.app https://*.lovable.dev https://www.googletagmanager.com https://www.google-analytics.com https://challenges.cloudflare.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://partner.googleadservices.com https://adservice.google.com https://*.adtrafficquality.google";
 
 /**
  * With a nonce we can drop 'unsafe-inline' entirely: only the inline scripts we
@@ -90,8 +90,8 @@ function securityHeaders(nonce?: string, hostname?: string): Record<string, stri
       "font-src 'self' data:",
       "worker-src 'self' blob:",
       "child-src 'self' blob: https://*.razorpay.com https://challenges.cloudflare.com https://*.googlesyndication.com https://*.doubleclick.net",
-      "frame-src 'self' https://*.razorpay.com https://challenges.cloudflare.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com",
-      "connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://*.razorpay.com https://*.lovable.app https://*.lovable.dev https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://adservice.google.com",
+      "frame-src 'self' https://*.razorpay.com https://challenges.cloudflare.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
+      "connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://*.razorpay.com https://*.lovable.app https://*.lovable.dev https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://adservice.google.com https://*.adtrafficquality.google",
       "upgrade-insecure-requests",
     ].join("; "),
 
@@ -179,4 +179,3 @@ export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
   requestMiddleware: [errorMiddleware, securityHeadersMiddleware, csrfMiddleware],
 }));
-
