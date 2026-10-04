@@ -19,7 +19,6 @@ import {
 import { HeroBackdrop } from "@/components/HeroBackdrop";
 import { ImpactStats } from "@/components/ImpactStats";
 import { Tilt3D } from "@/components/Tilt3D";
-import { ResumeMatchCard } from "@/components/ResumeMatchCard";
 
 
 
@@ -166,6 +165,36 @@ const ticker = [
 
 const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi);
 
+const HERO_HAND_CSS = `
+@font-face{font-family:"Caveat Brush";src:url(/fonts/caveat-brush.woff2) format("woff2");font-display:swap}
+.hero-hand{font-family:"Caveat Brush","Segoe Print","Comic Sans MS",cursive,sans-serif;font-weight:400;letter-spacing:.01em}
+.hero-hand .hh-w{display:inline-block;opacity:0;transform:translateY(.3em) rotate(-3deg);animation:hhIn .7s cubic-bezier(.2,.8,.2,1) forwards,hhBob 5s ease-in-out 2.2s infinite}
+.hero-hand .hh-w:nth-child(1){animation-delay:.05s,2.2s}
+.hero-hand .hh-w:nth-child(2){animation-delay:.25s,2.5s}
+.hero-hand .hh-w:nth-child(3){animation-delay:.45s,2.8s}
+.hero-hand .hh-w:nth-child(4){animation-delay:.65s,3.1s}
+.hero-hand .hh-w:nth-child(5){animation-delay:.85s,3.4s}
+.hero-hand .hh-w:nth-child(6){animation-delay:1.05s,3.7s}
+.hero-hand .hh-w:nth-child(7){animation-delay:1.25s,4s}
+.hero-hand .hh-w:nth-child(8){animation-delay:1.45s,4.3s}
+@keyframes hhIn{to{opacity:1;transform:none}}
+@keyframes hhBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-.05em) rotate(-.6deg)}}
+@media (prefers-reduced-motion:reduce){.hero-hand .hh-w{animation:none;opacity:1;transform:none}}
+`;
+
+function HandWords({ text, className }: { text: string; className?: string }) {
+  return (
+    <>
+      {text.split(" ").map((w, i) => (
+        <span key={`${w}-${i}`} className={`hh-w ${className ?? ""}`}>
+          {w}
+          {"\u00a0"}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function Index() {
   return (
     <main>
@@ -174,25 +203,26 @@ function Index() {
       <section className="bg-hero relative isolate overflow-hidden text-foreground">
         <HeroBackdrop />
 
-        <div className="site-container relative grid items-center gap-12 py-20 sm:py-24 lg:min-h-[min(720px,calc(100vh-4rem))] lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] lg:gap-16">
-          <div className="text-center lg:text-left">
+        <div className="site-container relative grid items-center gap-12 py-16 sm:py-24 lg:min-h-[min(720px,calc(100vh-4rem))]">
+          <div className="mx-auto text-center">
+            <style>{HERO_HAND_CSS}</style>
             <span className="animate-pulse-ring inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
               <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Tailor
               resume · Apply — 3 free a month
             </span>
-            <h1 className="animate-rise-instant mt-6 max-w-[19ch] font-display text-[2.4rem] leading-[1.05] font-bold text-balance sm:text-[3.2rem] xl:text-[4rem]">
-              Find the jobs.{" "}
-              <span className="text-gradient animate-shimmer">Tailor the resume.</span> Apply in one
-              click.
+            <h1 className="hero-hand animate-rise-instant mx-auto mt-6 max-w-[16ch] text-[2.9rem] leading-[1.08] text-balance sm:max-w-[20ch] sm:text-[4rem] xl:text-[5rem]">
+              <HandWords text="Find the jobs." />{" "}
+              <HandWords text="Tailor the resume." className="text-gradient" />{" "}
+              <HandWords text="Apply in one click." />
             </h1>
 
-            <p className="animate-rise-instant mt-6 max-w-xl text-base opacity-80 sm:text-lg lg:mx-0 mx-auto">
+            <p className="animate-rise-instant mt-6 mx-auto max-w-xl text-base opacity-80 sm:text-lg">
               Stop hunting across ten job sites and rewriting your CV for every company. Drop in
               your resume once — our AI finds matching roles, rebuilds your resume for each brand
               and writes the cover letter. You just hit apply.
             </p>
 
-            <div className="animate-rise mt-9 flex flex-wrap justify-center gap-3 [animation-delay:240ms] lg:justify-start">
+            <div className="animate-rise mt-9 flex flex-wrap justify-center gap-3 [animation-delay:240ms]">
               <Button
                 asChild
                 size="lg"
@@ -217,10 +247,6 @@ function Index() {
               Works with resumes from Indeed, LinkedIn, Naukri, Glassdoor & more.
             </p>
           </div>
-
-          {/* Animated illustration (desktop only) */}
-          <ResumeMatchCard />
-
 
         </div>
       </section>
