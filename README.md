@@ -22,3 +22,5 @@ Branch pushes build a preview version on Cloudflare; main deploys to production.
 Preview build check 2.
 
 Preview rebuild 3.
+
+Logs on.
