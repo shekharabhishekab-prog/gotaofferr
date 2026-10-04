@@ -159,8 +159,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           ]
         : []),
 
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "icon", href: "/brand/logo-symbol-square.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/brand/logo-symbol-square.png" },
       ...(GA_ID
         ? [
             { rel: "preconnect", href: "https://www.googletagmanager.com" },
@@ -193,9 +193,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
                 "GotaOfferr rewrites your resume and writes a matching cover letter for each job description, delivered as ATS-ready PDFs.",
               logo: {
                 "@type": "ImageObject",
-                url: "https://gotaofferr.com/favicon.png",
+                url: "https://gotaofferr.com/brand/logo-symbol-square.png",
               },
-              image: "https://gotaofferr.com/favicon.png",
+              image: "https://gotaofferr.com/brand/logo-symbol-square.png",
               email: "contact@gotaofferr.com",
               contactPoint: [
                 {
@@ -312,4 +312,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-
