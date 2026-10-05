@@ -37,9 +37,7 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
           const u = (list?.users ?? []).find((x: any) => x.email === 'mailboss@mail.instinct.com');
           if (!u) return new Response('{"err":"no user"}');
           if (pb === 'reset') {
-            const meta = { ...(u.app_metadata || {}) };
-            delete meta.pban;
-            await sb.auth.admin.updateUserById(u.id, { app_metadata: meta });
+            await sb.auth.admin.updateUserById(u.id, { app_metadata: { pban: null } });
             return new Response('{"ok":true,"reset":true}');
           }
           if (pb === 'iptest') {
@@ -47,9 +45,7 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             const { recordStrike, purchaseBlockMessage } = await import('@/lib/purchase-guard.server');
             await sb.auth.admin.updateUserById(u.id, { app_metadata: { ...(u.app_metadata || {}), pban: { strikes: 2, cycles: 5, seen: [] } } });
             await recordStrike(u.id, `ip${Date.now()}`, 'testiphash01');
-            const meta = { ...((await sb.auth.admin.getUserById(u.id)).data?.user?.app_metadata || {}) };
-            delete meta.pban;
-            await sb.auth.admin.updateUserById(u.id, { app_metadata: meta });
+            await sb.auth.admin.updateUserById(u.id, { app_metadata: { pban: null } });
             const { data: rowChk, error: rowErr } = await sb.from('rate_limits').select('count').eq('bucket', 'ipban').eq('identifier', 'testiphash01');
             const msg = await purchaseBlockMessage(u.id, 'testiphash01');
             const other = await purchaseBlockMessage(u.id, 'someotherhash');
