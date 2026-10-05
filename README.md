@@ -14,3 +14,13 @@ AI resume and cover letter tailoring, plus job search. Site: https://gotaofferr.
 
 ## Secrets
 Server keys live only in Cloudflare Worker secrets. Nothing secret belongs in this repo.
+
+## Previews
+Branch pushes build a preview version on Cloudflare; main deploys to production.
+
+
+Preview build check 2.
+
+Preview rebuild 3.
+
+Logs on.
