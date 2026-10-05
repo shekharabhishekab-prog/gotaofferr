@@ -89,7 +89,7 @@ export type TailorInput = z.infer<typeof tailorInputSchema>;
 export const FREE_MONTHLY_LIMIT = 10;
 
 /** Starter paid plan allowance per calendar month. */
-export const STARTER_MONTHLY_LIMIT = 30;
+export const STARTER_MONTHLY_LIMIT = 20;
 
 /** Job Hunt paid plan allowance per calendar month. */
 export const JOB_HUNT_MONTHLY_LIMIT = 129;
