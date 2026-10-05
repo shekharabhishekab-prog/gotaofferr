@@ -57,7 +57,16 @@ export async function upsertRazorpaySubscriptionRow(
       current_period_start: iso(subscription.current_start ?? subscription.start_at),
       current_period_end: iso(subscription.current_end ?? subscription.charge_at ?? subscription.end_at),
       cancel_at_period_end:
-        options?.cancelAtPeriodEnd ?? Boolean(subscription.end_at && subscription.status === 'active'),
+        options?.cancelAtPeriodEnd ??
+        // Razorpay sets end_at on every subscription (total_count cycles ahead), so
+        // end_at alone does not mean "cancelled". It only means cancel-at-period-end
+        // when the end falls on (or within a day of) the current period's end.
+        Boolean(
+          subscription.status === 'active' &&
+            subscription.end_at &&
+            subscription.current_end &&
+            subscription.end_at <= subscription.current_end + 86400,
+        ),
       environment: env,
       updated_at: new Date().toISOString(),
     } as any,
