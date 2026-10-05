@@ -94,16 +94,18 @@ const plans: Record<PlanKey, {
   free: {
     name: "Free",
     note: "forever",
-    tagline: "Try it on your next three applications.",
+    tagline: "Try it on your next ten applications.",
     bestFor: "Best for: testing whether tailoring actually gets you replies.",
     features: [
-      "3 tailored applications per month",
+      "10 resume + cover letter tailorings per month",
+      "5 resumes in the resume builder",
+      "2 AI job finder searches per month",
+      "1 job alert (3 emails, every 3 days)",
       "Resume builder: build a resume from scratch and download it as a PDF",
       "Resume rebuilt for each job description",
       "Cover letter for each",
       "PDF download",
       "Match score",
-      "1 free AI job finder search to try it out",
     ],
     cta: "Start free",
     highlight: false,
@@ -115,10 +117,11 @@ const plans: Record<PlanKey, {
     tagline: "A complete application kit — 43 credits' worth of work for the price of a coffee.",
     bestFor: "Best for: applying to a handful of roles you really want.",
     features: [
-      "20 tailored resumes per month",
+      "30 resume + cover letter tailorings per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
-      "20 matching cover letters per month",
-      "3 AI job finder searches per month",
+      "15 resumes in the resume builder",
+      "5 AI job finder searches per month",
+      "3 job alerts (3 emails each, every 3 days)",
       "Keyword gap report on every rewrite",
       "ATS match score + parseability check",
       "Unlimited PDF downloads of everything you make",
@@ -136,10 +139,11 @@ const plans: Record<PlanKey, {
     tagline: "Everything you need for a focused job hunt — 200 tailored applications, cover letters, and AI job searches in one package.",
     bestFor: "Best for: applying to 10-50 roles a month from boards you browse yourself.",
     features: [
-      "200 tailored applications per month",
+      "200 resume + cover letter tailorings per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
-      "200 cover letters per month",
-      "10 AI job finder searches per month",
+      "30 resumes in the resume builder",
+      "15 AI job finder searches per month",
+      "5 job alerts (3 emails each, every 3 days)",
       "Keyword gap insights — see exactly which words are missing",
       "Saved master resume, so you never re-upload",
       "Rewrite history: every resume you've generated, re-downloadable",
@@ -162,11 +166,11 @@ const plans: Record<PlanKey, {
     tagline: "The complete career package: we write the applications, find the jobs, and deliver fresh leads every 3 days.",
     bestFor: "Best for: a full-time search, or running two career tracks at once.",
     features: [
-      "400 tailored applications per month",
+      "400 resume + cover letter tailorings per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
-      "400 cover letters per month",
-      "30 AI job finder searches per month — one clean list across every board",
-      "Up to 5 saved job alerts, emailed every 3 days at a time and timezone you pick",
+      "80 resumes in the resume builder",
+      "40 AI job finder searches per month - one clean list across every board",
+      "10 job alerts (3 emails each, every 3 days)",
       "Everything else in Job Hunt Pack — history, keyword gaps, templates, LinkedIn About",
       "Your filters, saved: location, remote, experience, salary, company type",
       "One click from a listing to the company's own apply page",
@@ -202,7 +206,7 @@ function Pricing() {
   const [switching, setSwitching] = useState<PlanKey | null>(null);
   // Resolved after mount so server and client render the same first pass.
   const [festival, setFestival] = useState<ActiveFestival | null>(null);
-  useEffect(() => setFestival(activeFestival()), []);
+  useEffect(() => setFestival(activeFestival(Date.now(), pricing.code === "INR" ? "IN" : null)), [pricing.code]);
   const {
     plan: currentPlan,
     tier: currentTier,
@@ -348,7 +352,7 @@ function Pricing() {
 
       {festival && hasFestivalPrice(pricing, "job_hunt") ? (
         <p className="mt-6 w-fit rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
-          <strong>{festival.name} offer live.</strong> Job Hunt Pack is{" "}
+          <strong>{festival.title} - Save {savingPercent(pricing, "job_hunt", "month", true)}%.</strong> Job Hunt Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "job_hunt", "month", true))}/month and Career Pro Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "career_pro", "month", true))}/month until{" "}
           {new Date(festival.endsAt - 1).toLocaleDateString()}.
@@ -421,8 +425,8 @@ function Pricing() {
                     )}
                   </span>
                   <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
-                    Save {savingPercent(pricing, key as PaidPlanKey, interval, onFestivalOffer(key))}%
-                    {onFestivalOffer(key) ? ` — ${festival?.name} offer` : ""}
+                    {onFestivalOffer(key) ? `${festival?.title} - ` : ""}Save{" "}
+                    {savingPercent(pricing, key as PaidPlanKey, interval, onFestivalOffer(key))}%
                   </span>
                 </div>
               ) : null}
@@ -536,3 +540,4 @@ function Pricing() {
     </main>
   );
 }
+
