@@ -113,6 +113,12 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
         }
         if (/^[A-Z]{2}$/.test(cc) && cc !== 'XX' && cc !== 'IN') return { geoNotice: true };
       }
+      const { getRequest: getReq } = await import('@tanstack/react-start/server');
+      const { clientIp } = await import('@/lib/rate-limit.server');
+      const { hashIp, purchaseBlockMessage } = await import('@/lib/purchase-guard.server');
+      const iph = await hashIp(clientIp(getReq()));
+      const blocked = await purchaseBlockMessage(context.userId, iph);
+      if (blocked) return { error: blocked };
       const existing = await latestSubscription(context.supabase, context.userId, environment);
       let replaces: string | undefined;
       if (isEntitled(existing) && existing?.stripe_subscription_id) {
@@ -144,6 +150,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
           notes: {
             userId: context.userId,
             lookup_key: data.priceId,
+            iph,
             ...(replaces ? { replaces } : {}),
             ...(email ? { email } : {}),
             ...(name ? { name } : {}),
