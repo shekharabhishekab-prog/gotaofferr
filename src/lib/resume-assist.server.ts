@@ -70,12 +70,12 @@ export async function assistField(data: AssistInput): Promise<string> {
   const gateway = createLovableAiGatewayProvider(key);
 
   try {
-    const { text } = await generateText({
-      model: gateway("google/gemini-3.6-flash"),
+    const { text } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
+      model: createLovableAiGatewayProvider(key, modelId)(modelId),
       system: instruction(data),
       prompt: data.text,
       maxOutputTokens: 1200,
-    });
+    }));
     const cleaned = tidy(text ?? "", data.kind);
     if (!cleaned) throw new Error("The rewrite came back empty. Please try again.");
     return cleaned;
@@ -84,3 +84,4 @@ export async function assistField(data: AssistInput): Promise<string> {
     throw new Error(aiGatewayErrorMessage(error));
   }
 }
+
