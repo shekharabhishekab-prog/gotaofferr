@@ -115,6 +115,8 @@ export const getUsage = createServerFn({ method: "GET" })
 
 
 
+const CAREER_PRO_DAILY_TAILOR_CAP = 15;
+
 export const tailorResume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => tailorInputSchema.parse(input))
@@ -131,6 +133,29 @@ export const tailorResume = createServerFn({ method: "POST" })
     const email = (context.claims as any)?.email as string | undefined;
     const limit = await activeTailorLimit(sub, email);
 
+    const { getCompedGrant } = await import("@/lib/access.server");
+    const grant = getCompedGrant(email);
+    const routingTier = grant
+      ? tierForPriceId(grant.priceId)
+      : isEntitled(sub)
+        ? tierForPriceId(sub?.price_id)
+        : "free";
+    // Career Pro uses the full-quality models, which have a small free daily pool shared by everyone.
+    // A per-person daily ceiling keeps one heavy day from using it up for all paying users.
+    // The run is not counted when this message shows.
+    if (routingTier === "career_pro" && !grant) {
+      const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+      const { count: dayCount } = await context.supabase
+        .from("tailor_runs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", context.userId)
+        .gte("created_at", dayAgo);
+      if ((dayCount ?? 0) >= CAREER_PRO_DAILY_TAILOR_CAP) {
+        throw new Error(
+          "You have reached today's high-usage limit for tailoring. Your monthly allowance is safe - please continue tomorrow. This one was not counted.",
+        );
+      }
+    }
     const { count, error: countError } = await context.supabase
       .from("tailor_runs")
       .select("id", { count: "exact", head: true })
@@ -151,13 +176,6 @@ export const tailorResume = createServerFn({ method: "POST" })
       }
     }
 
-    const { getCompedGrant } = await import("@/lib/access.server");
-    const grant = getCompedGrant(email);
-    const routingTier = grant
-      ? tierForPriceId(grant.priceId)
-      : isEntitled(sub)
-        ? tierForPriceId(sub?.price_id)
-        : "free";
     const result = await runTailor(data, detectCountry(), routingTier);
 
     const { encryptResult } = await import("@/lib/resume-crypto.server");
@@ -205,4 +223,5 @@ export const tailorResume = createServerFn({ method: "POST" })
     };
 
   });
+
 
