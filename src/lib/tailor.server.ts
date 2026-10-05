@@ -89,6 +89,7 @@ PHASE 3 — SOUND LIKE A HUMAN WROTE IT. A hiring manager must never suspect AI.
 - Summary: plain first-person-implied statement of what they do, how long, and the concrete strengths that fit this role. No adjective pile-ups, no "dynamic X professional with a proven track record".
 - Cover letter: write like a competent person emailing a hiring manager, not like marketing copy. Open with a specific reason for applying tied to the company or role, give two concrete proof points from the resume, close with a simple, direct sign-off. Contractions are fine. Slight imperfection and directness are better than polish.
 - Before returning, reread every sentence and rewrite anything that sounds like a template, a LinkedIn post, or a chatbot.
+- AI-TEXT DETECTORS: some ATS products and recruiter tools score resumes and cover letters for machine-written text, and auto-reject the ones that look generated. Write so the text reads as one person's own writing and does not trip those detectors: uneven sentence and bullet lengths, plain everyday words, concrete details taken from the source, no repeated sentence frames, no stock openers or closers, no balanced three-part lists, no tidy summarising sentence at the end of a paragraph, and no vocabulary that is more formal than the candidate's own. Keep every fact true. This changes how the text reads, never what it claims.
 
 - keyAchievements: 5-7 of the candidate's strongest, most quantified wins drawn ONLY from the source resume, placed directly after Core Skills like a big-company / Fortune 500 resume template. Each one line, metric-first where the source provides numbers, under 30 words. If the source has no achievements, return an empty array.
   - coverLetter: 200-300 words, addressed to the hiring team at ${data.company || "the company"}, ${data.tone || "confident and professional"} in tone, no placeholders like [Your Name] — use the candidate's real details. Use \\n\\n between paragraphs.
@@ -364,3 +365,4 @@ export function monthStartIso(): string {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
+
