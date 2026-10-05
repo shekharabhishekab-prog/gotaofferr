@@ -169,6 +169,7 @@ const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi)
 const HERO_HAND_CSS = `
 @font-face{font-family:"Caveat Brush";src:url(/fonts/caveat-brush.woff2) format("woff2");font-display:swap}
 .hero-hand{font-family:"Caveat Brush","Segoe Print","Comic Sans MS",cursive,sans-serif;font-weight:400;letter-spacing:.01em}
+.hero-hand{max-width:7.15em!important}@media (min-width:640px){.hero-hand{max-width:8.94em!important}}
 .hero-hand .hh-w{display:inline-block;opacity:0;transform:translateY(.3em) rotate(-3deg);animation:hhIn .7s cubic-bezier(.2,.8,.2,1) forwards,hhBob 5s ease-in-out 2.2s infinite}
 .hero-hand .hh-w:nth-child(1){animation-delay:.05s,2.2s}
 .hero-hand .hh-w:nth-child(2){animation-delay:.25s,2.5s}
@@ -215,6 +216,7 @@ function Index() {
 
         <div className="site-container relative grid items-center gap-12 py-16 sm:py-24 lg:min-h-[min(720px,calc(100vh-4rem))]">
           <div className="mx-auto text-center">
+            <link rel="preload" href="/fonts/caveat-brush.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
             <style>{HERO_HAND_CSS}</style>
             <span className="animate-pulse-ring inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
               <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Tailor
