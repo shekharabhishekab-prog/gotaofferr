@@ -16,7 +16,7 @@ export type StripeEnv = PaymentsEnv;
 export const RAZORPAY_PLAN_IDS: Record<string, string> = {
   // Starter pack — sold in every billable currency.
   starter_inr_monthly: 'plan_TNgVxQhH31Jbw8',
-  starter_inr_festival_monthly: 'plan_TNgVy9w3nhiaSW',
+  starter_inr_festival_monthly: 'plan_TNgVxQhH31Jbw8',
   starter_usd_monthly: 'plan_TQMyEulrLUloQx',
   starter_eur_monthly: 'plan_TQMyFZGRW2gWzr',
   starter_gbp_monthly: 'plan_TQMyGGP0koWXfO',
