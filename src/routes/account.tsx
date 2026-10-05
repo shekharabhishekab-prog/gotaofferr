@@ -49,7 +49,7 @@ import {
 } from "@/lib/account.functions";
 import { checkIsAdmin } from "@/lib/admin.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
-import { FREE_MONTHLY_LIMIT, JOB_HUNT_MONTHLY_LIMIT, CAREER_PRO_MONTHLY_LIMIT } from "@/lib/tailor-schema";
+import { FREE_MONTHLY_LIMIT, STARTER_MONTHLY_LIMIT, JOB_HUNT_MONTHLY_LIMIT, CAREER_PRO_MONTHLY_LIMIT } from "@/lib/tailor-schema";
 
 
 
@@ -393,7 +393,9 @@ function Account() {
   const monthlyLimit = isSubscribed
     ? tier === "career_pro"
       ? CAREER_PRO_MONTHLY_LIMIT
-      : JOB_HUNT_MONTHLY_LIMIT
+      : tier === "starter"
+        ? STARTER_MONTHLY_LIMIT
+        : JOB_HUNT_MONTHLY_LIMIT
     : FREE_MONTHLY_LIMIT;
   const remaining = Math.max(0, monthlyLimit - (overview?.runsThisMonth ?? 0));
   const planLabel = isSubscribed ? planName : "Free";
@@ -976,3 +978,4 @@ function Account() {
     </main>
   );
 }
+
