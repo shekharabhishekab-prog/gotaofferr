@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
-import { toast } from 'sonner';
+import { toast } from "@/lib/toast";
 
 import { createSubscriptionCheckout } from '@/lib/payments.functions';
 
@@ -72,7 +72,7 @@ export function useStripeCheckout() {
         });
         rzp.on('payment.failed', (response: any) => {
           setIsOpen(false);
-          toast.error(response?.error?.description ?? 'Payment failed. Please try again.');
+          toast.error('That payment bounced like a bad tennis serve 🎾 Please try again or use a different card.');
         });
         rzp.open();
       } catch (e) {
@@ -88,3 +88,4 @@ export function useStripeCheckout() {
 
   return { openCheckout, closeCheckout, isOpen, checkoutElement };
 }
+
