@@ -550,7 +550,7 @@ export function ResumeTailor() {
                           </div>
                           {(e.context || e.location) && (
                             <p className="text-xs text-muted-foreground italic">
-                              {[e.context, e.location].filter(Boolean).join("  |  ")}
+                              {[e.context, e.location && e.context && e.context.toLowerCase().includes(e.location.toLowerCase().split(",")[0].trim()) ? "" : e.location].filter(Boolean).join("  |  ")}
                             </p>
                           )}
 
