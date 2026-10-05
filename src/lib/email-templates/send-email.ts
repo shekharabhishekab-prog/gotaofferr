@@ -23,6 +23,8 @@ export interface SendTemplateEmailOptions {
   /** Dedupes retries of the same logical send; defaults to a random UUID (no dedupe). */
   idempotencyKey?: string
   replyTo?: string
+  /** One-click unsubscribe URL (RFC 8058). Adds List-Unsubscribe headers. */
+  unsubscribeUrl?: string
 }
 
 /**
@@ -79,6 +81,14 @@ export async function sendTemplateEmail(
         html,
         text,
         reply_to: options.replyTo,
+        ...(options.unsubscribeUrl
+          ? {
+              headers: {
+                'List-Unsubscribe': `<${options.unsubscribeUrl}>`,
+                'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+              },
+            }
+          : {}),
       }),
     })
     if (!res.ok) {
@@ -112,3 +122,4 @@ export async function sendTemplateEmail(
 
   return { sent: true }
 }
+
