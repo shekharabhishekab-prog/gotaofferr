@@ -383,3 +383,11 @@ export const ATS_PARSE_RULES: string[] = [
   "Do not repeat the same sentence in two sections; repeated blocks are scored as keyword stuffing and can down-rank the application.",
 ];
 
+
+/** Today's date as a cover-letter header line: "October 5, 2026" (US style) or "5 October 2026". */
+export function letterDateLine(country: string | null, now: Date = new Date()): string {
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const d = now.getUTCDate(), m = months[now.getUTCMonth()], y = now.getUTCFullYear();
+  const code = country?.toUpperCase() ?? "";
+  return ["US", "CA", "PH"].includes(code) ? `${m} ${d}, ${y}` : `${d} ${m} ${y}`;
+}
