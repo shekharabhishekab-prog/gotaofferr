@@ -5,6 +5,7 @@ import {
   type StripeEnv,
   planIdFor,
   getPaymentsErrorMessage,
+  rawPaymentsError,
   rzp,
   totalCountFor,
 } from '@/lib/razorpay.server';
@@ -232,7 +233,7 @@ export const changePlan = createServerFn({ method: 'POST' })
         ? { ok: true, kind, effective: 'now', effectiveDate: null }
         : { ok: true, kind, effective: 'period_end', effectiveDate: current.current_period_end ?? null };
     } catch (error) {
-      const message = getPaymentsErrorMessage(error);
+      const message = rawPaymentsError(error);
       // UPI-mandate subscriptions cannot be patched to another plan by the
       // gateway. Send the user through a fresh checkout for the new plan instead.
       const cannotUpdateInPlace =
@@ -244,7 +245,7 @@ export const changePlan = createServerFn({ method: 'POST' })
           needsCheckout: true,
         };
       }
-      return { error: message };
+      return { error: getPaymentsErrorMessage(error) };
     }
   });
 
