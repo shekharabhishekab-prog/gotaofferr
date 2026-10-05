@@ -571,11 +571,11 @@ ${JSON.stringify(shortlist)}`;
 
   let output: { jobs?: JobListing[] } | undefined;
   try {
-    ({ output } = await generateText({
-      model: gateway("google/gemini-3.6-flash"),
+    ({ output } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
+      model: gateway(modelId),
       output: Output.object({ schema: jobListingsSchema }),
       prompt,
-    }));
+    })));
   } catch (error) {
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
     throw new Error(aiGatewayErrorMessage(error));
