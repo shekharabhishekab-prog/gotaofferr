@@ -25,6 +25,7 @@ function proChain(): string[] {
 }
 
 export function chainForTier(tier: RoutingTier): string[] {
+  // Career Pro only gets the full-quality models. Free, Starter and Job Hunt use the lower models.
   return tier === "career_pro" ? proChain() : FREE_CHAIN;
 }
 
@@ -70,10 +71,8 @@ export async function countCall(model: string): Promise<boolean> {
   }
 }
 
-export function limitMessage(tier: RoutingTier): string {
-  return tier === "career_pro"
-    ? "Our best-quality writing engine is at its capacity right now. Your rewrite was not counted. Please try again in a few minutes."
-    : "We've reached today's free AI limit. Please try again tomorrow. Your rewrite was not counted.";
+export function limitMessage(_tier: RoutingTier): string {
+  return "We're getting a lot of requests right now. Please try again in a few minutes. This one was not counted.";
 }
 
 /** Try each model in the tier's chain; move on only for quota errors. */
