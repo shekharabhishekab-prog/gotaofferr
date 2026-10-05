@@ -133,6 +133,7 @@ async function createDoc() {
 
 export async function buildResumePdf(r: TailoredResume) {
   const d = await createDoc();
+  d.doc.setProperties({ title: `${r.name || "Resume"} - Resume`, subject: "Resume", creator: "GotaOfferr" });
 
   d.text(r.name || "Resume", { size: 21, style: "bold", color: [17, 51, 92] });
   if (r.headline) d.text(r.headline, { size: 11, color: [80, 90, 105] });
@@ -275,3 +276,4 @@ export async function buildExampleResumePdf(example: {
 export function slug(s: string) {
   return (s || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+
