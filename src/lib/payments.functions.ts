@@ -100,7 +100,13 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
       const { enforcePolicy } = await import('@/lib/rate-limit.server');
       await enforcePolicy('payments-checkout', context.userId);
       const existing = await latestSubscription(context.supabase, context.userId, environment);
+      let replaces: string | undefined;
       if (isEntitled(existing) && existing?.stripe_subscription_id) {
+        // An upgrade is a new full-price subscription that replaces the old one
+        // once its first payment succeeds. Anything else still goes through Switch plan.
+        if (planChangeKind(existing.price_id, data.priceId) === 'upgrade') {
+          replaces = existing.stripe_subscription_id;
+        } else
         return {
           error:
             'You already have an active plan. Use "Switch plan" to move between Job Hunt and Career Pro Packs.',
@@ -124,6 +130,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
           notes: {
             userId: context.userId,
             lookup_key: data.priceId,
+            ...(replaces ? { replaces } : {}),
             ...(email ? { email } : {}),
             ...(name ? { name } : {}),
           },
@@ -216,12 +223,18 @@ export const changePlan = createServerFn({ method: 'POST' })
     const kind = planChangeKind(current.price_id, data.priceId);
     if (kind === 'same') return { error: "You're already on this plan." };
 
+    // Upgrades charge the FULL new plan price on a new subscription (the old one
+    // is cancelled after the new payment succeeds), never a prorated difference.
+    if (kind === 'upgrade') {
+      return { error: '', needsCheckout: true };
+    }
+
     try {
       const updated = await rzp<any>(`/subscriptions/${current.stripe_subscription_id}`, {
         method: 'PATCH',
         body: {
           plan_id: planIdFor(data.priceId),
-          schedule_change_at: kind === 'upgrade' ? 'now' : 'cycle_end',
+          schedule_change_at: 'cycle_end',
           customer_notify: 1,
         },
       });
@@ -229,9 +242,7 @@ export const changePlan = createServerFn({ method: 'POST' })
       const { upsertRazorpaySubscriptionRow } = await import('@/lib/subscription-sync.server');
       await upsertRazorpaySubscriptionRow(updated, environment, context.userId);
 
-      return kind === 'upgrade'
-        ? { ok: true, kind, effective: 'now', effectiveDate: null }
-        : { ok: true, kind, effective: 'period_end', effectiveDate: current.current_period_end ?? null };
+      return { ok: true, kind, effective: 'period_end', effectiveDate: current.current_period_end ?? null };
     } catch (error) {
       const message = rawPaymentsError(error);
       // UPI-mandate subscriptions cannot be patched to another plan by the
