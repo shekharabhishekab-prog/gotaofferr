@@ -21,7 +21,7 @@ async function usedThisMonth(userId: string): Promise<number> {
     .from("builder_uses")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
-    .gte("created_at", monthStartIso());
+    .gte("created_at", (await (await import("@/lib/usage-window.server")).usageSince(supabaseAdmin as any, userId)));
   return count ?? 0;
 }
 
