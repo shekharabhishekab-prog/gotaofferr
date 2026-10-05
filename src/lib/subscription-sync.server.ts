@@ -42,7 +42,7 @@ export async function upsertRazorpaySubscriptionRow(
   const userId = userIdOverride || subscription?.notes?.userId || null;
   if (!userId) return { ok: false, reason: 'no userId on subscription' };
 
-  const lookupKey = subscription?.notes?.lookup_key || lookupKeyForPlanId(subscription?.plan_id) || '';
+  const lookupKey = lookupKeyForPlanId(subscription?.plan_id) || subscription?.notes?.lookup_key || '';
 
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
 
@@ -81,3 +81,4 @@ export async function setSubscriptionStatus(
     .eq('stripe_subscription_id', subscriptionId)
     .eq('environment', env);
 }
+
