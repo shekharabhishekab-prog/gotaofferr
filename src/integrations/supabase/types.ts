@@ -156,6 +156,8 @@ export type Database = {
           extra_filters: string | null
           id: string
           last_job_count: number
+          emails_sent: number
+          completed_at: string | null
           last_jobs: Json | null
           last_sent_at: string | null
           local_hour: number
@@ -175,6 +177,8 @@ export type Database = {
           extra_filters?: string | null
           id?: string
           last_job_count?: number
+          emails_sent?: number
+          completed_at?: string | null
           last_jobs?: Json | null
           last_sent_at?: string | null
           local_hour?: number
@@ -194,6 +198,8 @@ export type Database = {
           extra_filters?: string | null
           id?: string
           last_job_count?: number
+          emails_sent?: number
+          completed_at?: string | null
           last_jobs?: Json | null
           last_sent_at?: string | null
           local_hour?: number
@@ -604,3 +610,4 @@ export const Constants = {
     },
   },
 } as const
+
