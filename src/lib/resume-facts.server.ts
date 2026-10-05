@@ -67,7 +67,13 @@ export function extractSourceFacts(resume: string): string[] {
  * a loss; only genuinely dropped information is reported.
  */
 export function findMissingFacts(resume: string, draft: unknown, limit = 40): string[] {
-  const haystack = normalize(JSON.stringify(draft ?? ""));
+  // Only the resume itself counts as keeping a fact. A fact that appears only in the
+  // cover letter or the insights is still missing from the resume.
+  const resumeOnly: any = draft && typeof draft === "object" ? { ...(draft as any) } : draft;
+  if (resumeOnly && typeof resumeOnly === "object") {
+    for (const k of ["coverLetter", "tips", "matchedKeywords", "missingKeywords", "scoreBreakdown", "consistencyFlags", "regionAdaptations", "fitWarning"]) delete resumeOnly[k];
+  }
+  const haystack = normalize(JSON.stringify(resumeOnly ?? ""));
   const missing: string[] = [];
   for (const fact of extractSourceFacts(resume)) {
     const needle = normalize(fact);
@@ -77,3 +83,4 @@ export function findMissingFacts(resume: string, draft: unknown, limit = 40): st
   }
   return missing;
 }
+
