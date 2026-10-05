@@ -181,6 +181,7 @@ const HERO_HAND_CSS = `
 @keyframes hhIn{to{opacity:1;transform:none}}
 @keyframes hhBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-.05em) rotate(-.6deg)}}
 .hero-v2 .hero-hand{transform-style:preserve-3d;text-shadow:0 1px 0 rgba(0,0,0,.18),0 2px 0 rgba(0,0,0,.14),0 3px 0 rgba(0,0,0,.1),0 8px 18px rgba(0,0,0,.25)}
+.hero-v2 .hero-hand .text-gradient{text-shadow:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
 @keyframes hv2Sway{0%,100%{transform:perspective(900px) rotateX(2deg) rotateY(-4deg)}50%{transform:perspective(900px) rotateX(-2deg) rotateY(4deg)}}
 @media (hover:none){.hero-v2 .hv2-sway{animation:hv2Sway 7s ease-in-out infinite;will-change:transform}}
 @media (prefers-reduced-motion:reduce){.hero-v2 .hv2-sway{animation:none}}
