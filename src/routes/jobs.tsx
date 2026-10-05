@@ -326,10 +326,19 @@ function Jobs() {
     }
   }
 
+  const currentTier = searchUsage?.tier ?? tier;
+  const nextPackName = !session
+    ? "Career Pro Pack"
+    : currentTier === "free"
+      ? "Starter Pack"
+      : currentTier === "starter"
+        ? "Job Hunt Pack"
+        : "Career Pro Pack";
+
   return (
     <main className="site-container py-14 sm:py-20">
       <div className="flex items-center gap-2 text-sm font-medium text-primary">
-        <Sparkles className="size-4" /> Career Pro Pack
+        <Sparkles className="size-4" /> {nextPackName}
       </div>
       <h1 className="mt-3 font-display text-4xl font-bold text-foreground">AI job finder</h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
