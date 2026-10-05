@@ -81,6 +81,10 @@ export function activeFestival(
   region: FestivalRegion | null = "IN",
 ): ActiveFestival | null {
   if (!region) return null;
+  // Limited Launch Offer: India always runs the launch price (no end date for now).
+  if (region === "IN") {
+    return { name: "Launch", title: "Limited Launch Offer", date: "", endsAt: Date.UTC(2100, 0, 1) };
+  }
   for (const festival of FESTIVALS) {
     if (!festival.regions.includes(region)) continue;
     const start = festivalDayStart(festival.date);
