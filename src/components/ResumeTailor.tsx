@@ -422,7 +422,7 @@ export function ResumeTailor() {
               <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
                 {isSubscribed
                   ? tier === "career_pro"
-                    ? "169 rewrites included per month"
+                    ? "199 rewrites included per month"
                     : "129 rewrites included per month"
                   : "Takes ~15 seconds"}
               </p>
