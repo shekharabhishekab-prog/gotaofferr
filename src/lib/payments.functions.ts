@@ -3,7 +3,7 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { TESTING_UNLOCK_ALL_PLANS, TESTING_PLAN_PRICE_ID } from '@/lib/access';
 import {
   type StripeEnv,
-  RAZORPAY_PLAN_IDS,
+  planIdFor,
   getPaymentsErrorMessage,
   rzp,
   totalCountFor,
@@ -83,12 +83,12 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => {
     const data = checkoutInputSchema.parse(input);
-    if (!RAZORPAY_PLAN_IDS[data.priceId]) throw new Error('Unknown plan');
+    if (!planIdFor(data.priceId)) throw new Error('Unknown plan');
     // Festival pricing is only purchasable while the offer window is open.
     if (data.priceId.endsWith('_yearly')) {
       throw new Error('Yearly billing is no longer available. Please choose the monthly plan.');
     }
-    if (isFestivalPriceId(data.priceId) && !isFestivalActive()) {
+    if (isFestivalPriceId(data.priceId) && !isFestivalActive(Date.now(), 'IN')) {
       throw new Error('That festival offer has ended.');
     }
     return data;
@@ -116,7 +116,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
       const subscription = await rzp<any>('/subscriptions', {
         method: 'POST',
         body: {
-          plan_id: RAZORPAY_PLAN_IDS[data.priceId],
+          plan_id: planIdFor(data.priceId),
           total_count: totalCountFor(data.priceId),
           customer_notify: 1,
           ...(customerId ? { customer_id: customerId } : {}),
@@ -195,12 +195,12 @@ type PlanChangeResult =
 export const changePlan = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { priceId: string; environment?: StripeEnv }) => {
-    if (!RAZORPAY_PLAN_IDS[data.priceId]) throw new Error('Unknown plan');
+    if (!planIdFor(data.priceId)) throw new Error('Unknown plan');
     // Festival pricing is only purchasable while the offer window is open.
     if (data.priceId.endsWith('_yearly')) {
       throw new Error('Yearly billing is no longer available. Please choose the monthly plan.');
     }
-    if (isFestivalPriceId(data.priceId) && !isFestivalActive()) {
+    if (isFestivalPriceId(data.priceId) && !isFestivalActive(Date.now(), 'IN')) {
       throw new Error('That festival offer has ended.');
     }
     return data;
@@ -219,7 +219,7 @@ export const changePlan = createServerFn({ method: 'POST' })
       const updated = await rzp<any>(`/subscriptions/${current.stripe_subscription_id}`, {
         method: 'PATCH',
         body: {
-          plan_id: RAZORPAY_PLAN_IDS[data.priceId],
+          plan_id: planIdFor(data.priceId),
           schedule_change_at: kind === 'upgrade' ? 'now' : 'cycle_end',
           customer_notify: 1,
         },
@@ -341,3 +341,4 @@ export const setAutoRenew = createServerFn({ method: 'POST' })
       return { error: getPaymentsErrorMessage(error) };
     }
   });
+
