@@ -117,9 +117,9 @@ const plans: Record<PlanKey, {
     tagline: "A complete application kit — 43 credits' worth of work for the price of a coffee.",
     bestFor: "Best for: applying to a handful of roles you really want.",
     features: [
-      "30 resume + cover letter tailorings per month",
+      "20 resume + cover letter tailorings per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
-      "15 resumes in the resume builder",
+      "12 resumes in the resume builder",
       "5 AI job finder searches per month",
       "3 job alerts (3 emails each, every 3 days)",
       "Keyword gap report on every rewrite",
@@ -168,9 +168,9 @@ const plans: Record<PlanKey, {
     features: [
       "199 resume + cover letter tailorings per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
-      "70 resumes in the resume builder",
-      "35 AI job finder searches per month - one clean list across every board",
-      "10 job alerts (3 emails each, every 3 days)",
+      "50 resumes in the resume builder",
+      "30 AI job finder searches per month - one clean list across every board",
+      "7 job alerts (3 emails each, every 3 days)",
       "Everything else in Job Hunt Pack — history, keyword gaps, templates, LinkedIn About",
       "Your filters, saved: location, remote, experience, salary, company type",
       "One click from a listing to the company's own apply page",
@@ -352,10 +352,10 @@ function Pricing() {
 
       {festival && hasFestivalPrice(pricing, "job_hunt") ? (
         <p className="mt-6 w-fit rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
-          <strong>{festival.title} - Save {savingPercent(pricing, "job_hunt", "month", true)}%.</strong> Job Hunt Pack is{" "}
+          <strong>{festival.title} - Save {savingPercent(pricing, "job_hunt", "month", true)}%.</strong> Starter Pack is{" "}
+          {formatAmount(pricing, amountFor(pricing, "starter", "month", true))}/month, Job Hunt Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "job_hunt", "month", true))}/month and Career Pro Pack is{" "}
-          {formatAmount(pricing, amountFor(pricing, "career_pro", "month", true))}/month until{" "}
-          {new Date(festival.endsAt - 1).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}.
+          {formatAmount(pricing, amountFor(pricing, "career_pro", "month", true))}/month.
         </p>
       ) : null}
 
