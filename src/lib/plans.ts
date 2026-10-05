@@ -341,5 +341,5 @@ export function nextTier(tier: PlanTier): PlanTier | null {
 export const UPGRADE_NOTE: Record<Exclude<PlanTier, "career_pro">, string> = {
   free: "Starter gives you 5 job searches, 30 tailored resumes and 15 builder resumes a month, plus 3 job alerts.",
   starter: "Job Hunt gives you 10 job searches, 129 tailored resumes and 20 builder resumes a month, plus 5 job alerts.",
-  job_hunt: "Career Pro gives you 35 job searches, 169 tailored resumes and 70 builder resumes a month, plus 10 job alerts.",
+  job_hunt: "Career Pro gives you 35 job searches, 199 tailored resumes and 70 builder resumes a month, plus 10 job alerts.",
 };
