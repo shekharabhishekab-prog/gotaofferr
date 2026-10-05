@@ -65,7 +65,7 @@ function tidy(raw: string, kind: AssistInput["kind"]): string {
 
 /** Rewrites a single builder field so users get help as they type, not only at the end. */
 export async function assistField(data: AssistInput): Promise<string> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not available right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
