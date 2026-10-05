@@ -115,7 +115,7 @@ export const getUsage = createServerFn({ method: "GET" })
 
 
 
-const CAREER_PRO_DAILY_TAILOR_CAP = 15;
+const DAILY_TAILOR_ABUSE_GUARD = 40;
 
 export const tailorResume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -140,19 +140,18 @@ export const tailorResume = createServerFn({ method: "POST" })
       : isEntitled(sub)
         ? tierForPriceId(sub?.price_id)
         : "free";
-    // Career Pro uses the full-quality models, which have a small free daily pool shared by everyone.
-    // A per-person daily ceiling keeps one heavy day from using it up for all paying users.
+    // Abuse guard only: far above normal use (about 7 a day on Career Pro). Protects the shared full-model pool.
     // The run is not counted when this message shows.
-    if (routingTier === "career_pro" && !grant) {
+    if ((routingTier === "career_pro" || routingTier === "job_hunt") && !grant) {
       const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
       const { count: dayCount } = await context.supabase
         .from("tailor_runs")
         .select("id", { count: "exact", head: true })
         .eq("user_id", context.userId)
         .gte("created_at", dayAgo);
-      if ((dayCount ?? 0) >= CAREER_PRO_DAILY_TAILOR_CAP) {
+      if ((dayCount ?? 0) >= DAILY_TAILOR_ABUSE_GUARD) {
         throw new Error(
-          "You have reached today's high-usage limit for tailoring. Your monthly allowance is safe - please continue tomorrow. This one was not counted.",
+          "That's a lot of tailoring in a short time. Please try again in a little while. This one was not counted.",
         );
       }
     }
