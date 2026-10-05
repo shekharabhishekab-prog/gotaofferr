@@ -10,15 +10,30 @@ const TIERS: PlanId[] = ['starter', 'job_hunt', 'career_pro'];
 export const Route = createFileRoute('/api/public/test-seed-plans')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }: { request: Request }) => {
         const tid = process.env['RAZORPAY_TEST_KEY_ID'] || '';
         if (!tid.startsWith('rzp_test_') || !process.env['RAZORPAY_TEST_KEY_SECRET']) {
           return new Response('Not found', { status: 404 });
         }
+        const url = new URL(request.url);
+        const diag = url.searchParams.get('diag');
+        if (diag) {
+          const { planIdFor } = await import('@/lib/razorpay.server');
+          try {
+            const r = await rzp<any>('/subscriptions', {
+              method: 'POST',
+              body: { plan_id: planIdFor(diag), total_count: 12, customer_notify: 0 },
+            });
+            return new Response(JSON.stringify({ ok: true, id: r.id, plan: planIdFor(diag) }));
+          } catch (e) {
+            return new Response(JSON.stringify({ plan: planIdFor(diag), err: e instanceof Error ? e.message : String(e) }));
+          }
+        }
+        const only = url.searchParams.get('cur');
         const out: Record<string, string> = {};
         const errors: Record<string, string> = {};
         const jobs: Array<[string, string, PlanId, boolean]> = [];
-        for (const c of CURRENCIES)
+        for (const c of only ? only.split(',') : CURRENCIES)
           for (const t of TIERS) {
             jobs.push([`${t}_${c.toLowerCase()}_monthly`, c, t, false]);
             if (c === 'INR') jobs.push([`${t}_inr_festival_monthly`, c, t, true]);
@@ -31,7 +46,7 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
               body: {
                 period: 'monthly',
                 interval: 1,
-                item: { name: `TEST ${key}`, amount: Math.round(amt * 100), currency: cur },
+                item: { name: `TEST ${key}`, amount: Math.round(amt * ((url.searchParams.get('zd') ? 1 : 100))), currency: cur },
               },
             });
             out[key] = p.id;
