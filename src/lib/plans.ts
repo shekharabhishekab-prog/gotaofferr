@@ -184,7 +184,7 @@ export function planLabel(priceId?: string | null): string {
 
 
 /** Days of access kept while Stripe retries a failed renewal payment. */
-export const PAST_DUE_GRACE_DAYS = 14;
+export const PAST_DUE_GRACE_DAYS = 4;
 
 export type SubscriptionRow = {
   status: string | null;
@@ -215,8 +215,11 @@ export function isEntitled(sub: SubscriptionRow | null | undefined): boolean {
     case "trialing":
       return end === null || end > now;
     case "past_due":
-    case "unpaid":
+      // Razorpay retries a failed renewal once a day, 3 times.
       return end === null || end + PAST_DUE_GRACE_DAYS * 86_400_000 > now;
+    case "unpaid":
+      // Halted after the failed retries: back to Free.
+      return false;
     case "canceled":
       return end !== null && end > now;
     default:
