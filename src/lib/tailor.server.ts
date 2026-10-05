@@ -6,6 +6,7 @@ import {
   resumeMarket,
   coverLetterRules,
   detectJobCountry,
+  letterDateLine,
   crossBorderRules,
   domesticRules,
   ATS_PARSE_RULES,
@@ -48,6 +49,11 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   // known country the model reads the job's country from the ad itself (see the generic market).
   const market = resumeMarket(detectedJobCountry);
   const letterRules = coverLetterRules(detectedJobCountry);
+  const withLetterDate = <T extends { coverLetter: string }>(r: T): T => {
+    const text = (r.coverLetter ?? "").trim();
+    if (!text) return r;
+    return { ...r, coverLetter: `${letterDateLine(jobCountry)}\n\n${text}` };
+  };
   const crossBorder = crossBorderRules(sourceCountry, detectedJobCountry);
   const domestic = crossBorder.length ? [] : domesticRules(sourceCountry, detectedJobCountry);
 
@@ -205,16 +211,16 @@ ${data.resume}`;
     const summed = b
       ? Math.round(b.keywordMatch + b.titleAlignment + b.formatting + b.experienceRelevance + b.quantifiedImpact)
       : null;
-    return humanize({
+    return withLetterDate(humanize({
       ...result,
       matchScore: summed !== null ? Math.max(0, Math.min(100, summed)) : result.matchScore,
       atsScore: Math.max(95, Math.min(100, Math.round(result.atsScore ?? 95))),
-    });
+    }));
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
       try {
         const raw = (error.text ?? "").replace(/^```json\s*|```$/g, "");
-        return humanize(tailoredResumeSchema.parse(JSON.parse(raw)));
+        return withLetterDate(humanize(tailoredResumeSchema.parse(JSON.parse(raw))));
       } catch {
         throw new Error("The AI response could not be parsed. Please try again.");
       }
