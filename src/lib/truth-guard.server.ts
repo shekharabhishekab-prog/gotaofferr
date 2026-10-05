@@ -40,7 +40,12 @@ function supportedFraction(item: string, src: Src): number {
 }
 
 function numbersOk(item: string, src: Src): boolean {
-  const nums = (item.match(/\d[\d,.]*/g) ?? []).map((n) => n.replace(/[,.]+$/, ""));
+  // A labelled currency conversion such as "(approx. AED 180K)" is the market
+  // rule's own addition. The original figure beside it must still be in the source.
+  const stripped = item
+    .replace(/\((?:approx\.?|approximately|about|around|equivalent|equiv\.?|≈|~)[^)]*\)/gi, " ")
+    .replace(/(?:approx\.?|approximately|≈|~)\s*[A-Za-z$€£₹]{0,4}\s*\d[\d,.]*\s*[kKmMlL]?(?:akh|illion|rore)?/gi, " ");
+  const nums = (stripped.match(/\d[\d,.]*/g) ?? []).map((n) => n.replace(/[,.]+$/, ""));
   return nums.every((n) => src.numbers.has(n) || n.length <= 1);
 }
 
@@ -266,3 +271,4 @@ export function polishResume(result: TailoredResume, final: boolean): { result: 
   if (/\[[^\]]*(your|name|company|date)[^\]]*\]/i.test(r.coverLetter)) issues.push("placeholder in cover letter");
   return { result: r, issues };
 }
+
