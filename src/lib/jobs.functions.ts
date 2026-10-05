@@ -216,7 +216,7 @@ export const getAlertUsage = createServerFn({ method: "GET" })
       .from("job_alerts")
       .select("id", { count: "exact", head: true })
       .eq("user_id", context.userId)
-      .gte("created_at", alertMonthStartIso());
+      .gte("created_at", await (await import("@/lib/usage-window.server")).usageSince(context.supabase, context.userId));
     const limit = ALERT_ATTEMPT_LIMIT[tier];
     const used = count ?? 0;
     return { tier, limit, used, remaining: Math.max(0, limit - used) };
@@ -262,7 +262,7 @@ export const saveJobAlert = createServerFn({ method: "POST" })
       .from("job_alerts")
       .select("id", { count: "exact", head: true })
       .eq("user_id", context.userId)
-      .gte("created_at", alertMonthStartIso());
+      .gte("created_at", await (await import("@/lib/usage-window.server")).usageSince(context.supabase, context.userId));
     const limit = ALERT_ATTEMPT_LIMIT[tier];
     if ((count ?? 0) >= limit) {
       const up = nextTier(tier);
