@@ -120,8 +120,8 @@ function Terms() {
           <p>
             Payments are processed by Razorpay; we do not store your card details. Prices are shown
             in your local currency where supported and may include applicable taxes. Promotional or
-            festival prices apply only during the stated window and revert to the standard price at
-            the next renewal after the offer ends.
+            festival prices apply to the first payment only, made during the stated window. From
+            the next month your plan renews at the regular price shown on the pricing page.
           </p>
           <p className="rounded-xl border border-border bg-card/60 p-4 text-card-foreground">
             <strong>Automatic renewal (please read before paying).</strong> All paid packages —
@@ -133,9 +133,9 @@ function Terms() {
             for the next month of access and no separate approval is asked for at renewal time. Your
             bank or payment provider sends you a pre-debit notification before recurring mandate
             charges as required by law, and we email a receipt after every successful charge. If a
-            renewal payment fails, we keep your plan for a grace period of 14 days while the payment is
-            retried. If payment still does not succeed after that, your account returns to the Free
-            plan.
+            renewal payment fails, we retry the payment once a day, up to 3 times, and keep your plan
+            while we retry. If all 3 retries fail, your plan is suspended and your account returns
+            to the Free plan.
           </p>
           <h3 className="pt-2 text-lg font-semibold text-foreground">
             Upgrades, renewal and cancellation
