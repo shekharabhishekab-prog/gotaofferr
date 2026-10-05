@@ -119,9 +119,9 @@ function Terms() {
           </p>
           <p>
             Payments are processed by Razorpay; we do not store your card details. Prices are shown
-            in your local currency where supported and may include applicable taxes. Promotional or
-            festival prices apply to the first payment only, made during the stated window. From
-            the next month your plan renews at the regular price shown on the pricing page.
+            in your local currency where supported and may include applicable taxes. Launch
+            offer prices stay the same every month while you keep your plan. We may change prices
+            in future; any change applies only after we tell you on this site.
           </p>
           <p className="rounded-xl border border-border bg-card/60 p-4 text-card-foreground">
             <strong>Automatic renewal (please read before paying).</strong> All paid packages —
