@@ -34,7 +34,7 @@ ${data.skills || "Not given"}`;
 
 /** Free report: overall score plus headline, About and skills feedback. */
 export async function reviewProfileFree(data: LinkedInInput): Promise<LinkedInFreeReview> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not available right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
@@ -67,7 +67,7 @@ ${profileText(data)}`;
 
 /** Paid report: keyword alignment for a target role, industry advice, and rewrites. */
 export async function reviewProfilePro(data: LinkedInInput): Promise<LinkedInProReview> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not available right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
