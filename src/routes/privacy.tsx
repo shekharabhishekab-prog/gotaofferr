@@ -98,8 +98,16 @@ function Privacy() {
           </p>
           <p>
             All data in transit is encrypted with TLS, and saved resumes and tailored documents are
-            encrypted at rest with AES-256-GCM. We do not sell your data or use it to train
-            third-party AI models.
+            encrypted at rest with AES-256-GCM. We do not sell your data, and we do not use it to train
+            our own AI models.
+          </p>
+          <p>
+            Your resume and job description text is sent to Google's Gemini API to generate your
+            output. We use Google's free usage tier. Under Google's terms for that tier, Google may
+            use this content to improve its products and machine-learning models, and human
+            reviewers may read some of it. This does not apply to users in the European Economic
+            Area, the United Kingdom or Switzerland. Please do not include sensitive details you
+            are not comfortable sharing.
           </p>
         </section>
 
