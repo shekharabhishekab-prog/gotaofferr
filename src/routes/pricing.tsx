@@ -355,7 +355,7 @@ function Pricing() {
           <strong>{festival.title} - Save {savingPercent(pricing, "job_hunt", "month", true)}%.</strong> Job Hunt Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "job_hunt", "month", true))}/month and Career Pro Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "career_pro", "month", true))}/month until{" "}
-          {new Date(festival.endsAt - 1).toLocaleDateString()}.
+          {new Date(festival.endsAt - 1).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}.
         </p>
       ) : null}
 
