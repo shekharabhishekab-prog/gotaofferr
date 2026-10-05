@@ -203,16 +203,23 @@ export const RAZORPAY_PLAN_IDS: Record<string, string> = {
  * replaces ids per environment - used by the test preview, which has its own
  * Razorpay TEST account and therefore different plan ids. Unset on the live site.
  */
-export function planIdFor(lookupKey: string): string | undefined {
-  const raw = process.env['RAZORPAY_PLAN_OVERRIDES'];
-  if (raw) {
+function planOverrides(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const name of ['RAZORPAY_PLAN_OVERRIDES', 'RAZORPAY_PLAN_OVERRIDES_INR']) {
+    const raw = process.env[name];
+    if (!raw) continue;
     try {
-      const o = JSON.parse(raw) as Record<string, string>;
-      if (o[lookupKey]) return o[lookupKey];
+      Object.assign(out, JSON.parse(raw) as Record<string, string>);
     } catch {
       /* ignore bad override */
     }
   }
+  return out;
+}
+
+export function planIdFor(lookupKey: string): string | undefined {
+  const o = planOverrides();
+  if (o[lookupKey]) return o[lookupKey];
   return RAZORPAY_PLAN_IDS[lookupKey];
 }
 
@@ -248,12 +255,7 @@ export function lookupKeyForPlanId(planId?: string | null): string | null {
   if (!planId) return null;
   let found = Object.entries(RAZORPAY_PLAN_IDS).find(([, id]) => id === planId);
   if (!found) {
-    try {
-      const o = JSON.parse(process.env['RAZORPAY_PLAN_OVERRIDES'] || '{}') as Record<string, string>;
-      found = Object.entries(o).find(([, id]) => id === planId);
-    } catch {
-      /* ignore */
-    }
+    found = Object.entries(planOverrides()).find(([, id]) => id === planId);
   }
   return found ? found[0] : (LEGACY_PLAN_IDS[planId] ?? null);
 }
