@@ -17,6 +17,7 @@ import { SiteHeader } from "../components/SiteHeader";
 import { NetworkStatusBanner } from "../components/NetworkStatusBanner";
 import { Toaster } from "../components/ui/sonner";
 import { DeferredThirdParty } from "../components/DeferredThirdParty";
+import { AdPolicy } from "../components/AdPolicy";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -170,6 +171,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     scripts: [
       // AdSense site-verification snippet: must be in the server-rendered <head> so Google's Verify can see it.
+      // Paid members: pause ad requests before AdSense loads (tier remembered from the last visit).
+      ...(ADSENSE_CLIENT
+        ? [
+            {
+              children:
+                'window.adsbygoogle=window.adsbygoogle||[];try{var t=localStorage.getItem("gt_tier");if(t&&t!=="free")window.adsbygoogle.pauseAdRequests=1}catch(e){}',
+            },
+          ]
+        : []),
       ...(ADSENSE_CLIENT
         ? [
             {
@@ -309,6 +319,8 @@ function RootComponent() {
       </div>
       <Toaster position="top-center" richColors />
       <DeferredThirdParty gaId={GA_ID} />
+      <AdPolicy />
     </QueryClientProvider>
   );
 }
+
