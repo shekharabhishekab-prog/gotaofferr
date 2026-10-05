@@ -16,8 +16,10 @@ export function normaliseStatus(status?: string | null): string {
     case 'created':
       return status === 'active' ? 'active' : 'trialing';
     case 'pending':
-    case 'halted':
       return 'past_due';
+    case 'halted':
+      // Razorpay halts a subscription after its 3 failed retries: no more access.
+      return 'unpaid';
     case 'cancelled':
       return 'canceled';
     case 'completed':
