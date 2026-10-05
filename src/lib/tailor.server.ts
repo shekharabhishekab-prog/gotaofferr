@@ -42,9 +42,12 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   // The hiring market is the JOB's country, not the applicant's: an India-based
   // candidate applying to Sydney must be screened by Australian conventions.
   const sourceCountry = country ?? null;
-  const jobCountry = detectJobCountry(data.jobDescription, data.company) ?? sourceCountry;
-  const market = resumeMarket(jobCountry);
-  const letterRules = coverLetterRules(jobCountry);
+  const detectedJobCountry = detectJobCountry(data.jobDescription, data.company);
+  const jobCountry = detectedJobCountry ?? sourceCountry;
+  // Never fall back to the applicant's own country for the FORMAT: when the ad names no
+  // known country the model reads the job's country from the ad itself (see the generic market).
+  const market = resumeMarket(detectedJobCountry);
+  const letterRules = coverLetterRules(detectedJobCountry);
   const crossBorder = crossBorderRules(sourceCountry, jobCountry);
   const domestic = crossBorder.length ? [] : domesticRules(sourceCountry, jobCountry);
 
