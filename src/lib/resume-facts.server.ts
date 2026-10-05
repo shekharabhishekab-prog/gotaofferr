@@ -42,6 +42,11 @@ export function extractSourceFacts(resume: string): string[] {
     resume.match(/\b(?:[₹$€£]\s?\d[\d,.]*\s?[kmb]?|\d[\d,.]*\s?(?:%|x|k|m|mn|bn|million|billion|lakh|crore)\b)/gi) ?? [];
   for (const metric of metrics) facts.add(metric.trim());
 
+  // Plain counts with a noun ("12 influencer campaigns", "team of 5 engineers", "30+ clients").
+  const counts =
+    resume.match(/\b\d{1,4}\+?\s(?:[A-Za-z]+\s)?(?:campaigns|clients|projects|members|people|employees|products|stores|markets|countries|accounts|events|brands|launches|dashboards|hires|customers|users|engineers|reports|releases|workshops|webinars|articles)\b/gi) ?? [];
+  for (const c of counts) facts.add(c.trim());
+
   // Multi-word proper nouns: employers, partners, clients, tools, institutions.
   const properNouns =
     resume.match(/\b([A-Z][A-Za-z&.'-]+(?:\s+(?:of|and|for|the|de|&)?\s*[A-Z][A-Za-z&.'-]+){1,4})\b/g) ?? [];
