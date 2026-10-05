@@ -117,12 +117,12 @@ WRITING RULES (mandatory):
 ${draftToText(draft)}`;
 
   try {
-    const { output } = await generateText({
-      model: gateway("google/gemini-3.6-flash"),
+    const { output } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
+      model: createLovableAiGatewayProvider(key, modelId)(modelId),
       output: Output.object({ schema: polishedResumeSchema }),
       prompt,
       maxOutputTokens: 8000,
-    });
+    }));
     return stripPlaceholders(output);
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
@@ -155,3 +155,4 @@ function stripPlaceholders(result: PolishedResume): PolishedResume {
     })),
   };
 }
+
