@@ -362,7 +362,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function firecrawlSearch(query: string, limit: number, attempt = 0): Promise<RawResult[]> {
   const lovableApiKey = process.env.LOVABLE_API_KEY;
   const connectionKey = process.env.FIRECRAWL_API_KEY;
-  const direct = process.env.FIRECRAWL_DIRECT === "1";
+  const direct = process.env.FIRECRAWL_DIRECT !== "0";
   if (!connectionKey || (!direct && !lovableApiKey)) {
     throw new Error("Job search is not configured yet. Please try again later.");
   }
