@@ -75,7 +75,7 @@ PHASE 2 — WRITE THE TAILORED RESUME. Rules:
 - NEVER PAD. The bullet-count and length targets below apply only where the source resume has enough real material. If a role has 3 duties in the source, output 3 bullets, not 7. Do not add duties, tasks or responsibilities the source does not show just to reach a count; a short honest resume beats a long invented one.
 - Bullet counts per role: current/most recent role 7-10 bullets; each earlier role 5-7 bullets; the oldest or shortest role at least 4. Never fewer than 4 bullets for any role that has material in the source.
 - Keep EVERY concrete detail the source gives: named clients, partner organisations, brands, campaign names, event names, programme names, tool names, budgets, currencies, percentages, follower counts, team sizes, timeframes, platforms, handles, portfolio links. Losing a specific number or a named partner is a failure.
-- experience[].context: one short factual line describing the employer or the scope (for example "National NGO, artisan livelihoods" or "D2C footwear e-commerce brand") whenever the source supports it, otherwise null.
+- experience[].context: one short factual line describing the employer or the scope (for example "National NGO, artisan livelihoods" or "D2C footwear e-commerce brand") ONLY when the source resume itself states it (use its own words, never invent or generalise an employer description), otherwise null.
 - Preserve every factual and meaningful section from the original resume. Do not remove roles, projects, education, certifications, awards, languages, volunteer work, publications, training, or other qualifications just because they are less relevant to the target role.
 - Preserve every employer, job title, project, credential, institution, date, and contact detail from the source. You may reorder bullets within an entry, but every original entry must remain represented in the result.
 - skills: 12-18 role-relevant competencies as a flat ATS-friendly list.
@@ -205,6 +205,31 @@ ${data.resume}`;
       console.error("[truth-guard] failed", e);
     }
 
+    // Key Achievements must not repeat Experience bullets; employer context
+    // lines must come from the source resume (no invented descriptors).
+    try {
+      const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((w) => w.length > 2);
+      const sim = (a: string, b: string) => {
+        const A = new Set(norm(a)); const B = norm(b);
+        if (!A.size || !B.length) return 0;
+        return B.filter((w) => A.has(w)).length / Math.max(A.size, B.length);
+      };
+      const allBullets = (result.experience ?? []).flatMap((e: any) => e.bullets ?? []);
+      result.keyAchievements = (result.keyAchievements ?? []).filter(
+        (k: string) => !allBullets.some((b: string) => sim(k, b) >= 0.6),
+      );
+      const srcWords = new Set(norm(data.resume));
+      for (const e of result.experience ?? []) {
+        const c = (e as any).context as string | null;
+        if (!c) continue;
+        const w = norm(c);
+        const hit = w.filter((x) => srcWords.has(x)).length;
+        if (w.length && hit / w.length < 0.8) (e as any).context = null;
+      }
+    } catch (e) {
+      console.error("[dedupe] failed", e);
+    }
+
     // Guarantee our public ATS score is always above 95%, as promised, and
     // keep the headline match score honest: it must equal its own breakdown.
     const b = result.scoreBreakdown;
@@ -268,7 +293,7 @@ ${missingBlock}
 REPAIR TASK: return the SAME resume, expanded. Keep every existing fact and wording that already works, and:
 - Most recent role: 7-10 bullets. Every other role: 5-7 bullets, never fewer than 4.
 - Add the missing detail back from the source resume below: client names, partner organisations, event names, tools, budgets, percentages, follower counts, team sizes, links.
-- Fill experience[].context with a short factual line about each employer or its scope wherever the source supports it.
+- Fill experience[].context only with an employer/scope line the source resume itself states; otherwise null. Never invent a descriptor.
 - Fill skillGroups with categorised tool/skill groups covering every tool named in the source resume.
 - Do not invent anything that is not in the source resume. Do not shorten anything. Do not delete any role, project, degree, certification, language or link that is in the source.
 
