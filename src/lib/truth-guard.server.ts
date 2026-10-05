@@ -98,6 +98,9 @@ const CLAIM_WORDS: Array<[RegExp, RegExp]> = [
   [/visa|sponsor|work (permit|authori[sz]ation)|right to work/i, /visa|sponsor|work (permit|authori[sz]ation)|right to work|citizen|permanent resident/i],
   [/notice period|available (in|from|immediately|within)|immediate(ly)? available|start date/i, /notice|available|availability|immediate/i],
   [/nationality/i, /nationality|citizen/i],
+  [/\broas\b|return on (ad )?spend/i, /\broas\b|return on (ad )?spend/i],
+  [/\broi\b|return on investment/i, /\broi\b|return on investment/i],
+  [/conversion rates?/i, /conversion/i],
 ];
 
 function claimUnsupported(text: string, src: Src): boolean {
