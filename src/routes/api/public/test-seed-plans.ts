@@ -16,6 +16,18 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
           return new Response('Not found', { status: 404 });
         }
         const url = new URL(request.url);
+        if (url.searchParams.get('reset') === 'qa') {
+          // TEST-only (route 404s without TEST keys): ends the QA test account's subscription row.
+          const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+          const { data: list } = await (supabaseAdmin as any).auth.admin.listUsers({ page: 1, perPage: 200 });
+          const u = (list?.users ?? []).find((x: any) => x.email === 'mailboss@mail.instinct.com');
+          if (!u) return new Response('{"err":"no user"}');
+          const { error } = await (supabaseAdmin as any)
+            .from('subscriptions')
+            .update({ status: 'canceled', current_period_end: new Date(Date.now() - 60000).toISOString() })
+            .eq('user_id', u.id);
+          return new Response(JSON.stringify({ ok: !error, err: error?.message }));
+        }
         const subq = url.searchParams.get('sub');
         if (subq && /^sub_[A-Za-z0-9]+$/.test(subq)) {
           try {
