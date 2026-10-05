@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ChevronDown, Download, Loader2, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
 import { useSession } from "@/hooks/useSession";
 import { assistResumeField, polishResumeDraft } from "@/lib/resume-builder.functions";
+import { getBuilderUsage, spendBuilderResume } from "@/lib/builder-usage.functions";
+import { UsageUpsell } from "@/components/UsageUpsell";
 import type { AssistKind } from "@/lib/resume-assist-schema";
 import {
   emptyDraft,
@@ -33,6 +35,13 @@ export function ResumeBuilder() {
   const navigate = useNavigate();
   const polish = useServerFn(polishResumeDraft);
   const assist = useServerFn(assistResumeField);
+  const loadUsage = useServerFn(getBuilderUsage);
+  const spendResume = useServerFn(spendBuilderResume);
+  const [usage, setUsage] = useState<{ tier: "free" | "starter" | "job_hunt" | "career_pro"; limit: number; used: number } | null>(null);
+  useEffect(() => {
+    if (!session) return;
+    void loadUsage({}).then((u) => setUsage(u)).catch(() => undefined);
+  }, [session, loadUsage]);
 
   const [draft, setDraft] = useState<ResumeDraft>(() => emptyDraft("international"));
   const [polished, setPolished] = useState<PolishedResume | null>(null);
@@ -124,6 +133,12 @@ export function ResumeBuilder() {
     }
     setDownloading(true);
     try {
+      const spent = await spendResume({});
+      setUsage({ tier: spent.tier, limit: spent.limit, used: spent.used });
+      if (!spent.ok) {
+        toast.error("You have used all your builder resumes for this month.");
+        return;
+      }
       const { buildBuilderResumePdf } = await import("@/lib/resume-builder-pdf");
       const doc = await buildBuilderResumePdf(data, polished);
       doc.save(`${(data.fullName || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-resume.pdf`);
@@ -510,6 +525,11 @@ export function ResumeBuilder() {
                 Download PDF
               </Button>
             </div>
+            {usage ? (
+              <div className="mt-3">
+                <UsageUpsell tier={usage.tier} noun="resumes" limit={usage.limit} used={usage.used} />
+              </div>
+            ) : null}
             <p className="mt-3 text-xs text-muted-foreground">
               Building is free. You'll need a free account to download the PDF.
             </p>
@@ -721,3 +741,4 @@ function PreviewBlock({ title, children }: { title: string; children: React.Reac
     </div>
   );
 }
+
