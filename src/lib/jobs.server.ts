@@ -360,7 +360,7 @@ type RawResult = { url?: string; title?: string; description?: string };
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 async function firecrawlSearch(query: string, limit: number, attempt = 0): Promise<RawResult[]> {
-  const lovableApiKey = process.env.LOVABLE_API_KEY;
+  const lovableApiKey = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   const connectionKey = process.env.FIRECRAWL_API_KEY;
   const direct = process.env.FIRECRAWL_DIRECT !== "0";
   if (!connectionKey || (!direct && !lovableApiKey)) {
@@ -533,7 +533,7 @@ async function searchViaFirecrawl(input: JobSearchInput, queries: string[]): Pro
   ];
 
 
-  const key = process.env.LOVABLE_API_KEY;
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("Missing LOVABLE_API_KEY");
   const gateway = createLovableAiGatewayProvider(key);
 
