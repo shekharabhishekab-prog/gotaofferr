@@ -80,7 +80,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
     rules: [
       ...COMMON_NO_PHOTO,
       'Call the document a "Resume". Keep it to one page for under 10 years of experience, two pages at most.',
-      "Contact line: full name, city and state (no street address), phone in +1 (XXX) XXX-XXXX form, professional email, LinkedIn.",
+      "Contact items (each its own line): full name, city and state (no street address), phone in +1 (XXX) XXX-XXXX form, professional email, LinkedIn.",
       "Use US spelling (organize, analyze, program) and MM/YYYY date ranges.",
       "Use US units. Keep every money figure in the currency the source resume states; never restate it in another currency.",
       "Lead with impact and metrics. No objective statement, no references line, no personal details.",
@@ -91,7 +91,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
     label: "Canada",
     rules: [
       ...COMMON_NO_PHOTO,
-      "One to two pages. Contact line: name, city and province, phone, email, LinkedIn.",
+      "One to two pages. Contact items (each its own line): name, city and province, phone, email, LinkedIn.",
       "Canadian spelling (organize, but centre, labour). Quantify in CAD ($).",
       "Note Canadian work authorization only if the source resume states it.",
     ],
@@ -110,7 +110,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
   IN: {
     label: "India",
     rules: [
-      "One to two pages. Contact line: name, city, phone with +91, email, LinkedIn.",
+      "One to two pages. Contact items (each its own line): name, city, phone with +91, email, LinkedIn.",
       "Include education prominently with institution and year; keep percentage/CGPA only if the source resume has it.",
       "Keep notice period, current CTC or expected CTC only when the source resume states them. Never invent them. When the source states a notice period, state it explicitly in the header or Additional section.",
       "Indian English spelling is fine. Quantify in INR using lakh/crore where the source does (for example, ₹1.2 Cr revenue).",
@@ -377,7 +377,8 @@ export const ATS_PARSE_RULES: string[] = [
   "Keywords must appear in the same word form the job description uses (if the ad says \"stakeholder management\", write that phrase, not \"managing stakeholders\"). Use the exact tool names too (Google Analytics 4, HubSpot, Figma).",
   "Spell an acronym out once with the short form in brackets, then use the short form after that, so both index.",
   "Skills must be a plain comma-free list of individual competencies, each parseable on its own; no skill ratings, star bars or percentages.",
-  "Contact block at the very top as plain text lines: name, city and country, phone with dialling code, email, LinkedIn URL, portfolio URL. Never inside a header, never as an icon row.",
+  "If a country rule above names a more specific contact format (for example US city and state), the country rule wins over this general one. Contact block at the very top as plain text lines: name, city and country, phone with dialling code, email, LinkedIn URL, portfolio URL. Never inside a header, never as an icon row.",
   "No hyperlinks whose visible text hides the URL, no footnotes, no abbreviations of month names beyond three letters.",
   "Do not repeat the same sentence in two sections; repeated blocks are scored as keyword stuffing and can down-rank the application.",
 ];
+
