@@ -132,6 +132,12 @@ PHASE 3.5 — SURVIVE GREENHOUSE / WORKDAY / LEVER RESUME PARSING. These ATS pro
 PHASE 3.6 — UNIVERSAL ATS PARSE RULES (apply to every resume, domestic or cross-border):
 ${ATS_PARSE_RULES.map((rule) => `- ${rule}`).join("\n")}
 
+PHASE 3.7 — GET SELECTED BY THE ATS (recruiters filter and rank by keyword match before any human reads the resume):
+- Every must-have skill, tool, qualification and responsibility phrase in the job description that the candidate TRULY has must appear verbatim at least once in skills and at least once inside an experience bullet or the summary, in the job description's exact wording. Truthful matches only: never add a keyword the source resume does not support (the HARD RULE above still wins).
+- Put the strongest 5-8 matched keywords in the first two lines of the summary, because many parsers and recruiters weight the top of the page most.
+- The resume must read cleanly as plain text in this order: contact lines, summary, skills, experience (newest first), education, certifications. Nothing may depend on position, colour, font size or an image to make sense.
+- Each experience bullet is a full sentence on its own line: action verb, what was done, tool or method named in the job description's words, then the measurable result where the source has one.
+
 PHASE 4 — WRITE FOR THE HIRING MARKET OF THE JOB: ${market.label}. These conventions are mandatory and override any generic habit:
 ${market.rules.map((rule) => `- ${rule}`).join("\n")}
 ${crossBorder.length ? `\nPHASE 4.5 — CROSS-BORDER APPLICATION RULES (mandatory, they override Phase 4 where they conflict):\n${crossBorder.map((rule) => `- ${rule}`).join("\n")}\n` : ""}${domestic.length ? `\nPHASE 4.5 — DOMESTIC APPLICATION RULES (same country on both sides; mandatory, they override Phase 4 where they conflict):\n${domestic.map((rule) => `- ${rule}`).join("\n")}\n` : ""}
