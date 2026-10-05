@@ -177,7 +177,7 @@ ${data.resume}`;
     let missing = findMissingFacts(data.resume, result);
     // The repair pass doubles the wait, so only pay for it when the draft is
     // genuinely thin or dropped several real facts, not for cosmetic gaps.
-    if (needsDepthRepair(result) || missing.length >= 3) {
+    if (needsDepthRepair(result) || missing.length >= 3 || missing.some((f) => /\d/.test(f))) {
       const repaired = await repairDepth(gateway, result, data, prompt, missing);
       // Only accept the repair if it did not lose ground on preservation.
       if (findMissingFacts(data.resume, repaired).length <= missing.length) {
