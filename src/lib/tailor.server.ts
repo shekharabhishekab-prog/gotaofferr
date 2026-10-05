@@ -48,8 +48,8 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   // known country the model reads the job's country from the ad itself (see the generic market).
   const market = resumeMarket(detectedJobCountry);
   const letterRules = coverLetterRules(detectedJobCountry);
-  const crossBorder = crossBorderRules(sourceCountry, jobCountry);
-  const domestic = crossBorder.length ? [] : domesticRules(sourceCountry, jobCountry);
+  const crossBorder = crossBorderRules(sourceCountry, detectedJobCountry);
+  const domestic = crossBorder.length ? [] : domesticRules(sourceCountry, detectedJobCountry);
 
 
   const prompt = `You are an expert technical recruiter and resume writer.
