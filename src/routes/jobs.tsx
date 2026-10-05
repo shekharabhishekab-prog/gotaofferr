@@ -747,7 +747,7 @@ function Jobs() {
             <li>One click tailors your resume and cover letter to the job you picked.</li>
           </ul>
           <p>
-            Career Pro also includes job alerts that email you new matches every few days. New to
+            Every plan includes job alerts: each alert emails you new matches 3 times, every 3 days. New to
             GotaOfferr? Read{" "}
             <a className="underline" href="/how-it-works">
               how it works
