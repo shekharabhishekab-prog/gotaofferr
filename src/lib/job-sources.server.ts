@@ -112,9 +112,11 @@ export async function adzunaSearch(opts: {
 }): Promise<JobListing[]> {
   const id = process.env.ADZUNA_APP_ID;
   const key = process.env.ADZUNA_APP_KEY;
+  if (!id || !key) console.error("[adzuna] missing env", { hasId: !!id, hasKey: !!key });
   if (!id || !key) throw new SourceUnavailableError("Job sources are refreshing. Please try again in a few minutes.");
   const { countCall } = await import("./model-router.server");
   if (!(await countCall("adzuna-search"))) {
+    console.error("[adzuna] daily cap reached or counter unavailable");
     throw new SourceUnavailableError("Job sources are refreshing. Please try again in a few minutes.");
   }
   const p = new URLSearchParams({
