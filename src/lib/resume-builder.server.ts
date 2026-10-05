@@ -97,10 +97,18 @@ export async function polishDraft(draft: ResumeDraft): Promise<PolishedResume> {
   if (!key) throw new Error("AI is not configured right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
-  const prompt = `You are a senior resume writer. Turn the candidate's rough notes into a clean, ATS-safe resume in the ${draft.template === "india" ? "Indian national" : "international"} format.
+  // No job description here, so the format follows where the user is (IP country).
+  // If the country is unknown, fall back to the template the user picked.
+  const { detectCountry, resumeMarket } = await import("./resume-locale.server");
+  const country = detectCountry();
+  const market = country ? resumeMarket(country) : null;
+  const formatLabel = market ? market.label : draft.template === "india" ? "Indian national" : "international";
+  const formatRules = market ? market.rules : TEMPLATE_RULES[draft.template];
+
+  const prompt = `You are a senior resume writer. Turn the candidate's rough notes into a clean, ATS-safe resume in the ${formatLabel} format.
 
 FORMAT RULES (mandatory):
-${TEMPLATE_RULES[draft.template].map((rule) => `- ${rule}`).join("\n")}
+${formatRules.map((rule) => `- ${rule}`).join("\n")}
 
 WRITING RULES (mandatory):
 - Never invent an employer, job title, date, degree, tool, client or number that is not in the notes. If a metric is missing, write the outcome without a number rather than making one up.
