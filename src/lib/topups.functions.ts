@@ -75,7 +75,7 @@ export const createTopupOrder = createServerFn({ method: "POST" })
 
       return {
         orderId: order.id,
-        keyId: process.env["RAZORPAY_KEY_ID"]!,
+        keyId: (await import("@/lib/razorpay.server")).razorpayKeys().id!,
         amount: minor,
         currency: pricing.code,
         name: pack.name,
@@ -106,7 +106,7 @@ export const verifyTopupPayment = createServerFn({ method: "POST" })
       await enforcePolicy("payments-verify", context.userId);
 
       const { createHmac, timingSafeEqual } = await import("node:crypto");
-      const secret = process.env["RAZORPAY_KEY_SECRET"];
+      const secret = (await import("@/lib/razorpay.server")).razorpayKeys().secret;
       if (!secret) return { ok: false, error: "Payments are not configured." };
 
       const expected = createHmac("sha256", secret)
@@ -185,3 +185,4 @@ export const getTopupBalances = createServerFn({ method: "GET" })
     }
     return balances;
   });
+
