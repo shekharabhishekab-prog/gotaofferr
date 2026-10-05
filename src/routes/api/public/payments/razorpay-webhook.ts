@@ -34,6 +34,18 @@ export const Route = createFileRoute('/api/public/payments/razorpay-webhook')({
             case 'subscription.completed':
             case 'subscription.paused':
             case 'subscription.resumed':
+              if (subscription?.id && event === 'subscription.halted') {
+                try {
+                  const full = await rzp<any>(`/subscriptions/${subscription.id}`);
+                  const uid = full?.notes?.userId;
+                  if (uid) {
+                    const { recordStrike } = await import('@/lib/purchase-guard.server');
+                    await recordStrike(uid, `halted:${subscription.id}`, full?.notes?.iph);
+                  }
+                } catch (e) {
+                  console.error('strike(halted) failed', e);
+                }
+              }
               if (subscription?.id) {
                 // Re-read so period dates and status stay authoritative.
                 try {
@@ -46,6 +58,17 @@ export const Route = createFileRoute('/api/public/payments/razorpay-webhook')({
             case 'payment.failed':
               if (payload?.payment?.entity?.subscription_id) {
                 await setSubscriptionStatus(payload.payment.entity.subscription_id, 'past_due', ENV);
+                try {
+                  // A failed payment on a brand-new checkout counts as a strike (renewals are counted when halted).
+                  const full = await rzp<any>(`/subscriptions/${payload.payment.entity.subscription_id}`);
+                  const uid = full?.notes?.userId;
+                  if (uid && (!full?.paid_count || full.paid_count === 0)) {
+                    const { recordStrike } = await import('@/lib/purchase-guard.server');
+                    await recordStrike(uid, `pay:${payload.payment.entity.id}`, full?.notes?.iph);
+                  }
+                } catch (e) {
+                  console.error('strike(payment) failed', e);
+                }
               }
               break;
             default:
@@ -61,3 +84,4 @@ export const Route = createFileRoute('/api/public/payments/razorpay-webhook')({
     },
   },
 });
+
