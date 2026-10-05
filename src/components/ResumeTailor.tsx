@@ -415,15 +415,15 @@ export function ResumeTailor() {
               <p className="mt-4 text-center text-xs text-muted-foreground">
                 You have tailored {usage.used} of {usage.limit} this month.{" "}
                 <Link to="/pricing" className="underline">
-                  Upgrade for 200 rewrites and a saved master resume.
+                  Upgrade for 129 rewrites and a saved master resume.
                 </Link>
               </p>
             ) : (
               <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
                 {isSubscribed
                   ? tier === "career_pro"
-                    ? "400 rewrites included per month"
-                    : "200 rewrites included per month"
+                    ? "169 rewrites included per month"
+                    : "129 rewrites included per month"
                   : "Takes ~15 seconds"}
               </p>
             )}
@@ -781,7 +781,7 @@ export function ResumeTailor() {
             <p className="mt-6 text-center text-xs text-muted-foreground">
               You have tailored {usage.used} of {usage.limit} this month.{" "}
               <Link to="/pricing" className="underline">
-                Upgrade for 200 rewrites and a saved master resume.
+                Upgrade for 129 rewrites and a saved master resume.
               </Link>
             </p>
           ) : null}
