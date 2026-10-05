@@ -321,9 +321,9 @@ export function monthlyWasAmount(pricing: CurrencyPricing, plan: PlanId): number
  */
 const FESTIVAL_AMOUNTS: Record<string, Partial<Record<PlanId, Record<BillingInterval, number>>>> = {
   INR: {
-    starter: { month: 29, year: 29 },
+    starter: { month: 49, year: 49 },
     job_hunt: { month: 199, year: 199 },
-    career_pro: { month: 699, year: 699 },
+    career_pro: { month: 399, year: 399 },
   },
 };
 
