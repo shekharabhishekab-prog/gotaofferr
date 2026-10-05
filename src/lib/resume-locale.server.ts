@@ -171,9 +171,10 @@ export function resumeMarket(country: string | null): ResumeMarket {
   if (match) return { country: code, label: match.label, rules: [...match.rules, ...CURRENCY_TRUTH] };
   return {
     country: code,
-    label: code ? `the candidate's market (${code})` : "an international market",
+    label: code ? `the candidate's market (${code})` : "the country of the job (read it from the job description)",
     rules: [
       ...COMMON_NO_PHOTO,
+      "The resume format follows the country of the JOB, never the country where the applicant lives. Work out the job's country from the job description (city, state, currency, company address, legal terms) and use that country's resume conventions: contact details, date format, spelling, page length, which personal details are normal. Only if the ad gives no clue at all, follow the source resume's own conventions.",
       "Use a clean, internationally readable one to two page format with Mon YYYY date ranges.",
       "Keep currency, spelling and qualification names exactly as the source resume and the job description use them.",
       ...CURRENCY_TRUTH,
