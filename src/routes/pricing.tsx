@@ -166,7 +166,7 @@ const plans: Record<PlanKey, {
     tagline: "The complete career package: we write the applications, find the jobs, and deliver fresh leads every 3 days.",
     bestFor: "Best for: a full-time search, or running two career tracks at once.",
     features: [
-      "169 resume + cover letter tailorings per month",
+      "199 resume + cover letter tailorings per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
       "70 resumes in the resume builder",
       "35 AI job finder searches per month - one clean list across every board",
