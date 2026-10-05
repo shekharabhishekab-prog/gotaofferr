@@ -12,10 +12,11 @@ export type AlertRow = {
   local_hour: number;
   timezone: string;
   last_sent_at: string | null;
+  emails_sent?: number;
 };
 
 export const ALERT_COLUMNS =
-  "id, user_id, role, location, remote_only, experience, salary_range, extra_filters, local_hour, timezone, last_sent_at";
+  "id, user_id, role, location, remote_only, experience, salary_range, extra_filters, local_hour, timezone, last_sent_at, emails_sent";
 
 /**
  * Every alert email ships at least this many openings. Kept low on purpose —
@@ -23,7 +24,10 @@ export const ALERT_COLUMNS =
  * user never received anything at all.
  */
 const MIN_JOBS_PER_ALERT = 1;
-const MAX_JOBS_PER_ALERT = 10;
+const MAX_JOBS_PER_ALERT = 8;
+
+/** Each alert sends exactly this many emails, 3 days apart, then ends for good. */
+export const ALERT_TOTAL_EMAILS = 3;
 
 export function dateAndHourInTimezone(timezone: string, date: Date) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -46,6 +50,7 @@ export function dateAndHourInTimezone(timezone: string, date: Date) {
 export const ALERT_INTERVAL_DAYS = 3;
 
 export function isAlertDue(alert: AlertRow, now: Date) {
+  if ((alert.emails_sent ?? 0) >= ALERT_TOTAL_EMAILS) return false;
   try {
     const localNow = dateAndHourInTimezone(alert.timezone, now);
     if (!Number.isFinite(localNow.hour) || localNow.hour < alert.local_hour) return false;
@@ -73,17 +78,17 @@ export async function sendDigestForAlert(
   const minJobs = options.minJobs ?? MIN_JOBS_PER_ALERT;
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { searchJobListings } = await import("@/lib/jobs.server");
+  const { searchAlertListings } = await import("@/lib/jobs.server");
   const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
 
-  const jobs = await searchJobListings({
+  const jobs = await searchAlertListings({
     role: alert.role,
     location: alert.location ?? undefined,
     remoteOnly: alert.remote_only,
     experience: alert.experience ?? undefined,
     salaryRange: alert.salary_range ?? undefined,
     extraFilters: alert.extra_filters ?? undefined,
-  });
+  }, null);
   if (jobs.length === 0) return { sent: false, reason: "no_jobs" };
 
   const { data: seen } = await supabaseAdmin
@@ -105,8 +110,11 @@ export async function sendDigestForAlert(
   if (!email) throw new Error("Alert owner has no email address");
 
   const localDate = dateAndHourInTimezone(alert.timezone, now).date;
+  const { alertUnsubscribeUrl } = await import("@/lib/alert-unsub.server");
+  const unsubscribeUrl = await alertUnsubscribeUrl(alert.id);
   const result = await sendTemplateEmail("job-alert", email, {
-    idempotencyKey: `job-alert-${alert.id}-${localDate}`,
+    unsubscribeUrl,
+    idempotencyKey: `job-alert-${alert.id}-${(alert.emails_sent ?? 0) + 1}`,
     templateData: {
       role: alert.role,
       location: alert.location,
@@ -114,6 +122,8 @@ export async function sendDigestForAlert(
       salaryRange: alert.salary_range,
       jobs: digest,
       jobsUrl: "https://gotaofferr.com/jobs?alert=1",
+      emailNumber: (alert.emails_sent ?? 0) + 1,
+      unsubscribeUrl,
     },
   });
   if (!result.sent) return { sent: false, reason: result.reason };
@@ -130,6 +140,9 @@ export async function sendDigestForAlert(
       last_sent_at: now.toISOString(),
       last_jobs: digest,
       last_job_count: digest.length,
+      emails_sent: (alert.emails_sent ?? 0) + 1,
+      // After the third email the alert is finished for good.
+      ...((alert.emails_sent ?? 0) + 1 >= ALERT_TOTAL_EMAILS ? { enabled: false, completed_at: now.toISOString() } : {}),
     })
     .eq("id", alert.id);
   if (updateError) throw updateError;
@@ -162,3 +175,4 @@ export async function runDueDigests() {
 
   return { checkedAt: now.toISOString(), alerts: rows.length, processed: emailed, emailed };
 }
+
