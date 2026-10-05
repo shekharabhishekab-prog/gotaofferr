@@ -148,8 +148,15 @@ export async function buildResumePdf(r: TailoredResume) {
   const groups = (r.skillGroups ?? []).filter((g) => g.label && g.items?.length);
   if (r.skills?.length || groups.length) {
     d.heading("Skills");
-    if (r.skills?.length) d.text(r.skills.join("  •  "), { size: 9.8 });
-    groups.forEach((g) => d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 }));
+    if (!groups.length) {
+      d.text((r.skills ?? []).join("  •  "), { size: 9.8 });
+    } else {
+      // One merged block: the groups carry the skills; flat skills they miss are added once.
+      const inGroups = new Set(groups.flatMap((g) => g.items.map((i) => i.trim().toLowerCase())));
+      const extra = (r.skills ?? []).filter((x) => !inGroups.has(x.trim().toLowerCase()));
+      groups.forEach((g) => d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 }));
+      if (extra.length) d.text(`Other: ${extra.join(", ")}`, { size: 9.5 });
+    }
   }
 
   if (r.keyAchievements?.length) {
@@ -162,7 +169,10 @@ export async function buildResumePdf(r: TailoredResume) {
     r.experience.forEach((e, i) => {
       if (i > 0) d.space(6);
       d.rowed(`${e.role}${e.company ? " — " + e.company : ""}`, e.dates || "");
-      const sub = [e.context, e.location].filter(Boolean).join("  |  ");
+      const ctx = (e.context ?? "").trim();
+      const loc = (e.location ?? "").trim();
+      const locKnown = !!loc && ctx.toLowerCase().includes(loc.toLowerCase().split(",")[0].trim());
+      const sub = [ctx, locKnown ? "" : loc].filter(Boolean).join("  |  ");
       if (sub) d.text(sub, { size: 9, style: "italic", color: [120, 126, 138] });
       d.bullets(e.bullets || []);
     });
