@@ -55,10 +55,11 @@ export async function recordStrike(userId: string, key: string, ipHash?: string)
       st.permanent = true;
       if (ipHash) {
         const sb = await admin();
-        await sb.from('rate_limits').upsert(
+        const { error: banErr } = await sb.from('rate_limits').upsert(
           { bucket: 'ipban', identifier: ipHash, window_start: BAN_WINDOW, count: 1 },
           { onConflict: 'bucket,identifier,window_start' },
         );
+        if (banErr) console.error('[purchase-guard] address block write failed', banErr.message);
       }
     } else {
       st.until = new Date(Date.now() + (st.cycles === 1 ? SUSPEND_FIRST_MS : SUSPEND_NEXT_MS)).toISOString();
