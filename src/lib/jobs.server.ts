@@ -259,6 +259,71 @@ function titleMatchesRole(title: string, role: string): boolean {
 }
 
 
+/** Generic job-level words. They never prove two roles are related. */
+const GENERIC_ROLE_WORDS = new Set(["manager", "executive", "lead", "senior", "sr", "junior", "jr", "head", "director", "associate", "assistant", "coordinator", "specialist", "officer", "analyst", "intern", "trainee", "consultant", "supervisor", "principal", "vp", "chief", "team", "work", "from", "home", "remote"]);
+
+function significantTokens(role: string): string[] {
+  return roleTokens(role).filter((t) => !GENERIC_ROLE_WORDS.has(t));
+}
+
+/** Share of the role's meaningful words found in the title. Generic words like "manager" do not count. */
+function significantOverlap(title: string, role: string): number {
+  const sig = significantTokens(role);
+  if (sig.length === 0) return roleOverlap(title, role);
+  const t = title.toLowerCase();
+  return sig.filter((token) => t.includes(token)).length / sig.length;
+}
+
+/** True when every word of an adjacent title appears in the listing title. */
+function matchesAdjacentTitle(title: string, adjacent: string[]): boolean {
+  const t = title.toLowerCase();
+  return adjacent.some((a) => {
+    const tokens = roleTokens(a);
+    return tokens.length > 0 && tokens.every((token) => t.includes(token));
+  });
+}
+
+/** Cached per role+place so repeat searches cost no extra AI call. */
+const expansionCache = new Map<string, { adjacent: string[]; places: string[] }>();
+
+/**
+ * Asks the free-tier model for adjacent job titles and nearby places.
+ * Fails open: on any error the search simply continues without them.
+ */
+async function expandSearch(
+  gateway: ReturnType<typeof createLovableAiGatewayProvider>,
+  role: string,
+  location: string,
+): Promise<{ adjacent: string[]; places: string[] }> {
+  const key = `${role.toLowerCase()}|${location.toLowerCase()}`;
+  const cached = expansionCache.get(key);
+  if (cached) return cached;
+  const empty = { adjacent: [] as string[], places: [] as string[] };
+  try {
+    const prompt = `Someone is searching for the job title "${role}"${location ? ` in "${location}"` : ""}.
+Reply with JSON only, no other text: {"adjacent": [...], "places": [...]}
+- "adjacent": up to 8 job titles that are close alternatives in the SAME professional field (similar duties, same or one rung lower or higher). Never include a different field. Example: for "Social Media Manager" give Social Media Coordinator, Brand Manager, Content Creator, Influencer Marketing Manager, Communications Manager. Never software or engineering roles for a marketing search.
+- "places": up to 4 real cities or areas within about 150 km of "${location}" where such jobs are common. Use [] when no place was given or it is worldwide.`;
+    const result = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
+      model: gateway(modelId),
+      prompt,
+    }));
+    const raw = (result as { text?: string }).text ?? "";
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (!m) return empty;
+    const parsed = JSON.parse(m[0]) as { adjacent?: unknown; places?: unknown };
+    const clean = (v: unknown, n: number) =>
+      Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.trim().length > 1).map((x) => x.trim().slice(0, 60)).slice(0, n) : [];
+    const out = { adjacent: clean(parsed.adjacent, 8), places: clean(parsed.places, 4) };
+    expansionCache.set(key, out);
+    return out;
+  } catch (error) {
+    console.error("[searchJobs] expandSearch failed (continuing without it)", error);
+    return empty;
+  }
+}
+
+
 const STALE_PATTERNS =
   /(no longer accepting|no longer available|no longer active|no longer open|no longer being accepted|this job (is|has) (closed|expired)|position (has been )?(filled|closed)|applications? (are |have )?closed|application (window|deadline) (has )?(closed|passed)|closed for applications|job expired|expired job|this (job|listing|posting) (has )?expired|posting (is |has been )?(closed|expired|inactive|removed)|not accepting applications|accepting applications is closed|vacancy (is )?closed|role (has been )?(filled|closed)|we are no longer hiring|we've filled this|hiring (for this role )?(is )?(closed|paused)|job (post(ing)?|ad) (is )?(no longer|removed)|this position is no longer|requisition (is )?(closed|cancelled)|sorry, this job|job not found|this opening is closed)/i;
 
@@ -459,8 +524,11 @@ export async function searchJobListings(input: JobSearchInput): Promise<JobListi
 
   const seen = new Set<string>();
   const all: { url: string; title: string; description: string; source: string }[] = [];
-  for (const result of ok) {
-    for (const r of result.value) {
+  // Lower-rung postings (e.g. coordinator for a manager search) are held back
+  // and used only as last-resort fill when too few results remain.
+  const lowRung: typeof all = [];
+  const ingest = (list: RawResult[]) => {
+    for (const r of list) {
       if (typeof r.url !== "string" || r.url.length === 0) continue;
       const key = normalizeUrl(r.url);
       if (seen.has(key)) continue;
@@ -469,13 +537,15 @@ export async function searchJobListings(input: JobSearchInput): Promise<JobListi
       const description = (r.description ?? "").slice(0, 180);
       // Drop postings that already say they're closed/expired.
       if (STALE_PATTERNS.test(`${title} ${description}`)) continue;
-      // Drop junior/intern rungs when the user searched for a senior title.
-      if (isBelowRequestedSeniority(title, input.role)) continue;
-      all.push({ url: r.url, title, description, source: sourceFromUrl(r.url) });
+      const item = { url: r.url, title, description, source: sourceFromUrl(r.url) };
+      if (isBelowRequestedSeniority(title, input.role)) {
+        lowRung.push(item);
+        continue;
+      }
+      all.push(item);
     }
-  }
-
-  if (all.length === 0) return [];
+  };
+  for (const result of ok) ingest(result.value);
 
   // Keep only results that actually mention the searched place. A city search
   // must not fall back to postings from somewhere else.
@@ -484,27 +554,62 @@ export async function searchJobListings(input: JobSearchInput): Promise<JobListi
     : [];
   const candidateText = (c: { title: string; description: string; url: string }) =>
     `${c.title} ${c.description} ${c.url}`;
+  let adjacentTitles: string[] = [];
+  const key = process.env.LOVABLE_API_KEY;
+  if (!key) throw new Error("Missing LOVABLE_API_KEY");
+  const gateway = createLovableAiGatewayProvider(key);
+  const isRelated = (title: string) =>
+    matchesAdjacentTitle(title, adjacentTitles) || significantOverlap(title, input.role) >= 0.5;
+  const isRelevant = (c: { title: string }) => titleMatchesRole(c.title, input.role) || isRelated(c.title);
+  const relevantCount = () =>
+    all.filter(
+      (c) =>
+        isRelevant(c) &&
+        (placeTokens.length === 0 ||
+          mentionsLocation(candidateText(c), placeTokens) ||
+          (nearTokens.length > 0 && mentionsLocation(candidateText(c), nearTokens))),
+    ).length;
+
+  // Too few real matches: widen on our own (adjacent titles, nearby places)
+  // until there are 10 or so. Extra search calls only happen in this case.
+  if (relevantCount() < 10) {
+    const expansion = await expandSearch(gateway, input.role, placeTokens.length ? input.location ?? "" : "");
+    adjacentTitles = expansion.adjacent;
+    nearTokens = [...new Set([...nearTokens, ...expansion.places.map((p) => normalizeText(p))])];
+    const where = placeTokens.length ? ` "${input.location}"` : "";
+    const remote = input.remoteOnly ? " remote" : "";
+    const extra = [
+      ...expansion.adjacent.slice(0, 4).map((t) => `"${t}" job opening apply${remote}${where}`),
+      ...expansion.places.slice(0, 2).map((p) => `"${input.role}" job opening apply "${p}"`),
+    ];
+    if (extra.length > 0) {
+      const more = await runPooled(extra.map((q) => () => firecrawlSearch(q, 20)), extra.length);
+      for (const r of more) if (r.status === "fulfilled") ingest(r.value);
+    }
+  }
+  if (all.length === 0 && lowRung.length === 0) return [];
+
   const inPlace = placeTokens.length
     ? all.filter((c) => mentionsLocation(candidateText(c), placeTokens))
     : all;
   // Close neighbours (never far regions) may follow, ranked strictly after the exact place.
-  const nearTokens = placeTokens.length ? nearbyTokens(input.location ?? "") : [];
   const inPlaceUrls = new Set(inPlace.map((c) => c.url));
   const nearby = nearTokens.length
     ? all.filter((c) => !inPlaceUrls.has(c.url) && mentionsLocation(candidateText(c), nearTokens))
     : [];
   const nearbyUrls = new Set(nearby.map((c) => c.url));
-  const pool = inPlace.length > 0 ? inPlace : [];
-  if (pool.length === 0 && nearby.length === 0) return [];
+  const pool = inPlace;
+  if (pool.length === 0 && nearby.length === 0 && lowRung.length === 0) return [];
+  let nearTokens = placeTokens.length ? nearbyTokens(input.location ?? "") : [];
 
   // Exact-role matches first, then the closest adjacent roles by word overlap.
   const exact = pool.filter((c) => titleMatchesRole(c.title, input.role));
   const exactUrls = new Set(exact.map((c) => c.url));
   const related = pool
     .filter((c) => !exactUrls.has(c.url))
-    // Keep only genuinely adjacent roles — at least half the role's words must match.
-    .filter((c) => roleOverlap(c.title, input.role) >= 0.34)
-    .sort((a, b) => roleOverlap(b.title, input.role) - roleOverlap(a.title, input.role));
+    // Keep only genuinely adjacent roles: an adjacent title, or half the role's meaningful words.
+    .filter((c) => isRelated(c.title))
+    .sort((a, b) => significantOverlap(b.title, input.role) - significantOverlap(a.title, input.role));
 
 
   // Interleave by source with a per-domain cap so one board (usually LinkedIn)
@@ -526,17 +631,13 @@ export async function searchJobListings(input: JobSearchInput): Promise<JobListi
 
   const exactShortlist = [...diversify(exact, 14), ...diversify(related, 8)].slice(0, 90);
   const nearbyShortlist = nearby
-    .filter((c) => titleMatchesRole(c.title, input.role) || roleOverlap(c.title, input.role) >= 0.5)
+    .filter((c) => isRelevant(c))
     .slice(0, 20);
   const shortlist = [
     ...exactShortlist.map((c) => ({ ...c, area: "exact-place" })),
     ...nearbyShortlist.map((c) => ({ ...c, area: "nearby" })),
   ];
 
-
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const gateway = createLovableAiGatewayProvider(key);
 
   const prompt = `You are a job-search assistant. Below are raw web search results for someone looking for a "${input.role}" role.
 
@@ -548,7 +649,9 @@ User filters:
 - Extra requirements: ${input.extraFilters || "none"}
 
 Turn these results into a clean list of job listings.
+Roles close to "${input.role}" (treat as related): ${adjacentTitles.length ? adjacentTitles.join(", ") : "none listed"}.
 Rules:
+- Order and strictness: exact "${input.role}" roles first, then the close roles above, and NEVER a completely unrelated role (for example software engineer or SEO for a social media search).
 - Set match = "exact" when the job title IS the "${input.role}" role (or an obvious synonym).
 - Set match = "related" ONLY for roles in the same job family AND at the same seniority level as "${input.role}". Never downgrade seniority: for a Manager search do not return Executive, Associate, Coordinator, Assistant, Intern, or Trainee roles; for a Head/Director search do not return Manager roles. Drop anything from a different field.
 - Salary filter (${input.salaryRange || "not set"}): drop a listing only when its stated pay is clearly below that range. If pay is not stated, KEEP the listing and write "Not specified".
@@ -617,20 +720,29 @@ ${JSON.stringify(shortlist)}`;
   // Safety net: when the model over-filters, top the list up straight from the
   // search results so a broad role never comes back with only 2-3 openings.
 
+  const topUp = [
+    ...shortlist,
+    // Last resort: lower-rung postings (coordinator etc.) only to reach 7.
+    ...lowRung
+      .filter((c) => isRelevant(c))
+      .filter((c) => !placeTokens.length || mentionsLocation(candidateText(c), placeTokens) || (nearTokens.length > 0 && mentionsLocation(candidateText(c), nearTokens)))
+      .map((c) => ({ ...c, area: "low-rung" })),
+  ];
   if (jobs.length < 15) {
-    for (const c of shortlist) {
+    for (const c of topUp) {
       if (jobs.length >= 15) break;
+      if (c.area === "low-rung" && jobs.length >= 7) continue;
       const urlKey = normalizeUrl(c.url);
       if (outUrls.has(urlKey)) continue;
       const isExact = titleMatchesRole(c.title, input.role);
-      if (!isExact && roleOverlap(c.title, input.role) < 0.5) continue;
+      if (!isExact && !isRelated(c.title)) continue;
       const cleanTitle = c.title.split(/\s+[-|–—]\s+/)[0]?.trim() || c.title;
       const company = c.title.split(/\s+[-|–—]\s+/)[1]?.trim() || c.source;
       outUrls.add(urlKey);
       jobs.push({
         title: cleanTitle.slice(0, 120),
         company: company.slice(0, 80),
-        location: input.location || "Not specified",
+        location: nearbyUrls.has(c.url) && input.location ? `Near ${input.location}` : input.location || "Not specified",
         workMode: input.remoteOnly ? "Remote" : "Not specified",
         experience: input.experience || "Not specified",
         salary: "Not specified",
@@ -646,11 +758,11 @@ ${JSON.stringify(shortlist)}`;
   const live = await dropClosedListings(jobs);
 
   // Searched place first, nearby areas strictly after; within each, exact role matches first.
-  const tier = (j: JobListing) =>
-    placeTokens.length && !mentionsLocation(j.location ?? "", placeTokens) && nearbyUrls.has(j.url) ? 1 : 0;
+  const tier = (j: JobListing) => (placeTokens.length && nearbyUrls.has(j.url) ? 1 : 0);
   return live.sort((a, b) => {
     if (tier(a) !== tier(b)) return tier(a) - tier(b);
     return a.match === b.match ? 0 : a.match === "exact" ? -1 : 1;
   });
 }
+
 
