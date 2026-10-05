@@ -306,7 +306,7 @@ export function getPaymentsErrorMessage(error: unknown): string {
     'That festival offer has ended',
   ];
   if (known.some((k) => raw.startsWith(k))) return raw;
-  return "We couldn't complete that just now. Please try again in a moment, or contact support if it keeps happening.";
+  return "Your payment hit a speed bump 🚧 Nothing is lost. Please try again in a moment, or contact support if it keeps happening.";
 }
 
 /** Verifies the `x-razorpay-signature` HMAC over the raw request body. */
