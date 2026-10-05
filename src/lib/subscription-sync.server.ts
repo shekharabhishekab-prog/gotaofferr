@@ -6,7 +6,7 @@
  *
  * The `stripe_*` column names are historical; they hold Razorpay IDs now.
  */
-import { type StripeEnv, lookupKeyForPlanId } from '@/lib/razorpay.server';
+import { type StripeEnv, lookupKeyForPlanId, rzp } from '@/lib/razorpay.server';
 
 /** Razorpay status → the vocabulary the entitlement rules in plans.ts use. */
 export function normaliseStatus(status?: string | null): string {
@@ -74,6 +74,47 @@ export async function upsertRazorpaySubscriptionRow(
   );
 
   if (error) return { ok: false, reason: error.message };
+
+  // Upgrade = a brand new full-price subscription. Once its first payment has
+  // gone through (status active), the plan it replaces is cancelled right away
+  // so the customer is never billed for two plans. Safe to run many times.
+  const replaces = subscription?.notes?.replaces;
+  if (
+    subscription?.status === 'active' &&
+    typeof replaces === 'string' &&
+    /^sub_[A-Za-z0-9]+$/.test(replaces) &&
+    replaces !== subscription.id
+  ) {
+    try {
+      const { data: old } = await supabaseAdmin
+        .from('subscriptions')
+        .select('status')
+        .eq('stripe_subscription_id', replaces)
+        .eq('user_id', userId)
+        .eq('environment', env)
+        .maybeSingle();
+      if (old && old.status !== 'canceled') {
+        try {
+          await rzp(`/subscriptions/${replaces}/cancel`, { method: 'POST', body: { cancel_at_cycle_end: 0 } });
+        } catch (e) {
+          console.error('[upgrade] could not cancel replaced subscription', replaces, e);
+        }
+        await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            status: 'canceled',
+            cancel_at_period_end: false,
+            current_period_end: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          } as any)
+          .eq('stripe_subscription_id', replaces)
+          .eq('user_id', userId)
+          .eq('environment', env);
+      }
+    } catch (e) {
+      console.error('[upgrade] replace step failed', e);
+    }
+  }
   return { ok: true };
 }
 
