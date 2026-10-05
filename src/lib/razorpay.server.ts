@@ -198,6 +198,24 @@ export const RAZORPAY_PLAN_IDS: Record<string, string> = {
   starter_zar_monthly: 'plan_TQNF7ZxjBWPpKm',
 };
 
+/**
+ * Plan id for a lookup key. RAZORPAY_PLAN_OVERRIDES (JSON, e.g. {"starter_inr_monthly":"plan_X"})
+ * replaces ids per environment - used by the test preview, which has its own
+ * Razorpay TEST account and therefore different plan ids. Unset on the live site.
+ */
+export function planIdFor(lookupKey: string): string | undefined {
+  const raw = process.env['RAZORPAY_PLAN_OVERRIDES'];
+  if (raw) {
+    try {
+      const o = JSON.parse(raw) as Record<string, string>;
+      if (o[lookupKey]) return o[lookupKey];
+    } catch {
+      /* ignore bad override */
+    }
+  }
+  return RAZORPAY_PLAN_IDS[lookupKey];
+}
+
 /** How many billing cycles a subscription is created for. */
 export function totalCountFor(lookupKey: string): number {
   return lookupKey.endsWith('_yearly') ? 10 : 120;
@@ -228,7 +246,15 @@ const LEGACY_PLAN_IDS: Record<string, string> = {
 
 export function lookupKeyForPlanId(planId?: string | null): string | null {
   if (!planId) return null;
-  const found = Object.entries(RAZORPAY_PLAN_IDS).find(([, id]) => id === planId);
+  let found = Object.entries(RAZORPAY_PLAN_IDS).find(([, id]) => id === planId);
+  if (!found) {
+    try {
+      const o = JSON.parse(process.env['RAZORPAY_PLAN_OVERRIDES'] || '{}') as Record<string, string>;
+      found = Object.entries(o).find(([, id]) => id === planId);
+    } catch {
+      /* ignore */
+    }
+  }
   return found ? found[0] : (LEGACY_PLAN_IDS[planId] ?? null);
 }
 
@@ -277,3 +303,4 @@ export async function verifyRazorpayWebhook(
   const body = JSON.parse(raw);
   return { event: body.event as string, payload: body.payload };
 }
+
