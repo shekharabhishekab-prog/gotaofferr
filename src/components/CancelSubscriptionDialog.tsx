@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { BarChart3, Bell, HeartHandshake, Loader2, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -271,3 +271,4 @@ export function CancelSubscriptionDialog({ open, onOpenChange, accessUntil, onCa
     </Dialog>
   );
 }
+
