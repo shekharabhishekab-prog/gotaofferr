@@ -136,13 +136,13 @@ const plans: Record<PlanKey, {
   job_hunt: {
     name: "Job Hunt Pack",
     note: "per month",
-    tagline: "Everything you need for a focused job hunt — 200 tailored applications, cover letters, and AI job searches in one package.",
+    tagline: "Everything you need for a focused job hunt — 129 tailored applications, cover letters, and AI job searches in one package.",
     bestFor: "Best for: applying to 10-50 roles a month from boards you browse yourself.",
     features: [
-      "200 resume + cover letter tailorings per month",
+      "129 resume + cover letter tailorings per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
-      "30 resumes in the resume builder",
-      "15 AI job finder searches per month",
+      "20 resumes in the resume builder",
+      "10 AI job finder searches per month",
       "5 job alerts (3 emails each, every 3 days)",
       "Keyword gap insights — see exactly which words are missing",
       "Saved master resume, so you never re-upload",
@@ -166,10 +166,10 @@ const plans: Record<PlanKey, {
     tagline: "The complete career package: we write the applications, find the jobs, and deliver fresh leads every 3 days.",
     bestFor: "Best for: a full-time search, or running two career tracks at once.",
     features: [
-      "400 resume + cover letter tailorings per month",
+      "169 resume + cover letter tailorings per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
-      "80 resumes in the resume builder",
-      "40 AI job finder searches per month - one clean list across every board",
+      "70 resumes in the resume builder",
+      "35 AI job finder searches per month - one clean list across every board",
       "10 job alerts (3 emails each, every 3 days)",
       "Everything else in Job Hunt Pack — history, keyword gaps, templates, LinkedIn About",
       "Your filters, saved: location, remote, experience, salary, company type",
@@ -492,7 +492,7 @@ function Pricing() {
               Job Hunt Pack — {monthlyLabel("job_hunt")}/month
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              You find the job. We rewrite your resume and cover letter for it, up to 200 times per
+              You find the job. We rewrite your resume and cover letter for it, up to 129 times per
               month, with keyword gaps flagged so it clears the ATS filter. Roughly the cost of one
               coffee a week for as many applications as most job seekers send.
             </p>
