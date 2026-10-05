@@ -12,6 +12,10 @@ export const MODEL_DAILY_CAP: Record<string, number> = {
   "gemini-3.6-flash": 20,
   "gemini-3-flash-preview": 20,
   "gemini-2.5-flash": 20,
+  // Adzuna free tier: 250/day, 2,500/month. Our own cap sits under both.
+  "adzuna-search": 65,
+  // Firecrawl searches are only counted for visibility (cap never reached).
+  "firecrawl-search": 100000,
 };
 
 const FREE_CHAIN = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
@@ -88,3 +92,4 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
   void last;
   throw new Error(limitMessage(tier));
 }
+
