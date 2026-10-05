@@ -20,10 +20,10 @@ export {
 export const YEARLY_BILLING_ENABLED = false;
 
 /** Career pro AI job finder searches per month. */
-export const JOB_SEARCH_MONTHLY_LIMIT = 40;
+export const JOB_SEARCH_MONTHLY_LIMIT = 35;
 
 /** Job hunt members get a taste of the job finder each month. */
-export const JOB_HUNT_JOB_SEARCH_LIMIT = 15;
+export const JOB_HUNT_JOB_SEARCH_LIMIT = 10;
 
 /** Starter members get a small monthly job finder allowance. */
 export const STARTER_JOB_SEARCH_LIMIT = 5;
@@ -307,8 +307,8 @@ export const PLAN_LABEL: Record<PlanTier, string> = {
 export const BUILDER_MONTHLY_LIMIT: Record<PlanTier, number> = {
   free: 5,
   starter: 15,
-  job_hunt: 30,
-  career_pro: 80,
+  job_hunt: 20,
+  career_pro: 70,
 };
 
 /** Job alerts a member can set up per month (each sends 3 emails, 3 days apart). */
@@ -340,6 +340,6 @@ export function nextTier(tier: PlanTier): PlanTier | null {
 /** Short "why upgrade" note. Upgrade prompts only ever point one tier up. */
 export const UPGRADE_NOTE: Record<Exclude<PlanTier, "career_pro">, string> = {
   free: "Starter gives you 5 job searches, 30 tailored resumes and 15 builder resumes a month, plus 3 job alerts.",
-  starter: "Job Hunt gives you 15 job searches, 200 tailored resumes and 30 builder resumes a month, plus 5 job alerts.",
-  job_hunt: "Career Pro gives you 40 job searches, 400 tailored resumes and 80 builder resumes a month, plus 10 job alerts.",
+  starter: "Job Hunt gives you 10 job searches, 129 tailored resumes and 20 builder resumes a month, plus 5 job alerts.",
+  job_hunt: "Career Pro gives you 35 job searches, 169 tailored resumes and 70 builder resumes a month, plus 10 job alerts.",
 };
