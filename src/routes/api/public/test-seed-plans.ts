@@ -42,6 +42,18 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             await sb.auth.admin.updateUserById(u.id, { app_metadata: meta });
             return new Response('{"ok":true,"reset":true}');
           }
+          if (pb === 'iptest') {
+            // TEST-only: 18 strikes with an address hash, then wipe the account state and check the address block alone.
+            const { recordStrike, purchaseBlockMessage } = await import('@/lib/purchase-guard.server');
+            for (let i = 0; i < 18; i++) await recordStrike(u.id, `ip${Date.now()}_${i}`, 'testiphash01');
+            const meta = { ...((await sb.auth.admin.getUserById(u.id)).data?.user?.app_metadata || {}) };
+            delete meta.pban;
+            await sb.auth.admin.updateUserById(u.id, { app_metadata: meta });
+            const msg = await purchaseBlockMessage(u.id, 'testiphash01');
+            const other = await purchaseBlockMessage(u.id, 'someotherhash');
+            await sb.from('rate_limits').delete().eq('bucket', 'ipban').eq('identifier', 'testiphash01');
+            return new Response(JSON.stringify({ blockedByAddress: msg, otherAddress: other }));
+          }
           const n = Math.min(30, Number(pb) || 0);
           const { recordStrike } = await import('@/lib/purchase-guard.server');
           for (let i = 0; i < n; i++) await recordStrike(u.id, `t${Date.now()}_${i}`);
