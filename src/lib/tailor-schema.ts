@@ -95,7 +95,7 @@ export const STARTER_MONTHLY_LIMIT = 30;
 export const JOB_HUNT_MONTHLY_LIMIT = 129;
 
 /** Career Pro paid plan allowance per calendar month. */
-export const CAREER_PRO_MONTHLY_LIMIT = 169;
+export const CAREER_PRO_MONTHLY_LIMIT = 199;
 
 
 
