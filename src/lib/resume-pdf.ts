@@ -137,7 +137,7 @@ export async function buildResumePdf(r: TailoredResume) {
 
   d.text(r.name || "Resume", { size: 21, style: "bold", color: [17, 51, 92] });
   if (r.headline) d.text(r.headline, { size: 11, color: [80, 90, 105] });
-  if (r.contacts?.length) d.text(r.contacts.join("  |  "), { size: 9, color: [105, 112, 125] });
+  r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(4);
 
   if (r.summary) {
@@ -191,7 +191,7 @@ export async function buildResumePdf(r: TailoredResume) {
   }
 
   if (r.skillGroups?.length) {
-    d.heading("Skills & Tools");
+    d.heading("Skills");
     r.skillGroups.forEach((g) => {
       if (!g.label || !g.items?.length) return;
       d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 });
@@ -213,7 +213,7 @@ export async function buildResumePdf(r: TailoredResume) {
 export async function buildCoverLetterPdf(r: TailoredResume, company?: string, role?: string) {
   const d = await createDoc();
   d.text(r.name || "Cover Letter", { size: 18, style: "bold", color: [17, 51, 92] });
-  if (r.contacts?.length) d.text(r.contacts.join("  |  "), { size: 9, color: [105, 112, 125] });
+  r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(10);
   const target = [role, company].filter(Boolean).join(" — ");
   if (target) d.text(`Re: ${target}`, { size: 10.5, style: "bold", gap: 6 });
