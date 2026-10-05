@@ -193,13 +193,13 @@ function mentionsLocation(text: string, tokens: string[]): boolean {
 }
 
 
-function buildQueries(input: JobSearchInput): string[] {
+function buildQueries(input: JobSearchInput, groups?: number[]): string[] {
   // One wide pass per board group (role + place only). Salary / extra filters
   // are applied later by the model — baking them into the search string starves
   // the result set and doubles the number of round trips.
   const wide = baseQuery(input, false);
-  const queries = BOARD_GROUPS.map((group) => (group ? `${wide} ${group}` : `${wide} careers`));
-  return queries;
+  const picked = groups ? groups.map((i) => BOARD_GROUPS[i] ?? "") : BOARD_GROUPS;
+  return picked.map((group) => (group ? `${wide} ${group}` : `${wide} careers`));
 }
 
 
@@ -441,8 +441,7 @@ function sourceFromUrl(url: string): string {
   }
 }
 
-export async function searchJobListings(input: JobSearchInput): Promise<JobListing[]> {
-  const queries = buildQueries(input);
+async function searchViaFirecrawl(input: JobSearchInput, queries: string[]): Promise<JobListing[]> {
   const settled = await runPooled(
     queries.map((query) => () => firecrawlSearch(query, 25)),
     // All board queries are independent, so run them in a single wave.
@@ -655,3 +654,94 @@ ${JSON.stringify(shortlist)}`;
 }
 
 
+
+
+
+const MIN_RESULTS = 7;
+
+/** Which board groups to query: fewer for Free (saves Firecrawl credits). */
+function firecrawlGroups(input: JobSearchInput, tier: string): number[] {
+  const regional = /india|delhi|mumbai|bengaluru|bangalore|hyderabad|chennai|pune|kolkata|gurgaon|noida|shimla/i.test(input.location ?? "") ? 2 : 1;
+  return tier === "free" ? [0, regional, 5] : [0, regional, 3, 5];
+}
+
+
+/** Adzuna listings for a search, filtered to the exact role and adjacent roles, merged after `jobs`. */
+async function adzunaPipeline(input: JobSearchInput, country: string, jobs: JobListing[], want = MIN_RESULTS): Promise<JobListing[]> {
+  const src = await import("./job-sources.server");
+  const base = { role: input.role, location: input.location, remoteOnly: input.remoteOnly, country };
+  let extra = await src.adzunaSearch(base);
+  if (jobs.length + extra.length < want) {
+    const more = await src.adzunaSearch({ ...base, orMode: true });
+    const have = new Set(extra.map((j) => normalizeUrl(j.url)));
+    extra = [...extra, ...more.filter((j) => !have.has(normalizeUrl(j.url)))];
+  }
+  const seen = new Set(jobs.map((j) => normalizeUrl(j.url)));
+  const identity = new Set(jobs.map((j) => `${j.title}|${j.company}`.toLowerCase()));
+  const accepted: JobListing[] = [];
+  for (const j of extra) {
+    if (seen.has(normalizeUrl(j.url))) continue;
+    const id = `${j.title}|${j.company}`.toLowerCase();
+    if (identity.has(id)) continue;
+    if (isBelowRequestedSeniority(j.title, input.role)) continue;
+    const exact = titleMatchesRole(j.title, input.role);
+    // Exact role first, then adjacent roles; never unrelated ones.
+    if (!exact && roleOverlap(j.title, input.role) < 0.34) continue;
+    seen.add(normalizeUrl(j.url));
+    identity.add(id);
+    accepted.push({ ...j, match: exact ? "exact" : "related" });
+  }
+  const merged = [...jobs, ...accepted];
+  merged.sort((a, b) => (a.match === b.match ? 0 : a.match === "exact" ? -1 : 1));
+  return merged;
+}
+
+/** Alerts use Adzuna only (never Firecrawl). */
+export async function searchAlertListings(input: JobSearchInput, visitorCountry?: string | null): Promise<JobListing[]> {
+  const src = await import("./job-sources.server");
+  const country = src.adzunaCountryFor(input.location, visitorCountry);
+  if (!country) return [];
+  return adzunaPipeline(input, country, [], 8);
+}
+
+/**
+ * Live search. One source at a time: Firecrawl first (paid plans always, Free only
+ * while credits comfortably remain), Adzuna second when Firecrawl is not allowed,
+ * fails, runs out or returns too few. Always aims for at least MIN_RESULTS.
+ */
+export async function searchJobListings(
+  input: JobSearchInput,
+  opts: { tier?: "free" | "starter" | "job_hunt" | "career_pro"; country?: string | null } = {},
+): Promise<JobListing[]> {
+  const tier = opts.tier ?? "free";
+  const src = await import("./job-sources.server");
+  // Gulf / Japan / Korea: clear "not available yet" before anything is spent.
+  const adzunaCountry = src.adzunaCountryFor(input.location, opts.country);
+
+  let jobs: JobListing[] = [];
+  let firstError: unknown = null;
+  if (await src.mayUseFirecrawl(tier)) {
+    try {
+      jobs = await searchViaFirecrawl(input, buildQueries(input, firecrawlGroups(input, tier)));
+      const { countCall } = await import("./model-router.server");
+      await countCall("firecrawl-search");
+    } catch (error) {
+      firstError = error;
+      console.warn("[jobs] firecrawl path failed, trying Adzuna", error);
+    }
+  }
+  if (jobs.length >= MIN_RESULTS) return jobs;
+
+  if (!adzunaCountry) {
+    if (jobs.length > 0) return jobs;
+    const { userError } = await import("./safe-error.server");
+    throw userError("Job sources for this place are refreshing. Please try again in a few minutes.");
+  }
+
+  try {
+    return await adzunaPipeline(input, adzunaCountry, jobs);
+  } catch (error) {
+    if (jobs.length > 0) return jobs;
+    throw error instanceof Error && (error as any).userFacing ? error : firstError ?? error;
+  }
+}
