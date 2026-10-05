@@ -5,7 +5,8 @@ import { passwordChangeSchema, profileUpdateSchema, runIdSchema } from "./accoun
 export const getAccountOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { monthStartIso } = await import("./tailor.server");
+    const { usageSince } = await import("./usage-window.server");
+    const since = await usageSince(context.supabase, context.userId);
 
     const [{ data: profile }, { count }, { data: recent }] = await Promise.all([
       context.supabase
@@ -17,7 +18,7 @@ export const getAccountOverview = createServerFn({ method: "GET" })
         .from("tailor_runs")
         .select("id", { count: "exact", head: true })
         .eq("user_id", context.userId)
-        .gte("created_at", monthStartIso()),
+        .gte("created_at", since),
       context.supabase
         .from("tailor_runs")
         .select("id, company, role, match_score, created_at, result")
@@ -210,3 +211,4 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
