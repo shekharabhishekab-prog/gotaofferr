@@ -68,8 +68,10 @@ export async function recordStrike(userId: string, key: string, ipHash?: string)
   console.warn(`[purchase-guard] user=${userId.slice(0, 8)} strikes=${st.strikes} cycles=${st.cycles} permanent=${!!st.permanent}`);
 }
 
-const FRIENDLY_BLOCK =
-  "We can't take new purchases from this account right now. Everything free still works. Please write to us from the Contact page and we will help.";
+// Kept under 90 characters so the checkout toast shows them as written.
+const FRIENDLY_BLOCK = "New purchases are unavailable on this account. Please contact us.";
+const FRIENDLY_PAUSE = "Purchases are paused on this account for a few days. Free features still work.";
+const FRIENDLY_PAUSE_FINAL = "Purchases are paused here. Further failed payments will block purchases for good.";
 
 /** Returns a friendly message when purchases must be refused, otherwise null. Fails open. */
 export async function purchaseBlockMessage(userId: string, ipHash?: string): Promise<string | null> {
@@ -88,12 +90,7 @@ export async function purchaseBlockMessage(userId: string, ipHash?: string): Pro
       if (data) return FRIENDLY_BLOCK;
     }
     if (st.until && new Date(st.until).getTime() > Date.now()) {
-      const d = new Date(st.until).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-      const warn =
-        st.cycles >= WARN_AT_CYCLES
-          ? ' Final warning: after a few more failed attempts, new purchases will be blocked permanently.'
-          : '';
-      return `New purchases are paused on this account until ${d} because several payments did not go through. Everything free still works.${warn}`;
+      return st.cycles >= WARN_AT_CYCLES ? FRIENDLY_PAUSE_FINAL : FRIENDLY_PAUSE;
     }
     if (st.cycles >= WARN_AT_CYCLES) {
       // suspension over, but warn on the next attempt through the checkout flow
