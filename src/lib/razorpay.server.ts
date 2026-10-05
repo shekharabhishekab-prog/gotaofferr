@@ -15,8 +15,8 @@ export type StripeEnv = PaymentsEnv;
 /** Stable lookup key → Razorpay plan ID (live account, one per currency). */
 export const RAZORPAY_PLAN_IDS: Record<string, string> = {
   // Starter pack — sold in every billable currency.
-  starter_inr_monthly: 'plan_TNgVxQhH31Jbw8',
-  starter_inr_festival_monthly: 'plan_TNgVxQhH31Jbw8',
+  starter_inr_monthly: 'plan_TkMr2UqLbhbpWC',
+  starter_inr_festival_monthly: 'plan_TkMr2UqLbhbpWC',
   starter_usd_monthly: 'plan_TQMyEulrLUloQx',
   starter_eur_monthly: 'plan_TQMyFZGRW2gWzr',
   starter_gbp_monthly: 'plan_TQMyGGP0koWXfO',
@@ -24,14 +24,14 @@ export const RAZORPAY_PLAN_IDS: Record<string, string> = {
   starter_aud_monthly: 'plan_TQMyHXJLTJxlM5',
 
 
-  job_hunt_inr_monthly: 'plan_TLnhpqWzp9rzdx',
+  job_hunt_inr_monthly: 'plan_TkMsd3ra9Z9BEg',
   job_hunt_inr_yearly: 'plan_TKabJJE4LMU1z5',
-  career_pro_inr_monthly: 'plan_TLnygf5Kr1ibJr',
+  career_pro_inr_monthly: 'plan_TkMz2PtZOMXS3f',
   career_pro_inr_yearly: 'plan_TKabKZKJXN0wi4',
 
   // Festival offer (India) — only usable while a festival window is open.
-  job_hunt_inr_festival_monthly: 'plan_TLnhrG9373SNqd',
-  career_pro_inr_festival_monthly: 'plan_TLnyhQlB0aQmrc',
+  job_hunt_inr_festival_monthly: 'plan_TkMsd3ra9Z9BEg',
+  career_pro_inr_festival_monthly: 'plan_TkMz2PtZOMXS3f',
   job_hunt_inr_festival_yearly: 'plan_TLNSAfXNhtBgkh',
 
 
@@ -233,6 +233,11 @@ export function totalCountFor(lookupKey: string): number {
  * (older INR price points, and the retired festival yearly plan).
  */
 const LEGACY_PLAN_IDS: Record<string, string> = {
+  plan_TNgVxQhH31Jbw8: 'starter_inr_monthly',
+  plan_TLnhpqWzp9rzdx: 'job_hunt_inr_monthly',
+  plan_TLnygf5Kr1ibJr: 'career_pro_inr_monthly',
+  plan_TLnhrG9373SNqd: 'job_hunt_inr_festival_monthly',
+  plan_TLnyhQlB0aQmrc: 'career_pro_inr_festival_monthly',
   plan_TLNS9IGCubVCOq: 'job_hunt_inr_monthly',
   plan_TKabJvftVhgLZd: 'career_pro_inr_monthly',
   plan_TLnhqYmWUpq4E4: 'career_pro_inr_monthly',
