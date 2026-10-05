@@ -28,6 +28,26 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             .eq('user_id', u.id);
           return new Response(JSON.stringify({ ok: !error, err: error?.message }));
         }
+        const pb = url.searchParams.get('pban');
+        if (pb) {
+          // TEST-only: drive the suspension ladder for the QA account.
+          const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+          const sb = supabaseAdmin as any;
+          const { data: list } = await sb.auth.admin.listUsers({ page: 1, perPage: 200 });
+          const u = (list?.users ?? []).find((x: any) => x.email === 'mailboss@mail.instinct.com');
+          if (!u) return new Response('{"err":"no user"}');
+          if (pb === 'reset') {
+            const meta = { ...(u.app_metadata || {}) };
+            delete meta.pban;
+            await sb.auth.admin.updateUserById(u.id, { app_metadata: meta });
+            return new Response('{"ok":true,"reset":true}');
+          }
+          const n = Math.min(30, Number(pb) || 0);
+          const { recordStrike } = await import('@/lib/purchase-guard.server');
+          for (let i = 0; i < n; i++) await recordStrike(u.id, `t${Date.now()}_${i}`);
+          const { data: again } = await sb.auth.admin.getUserById(u.id);
+          return new Response(JSON.stringify({ pban: (again?.user?.app_metadata as any)?.pban ?? null }));
+        }
         const subq = url.searchParams.get('sub');
         if (subq && /^sub_[A-Za-z0-9]+$/.test(subq)) {
           try {
