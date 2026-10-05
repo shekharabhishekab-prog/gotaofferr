@@ -36,7 +36,7 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   const { assertLooksLikeResume } = await import("./extract-pdf");
   assertLooksLikeResume(data.resume);
 
-  const key = process.env.LOVABLE_API_KEY;
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
   const gateway = createLovableAiGatewayProvider(key, modelId);
