@@ -81,7 +81,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
       ...COMMON_NO_PHOTO,
       'Call the document a "Resume". Keep it to one page for under 10 years of experience, two pages at most.',
       "Contact items (each its own line): full name, city and state (no street address), phone in +1 (XXX) XXX-XXXX form, professional email, LinkedIn.",
-      "Use US spelling (organize, analyze, program) and MM/YYYY date ranges.",
+      "Use US spelling (organize, analyze, program) and Mon YYYY - Mon YYYY date ranges (month as 3 letters, so every ATS reads tenure).",
       "Use US units. Keep every money figure in the currency the source resume states; never restate it in another currency.",
       "Lead with impact and metrics. No objective statement, no references line, no personal details.",
       "Translate non-US credentials into their US equivalent in plain wording (for example, \"B.Tech (equivalent to BS in Computer Science)\"). Do not list marks/percentages; add GPA only if the source resume has one.",
