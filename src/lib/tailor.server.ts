@@ -212,11 +212,12 @@ ${data.resume}`;
       const sim = (a: string, b: string) => {
         const A = new Set(norm(a)); const B = norm(b);
         if (!A.size || !B.length) return 0;
-        return B.filter((w) => A.has(w)).length / Math.max(A.size, B.length);
+        const shared = B.filter((w) => A.has(w)).length;
+        return Math.max(shared / Math.max(A.size, B.length), shared / Math.min(A.size, B.length) * 0.9);
       };
       const allBullets = (result.experience ?? []).flatMap((e: any) => e.bullets ?? []);
       result.keyAchievements = (result.keyAchievements ?? []).filter(
-        (k: string) => !allBullets.some((b: string) => sim(k, b) >= 0.6),
+        (k: string) => !allBullets.some((b: string) => sim(k, b) >= 0.55),
       );
       const srcWords = new Set(norm(data.resume));
       for (const e of result.experience ?? []) {
