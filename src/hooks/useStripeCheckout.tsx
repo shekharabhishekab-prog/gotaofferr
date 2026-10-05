@@ -88,7 +88,8 @@ export function useStripeCheckout() {
         rzp.open();
       } catch (e) {
         setIsOpen(false);
-        toast.error(e instanceof Error ? e.message : 'Could not start checkout');
+        const m = e instanceof Error ? e.message : '';
+        toast.error(m && m.length < 90 && !/key|passed|razorpay|undefined|null|token|fetch|json|\b[45]\d\d\b/i.test(m) ? m : 'Checkout hit a speed bump 🚧 Please try again in a moment.');
       }
     },
     [startCheckout],
