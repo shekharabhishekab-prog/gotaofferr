@@ -129,6 +129,31 @@ function Terms() {
             charges as required by law, and we email a receipt after every successful charge. If a
             renewal payment fails, access to paid features may be suspended until payment succeeds.
           </p>
+          <h3 className="pt-2 text-lg font-semibold text-foreground">
+            Upgrades, renewal and cancellation
+          </h3>
+          <ul className="list-disc space-y-2 pl-6">
+            <li>
+              Upgrading to a higher plan starts a new subscription at that plan's full price. The
+              new plan starts immediately, and your monthly attempts and usage limits start fresh
+              from the upgrade date.
+            </li>
+            <li>
+              Your billing date becomes the date you upgrade. Your plan renews, and your attempts
+              reset, on that date each month. We do not give credit for unused days on the old
+              plan; the old plan is cancelled once the new payment succeeds.
+            </li>
+            <li>
+              Your plan renews automatically every month and your payment method is charged on the
+              billing date until you cancel auto-pay.
+            </li>
+            <li>
+              If you cancel auto-pay, your plan stays active until the end of the month you have
+              already paid for. After that your account automatically returns to the Free plan,
+              whichever paid plan you had.
+            </li>
+            <li>If an upgrade payment fails, your current plan stays active and unchanged.</li>
+          </ul>
         </section>
 
         <section className="space-y-4">
@@ -214,3 +239,4 @@ function Terms() {
     </main>
   );
 }
+
