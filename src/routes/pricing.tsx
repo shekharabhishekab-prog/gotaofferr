@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useServerFn } from "@tanstack/react-start";
 
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
