@@ -26,12 +26,12 @@ export const RAZORPAY_PLAN_IDS: Record<string, string> = {
 
   job_hunt_inr_monthly: 'plan_TkMsd3ra9Z9BEg',
   job_hunt_inr_yearly: 'plan_TKabJJE4LMU1z5',
-  career_pro_inr_monthly: 'plan_TkMz2PtZOMXS3f',
+  career_pro_inr_monthly: 'plan_TkMz2PtZ0MXS3f',
   career_pro_inr_yearly: 'plan_TKabKZKJXN0wi4',
 
   // Festival offer (India) — only usable while a festival window is open.
   job_hunt_inr_festival_monthly: 'plan_TkMsd3ra9Z9BEg',
-  career_pro_inr_festival_monthly: 'plan_TkMz2PtZOMXS3f',
+  career_pro_inr_festival_monthly: 'plan_TkMz2PtZ0MXS3f',
   job_hunt_inr_festival_yearly: 'plan_TLNSAfXNhtBgkh',
 
 
