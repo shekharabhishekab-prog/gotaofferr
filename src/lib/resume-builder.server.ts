@@ -93,7 +93,7 @@ export function fallbackPolish(draft: ResumeDraft): PolishedResume {
  * inventing employers, dates, tools or metrics that were not supplied.
  */
 export async function polishDraft(draft: ResumeDraft): Promise<PolishedResume> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not configured right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
