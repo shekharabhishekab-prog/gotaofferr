@@ -145,9 +145,11 @@ export async function buildResumePdf(r: TailoredResume) {
     d.text(r.summary, { size: 9.8 });
   }
 
-  if (r.skills?.length) {
-    d.heading("Core Skills");
-    d.text(r.skills.join("  •  "), { size: 9.8 });
+  const groups = (r.skillGroups ?? []).filter((g) => g.label && g.items?.length);
+  if (r.skills?.length || groups.length) {
+    d.heading("Skills");
+    if (r.skills?.length) d.text(r.skills.join("  •  "), { size: 9.8 });
+    groups.forEach((g) => d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 }));
   }
 
   if (r.keyAchievements?.length) {
@@ -190,13 +192,6 @@ export async function buildResumePdf(r: TailoredResume) {
     d.bullets(r.certifications);
   }
 
-  if (r.skillGroups?.length) {
-    d.heading("Skills");
-    r.skillGroups.forEach((g) => {
-      if (!g.label || !g.items?.length) return;
-      d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 });
-    });
-  }
 
 
   if (r.additionalSections?.length) {
