@@ -16,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { CancelSubscriptionDialog } from "@/components/CancelSubscriptionDialog";
 import { Button } from "@/components/ui/button";
