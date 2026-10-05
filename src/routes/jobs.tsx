@@ -1,3 +1,4 @@
+import { friendlyMessage } from "@/lib/friendly-error";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import { RouteError } from "@/components/RouteError";
@@ -273,11 +274,11 @@ function Jobs() {
         },
       );
 
-      if ("error" in res) setError(res.error);
+      if ("error" in res) setError(friendlyMessage(res.error));
       else { setJobs(res.jobs); setPage(0); }
       refreshSearchUsage();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Job search failed");
+      setError(friendlyMessage(err, "Job search hit a wall 🧱 Please try again in a moment."));
     } finally {
       setSearching(false);
       setQueueNote(null);
@@ -320,7 +321,7 @@ function Jobs() {
       );
 
     } catch (err) {
-      setAlertSaved(err instanceof Error ? err.message : "Could not save alert");
+      setAlertSaved(friendlyMessage(err, "Your alert slipped away 🐟 Please try saving it again."));
     } finally {
       setSavingAlert(false);
     }
