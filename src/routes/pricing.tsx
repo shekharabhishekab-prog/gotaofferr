@@ -114,7 +114,7 @@ const plans: Record<PlanKey, {
   starter: {
     name: "Starter Pack",
     note: "per month",
-    tagline: "A complete application kit — 43 credits' worth of work for the price of a coffee.",
+    tagline: "A complete application kit — 40 credits' worth of work for the price of a coffee.",
     bestFor: "Best for: applying to a handful of roles you really want.",
     features: [
       "20 resume + cover letter tailorings per month",
@@ -399,13 +399,13 @@ function Pricing() {
                 ) : null}
                 {key === "starter" && !isCurrent ? (
                   <span className="w-fit rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-                    Limited time offer
+                    Limited Launch Offer
                   </span>
                 ) : null}
               </div>
               {key === "starter" ? (
                 <p className="-mt-1 mb-2 text-xs font-medium text-muted-foreground">
-                  43 AI actions bundled together
+                  40 AI actions bundled together
                 </p>
               ) : null}
               <h2 className="font-display text-lg font-semibold text-card-foreground">{p.name}</h2>
