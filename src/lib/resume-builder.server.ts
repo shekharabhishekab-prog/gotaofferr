@@ -131,7 +131,7 @@ ${draftToText(draft)}`;
       prompt,
       maxOutputTokens: 8000,
     }));
-    return stripPlaceholders(output);
+    return stripPlaceholders(output, draft);
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
       try {
@@ -146,15 +146,16 @@ ${draftToText(draft)}`;
   }
 }
 
-const PLACEHOLDER = /^(n\/?a|not specified|not provided|unknown|company name|none)$/i;
+const PLACEHOLDER = /^(n\/?a|not specified|not provided|not given|unknown|company( name)?|employer|organi[sz]ation|your company|xyz|none)$/i;
 
 /** The model sometimes fills blank fields with "Not Specified"; drop those. */
-function stripPlaceholders(result: PolishedResume): PolishedResume {
+function stripPlaceholders(result: PolishedResume, draft: ResumeDraft): PolishedResume {
+  const hadExperience = draft.experience.some((item) => item.role || item.company || item.details);
   const clean = (value: string) => (PLACEHOLDER.test((value ?? "").trim()) ? "" : value);
   return {
     ...result,
     headline: clean(result.headline),
-    experience: result.experience.map((item) => ({
+    experience: (hadExperience ? result.experience : []).map((item) => ({
       ...item,
       role: clean(item.role),
       company: clean(item.company),
