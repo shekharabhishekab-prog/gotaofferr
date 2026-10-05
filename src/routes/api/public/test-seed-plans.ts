@@ -16,6 +16,15 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
           return new Response('Not found', { status: 404 });
         }
         const url = new URL(request.url);
+        const subq = url.searchParams.get('sub');
+        if (subq && /^sub_[A-Za-z0-9]+$/.test(subq)) {
+          try {
+            const r: any = await rzp(`/subscriptions/${subq}`);
+            return new Response(JSON.stringify({ id: r.id, status: r.status, plan_id: r.plan_id, paid_count: r.paid_count, ended_at: r.ended_at, notes: r.notes }));
+          } catch (e) {
+            return new Response(JSON.stringify({ err: e instanceof Error ? e.message : String(e) }));
+          }
+        }
         const diag = url.searchParams.get('diag');
         if (diag) {
           const { planIdFor } = await import('@/lib/razorpay.server');
