@@ -208,11 +208,14 @@ ${data.resume}`;
     // Key Achievements must not repeat Experience bullets; employer context
     // lines must come from the source resume (no invented descriptors).
     try {
-      const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((w) => w.length > 2);
+      const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((w) => w.length > 2 || /\d/.test(w));
       const sim = (a: string, b: string) => {
         const A = new Set(norm(a)); const B = norm(b);
         if (!A.size || !B.length) return 0;
-        return B.filter((w) => A.has(w)).length / Math.max(A.size, B.length);
+        const BS = new Set(B);
+        const overlap = B.filter((w) => A.has(w)).length;
+        // Duplicate when most of the shorter line already sits inside the other one.
+        return Math.max(overlap / Math.max(A.size, BS.size), overlap / Math.min(A.size, BS.size) - 0.2);
       };
       const allBullets = (result.experience ?? []).flatMap((e: any) => e.bullets ?? []);
       result.keyAchievements = (result.keyAchievements ?? []).filter(
