@@ -17,6 +17,7 @@ const checkoutInputSchema = z
   .object({
     priceId: z.string().trim().min(1).max(80),
     environment: z.enum(['live', 'sandbox']).optional(),
+    indianConfirmed: z.boolean().optional(),
   })
   .strict();
 
@@ -74,6 +75,7 @@ async function resolveCustomer(email?: string, name?: string): Promise<string | 
 
 type CheckoutResult =
   | { subscriptionId: string; keyId: string; prefill: { email?: string; name?: string } }
+  | { geoNotice: true }
   | { error: string };
 
 /**
@@ -99,6 +101,18 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
     try {
       const { enforcePolicy } = await import('@/lib/rate-limit.server');
       await enforcePolicy('payments-checkout', context.userId);
+      // Price-country check: India prices are for buyers in India. If the live IP is
+      // elsewhere, show our message first (the buyer can confirm an Indian card/UPI).
+      if (data.priceId.includes('_inr_') && !data.indianConfirmed) {
+        const { getRequest } = await import('@tanstack/react-start/server');
+        const h = getRequest().headers;
+        let cc = (h.get('cf-ipcountry') || '').toUpperCase();
+        if ((process.env['RAZORPAY_TEST_KEY_ID'] || '').startsWith('rzp_test_')) {
+          const m = /(?:^|;\s*)gtest_country=([A-Za-z]{2})/.exec(h.get('cookie') || '');
+          if (m) cc = m[1].toUpperCase();
+        }
+        if (/^[A-Z]{2}$/.test(cc) && cc !== 'XX' && cc !== 'IN') return { geoNotice: true };
+      }
       const existing = await latestSubscription(context.supabase, context.userId, environment);
       let replaces: string | undefined;
       if (isEntitled(existing) && existing?.stripe_subscription_id) {
