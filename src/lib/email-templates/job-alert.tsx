@@ -23,6 +23,8 @@ interface Props {
   salaryRange?: string | null
   jobs?: AlertJob[]
   jobsUrl?: string
+  emailNumber?: number
+  unsubscribeUrl?: string
 }
 
 const card = {
@@ -63,15 +65,16 @@ const JobAlertEmail = ({
   salaryRange,
   jobs = [],
   jobsUrl = 'https://gotaofferr.com/jobs?alert=1',
+  emailNumber,
+  unsubscribeUrl,
 }: Props) => (
   <EmailLayout
     preview={`${jobs.length} new ${role ?? 'job'} openings matched your job alert`}
     heading={`${jobs.length} new matches for ${role ?? 'your role'}`}
-    footerNote="You're receiving this because you turned on a 3-day job alert in your GotaOfferr account."
+    footerNote={`You're receiving this because you set a job alert in your GotaOfferr account.${emailNumber ? ` This is email ${emailNumber} of 3.` : ''}`}
   >
     <Text style={styles.text}>
-      Here are today's freshest openings from across the job boards, picked using the exact
-      filters you saved in the AI job finder.
+      Here are fresh openings picked using the exact filters you saved in the AI job finder.
     </Text>
 
     <Text style={criteriaStyle}>
@@ -110,6 +113,11 @@ const JobAlertEmail = ({
     <Text style={{ ...styles.text, fontSize: '13px', margin: '18px 0 0' }}>
       Tailor your resume to any of these in one click — then apply the same day.
     </Text>
+    {unsubscribeUrl ? (
+      <Text style={{ ...styles.text, fontSize: '12px', margin: '14px 0 0' }}>
+        Don't want these? <Link href={unsubscribeUrl}>Stop this alert</Link>.
+      </Text>
+    ) : null}
   </EmailLayout>
 )
 
@@ -137,3 +145,4 @@ export const template = {
 } satisfies TemplateEntry
 
 export default JobAlertEmail
+
