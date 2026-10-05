@@ -49,10 +49,11 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             const meta = { ...((await sb.auth.admin.getUserById(u.id)).data?.user?.app_metadata || {}) };
             delete meta.pban;
             await sb.auth.admin.updateUserById(u.id, { app_metadata: meta });
+            const { data: rowChk, error: rowErr } = await sb.from('rate_limits').select('count').eq('bucket', 'ipban').eq('identifier', 'testiphash01');
             const msg = await purchaseBlockMessage(u.id, 'testiphash01');
             const other = await purchaseBlockMessage(u.id, 'someotherhash');
             await sb.from('rate_limits').delete().eq('bucket', 'ipban').eq('identifier', 'testiphash01');
-            return new Response(JSON.stringify({ blockedByAddress: msg, otherAddress: other }));
+            return new Response(JSON.stringify({ blockedByAddress: msg, otherAddress: other, rowChk, rowErr: rowErr?.message }));
           }
           const n = Math.min(30, Number(pb) || 0);
           const { recordStrike } = await import('@/lib/purchase-guard.server');
