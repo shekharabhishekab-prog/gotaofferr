@@ -185,6 +185,14 @@ ${data.resume}`;
         result = repaired;
         missing = findMissingFacts(data.resume, result);
       }
+      // One more attempt when a numeric fact is still missing.
+      if (missing.some((f) => /\d/.test(f))) {
+        const again = await repairDepth(gateway, result, data, prompt, missing);
+        if (findMissingFacts(data.resume, again).length < missing.length) {
+          result = again;
+          missing = findMissingFacts(data.resume, result);
+        }
+      }
     }
 
     // Deterministic honesty pass: remove claims, skills and duties the source
