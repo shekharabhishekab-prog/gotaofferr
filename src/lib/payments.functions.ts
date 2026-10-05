@@ -131,7 +131,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
 
       return {
         subscriptionId: subscription.id,
-        keyId: process.env['RAZORPAY_KEY_ID']!,
+        keyId: (await import('@/lib/razorpay.server')).razorpayKeys().id!,
         prefill: { ...(email && { email }), ...(name && { name }) },
       };
     } catch (error) {
