@@ -222,7 +222,9 @@ ${data.resume}`;
         (k: string) => {
           const nums = norm(k).filter((w) => /\d/.test(w));
           return !allBullets.some((b: string) => {
-            if (sim(k, b) < 0.6) return false;
+            // Same figures and at least 2 shared words = the same achievement worded twice.
+            const sameFact = nums.length > 0 && nums.every((n) => norm(b).includes(n)) && norm(k).filter((w) => !/\d/.test(w) && norm(b).includes(w)).length >= 2;
+            if (!sameFact && sim(k, b) < 0.6) return false;
             const bn = new Set(norm(b));
             return nums.every((n) => bn.has(n)); // never drop a fact that lives only here
           });
