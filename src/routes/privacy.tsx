@@ -102,12 +102,7 @@ function Privacy() {
             our own AI models.
           </p>
           <p>
-            Your resume and job description text is sent to Google's Gemini API to generate your
-            output. We use Google's free usage tier. Under Google's terms for that tier, Google may
-            use this content to improve its products and machine-learning models, and human
-            reviewers may read some of it. This does not apply to users in the European Economic
-            Area, the United Kingdom or Switzerland. Please do not include sensitive details you
-            are not comfortable sharing.
+            We do not sell your data. Your resume and job description text is sent to our AI provider, Google (Gemini), only to generate your output. Depending on the service tier we use at the time, the provider may handle this content under its own data terms. Please do not include sensitive details you are not comfortable sharing.
           </p>
         </section>
 
