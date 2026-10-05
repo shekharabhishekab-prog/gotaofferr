@@ -45,7 +45,8 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
           if (pb === 'iptest') {
             // TEST-only: 18 strikes with an address hash, then wipe the account state and check the address block alone.
             const { recordStrike, purchaseBlockMessage } = await import('@/lib/purchase-guard.server');
-            for (let i = 0; i < 18; i++) await recordStrike(u.id, `ip${Date.now()}_${i}`, 'testiphash01');
+            await sb.auth.admin.updateUserById(u.id, { app_metadata: { ...(u.app_metadata || {}), pban: { strikes: 2, cycles: 5, seen: [] } } });
+            await recordStrike(u.id, `ip${Date.now()}`, 'testiphash01');
             const meta = { ...((await sb.auth.admin.getUserById(u.id)).data?.user?.app_metadata || {}) };
             delete meta.pban;
             await sb.auth.admin.updateUserById(u.id, { app_metadata: meta });
