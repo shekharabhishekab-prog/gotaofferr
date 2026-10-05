@@ -220,7 +220,7 @@ function AuthPage() {
     <main className="mx-auto flex max-w-md flex-col px-5 py-16 sm:py-24">
       <div className="text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-          <Sparkles className="size-3 text-highlight" /> 3 free resumes every month
+          <Sparkles className="size-3 text-highlight" /> 10 free tailored resumes every month
         </span>
         <h1 className="mt-4 font-display text-3xl font-bold text-foreground">
           Sign in to GotaOfferr
@@ -437,3 +437,4 @@ function AuthPage() {
     </main>
   );
 }
+
