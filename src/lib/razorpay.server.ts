@@ -290,9 +290,23 @@ export async function rzp<T = any>(
   return json as T;
 }
 
+/** Raw gateway text - for server logs and matching only. Never show it to customers. */
+export function rawPaymentsError(error: unknown): string {
+  return error instanceof Error ? error.message : '';
+}
+
+/** Customer-safe message. The raw gateway text is logged, never returned. */
 export function getPaymentsErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return 'Something went wrong with the payment. Please try again.';
+  const raw = rawPaymentsError(error);
+  if (raw) console.error('Payments error (hidden from customer):', raw);
+  const known = [
+    'Please sign in',
+    'Unknown plan',
+    'Yearly billing is no longer available',
+    'That festival offer has ended',
+  ];
+  if (known.some((k) => raw.startsWith(k))) return raw;
+  return "We couldn't complete that just now. Please try again in a moment, or contact support if it keeps happening.";
 }
 
 /** Verifies the `x-razorpay-signature` HMAC over the raw request body. */
