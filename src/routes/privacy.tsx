@@ -26,7 +26,7 @@ function Privacy() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
       <h1 className="font-display text-4xl font-bold text-foreground">Privacy Policy</h1>
-      <p className="mt-4 text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString()}</p>
+      <p className="mt-4 text-sm text-muted-foreground">Last updated: 6 October 2026</p>
 
       <div className="mt-8 space-y-8 text-muted-foreground">
         <section className="space-y-4">
@@ -56,8 +56,13 @@ function Privacy() {
             content is used only for the tailoring request and is not stored on our servers permanently.
           </p>
           <p>
-            <strong>Usage data:</strong> We record how many resumes you have generated in the current billing
-            month to enforce free and paid plan limits.
+            <strong>Country and payment location:</strong> We use your approximate country (from your
+            IP address) to show and charge the right price and to prevent price abuse. Card details
+            are handled only by Razorpay; Razorpay tells us whether a card is Indian or international.
+          </p>
+          <p>
+            <strong>Usage data:</strong> We record how many tailoring, resume-builder, job-search and job-alert uses you have in the
+            current plan month to enforce free and paid plan limits.
           </p>
           <p>
             <strong>Payment information:</strong> We do not collect or store card details. Payments are
@@ -81,7 +86,7 @@ function Privacy() {
           <ul className="list-disc space-y-2 pl-6">
             <li>To provide the resume tailoring and cover-letter generation services.</li>
             <li>To enforce plan limits and manage your subscription.</li>
-            <li>To send transactional emails such as one-time sign-in codes, password reset codes, job alert emails (every 3 days when enabled), and payment receipts.</li>
+            <li>To send transactional emails such as one-time sign-in codes, password reset codes, job alert emails (up to 3 per alert, one every 3 days), and payment receipts.</li>
             <li>To improve the service and fix bugs.</li>
           </ul>
         </section>
@@ -89,7 +94,7 @@ function Privacy() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">4. Storage and security</h2>
           <p>
-            Authentication and limited account data are stored in Lovable Cloud (Supabase). Resume and job-description content is processed in real time and not retained after your session ends, unless you explicitly save a job alert or tailored output.
+            Authentication and limited account data are stored in Supabase (our own project). Resume and job-description content is processed in real time and not retained after your session ends, unless you explicitly save a job alert or tailored output.
           </p>
           <p>
             All data in transit is encrypted with TLS, and saved resumes and tailored documents are
@@ -104,8 +109,10 @@ function Privacy() {
             We use trusted providers for authentication, hosting, payments, AI generation, and email delivery. Each provider only receives the data needed to perform its specific function.
           </p>
           <ul className="list-disc space-y-2 pl-6">
-            <li>Lovable Cloud / Supabase — authentication and account data storage.</li>
-            <li>Lovable AI Gateway — resume, cover-letter and job-search generation.</li>
+            <li>Supabase — authentication and account data storage.</li>
+            <li>Cloudflare — website hosting and security.</li>
+            <li>Google (Gemini AI models) — resume, cover-letter and job-search generation.</li>
+            <li>Adzuna and Firecrawl — public job listing search. We send only your search words and location, never your resume.</li>
             <li>Razorpay — payment processing and subscription mandates.</li>
             <li>Resend — transactional email delivery (sign-in codes, alerts, receipts).</li>
             <li>Cloudflare Turnstile — bot and abuse protection.</li>
@@ -166,8 +173,8 @@ function Privacy() {
           <ul className="list-disc space-y-2 pl-6">
             <li>Account and profile data — kept while your account is active.</li>
             <li>
-              Tailored resumes and cover letters — kept so you can re-download them; the most recent
-              10 are shown on your account page.
+              Tailored resumes and cover letters — kept so you can re-download them; a limited number
+              of your most recent ones are kept and shown on your account page.
             </li>
             <li>Job alert settings and send history — kept until you delete the alert.</li>
             <li>
@@ -269,3 +276,4 @@ function Privacy() {
     </main>
   );
 }
+
