@@ -250,7 +250,7 @@ export function coverLetterRules(country: string | null): string[] {
 const JOB_COUNTRY_HINTS: Array<{ code: string; patterns: RegExp[] }> = [
   { code: "AU", patterns: [/\baustralia(n)?\b/i, /\bsydney\b/i, /\bmelbourne\b/i, /\bbrisbane\b/i, /\bperth\b/i, /\badelaide\b/i, /\bcanberra\b/i, /\bnsw\b/i, /\bvictoria,\s*au/i, /\bAUD\b/, /\bsuperannuation\b/i] },
   { code: "NZ", patterns: [/\bnew zealand\b/i, /\bauckland\b/i, /\bwellington\b/i, /\bchristchurch\b/i, /\bNZD\b/] },
-  { code: "US", patterns: [/\bunited states\b/i, /\bU\.?S\.?A\.?\b/, /\bnew york\b/i, /\bsan francisco\b/i, /\bchicago\b/i, /\bausti n?\b/i, /\bseattle\b/i, /\bboston\b/i, /\b401\(k\)\b/i, /\bUSD\b/] },
+  { code: "US", patterns: [/\bunited states\b/i, /\bU\.?S\.?A\.?\b/, /\bnew york\b/i, /\bsan francisco\b/i, /\bchicago\b/i, /\baustin\b/i, /\b(dallas|houston|atlanta|denver|miami|los angeles|san diego|san jose|phoenix|philadelphia|washington,?\s*d\.?c)\b/i, /,\s*(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|IL|IN|MA|MD|MI|MN|MO|NC|NJ|NY|OH|OR|PA|TX|VA|WA|WI)\s+\d{5}\b/, /,\s*(TX|NY|WA|MA|IL|GA|FL|NC|NJ|VA|CO|AZ|OH|PA)\b(?!\w)/, /\bseattle\b/i, /\bboston\b/i, /\b401\(k\)\b/i, /\bUSD\b/] },
   { code: "CA", patterns: [/\bcanada\b/i, /\btoronto\b/i, /\bvancouver\b/i, /\bmontreal\b/i, /\bottawa\b/i, /\bCAD\b/] },
   { code: "GB", patterns: [/\bunited kingdom\b/i, /\bengland\b/i, /\bscotland\b/i, /\blondon\b/i, /\bmanchester\b/i, /\bbirmingham\b/i, /\bGBP\b/, /£/] },
   { code: "IE", patterns: [/\bireland\b/i, /\bdublin\b/i, /\bcork,\s*ie/i] },
