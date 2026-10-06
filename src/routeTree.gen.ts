@@ -39,7 +39,6 @@ import { Route as GuidesGermanyResumeFormatRouteImport } from './routes/guides.g
 import { Route as GuidesIndiaResumeFormatRouteImport } from './routes/guides.india-resume-format'
 import { Route as GuidesSingaporeResumeFormatRouteImport } from './routes/guides.singapore-resume-format'
 import { Route as GuidesUkResumeFormatRouteImport } from './routes/guides.uk-resume-format'
-import { Route as ApiPublicTestSeedPlansRouteImport } from './routes/api/public/test-seed-plans'
 import { Route as ExamplesCoverLettersIndexRouteImport } from './routes/examples.cover-letters.index'
 import { Route as ExamplesCoverLettersSlugRouteImport } from './routes/examples.cover-letters.$slug'
 import { Route as ExamplesResumesIndexRouteImport } from './routes/examples.resumes.index'
@@ -207,11 +206,6 @@ const GuidesUkResumeFormatRoute = GuidesUkResumeFormatRouteImport.update({
   path: '/guides/uk-resume-format',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicTestSeedPlansRoute = ApiPublicTestSeedPlansRouteImport.update({
-  id: '/api/public/test-seed-plans',
-  path: '/api/public/test-seed-plans',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ExamplesCoverLettersIndexRoute =
   ExamplesCoverLettersIndexRouteImport.update({
     id: '/examples/cover-letters/',
@@ -300,7 +294,6 @@ export interface FileRoutesByFullPath {
   '/guides/india-resume-format': typeof GuidesIndiaResumeFormatRoute
   '/guides/singapore-resume-format': typeof GuidesSingaporeResumeFormatRoute
   '/guides/uk-resume-format': typeof GuidesUkResumeFormatRoute
-  '/api/public/test-seed-plans': typeof ApiPublicTestSeedPlansRoute
   '/examples/cover-letters/$slug': typeof ExamplesCoverLettersSlugRoute
   '/examples/resumes/$slug': typeof ExamplesResumesSlugRoute
   '/examples/cover-letters/': typeof ExamplesCoverLettersIndexRoute
@@ -343,7 +336,6 @@ export interface FileRoutesByTo {
   '/guides/india-resume-format': typeof GuidesIndiaResumeFormatRoute
   '/guides/singapore-resume-format': typeof GuidesSingaporeResumeFormatRoute
   '/guides/uk-resume-format': typeof GuidesUkResumeFormatRoute
-  '/api/public/test-seed-plans': typeof ApiPublicTestSeedPlansRoute
   '/examples/cover-letters/$slug': typeof ExamplesCoverLettersSlugRoute
   '/examples/resumes/$slug': typeof ExamplesResumesSlugRoute
   '/examples/cover-letters': typeof ExamplesCoverLettersIndexRoute
@@ -387,7 +379,6 @@ export interface FileRoutesById {
   '/guides/india-resume-format': typeof GuidesIndiaResumeFormatRoute
   '/guides/singapore-resume-format': typeof GuidesSingaporeResumeFormatRoute
   '/guides/uk-resume-format': typeof GuidesUkResumeFormatRoute
-  '/api/public/test-seed-plans': typeof ApiPublicTestSeedPlansRoute
   '/examples/cover-letters/$slug': typeof ExamplesCoverLettersSlugRoute
   '/examples/resumes/$slug': typeof ExamplesResumesSlugRoute
   '/examples/cover-letters/': typeof ExamplesCoverLettersIndexRoute
@@ -432,7 +423,6 @@ export interface FileRouteTypes {
     | '/guides/india-resume-format'
     | '/guides/singapore-resume-format'
     | '/guides/uk-resume-format'
-    | '/api/public/test-seed-plans'
     | '/examples/cover-letters/$slug'
     | '/examples/resumes/$slug'
     | '/examples/cover-letters/'
@@ -475,7 +465,6 @@ export interface FileRouteTypes {
     | '/guides/india-resume-format'
     | '/guides/singapore-resume-format'
     | '/guides/uk-resume-format'
-    | '/api/public/test-seed-plans'
     | '/examples/cover-letters/$slug'
     | '/examples/resumes/$slug'
     | '/examples/cover-letters'
@@ -518,7 +507,6 @@ export interface FileRouteTypes {
     | '/guides/india-resume-format'
     | '/guides/singapore-resume-format'
     | '/guides/uk-resume-format'
-    | '/api/public/test-seed-plans'
     | '/examples/cover-letters/$slug'
     | '/examples/resumes/$slug'
     | '/examples/cover-letters/'
@@ -562,7 +550,6 @@ export interface RootRouteChildren {
   GuidesIndiaResumeFormatRoute: typeof GuidesIndiaResumeFormatRoute
   GuidesSingaporeResumeFormatRoute: typeof GuidesSingaporeResumeFormatRoute
   GuidesUkResumeFormatRoute: typeof GuidesUkResumeFormatRoute
-  ApiPublicTestSeedPlansRoute: typeof ApiPublicTestSeedPlansRoute
   ExamplesCoverLettersSlugRoute: typeof ExamplesCoverLettersSlugRoute
   ExamplesResumesSlugRoute: typeof ExamplesResumesSlugRoute
   ExamplesCoverLettersIndexRoute: typeof ExamplesCoverLettersIndexRoute
@@ -787,13 +774,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesUkResumeFormatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/test-seed-plans': {
-      id: '/api/public/test-seed-plans'
-      path: '/api/public/test-seed-plans'
-      fullPath: '/api/public/test-seed-plans'
-      preLoaderRoute: typeof ApiPublicTestSeedPlansRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/examples/cover-letters/': {
       id: '/examples/cover-letters/'
       path: '/examples/cover-letters'
@@ -900,7 +880,6 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesIndiaResumeFormatRoute: GuidesIndiaResumeFormatRoute,
   GuidesSingaporeResumeFormatRoute: GuidesSingaporeResumeFormatRoute,
   GuidesUkResumeFormatRoute: GuidesUkResumeFormatRoute,
-  ApiPublicTestSeedPlansRoute: ApiPublicTestSeedPlansRoute,
   ExamplesCoverLettersSlugRoute: ExamplesCoverLettersSlugRoute,
   ExamplesResumesSlugRoute: ExamplesResumesSlugRoute,
   ExamplesCoverLettersIndexRoute: ExamplesCoverLettersIndexRoute,
