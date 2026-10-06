@@ -18,7 +18,10 @@ export function aiGatewayErrorMessage(error: unknown): string {
     return "The AI service is busy right now. Please wait a moment and try again.";
   }
   if (status === 401 || status === 403 || text.includes("unauthorized")) {
-    return "The AI service is not configured correctly. Please contact support.";
+    console.error("[ai-gateway] auth/config error", status, text.slice(0, 300));
+    return "Something went wrong on our side. Please try again in a moment.";
   }
-  return anyError instanceof Error && anyError.message ? anyError.message : "Something went wrong. Please try again.";
+  console.error("[ai-gateway] unexpected error", status, text.slice(0, 300));
+  return "Something went wrong on our side. Please try again in a moment.";
 }
+
