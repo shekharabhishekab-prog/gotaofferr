@@ -149,14 +149,42 @@ ${draftToText(draft)}`;
 const PLACEHOLDER = /^(n\/?a|not specified|not provided|not given|unknown|company( name)?|employer|organi[sz]ation|your company|xyz|none)$/i;
 
 /** The model sometimes fills blank fields with "Not Specified"; drop those. */
+const BUILDER_CLAIMS = /return on (ad )?spend|\broas\b|\broi\b|return on investment|conversion rates?|revenue growth|\brevenue\b/i;
+const stemW = (w: string) => w.toLowerCase().replace(/(ing|ed|es|s)$/, "");
+
+/** Cuts invented tails ("... through audience segmentation") and unsupported result claims. */
+function trimInvented(text: string, notes: string): string {
+  const src = new Set((notes.toLowerCase().match(/[a-z0-9]+/g) ?? []).map(stemW));
+  const has = (w: string) => src.has(stemW(w));
+  const claimsOk = (t: string) => !BUILDER_CLAIMS.test(t) || BUILDER_CLAIMS.test(notes);
+  let out = text;
+  const m = /^(.*\S)\s+(?:through|via|using|by|to|while)\s+(.+)$/i.exec(out);
+  if (m) {
+    const tail = (m[2].toLowerCase().match(/[a-z]{4,}/g) ?? []);
+    const absent = tail.filter((w) => !has(w));
+    if (tail.length >= 2 && absent.length >= 2 && absent.length / tail.length >= 0.6) out = m[1];
+    else if (!claimsOk(m[2])) out = m[1];
+  }
+  if (!claimsOk(out)) {
+    const parts = out.split(/(?<=[.!?])\s+/);
+    const kept = parts.filter(claimsOk);
+    out = kept.length ? kept.join(" ") : out;
+  }
+  return out;
+}
+
 function stripPlaceholders(result: PolishedResume, draft: ResumeDraft): PolishedResume {
+  const notes = draftToText(draft);
   const hadExperience = draft.experience.some((item) => item.role || item.company || item.details);
   const clean = (value: string) => (PLACEHOLDER.test((value ?? "").trim()) ? "" : value);
   return {
     ...result,
     headline: clean(result.headline),
+    summary: trimInvented(result.summary, notes),
+    keyAchievements: result.keyAchievements.map((k) => trimInvented(k, notes)),
     experience: (hadExperience ? result.experience : []).map((item) => ({
       ...item,
+      bullets: item.bullets.map((b) => trimInvented(b, notes)),
       role: clean(item.role),
       company: clean(item.company),
       location: clean(item.location),
