@@ -27,8 +27,6 @@ const GEO_HEADERS = [
 /** Best-effort country of the person whose resume we are rewriting. */
 export function detectCountry(): string | null {
   try {
-    const m = /(?:^|;\s*)gtest_country=([A-Za-z]{2})/.exec(getRequest().headers.get("cookie") || "");
-    if (m) return m[1].toUpperCase();
   } catch {
     /* no request */
   }
