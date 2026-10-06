@@ -77,6 +77,16 @@ export async function upsertRazorpaySubscriptionRow(
 
   if (error) return { ok: false, reason: error.message };
 
+  // A paid, active subscription proves an honest buyer: clear any failed-payment strikes.
+  if (subscription?.status === 'active' && (subscription?.paid_count ?? 0) > 0) {
+    try {
+      const { clearStrikes } = await import('./purchase-guard.server');
+      await clearStrikes(userId);
+    } catch {
+      /* never block activation */
+    }
+  }
+
   // Upgrade = a brand new full-price subscription. Once its first payment has
   // gone through (status active), the plan it replaces is cancelled right away
   // so the customer is never billed for two plans. Safe to run many times.
