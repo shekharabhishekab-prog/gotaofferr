@@ -34,18 +34,7 @@ export const Route = createFileRoute('/api/public/payments/razorpay-webhook')({
             case 'subscription.completed':
             case 'subscription.paused':
             case 'subscription.resumed':
-              if (subscription?.id && event === 'subscription.halted') {
-                try {
-                  const full = await rzp<any>(`/subscriptions/${subscription.id}`);
-                  const uid = full?.notes?.userId;
-                  if (uid) {
-                    const { recordStrike } = await import('@/lib/purchase-guard.server');
-                    await recordStrike(uid, `halted:${subscription.id}`, full?.notes?.iph);
-                  }
-                } catch (e) {
-                  console.error('strike(halted) failed', e);
-                }
-              }
+              // A halted renewal is an honest card problem, not abuse: no strike.
               if (subscription?.id) {
                 // Re-read so period dates and status stay authoritative.
                 try {
