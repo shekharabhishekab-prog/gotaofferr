@@ -135,7 +135,7 @@ export async function upsertRazorpaySubscriptionRow(
         (r: any) =>
           r.stripe_subscription_id !== subscription.id &&
           me &&
-          new Date(r.created_at).getTime() < new Date(me.created_at).getTime(),
+          new Date(r.created_at ?? 0).getTime() < new Date(me.created_at ?? 0).getTime(),
       );
       if (me && older) {
         try {
