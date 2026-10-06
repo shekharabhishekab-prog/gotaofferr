@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronDown, Download, Loader2, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { ChevronDown, Download, Loader2, Plus, Save, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
 import { useSession } from "@/hooks/useSession";
 import { assistResumeField, polishResumeDraft } from "@/lib/resume-builder.functions";
 import { getBuilderUsage, spendBuilderResume } from "@/lib/builder-usage.functions";
+import { saveBuilderResume } from "@/lib/builder-saves.functions";
 import { UsageUpsell } from "@/components/UsageUpsell";
 import type { AssistKind } from "@/lib/resume-assist-schema";
 import {
@@ -36,6 +37,8 @@ export function ResumeBuilder() {
   const polish = useServerFn(polishResumeDraft);
   const assist = useServerFn(assistResumeField);
   const loadUsage = useServerFn(getBuilderUsage);
+  const saveResume = useServerFn(saveBuilderResume);
+  const [saving, setSaving] = useState(false);
   const spendResume = useServerFn(spendBuilderResume);
   const [usage, setUsage] = useState<{ tier: "free" | "starter" | "job_hunt" | "career_pro"; limit: number; used: number } | null>(null);
   useEffect(() => {
@@ -120,6 +123,22 @@ export function ResumeBuilder() {
       resetTurnstile();
       setCaptchaToken(null);
       setPolishing(false);
+    }
+  }
+
+  async function saveToAccount() {
+    const data = parsed();
+    if (!data) return;
+    setSaving(true);
+    try {
+      const r = await saveResume({ data: { label: data.targetRole || data.fullName || "Resume", draft: data, polished } });
+      if (r.ok) toast.success("Saved to your account.");
+      else if (r.reason === "full") toast.error("Your saved slots are full. Delete one from your account first.");
+      else toast.error("Could not save right now. Please try again.");
+    } catch {
+      toast.error("Could not save right now. Please try again.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -524,6 +543,12 @@ export function ResumeBuilder() {
                 {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
                 Download PDF
               </Button>
+              {session && usage && usage.tier !== "free" ? (
+                <Button variant="outline" onClick={saveToAccount} disabled={saving}>
+                  {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                  Save to my account
+                </Button>
+              ) : null}
             </div>
             {usage ? (
               <div className="mt-3">
