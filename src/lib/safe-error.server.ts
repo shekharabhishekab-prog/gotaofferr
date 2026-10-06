@@ -30,6 +30,7 @@ export function safeError(
 ): Error {
   if (isUserFacing(error)) return error as Error;
   console.error(`[${scope}]`, error);
+  void import('./ops-alert.server').then((m) => m.opsAlert(`server error: ${scope}`, error)).catch(() => {});
   return new Error(publicMessage);
 }
 
@@ -43,3 +44,4 @@ export function safeErrorMessage(
   console.error(`[${scope}]`, error);
   return publicMessage;
 }
+
