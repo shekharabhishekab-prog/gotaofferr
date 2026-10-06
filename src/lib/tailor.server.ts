@@ -282,13 +282,26 @@ ${data.resume}`;
 
     // Guarantee our public ATS score is always above 95%, as promised, and
     // keep the headline match score honest: it must equal its own breakdown.
+    // The match score is counted in code (same formula for every plan and model).
+    let counted: { score: number; breakdown: any } | null = null;
+    try {
+      const { computeMatchScore } = await import("@/lib/match-score.server");
+      counted = computeMatchScore({ jobDescription: data.jobDescription, role: data.role, resume: data.resume }, result);
+    } catch (e) {
+      console.error("[match-score] failed", e);
+    }
     const b = result.scoreBreakdown;
     const summed = b
       ? Math.round(b.keywordMatch + b.titleAlignment + b.formatting + b.experienceRelevance + b.quantifiedImpact)
       : null;
     return withLetterDate(humanize({
       ...result,
-      matchScore: summed !== null ? Math.max(0, Math.min(100, summed)) : result.matchScore,
+      scoreBreakdown: counted ? counted.breakdown : result.scoreBreakdown,
+      matchScore: counted
+        ? counted.score
+        : summed !== null
+          ? Math.max(0, Math.min(100, summed))
+          : result.matchScore,
       atsScore: Math.max(95, Math.min(100, Math.round(result.atsScore ?? 95))),
     }));
   } catch (error) {
