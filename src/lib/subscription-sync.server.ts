@@ -117,6 +117,46 @@ export async function upsertRazorpaySubscriptionRow(
       console.error('[upgrade] replace step failed', e);
     }
   }
+  // Duplicate guard: a second checkout of the SAME plan can slip through when the
+  // first payment has not activated yet. When this newer one activates and an older
+  // active row for the same plan exists, cancel this newer one so the customer is
+  // never billed twice. No automatic refund: it is only logged for a manual refund.
+  if (subscription?.status === 'active' && !subscription?.notes?.replaces && lookupKey) {
+    try {
+      const { data: rows } = await supabaseAdmin
+        .from('subscriptions')
+        .select('stripe_subscription_id, created_at, status')
+        .eq('user_id', userId)
+        .eq('environment', env)
+        .eq('price_id', lookupKey)
+        .in('status', ['active', 'trialing']);
+      const me = (rows ?? []).find((r: any) => r.stripe_subscription_id === subscription.id);
+      const older = (rows ?? []).find(
+        (r: any) =>
+          r.stripe_subscription_id !== subscription.id &&
+          me &&
+          new Date(r.created_at).getTime() < new Date(me.created_at).getTime(),
+      );
+      if (me && older) {
+        try {
+          await rzp(`/subscriptions/${subscription.id}/cancel`, { method: 'POST', body: { cancel_at_cycle_end: 0 } });
+        } catch (e) {
+          console.error('[duplicate-sub] could not cancel duplicate', subscription.id, e);
+        }
+        await supabaseAdmin
+          .from('subscriptions')
+          .update({ status: 'canceled', cancel_at_period_end: false, current_period_end: new Date().toISOString(), updated_at: new Date().toISOString() } as any)
+          .eq('stripe_subscription_id', subscription.id)
+          .eq('user_id', userId)
+          .eq('environment', env);
+        console.error(
+          `[duplicate-sub] REFUND-NEEDED user=${userId} duplicate=${subscription.id} kept=${older.stripe_subscription_id} plan=${lookupKey}`,
+        );
+      }
+    } catch (e) {
+      console.error('[duplicate-sub] guard failed', e);
+    }
+  }
   return { ok: true };
 }
 
