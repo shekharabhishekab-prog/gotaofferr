@@ -1,7 +1,7 @@
 /**
  * Purchase-only suspension ladder. Free features are never affected.
  * Strikes: a halted subscription, or a failed payment on a NEW checkout.
- * 3 strikes = one cycle. Cycle 1 = 2 hours, cycle 2 = 2 days, cycle 3+ = 7 days (the maximum).
+ * 3 strikes = one cycle. Round 1 = 2 hours, round 2 = 2 days, rounds 3 and 4 = 3 days, round 5 = permanent.
  * After WARN_AT_CYCLES cycles the buyer sees a final warning. After
  * BLOCK_AT_CYCLES cycles purchases are blocked for good for the account and the network address.
  * State lives in the user's auth app_metadata (no schema change); the address block
@@ -10,9 +10,9 @@
 export const STRIKES_PER_CYCLE = 3;
 export const SUSPEND_FIRST_MS = 2 * 3600 * 1000;
 export const SUSPEND_SECOND_MS = 2 * 24 * 3600 * 1000;
-export const SUSPEND_NEXT_MS = 7 * 24 * 3600 * 1000;
+export const SUSPEND_NEXT_MS = 3 * 24 * 3600 * 1000;
 export const WARN_AT_CYCLES = 4;
-export const BLOCK_AT_CYCLES = 6;
+export const BLOCK_AT_CYCLES = 5;
 
 type PBan = { strikes: number; cycles: number; until?: string; permanent?: boolean; seen?: string[] };
 
@@ -72,7 +72,9 @@ export async function recordStrike(userId: string, key: string, ipHash?: string)
 
 // Kept under 90 characters so the checkout toast shows them as written.
 const FRIENDLY_BLOCK = "Plot twist: purchases are now blocked here for good. Please contact us.";
-const FRIENDLY_PAUSE = "Purchases are in timeout for now. Please try again later. Free features still work.";
+const FRIENDLY_PAUSE_1 = "Payment failed 3 times. Purchases are in timeout for 2 hours. Go grab a chai!";
+const FRIENDLY_PAUSE_2 = "Still not getting it? Purchases are paused for 2 days. Check your card, please.";
+const FRIENDLY_PAUSE_3 = "Third timeout. Purchases are paused for 3 days. Free features still work.";
 const FRIENDLY_PAUSE_FINAL = "Final warning: one more round of failed payments and purchases are blocked for good.";
 
 /** Returns a friendly message when purchases must be refused, otherwise null. Fails open. */
@@ -92,7 +94,7 @@ export async function purchaseBlockMessage(userId: string, ipHash?: string): Pro
       if (data) return FRIENDLY_BLOCK;
     }
     if (st.until && new Date(st.until).getTime() > Date.now()) {
-      return st.cycles >= WARN_AT_CYCLES ? FRIENDLY_PAUSE_FINAL : FRIENDLY_PAUSE;
+      return st.cycles >= WARN_AT_CYCLES ? FRIENDLY_PAUSE_FINAL : st.cycles <= 1 ? FRIENDLY_PAUSE_1 : st.cycles === 2 ? FRIENDLY_PAUSE_2 : FRIENDLY_PAUSE_3;
     }
     if (st.cycles >= WARN_AT_CYCLES) {
       // suspension over, but warn on the next attempt through the checkout flow
