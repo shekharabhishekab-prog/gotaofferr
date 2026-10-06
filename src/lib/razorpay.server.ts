@@ -265,11 +265,7 @@ export function lookupKeyForPlanId(planId?: string | null): string | null {
   return found ? found[0] : (LEGACY_PLAN_IDS[planId] ?? null);
 }
 
-/** Preview-only override: when both TEST vars exist (never set on production) they win. */
 export function razorpayKeys(): { id?: string; secret?: string } {
-  const tid = process.env['RAZORPAY_TEST_KEY_ID'];
-  const tsec = process.env['RAZORPAY_TEST_KEY_SECRET'];
-  if (tid && tsec && tid.startsWith('rzp_test_')) return { id: tid, secret: tsec };
   return { id: process.env['RAZORPAY_KEY_ID'], secret: process.env['RAZORPAY_KEY_SECRET'] };
 }
 
