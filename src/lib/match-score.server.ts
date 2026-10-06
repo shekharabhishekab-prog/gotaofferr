@@ -60,7 +60,10 @@ export function computeMatchScore(
   const kw = Math.min(1, coverage(jd, finalText) / FULL_COVERAGE);
   const keywordMatch = Math.round(40 * kw);
 
-  const roleTerms = termSet(input.role || "");
+  // No role typed: the posting itself usually opens with the job title.
+  const roleText =
+    input.role?.trim() || input.jobDescription.split(/\n| - | – | \| /)[0].slice(0, 80);
+  const roleTerms = termSet(roleText);
   let titleAlignment = 10;
   if (roleTerms.size) {
     const own = termSet(`${r.headline} ${(r.experience ?? []).slice(0, 2).map((e) => e.role).join(" ")}`);
@@ -71,10 +74,10 @@ export function computeMatchScore(
 
   // The output is always one column with standard headings. Deduct only when the
   // SOURCE resume is table-like (lots of tabs or pipe-separated cells).
-  const tableLines = input.resume.split("\n").filter((l) => (l.match(/\||\t/g) ?? []).length >= 3).length;
+  const tableLines = input.resume.split("\n").filter((l) => !/@|https?:|linkedin|github/i.test(l) && (l.match(/\||\t/g) ?? []).length >= 3).length;
   const formatting = Math.max(12, 20 - Math.min(8, tableLines * 2));
 
-  const rel = Math.min(1, coverage(jd, bullets.join(" ")) / FULL_COVERAGE);
+  const rel = Math.min(1, coverage(jd, `${bullets.join(" ")} ${r.summary} ${(r.skills ?? []).join(" ")}`) / FULL_COVERAGE);
   const experienceRelevance = Math.round(15 * rel);
 
   const withNum = bullets.filter((b) => /\d/.test(b)).length;
