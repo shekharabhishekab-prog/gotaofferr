@@ -38,7 +38,7 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
           if (!u) return new Response('{"err":"no user"}');
           if (al === 'seed') {
             await sb.from('job_alerts').delete().eq('user_id', u.id);
-            const { data, error } = await sb.from('job_alerts').insert({ user_id: u.id, role: 'Digital Marketing Manager', location: 'Dubai', local_hour: 0, timezone: 'Asia/Kolkata', enabled: true }).select('id, emails_sent, last_sent_at').single();
+            const { data, error } = await sb.from('job_alerts').insert({ user_id: u.id, role: 'Digital Marketing Manager', location: 'New York', local_hour: 0, timezone: 'Asia/Kolkata', enabled: true }).select('id, emails_sent, last_sent_at').single();
             return new Response(JSON.stringify({ data, err: error?.message }));
           }
           if (al === 'age') {
