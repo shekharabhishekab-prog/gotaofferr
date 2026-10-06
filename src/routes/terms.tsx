@@ -139,7 +139,7 @@ function Terms() {
           </p>
           <p>
             <strong>Repeated failed payments.</strong> If payments fail again and again on an
-            account, we may pause new purchases on it for 2 hours, then for 2 days, then for 7
+            account, we may pause new purchases on it for 2 hours, then for 2 days, then for 3
             days. After several rounds we may block new purchases for good on that account and the
             network address it uses. Free features keep working. Existing renewals follow the retry
             rules above.
