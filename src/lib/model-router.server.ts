@@ -72,7 +72,7 @@ export async function countCall(model: string): Promise<boolean> {
 }
 
 export function limitMessage(_tier: RoutingTier): string {
-  return "We're getting a lot of requests right now. Please try again in a few minutes. This one was not counted.";
+  return "Too many job hunters, one very tired AI. Give it a few minutes - this one wasn't counted.";
 }
 
 /** Try each model in the tier's chain; move on only for quota errors. */
