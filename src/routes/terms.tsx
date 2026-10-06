@@ -27,7 +27,7 @@ function Terms() {
     <main className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
       <h1 className="font-display text-4xl font-bold text-foreground">Terms &amp; Conditions</h1>
       <p className="mt-4 text-sm text-muted-foreground">
-        Last updated: {new Date().toLocaleDateString()}
+        Last updated: 7 October 2026
       </p>
 
       <div className="mt-8 space-y-8 text-muted-foreground">
@@ -169,6 +169,10 @@ function Terms() {
             </li>
             <li>If an upgrade payment fails, your current plan stays active and unchanged.</li>
           </ul>
+          <p>
+            Ads depend on your plan. The Free plan shows ads. Starter and Job Hunt show fewer ads.
+            Career Pro shows no ads.
+          </p>
         </section>
 
         <section className="space-y-4">
@@ -240,6 +244,12 @@ function Terms() {
 
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">13. Contact</h2>
+          <p>
+            We handle your personal data as described in our Privacy Policy, in line with India's
+            Digital Personal Data Protection Act, 2023. To access, correct or delete your data, or to
+            raise a complaint, contact our Grievance Officer at contact@gotaofferr.com. We reply
+            within 30 days.
+          </p>
           <p>
             Questions about these Terms: contact@gotaofferr.com, or use the{" "}
             <Link to="/contact" className="underline hover:text-foreground">
