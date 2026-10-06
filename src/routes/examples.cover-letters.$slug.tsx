@@ -233,7 +233,7 @@ function CoverLetterExamplePage() {
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
           Paste the job description, upload your resume, and get a matching cover letter and
-          ATS-ready resume together — three free every month.
+          ATS-ready resume together — ten free every month.
         </p>
         <Button asChild size="lg" className="mt-6">
           <Link to="/tailor">Write my cover letter</Link>
@@ -258,3 +258,4 @@ function CoverLetterNotFound() {
     </main>
   );
 }
+
