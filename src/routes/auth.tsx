@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PasswordInput } from "@/components/PasswordInput";
 import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -200,20 +199,11 @@ function AuthPage() {
 
 
   async function google() {
-    if (import.meta.env.VITE_AUTH_MODE === "supabase") {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(next)}` },
-      });
-      if (error) toast.error("Google sign-in failed. Please try again.");
-      return;
-    }
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}${next}`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(next)}` },
     });
-    if (result.error) return toast.error("Google sign-in failed. Please try again.");
-    if (result.redirected) return;
-    navigate({ to: next, replace: true });
+    if (error) toast.error("Google sign-in failed. Please try again.");
   }
 
   return (
