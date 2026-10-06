@@ -151,7 +151,7 @@ export const tailorResume = createServerFn({ method: "POST" })
         .gte("created_at", dayAgo);
       if ((dayCount ?? 0) >= DAILY_TAILOR_ABUSE_GUARD) {
         throw new Error(
-          "That's a lot of tailoring in a short time. Please try again in a little while. This one was not counted.",
+          "Easy there, champ! That's a lot of tailoring for one day. Take a short break and try again later. Not counted.",
         );
       }
     }
