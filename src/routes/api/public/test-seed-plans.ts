@@ -28,6 +28,19 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             .eq('user_id', u.id);
           return new Response(JSON.stringify({ ok: !error, err: error?.message }));
         }
+        if (url.searchParams.get('backdate') === 'saves') {
+          // TEST-only: make the oldest saved builder resume 4 months old to prove the 3-month purge.
+          const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+          const { data: list } = await (supabaseAdmin as any).auth.admin.listUsers({ page: 1, perPage: 200 });
+          const u = (list?.users ?? []).find((x: any) => x.email === 'mailboss@mail.instinct.com');
+          if (!u) return new Response('{"err":"no user"}');
+          const { data: rows } = await (supabaseAdmin as any).from('default_resumes').select('id').eq('user_id', u.id).order('created_at', { ascending: true }).limit(1);
+          const id = rows?.[0]?.id;
+          if (!id) return new Response('{"err":"no saved row"}');
+          const old = new Date(Date.now() - 125 * 86400000).toISOString();
+          const { error } = await (supabaseAdmin as any).from('default_resumes').update({ created_at: old }).eq('id', id);
+          return new Response(JSON.stringify({ ok: !error, err: error?.message, id }));
+        }
         const al = url.searchParams.get('alerts');
         if (al) {
           // TEST-only: drive the job-alert cadence for the QA account.
