@@ -107,10 +107,6 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
         const { getRequest } = await import('@tanstack/react-start/server');
         const h = getRequest().headers;
         let cc = (h.get('cf-ipcountry') || '').toUpperCase();
-        if ((process.env['RAZORPAY_TEST_KEY_ID'] || '').startsWith('rzp_test_')) {
-          const m = /(?:^|;\s*)gtest_country=([A-Za-z]{2})/.exec(h.get('cookie') || '');
-          if (m) cc = m[1].toUpperCase();
-        }
         if (/^[A-Z]{2}$/.test(cc) && cc !== 'XX' && cc !== 'IN') return { geoNotice: true };
       }
       const { getRequest: getReq } = await import('@tanstack/react-start/server');
