@@ -162,17 +162,20 @@ export async function runDueDigests() {
 
   const rows = ((alerts ?? []) as AlertRow[]).filter((alert) => isAlertDue(alert, now));
   let emailed = 0;
+  const reasons: string[] = [];
 
   for (const alert of rows) {
     try {
       const result = await sendDigestForAlert(alert, { now });
       if (result.sent) emailed += 1;
+      else reasons.push(result.reason ?? "unknown");
       console.log(`Job alert ${alert.id}: sent=${result.sent} ${result.reason ?? ""}`);
     } catch (error) {
       console.error(`Job alert ${alert.id} failed:`, error);
+      reasons.push("error");
     }
   }
 
-  return { checkedAt: now.toISOString(), alerts: rows.length, processed: emailed, emailed };
+  return { checkedAt: now.toISOString(), alerts: rows.length, processed: emailed, emailed, reasons };
 }
 
