@@ -1,3 +1,4 @@
+import { PROMPT_GUARD } from "./prompt-guard";
 import { generateText } from "ai";
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
@@ -12,6 +13,10 @@ const BASE_RULES = `Rules you must follow:
 - Return only the rewritten content. No headings, no preamble, no quotes, no markdown.`;
 
 function instruction(data: AssistInput): string {
+  return `${PROMPT_GUARD}\n\n${instructionBody(data)}`;
+}
+
+function instructionBody(data: AssistInput): string {
   const region =
     data.template === "india"
       ? "Audience: Indian recruiters and Indian ATS portals. Indian English spelling."
