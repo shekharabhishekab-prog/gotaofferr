@@ -145,7 +145,15 @@ export async function upsertRazorpaySubscriptionRow(
         }
         await supabaseAdmin
           .from('subscriptions')
-          .update({ status: 'canceled', cancel_at_period_end: false, current_period_end: new Date().toISOString(), updated_at: new Date().toISOString() } as any)
+          .update({
+            status: 'canceled',
+            cancel_at_period_end: false,
+            current_period_end: new Date().toISOString(),
+            // Keep the cancelled duplicate OLDER than the kept plan: the rest of the app
+            // reads the newest row as the user's plan, so the kept plan must stay newest.
+            created_at: new Date(new Date(older.created_at ?? 0).getTime() - 1000).toISOString(),
+            updated_at: new Date().toISOString(),
+          } as any)
           .eq('stripe_subscription_id', subscription.id)
           .eq('user_id', userId)
           .eq('environment', env);
