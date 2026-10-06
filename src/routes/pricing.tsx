@@ -352,7 +352,7 @@ function Pricing() {
 
       {festival && hasFestivalPrice(pricing, "job_hunt") ? (
         <p className="mt-6 w-fit rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
-          <strong>{festival.title} - Save {savingPercent(pricing, "job_hunt", "month", true)}%.</strong> Starter Pack is{" "}
+          <strong>{festival.title} - Save up to {savingPercent(pricing, "job_hunt", "month", true)}%.</strong> Starter Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "starter", "month", true))}/month, Job Hunt Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "job_hunt", "month", true))}/month and Career Pro Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "career_pro", "month", true))}/month.
@@ -425,8 +425,12 @@ function Pricing() {
                     )}
                   </span>
                   <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
-                    {onFestivalOffer(key) ? `${festival?.title} - ` : ""}Save{" "}
-                    {savingPercent(pricing, key as PaidPlanKey, interval, onFestivalOffer(key))}%
+                    {onFestivalOffer(key) ? `${festival?.title}` : ""}
+                    {onFestivalOffer(key) &&
+                    savingPercent(pricing, key as PaidPlanKey, interval, true) !==
+                      savingPercent(pricing, "job_hunt", "month", true)
+                      ? ""
+                      : `${onFestivalOffer(key) ? " - " : ""}Save ${savingPercent(pricing, key as PaidPlanKey, interval, onFestivalOffer(key))}%`}
                   </span>
                 </div>
               ) : null}
