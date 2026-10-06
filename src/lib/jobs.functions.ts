@@ -50,6 +50,30 @@ async function countSearches(context: Ctx, since?: string): Promise<number> {
 }
 
 /**
+ * A search done as a signed-out guest counts against the Free allowance after
+ * sign-up. The guest use is tied to the browser cookie set at that search and
+ * only counts inside the current Free window (this month).
+ */
+async function guestSearchesUsed(since: string): Promise<number> {
+  try {
+    const { getCookie } = await import("@tanstack/react-start/server");
+    const { ANON_COOKIE, hashValue } = await import("./anon-tailor.server");
+    const cookieId = getCookie(ANON_COOKIE);
+    if (!cookieId) return 0;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("anonymous_tailor_uses")
+      .select("id")
+      .eq("device_hash", "jobs:" + hashValue(cookieId))
+      .gte("created_at", since)
+      .limit(1);
+    return data && data.length ? 1 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * Job finder access. Career pro members get JOB_SEARCH_MONTHLY_LIMIT searches
  * per billing period; everyone else gets FREE_JOB_SEARCH_TRIALS lifetime trial
  * searches so they can see what the feature does before paying.
@@ -77,7 +101,8 @@ async function assertCanSearch(context: Ctx): Promise<{ pro: boolean; used: numb
     return { pro, used, limit: paidLimit };
   }
 
-  const used = await countSearches(context, searchWindowStart(null));
+  const freeSince = searchWindowStart(null);
+  const used = (await countSearches(context, freeSince)) + (await guestSearchesUsed(freeSince));
   if (used >= FREE_JOB_SEARCH_TRIALS) {
     if (await consumeTopupCredit(context.userId, "job_search")) {
       return { pro: false, used, limit: FREE_JOB_SEARCH_TRIALS };
@@ -109,7 +134,9 @@ export const getJobSearchUsage = createServerFn({ method: "GET" })
     const comped = isCompedCareerPro(ctx.claims?.email);
     const sub = comped ? null : await loadSubscription(ctx);
     const paidLimit = comped ? JOB_SEARCH_MONTHLY_LIMIT : monthlyJobSearchLimit(sub);
-    const used = paidLimit > 0 ? await countSearches(ctx, searchWindowStart(sub)) : await countSearches(ctx, searchWindowStart(null));
+    const used = paidLimit > 0
+      ? await countSearches(ctx, searchWindowStart(sub))
+      : (await countSearches(ctx, searchWindowStart(null))) + (await guestSearchesUsed(searchWindowStart(null)));
     const limit = paidLimit > 0 ? paidLimit : FREE_JOB_SEARCH_TRIALS;
     const topup = await topupBalance(ctx.userId, "job_search");
     const tier = comped ? "career_pro" : isEntitled(sub) ? tierForPriceId(sub?.price_id) : "free";
