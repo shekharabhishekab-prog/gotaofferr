@@ -119,6 +119,7 @@ function Privacy() {
             <li>Razorpay — payment processing and subscription mandates.</li>
             <li>Resend — transactional email delivery (sign-in codes, alerts, receipts).</li>
             <li>Cloudflare Turnstile — bot and abuse protection.</li>
+            <li>PostHog — product analytics.</li>
             <li>Google — sign-in with Google, Google Analytics (usage measurement) and Google AdSense (advertising).</li>
           </ul>
         </section>
@@ -140,6 +141,10 @@ function Privacy() {
           <p>
             Ads depend on your plan. The Free plan shows ads. Starter and Job Hunt show fewer ads.
             Career Pro shows no ads.
+          </p>
+          <p>
+            We also use PostHog (US servers) to count page visits and see which features are used.
+            We do not send your name, email or resume content to PostHog.
           </p>
         </section>
 
