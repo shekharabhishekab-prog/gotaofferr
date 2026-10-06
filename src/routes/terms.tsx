@@ -137,6 +137,13 @@ function Terms() {
             while we retry. If all 3 retries fail, your plan is suspended and your account returns
             to the Free plan.
           </p>
+          <p>
+            <strong>Repeated failed payments.</strong> If payments fail again and again on an
+            account, we may pause new purchases on it for 2 hours, then for 2 days, then for 7
+            days. After several rounds we may block new purchases for good on that account and the
+            network address it uses. Free features keep working. Existing renewals follow the retry
+            rules above.
+          </p>
           <h3 className="pt-2 text-lg font-semibold text-foreground">
             Upgrades, renewal and cancellation
           </h3>
