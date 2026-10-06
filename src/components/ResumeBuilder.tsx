@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronDown, Download, Loader2, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
-import { toast } from "sonner";
+import { ChevronDown, Download, Loader2, Plus, Save, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
 import { useSession } from "@/hooks/useSession";
 import { assistResumeField, polishResumeDraft } from "@/lib/resume-builder.functions";
+import { getBuilderUsage, spendBuilderResume } from "@/lib/builder-usage.functions";
+import { saveBuilderResume } from "@/lib/builder-saves.functions";
+import { UsageUpsell } from "@/components/UsageUpsell";
 import type { AssistKind } from "@/lib/resume-assist-schema";
 import {
   emptyDraft,
@@ -33,6 +36,15 @@ export function ResumeBuilder() {
   const navigate = useNavigate();
   const polish = useServerFn(polishResumeDraft);
   const assist = useServerFn(assistResumeField);
+  const loadUsage = useServerFn(getBuilderUsage);
+  const saveResume = useServerFn(saveBuilderResume);
+  const [saving, setSaving] = useState(false);
+  const spendResume = useServerFn(spendBuilderResume);
+  const [usage, setUsage] = useState<{ tier: "free" | "starter" | "job_hunt" | "career_pro"; limit: number; used: number } | null>(null);
+  useEffect(() => {
+    if (!session) return;
+    void loadUsage({}).then((u) => setUsage(u)).catch(() => undefined);
+  }, [session, loadUsage]);
 
   const [draft, setDraft] = useState<ResumeDraft>(() => emptyDraft("international"));
   const [polished, setPolished] = useState<PolishedResume | null>(null);
@@ -114,6 +126,22 @@ export function ResumeBuilder() {
     }
   }
 
+  async function saveToAccount() {
+    const data = parsed();
+    if (!data) return;
+    setSaving(true);
+    try {
+      const r = await saveResume({ data: { label: data.targetRole || data.fullName || "Resume", draft: data, polished } });
+      if (r.ok) toast.success("Saved to your account.");
+      else if (r.reason === "full") toast.error("Your saved slots are full. Delete one from your account first.");
+      else toast.error("Could not save right now. Please try again.");
+    } catch {
+      toast.error("Could not save right now. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function download() {
     const data = parsed();
     if (!data) return;
@@ -124,6 +152,12 @@ export function ResumeBuilder() {
     }
     setDownloading(true);
     try {
+      const spent = await spendResume({});
+      setUsage({ tier: spent.tier, limit: spent.limit, used: spent.used });
+      if (!spent.ok) {
+        toast.error("You have used all your builder resumes for this month.");
+        return;
+      }
       const { buildBuilderResumePdf } = await import("@/lib/resume-builder-pdf");
       const doc = await buildBuilderResumePdf(data, polished);
       doc.save(`${(data.fullName || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-resume.pdf`);
@@ -509,7 +543,18 @@ export function ResumeBuilder() {
                 {downloading ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
                 Download PDF
               </Button>
+              {session && usage && usage.tier !== "free" ? (
+                <Button variant="outline" onClick={saveToAccount} disabled={saving}>
+                  {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+                  Save to my account
+                </Button>
+              ) : null}
             </div>
+            {usage ? (
+              <div className="mt-3">
+                <UsageUpsell tier={usage.tier} noun="resumes" limit={usage.limit} used={usage.used} />
+              </div>
+            ) : null}
             <p className="mt-3 text-xs text-muted-foreground">
               Building is free. You'll need a free account to download the PDF.
             </p>
@@ -721,3 +766,4 @@ function PreviewBlock({ title, children }: { title: string; children: React.Reac
     </div>
   );
 }
+

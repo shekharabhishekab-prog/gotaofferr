@@ -16,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { CancelSubscriptionDialog } from "@/components/CancelSubscriptionDialog";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RouteError } from "@/components/RouteError";
+import { SavedBuilderResumes } from "@/components/SavedBuilderResumes";
 import { RouteNotFound } from "@/components/RouteNotFound";
 import { PasswordInput } from "@/components/PasswordInput";
 import { useSession } from "@/hooks/useSession";
@@ -49,7 +50,7 @@ import {
 } from "@/lib/account.functions";
 import { checkIsAdmin } from "@/lib/admin.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
-import { FREE_MONTHLY_LIMIT, JOB_HUNT_MONTHLY_LIMIT, CAREER_PRO_MONTHLY_LIMIT } from "@/lib/tailor-schema";
+import { FREE_MONTHLY_LIMIT, STARTER_MONTHLY_LIMIT, JOB_HUNT_MONTHLY_LIMIT, CAREER_PRO_MONTHLY_LIMIT } from "@/lib/tailor-schema";
 
 
 
@@ -393,7 +394,9 @@ function Account() {
   const monthlyLimit = isSubscribed
     ? tier === "career_pro"
       ? CAREER_PRO_MONTHLY_LIMIT
-      : JOB_HUNT_MONTHLY_LIMIT
+      : tier === "starter"
+        ? STARTER_MONTHLY_LIMIT
+        : JOB_HUNT_MONTHLY_LIMIT
     : FREE_MONTHLY_LIMIT;
   const remaining = Math.max(0, monthlyLimit - (overview?.runsThisMonth ?? 0));
   const planLabel = isSubscribed ? planName : "Free";
@@ -528,6 +531,8 @@ function Account() {
               </ul>
             )}
           </div>
+
+          <SavedBuilderResumes />
         </TabsContent>
 
         <TabsContent value="subscription" className="mt-8 space-y-6">
@@ -976,3 +981,4 @@ function Account() {
     </main>
   );
 }
+

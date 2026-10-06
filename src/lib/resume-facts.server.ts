@@ -42,6 +42,11 @@ export function extractSourceFacts(resume: string): string[] {
     resume.match(/\b(?:[₹$€£]\s?\d[\d,.]*\s?[kmb]?|\d[\d,.]*\s?(?:%|x|k|m|mn|bn|million|billion|lakh|crore)\b)/gi) ?? [];
   for (const metric of metrics) facts.add(metric.trim());
 
+  // Plain counts with a noun ("12 influencer campaigns", "team of 5 engineers", "30+ clients").
+  const counts =
+    resume.match(/\b\d{1,4}\+?\s(?:[A-Za-z]+\s)?(?:campaigns|clients|projects|members|people|employees|products|stores|markets|countries|accounts|events|brands|launches|dashboards|hires|customers|users|engineers|reports|releases|workshops|webinars|articles)\b/gi) ?? [];
+  for (const c of counts) facts.add(c.trim());
+
   // Multi-word proper nouns: employers, partners, clients, tools, institutions.
   const properNouns =
     resume.match(/\b([A-Z][A-Za-z&.'-]+(?:\s+(?:of|and|for|the|de|&)?\s*[A-Z][A-Za-z&.'-]+){1,4})\b/g) ?? [];
@@ -67,7 +72,13 @@ export function extractSourceFacts(resume: string): string[] {
  * a loss; only genuinely dropped information is reported.
  */
 export function findMissingFacts(resume: string, draft: unknown, limit = 40): string[] {
-  const haystack = normalize(JSON.stringify(draft ?? ""));
+  // Only the resume itself counts as keeping a fact. A fact that appears only in the
+  // cover letter or the insights is still missing from the resume.
+  const resumeOnly: any = draft && typeof draft === "object" ? { ...(draft as any) } : draft;
+  if (resumeOnly && typeof resumeOnly === "object") {
+    for (const k of ["coverLetter", "tips", "matchedKeywords", "missingKeywords", "scoreBreakdown", "consistencyFlags", "regionAdaptations", "fitWarning"]) delete resumeOnly[k];
+  }
+  const haystack = normalize(JSON.stringify(resumeOnly ?? ""));
   const missing: string[] = [];
   for (const fact of extractSourceFacts(resume)) {
     const needle = normalize(fact);
@@ -77,3 +88,4 @@ export function findMissingFacts(resume: string, draft: unknown, limit = 40): st
   }
   return missing;
 }
+

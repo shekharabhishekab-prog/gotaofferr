@@ -1,3 +1,4 @@
+import { friendlyMessage } from "@/lib/friendly-error";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import { RouteError } from "@/components/RouteError";
@@ -18,10 +19,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSession } from "@/hooks/useSession";
+import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
+import { getDeviceId } from "@/lib/device-id";
+import { searchJobsAnonymous } from "@/lib/anon-jobs.functions";
 import { useSubscription } from "@/hooks/useSubscription";
+import { UsageUpsell } from "@/components/UsageUpsell";
 import {
   getAlertDigest,
   getJobAlert,
+  getAlertUsage,
   getJobSearchUsage,
   saveJobAlert,
   searchJobs,
@@ -75,8 +81,18 @@ function Jobs() {
   const { session } = useSession();
   const { tier, isSubscribed, loading: subLoading } = useSubscription();
   const runSearch = useServerFn(searchJobs);
+  const runAnonSearch = useServerFn(searchJobsAnonymous);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [anonUsed, setAnonUsed] = useState(false);
+  useEffect(() => {
+    try { if (localStorage.getItem("gao_jobs_anon_used") === "1") setAnonUsed(true); } catch { /* ignore */ }
+  }, []);
   const loadSearchUsage = useServerFn(getJobSearchUsage);
   const loadAlert = useServerFn(getJobAlert);
+  const loadAlertUsage = useServerFn(getAlertUsage);
+  const [alertUsage, setAlertUsage] = useState<{ tier: "free" | "starter" | "job_hunt" | "career_pro"; limit: number; used: number } | null>(null);
+  const refreshAlertUsage = () => { if (session) loadAlertUsage({}).then(setAlertUsage).catch(() => undefined); };
+  useEffect(refreshAlertUsage, [session]); // eslint-disable-line react-hooks/exhaustive-deps
   const storeAlert = useServerFn(saveJobAlert);
   const loadDigest = useServerFn(getAlertDigest);
   const { alert: alertParam } = Route.useSearch();
@@ -106,6 +122,7 @@ function Jobs() {
 
   // One free trial search per account; Career pro gets a monthly allowance.
   const [searchUsage, setSearchUsage] = useState<{
+    tier: "free" | "starter" | "job_hunt" | "career_pro";
     pro: boolean;
     used: number;
     limit: number;
@@ -183,7 +200,7 @@ function Jobs() {
   } | null>(null);
 
   useEffect(() => {
-    if (!session || !isPro) return;
+    if (!session) return;
     let live = true;
     loadAlert({})
       .then((res) => {
@@ -210,11 +227,11 @@ function Jobs() {
     return () => {
       live = false;
     };
-  }, [session, isPro, loadAlert]);
+  }, [session, loadAlert]);
 
   // Opened from the alert email: show the exact jobs that were sent.
   useEffect(() => {
-    if (alertParam !== "1" || !session || !isPro) return;
+    if (alertParam !== "1" || !session) return;
     let live = true;
     setDigestOpen(true);
     setDigestLoading(true);
@@ -230,7 +247,7 @@ function Jobs() {
     return () => {
       live = false;
     };
-  }, [alertParam, session, isPro, loadDigest]);
+  }, [alertParam, session, loadDigest]);
 
   function closeDigest(open: boolean) {
     setDigestOpen(open);
@@ -248,6 +265,32 @@ function Jobs() {
     setJobs(null);
     setQueueNote(null);
     try {
+      if (!session) {
+        const out = await runAnonSearch({
+          data: {
+            role: role.trim(),
+            location: location.trim() || undefined,
+            remoteOnly,
+            experience: experience.trim() || undefined,
+            salaryRange: salaryRange || undefined,
+            extraFilters: extraFilters.trim() || undefined,
+            deviceId: getDeviceId(),
+            turnstileToken: captchaToken ?? undefined,
+          },
+        });
+        setCaptchaToken(null);
+        resetTurnstile();
+        if ("error" in out) {
+          if (out.used) {
+            try { localStorage.setItem("gao_jobs_anon_used", "1"); } catch { /* ignore */ }
+            setAnonUsed(true);
+          } else setError(friendlyMessage(out.error));
+        } else {
+          setJobs(out.jobs); setPage(0);
+          try { localStorage.setItem("gao_jobs_anon_used", "1"); } catch { /* ignore */ }
+        }
+        return;
+      }
       const res = await runQueued(
         () =>
           runSearch({
@@ -266,11 +309,11 @@ function Jobs() {
         },
       );
 
-      if ("error" in res) setError(res.error);
+      if ("error" in res) setError(friendlyMessage(res.error));
       else { setJobs(res.jobs); setPage(0); }
       refreshSearchUsage();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Job search failed");
+      setError(friendlyMessage(err, "Job search hit a wall 🧱 Please try again in a moment."));
     } finally {
       setSearching(false);
       setQueueNote(null);
@@ -278,6 +321,10 @@ function Jobs() {
   }
 
   async function onSaveAlert() {
+    if (!session) {
+      setAlertSaved("Create a free account to save job alerts.");
+      return;
+    }
     if (role.trim().length < 2) {
       setAlertSaved("Add a role first.");
       return;
@@ -298,6 +345,7 @@ function Jobs() {
           enabled: alertOn,
         },
       });
+      refreshAlertUsage();
       const firstSent = "firstEmailSent" in res && (res as { firstEmailSent?: boolean }).firstEmailSent;
       setAlertSaved(
         "error" in res && res.error
@@ -307,21 +355,30 @@ function Jobs() {
                 firstSent ? "your first digest is on its way to your inbox now" : "we'll email you"
               } ${role.trim()} matches${
                 location ? ` in ${location}` : ""
-              }${firstSent ? `, then every 3 days at ${formatHour(alertHour)} ${timezone}.` : ` every 3 days at ${formatHour(alertHour)} ${timezone}.`}`
+              }${firstSent ? `, then 2 more emails, 3 days apart, at ${formatHour(alertHour)} ${timezone}.` : ` every 3 days at ${formatHour(alertHour)} ${timezone}.`}`
             : "Saved, but alert emails are OFF — turn on \"Email me every 3 days\" and save again to start receiving them.",
       );
 
     } catch (err) {
-      setAlertSaved(err instanceof Error ? err.message : "Could not save alert");
+      setAlertSaved(friendlyMessage(err, "Your alert slipped away 🐟 Please try saving it again."));
     } finally {
       setSavingAlert(false);
     }
   }
 
+  const currentTier = searchUsage?.tier ?? tier;
+  const nextPackName = !session
+    ? "Career Pro Pack"
+    : currentTier === "free"
+      ? "Starter Pack"
+      : currentTier === "starter"
+        ? "Job Hunt Pack"
+        : "Career Pro Pack";
+
   return (
     <main className="site-container py-14 sm:py-20">
       <div className="flex items-center gap-2 text-sm font-medium text-primary">
-        <Sparkles className="size-4" /> Career Pro Pack
+        <Sparkles className="size-4" /> {nextPackName}
       </div>
       <h1 className="mt-3 font-display text-4xl font-bold text-foreground">AI job finder</h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
@@ -329,58 +386,40 @@ function Jobs() {
         list — click any job to apply on the company's own page.
       </p>
 
-      {!session ? (
+      {!session && anonUsed && !jobs ? (
         <div className="mt-10 rounded-2xl border border-border bg-card p-8">
-          <p className="text-card-foreground">Sign in to use the job finder.</p>
+          <p className="text-card-foreground">Create a free account to keep searching.</p>
           <Button asChild className="mt-4">
-            <Link to="/auth" search={{ redirect: "/jobs" }}>Sign in</Link>
+            <Link to="/auth" search={{ redirect: "/jobs" }}>Sign in or create account</Link>
           </Button>
         </div>
-      ) : !subLoading && usageLoaded && !canUseFinder ? (
+      ) : session && !subLoading && usageLoaded && !canUseFinder ? (
         <div className="mt-10 rounded-2xl border border-primary/40 bg-card p-8">
           <h2 className="font-display text-xl font-semibold text-card-foreground">
-            The job finder is part of Career Pro Pack
+            You have used your job searches for this month
           </h2>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Career Pro Pack searches every board for you, saves your filters, and emails you the new matches
-            each day — so you stop hopping between sites.
+            Your allowance resets next month. You can also move up a plan to keep searching now.
           </p>
+          {searchUsage ? (
+            <div className="mt-4">
+              <UsageUpsell tier={searchUsage.tier} noun="searches" limit={searchUsage.limit} used={searchUsage.used} />
+            </div>
+          ) : null}
           <Button asChild className="mt-5">
-            <Link to="/pricing">See Career Pro Pack</Link>
+            <Link to="/pricing">See plans</Link>
           </Button>
         </div>
       ) : (
         <>
           {searchUsage ? (
-            <p className="mt-8 w-fit rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
-              {searchUsage.pro ? (
-                <>
-                  <strong>{Math.max(0, searchUsage.remaining)} of {searchUsage.limit} searches left</strong>{" "}
-                  this billing period.
-                </>
-              ) : outOfSearches ? (
-                <>
-                  <strong>You've used your free job finder search.</strong>{" "}
-                  <Link to="/pricing" className="underline">
-                    Career Pro Pack
-                  </Link>{" "}
-                  gives you 30 searches a month and job alerts. Your results below stay on screen.
-                </>
-              ) : (
-                <>
-                  <strong>Free trial search.</strong> You get {searchUsage.limit} job finder search on
-                  the house — {Math.max(0, searchUsage.remaining)} left. After that,{" "}
-                  <Link to="/pricing" className="underline">
-                    Career Pro Pack
-                  </Link>{" "}
-                  gives you 30 searches a month and job alerts.
-                </>
-              )}
-
-            </p>
+            <div className="mt-8">
+              <UsageUpsell tier={searchUsage.tier} noun="searches" limit={searchUsage.limit} used={searchUsage.used} />
+            </div>
           ) : null}
 
           <form onSubmit={onSearch} className="mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
+            {!session ? <TurnstileWidget onToken={setCaptchaToken} className="mb-3 flex justify-center" /> : null}
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <Label htmlFor="role">Job role</Label>
@@ -507,14 +546,14 @@ function Jobs() {
             </div>
           </form>
 
-          <div className={`mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8 ${isPro ? "" : "hidden"}`}>
+          <div className={`mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8 ${session || jobs ? "" : "hidden"}`}>
             <div className="flex items-center gap-2 text-card-foreground">
               <Bell className="size-4 text-primary" />
               <h2 className="font-display text-lg font-semibold">Job alert every 3 days</h2>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
               We reuse the filters above — role, location, salary, experience — run that search every
-              3 days and email you the matching openings (up to 10) at your chosen time.
+              3 days and email you the matching openings (4 to 8 each time) at your chosen time. Each alert sends 3 emails, then ends. Setting it again starts a new one.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
               {[
@@ -574,6 +613,11 @@ function Jobs() {
                 {savingAlert ? "Saving…" : "Save alert"}
               </Button>
             </div>
+            {alertUsage ? (
+              <div className="mt-4">
+                <UsageUpsell tier={alertUsage.tier} noun={alertUsage.limit === 1 ? "alert" : "alerts"} limit={alertUsage.limit} used={alertUsage.used} />
+              </div>
+            ) : null}
             {alertSaved ? <p className="mt-3 text-sm text-muted-foreground">{alertSaved}</p> : null}
           </div>
 
@@ -753,7 +797,7 @@ function Jobs() {
             <li>One click tailors your resume and cover letter to the job you picked.</li>
           </ul>
           <p>
-            Career Pro also includes job alerts that email you new matches every few days. New to
+            Every plan includes job alerts: each alert emails you new matches 3 times, every 3 days. New to
             GotaOfferr? Read{" "}
             <a className="underline" href="/how-it-works">
               how it works
@@ -774,3 +818,4 @@ function Jobs() {
   );
 
 }
+

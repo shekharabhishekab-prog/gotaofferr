@@ -90,12 +90,9 @@ export const getUsage = createServerFn({ method: "GET" })
     const sub = await loadSubscription(context);
     const email = (context.claims as any)?.email as string | undefined;
 
-    const { count, error } = await context.supabase
-      .from("tailor_runs")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", context.userId)
-      .gte("created_at", usageWindowStart(sub, monthStartIso()));
-
+    const { countTailorUsage } = await import("@/lib/tailor-usage.server");
+    const count = await countTailorUsage(context.supabase, context.userId, usageWindowStart(sub, monthStartIso()));
+    const error = null as { message: string } | null;
     if (error) {
       const { safeError } = await import("@/lib/safe-error.server");
       throw safeError("getUsage", error, "Could not load your usage right now.");
@@ -115,6 +112,8 @@ export const getUsage = createServerFn({ method: "GET" })
 
 
 
+const DAILY_TAILOR_ABUSE_GUARD = 40;
+
 export const tailorResume = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => tailorInputSchema.parse(input))
@@ -131,14 +130,27 @@ export const tailorResume = createServerFn({ method: "POST" })
     const email = (context.claims as any)?.email as string | undefined;
     const limit = await activeTailorLimit(sub, email);
 
-    const { count, error: countError } = await context.supabase
-      .from("tailor_runs")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", context.userId)
-      .gte("created_at", usageWindowStart(sub, monthStartIso()));
-    if (countError) throw new Error(countError.message);
-
-    const used = count ?? 0;
+    const { getCompedGrant } = await import("@/lib/access.server");
+    const grant = getCompedGrant(email);
+    const routingTier = grant
+      ? tierForPriceId(grant.priceId)
+      : isEntitled(sub)
+        ? tierForPriceId(sub?.price_id)
+        : "free";
+    // Abuse guard only: far above normal use (about 7 a day on Career Pro). Protects the shared full-model pool.
+    // The run is not counted when this message shows.
+    if ((routingTier === "career_pro" || routingTier === "job_hunt") && !grant) {
+      const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+      const { countTailorUsage: countDay } = await import("@/lib/tailor-usage.server");
+      const dayCount = await countDay(context.supabase, context.userId, dayAgo);
+      if (dayCount >= DAILY_TAILOR_ABUSE_GUARD) {
+        throw new Error(
+          "Easy there, champ! That's a lot of tailoring for one day. Take a short break and try again later. Not counted.",
+        );
+      }
+    }
+    const { countTailorUsage: countUsage, recordTailorRun } = await import("@/lib/tailor-usage.server");
+    const used = await countUsage(context.supabase, context.userId, usageWindowStart(sub, monthStartIso()));
     // Plan allowance first; a purchased top-up credit covers the overflow.
     const { consumeTopupCredit, topupBalance } = await import("@/lib/topups.server");
     let usedTopup = false;
@@ -151,13 +163,6 @@ export const tailorResume = createServerFn({ method: "POST" })
       }
     }
 
-    const { getCompedGrant } = await import("@/lib/access.server");
-    const grant = getCompedGrant(email);
-    const routingTier = grant
-      ? tierForPriceId(grant.priceId)
-      : isEntitled(sub)
-        ? tierForPriceId(sub?.price_id)
-        : "free";
     const result = await runTailor(data, detectCountry(), routingTier);
 
     const { encryptResult } = await import("@/lib/resume-crypto.server");
@@ -172,25 +177,7 @@ export const tailorResume = createServerFn({ method: "POST" })
       result: (await encryptResult(JSON.parse(JSON.stringify(result)))) as never,
     });
 
-    if (process.env["MAX_SAVED_RESUMES"]) {
-      const cap = Math.max(1, parseInt(process.env["MAX_SAVED_RESUMES"] as string, 10) || 10);
-      const { data: keep } = await context.supabase
-        .from("tailor_runs")
-        .select("id")
-        .eq("user_id", context.userId)
-        .not("result", "is", null)
-        .order("created_at", { ascending: false })
-        .range(cap, cap + 200);
-      const stale = (keep ?? []).map((r: { id: string }) => r.id);
-      if (stale.length) {
-        // Keep the row (monthly usage is counted from rows) but drop the saved resume body.
-        await context.supabase
-          .from("tailor_runs")
-          .update({ result: null as never })
-          .in("id", stale)
-          .eq("user_id", context.userId);
-      }
-    }
+    await recordTailorRun(context.supabase, context.userId);
 
     const nextUsed = used + 1;
     const topup = await topupBalance(context.userId, "tailor");
@@ -205,4 +192,5 @@ export const tailorResume = createServerFn({ method: "POST" })
     };
 
   });
+
 

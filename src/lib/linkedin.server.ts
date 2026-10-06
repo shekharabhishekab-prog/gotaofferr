@@ -34,7 +34,7 @@ ${data.skills || "Not given"}`;
 
 /** Free report: overall score plus headline, About and skills feedback. */
 export async function reviewProfileFree(data: LinkedInInput): Promise<LinkedInFreeReview> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not available right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
@@ -52,12 +52,12 @@ ${VOICE_RULES}
 ${profileText(data)}`;
 
   try {
-    const { output } = await generateText({
-      model: gateway("google/gemini-3.6-flash"),
+    const { output } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
+      model: createLovableAiGatewayProvider(key, modelId)(modelId),
       output: Output.object({ schema: linkedinFreeReviewSchema }),
       prompt,
       maxOutputTokens: 6000,
-    });
+    }));
     return output;
   } catch (error) {
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
@@ -67,7 +67,7 @@ ${profileText(data)}`;
 
 /** Paid report: keyword alignment for a target role, industry advice, and rewrites. */
 export async function reviewProfilePro(data: LinkedInInput): Promise<LinkedInProReview> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not available right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
@@ -86,15 +86,16 @@ TARGET ROLE: ${data.targetRole || "Not specified"}
 ${profileText(data)}`;
 
   try {
-    const { output } = await generateText({
-      model: gateway("google/gemini-3.6-flash"),
+    const { output } = await (await import("./model-router.server")).runWithModelChain("career_pro", (modelId) => generateText({
+      model: createLovableAiGatewayProvider(key, modelId)(modelId),
       output: Output.object({ schema: linkedinProReviewSchema }),
       prompt,
       maxOutputTokens: 10000,
-    });
+    }));
     return output;
   } catch (error) {
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
     throw new Error(aiGatewayErrorMessage(error));
   }
 }
+

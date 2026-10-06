@@ -133,10 +133,11 @@ async function createDoc() {
 
 export async function buildResumePdf(r: TailoredResume) {
   const d = await createDoc();
+  d.doc.setProperties({ title: `${r.name || "Resume"} - Resume`, subject: "Resume", creator: "GotaOfferr" });
 
   d.text(r.name || "Resume", { size: 21, style: "bold", color: [17, 51, 92] });
   if (r.headline) d.text(r.headline, { size: 11, color: [80, 90, 105] });
-  if (r.contacts?.length) d.text(r.contacts.join("  |  "), { size: 9, color: [105, 112, 125] });
+  r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(4);
 
   if (r.summary) {
@@ -144,9 +145,18 @@ export async function buildResumePdf(r: TailoredResume) {
     d.text(r.summary, { size: 9.8 });
   }
 
-  if (r.skills?.length) {
-    d.heading("Core Skills");
-    d.text(r.skills.join("  •  "), { size: 9.8 });
+  const groups = (r.skillGroups ?? []).filter((g) => g.label && g.items?.length);
+  if (r.skills?.length || groups.length) {
+    d.heading("Skills");
+    if (!groups.length) {
+      d.text((r.skills ?? []).join("  •  "), { size: 9.8 });
+    } else {
+      // One merged block: the groups carry the skills; flat skills they miss are added once.
+      const inGroups = new Set(groups.flatMap((g) => g.items.map((i) => i.trim().toLowerCase())));
+      const extra = (r.skills ?? []).filter((x) => !inGroups.has(x.trim().toLowerCase()));
+      groups.forEach((g) => d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 }));
+      if (extra.length) d.text(`Other: ${extra.join(", ")}`, { size: 9.5 });
+    }
   }
 
   if (r.keyAchievements?.length) {
@@ -159,7 +169,10 @@ export async function buildResumePdf(r: TailoredResume) {
     r.experience.forEach((e, i) => {
       if (i > 0) d.space(6);
       d.rowed(`${e.role}${e.company ? " — " + e.company : ""}`, e.dates || "");
-      const sub = [e.context, e.location].filter(Boolean).join("  |  ");
+      const ctx = (e.context ?? "").trim();
+      const loc = (e.location ?? "").trim();
+      const locKnown = !!loc && ctx.toLowerCase().includes(loc.toLowerCase().split(",")[0].trim());
+      const sub = [ctx, locKnown ? "" : loc].filter(Boolean).join("  |  ");
       if (sub) d.text(sub, { size: 9, style: "italic", color: [120, 126, 138] });
       d.bullets(e.bullets || []);
     });
@@ -189,13 +202,6 @@ export async function buildResumePdf(r: TailoredResume) {
     d.bullets(r.certifications);
   }
 
-  if (r.skillGroups?.length) {
-    d.heading("Skills & Tools");
-    r.skillGroups.forEach((g) => {
-      if (!g.label || !g.items?.length) return;
-      d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 });
-    });
-  }
 
 
   if (r.additionalSections?.length) {
@@ -212,7 +218,7 @@ export async function buildResumePdf(r: TailoredResume) {
 export async function buildCoverLetterPdf(r: TailoredResume, company?: string, role?: string) {
   const d = await createDoc();
   d.text(r.name || "Cover Letter", { size: 18, style: "bold", color: [17, 51, 92] });
-  if (r.contacts?.length) d.text(r.contacts.join("  |  "), { size: 9, color: [105, 112, 125] });
+  r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(10);
   const target = [role, company].filter(Boolean).join(" — ");
   if (target) d.text(`Re: ${target}`, { size: 10.5, style: "bold", gap: 6 });
@@ -275,3 +281,4 @@ export async function buildExampleResumePdf(example: {
 export function slug(s: string) {
   return (s || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+

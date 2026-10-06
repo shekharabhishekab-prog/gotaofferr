@@ -5,31 +5,25 @@ import { passwordChangeSchema, profileUpdateSchema, runIdSchema } from "./accoun
 export const getAccountOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { monthStartIso } = await import("./tailor.server");
+    const { usageSince } = await import("./usage-window.server");
+    const since = await usageSince(context.supabase, context.userId);
 
-    const [{ data: profile }, { count }, { data: recent }] = await Promise.all([
+    const [{ data: profile }, count, { data: recent }] = await Promise.all([
       context.supabase
         .from("profiles")
         .select("full_name, created_at")
         .eq("id", context.userId)
         .maybeSingle(),
-      context.supabase
-        .from("tailor_runs")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", context.userId)
-        .gte("created_at", monthStartIso()),
+      import("./tailor-usage.server").then((m) => m.countTailorUsage(context.supabase, context.userId, since)),
       context.supabase
         .from("tailor_runs")
         .select("id, company, role, match_score, created_at, result")
         .eq("user_id", context.userId)
         .order("created_at", { ascending: false })
-        .limit(10),
+        .limit(7),
     ]);
 
-    const { count: totalCount } = await context.supabase
-      .from("tailor_runs")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", context.userId);
+    const totalCount = await (await import("./tailor-usage.server")).countTailorUsage(context.supabase, context.userId);
 
     return {
       fullName: profile?.full_name ?? null,
@@ -210,3 +204,4 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+

@@ -6,6 +6,7 @@ import {
   resumeMarket,
   coverLetterRules,
   detectJobCountry,
+  letterDateLine,
   crossBorderRules,
   domesticRules,
   ATS_PARSE_RULES,
@@ -35,19 +36,32 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   const { assertLooksLikeResume } = await import("./extract-pdf");
   assertLooksLikeResume(data.resume);
 
-  const key = process.env.LOVABLE_API_KEY;
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
   const gateway = createLovableAiGatewayProvider(key, modelId);
   // The hiring market is the JOB's country, not the applicant's: an India-based
   // candidate applying to Sydney must be screened by Australian conventions.
   const sourceCountry = country ?? null;
-  const jobCountry = detectJobCountry(data.jobDescription, data.company) ?? sourceCountry;
-  const market = resumeMarket(jobCountry);
-  const letterRules = coverLetterRules(jobCountry);
-  const crossBorder = crossBorderRules(sourceCountry, jobCountry);
-  const domestic = crossBorder.length ? [] : domesticRules(sourceCountry, jobCountry);
+  const detectedJobCountry = detectJobCountry(data.jobDescription, data.company);
+  const jobCountry = detectedJobCountry ?? sourceCountry;
+  // Never fall back to the applicant's own country for the FORMAT: when the ad names no
+  // known country the model reads the job's country from the ad itself (see the generic market).
+  const market = resumeMarket(detectedJobCountry);
+  const letterRules = coverLetterRules(detectedJobCountry);
+  const withLetterDate = <T extends { coverLetter: string }>(r: T): T => {
+    const text = (r.coverLetter ?? "").trim();
+    if (!text) return r;
+    return { ...r, coverLetter: `${letterDateLine(jobCountry)}\n\n${text}` };
+  };
+  const crossBorder = crossBorderRules(sourceCountry, detectedJobCountry);
+  const domestic = crossBorder.length ? [] : domesticRules(sourceCountry, detectedJobCountry);
 
+
+  // Extra checklist for the lighter models so their output matches the pro models: same facts, same depth.
+  const liteBoost = /lite/i.test(modelId)
+    ? `\nPHASE 3.8 — DEPTH CHECKLIST (verify every item before you answer):\n- The summary MUST contain at least two real headline numbers copied from the source resume (money figures, percentages, traffic, team size, years), written exactly as the source has them. A summary with no number is wrong when the source has numbers.\n- Core skills: list 12-14 items. Include EVERY skill, tool, platform and method from the source resume that the job description also asks for (use the job description's exact wording), then fill the rest with real, source-backed skills most relevant to the role.\n- Keep every metric the source gives for a role inside that role's bullets: do not drop or blur a number ("measurable results" is never acceptable when the source has the figure).\n- Each role keeps 3-4 bullets when the source has that much; each bullet names the tool or method in the job description's words.\n- KEYWORD COVERAGE: go through the job description word by word. For every skill, tool, method, responsibility and requirement that the SOURCE resume supports (even when the source words it differently), use the job description's exact wording at least once in the summary, the skills list or a bullet. Mirror the posting's title and responsibility phrases (for example performance marketing, ROAS, reporting, team management) wherever the source shows the same real activity. Never add a keyword the source does not support: unsupported ones go to missingKeywords.\n- Never repeat one achievement in two sections.\n${final ? "- YOUR PREVIOUS DRAFT HAD TOO FEW CORE SKILLS. The skills array MUST contain 12 to 14 entries this time, every one supported by the source resume (include role-level skills such as budget management, reporting, CRM, B2C growth when the source shows them).\n" : ""}`
+    : "";
 
   const prompt = `You are an expert technical recruiter and resume writer.
 
@@ -66,7 +80,7 @@ PHASE 2 — WRITE THE TAILORED RESUME. Rules:
 - NEVER PAD. The bullet-count and length targets below apply only where the source resume has enough real material. If a role has 3 duties in the source, output 3 bullets, not 7. Do not add duties, tasks or responsibilities the source does not show just to reach a count; a short honest resume beats a long invented one.
 - Bullet counts per role: current/most recent role 7-10 bullets; each earlier role 5-7 bullets; the oldest or shortest role at least 4. Never fewer than 4 bullets for any role that has material in the source.
 - Keep EVERY concrete detail the source gives: named clients, partner organisations, brands, campaign names, event names, programme names, tool names, budgets, currencies, percentages, follower counts, team sizes, timeframes, platforms, handles, portfolio links. Losing a specific number or a named partner is a failure.
-- experience[].context: one short factual line describing the employer or the scope (for example "National NGO, artisan livelihoods" or "D2C footwear e-commerce brand") whenever the source supports it, otherwise null.
+- experience[].context: one short factual line describing the employer or the scope (for example "National NGO, artisan livelihoods" or "D2C footwear e-commerce brand") ONLY when the source resume itself states it (use its own words, never invent or generalise an employer description), otherwise null.
 - Preserve every factual and meaningful section from the original resume. Do not remove roles, projects, education, certifications, awards, languages, volunteer work, publications, training, or other qualifications just because they are less relevant to the target role.
 - Preserve every employer, job title, project, credential, institution, date, and contact detail from the source. You may reorder bullets within an entry, but every original entry must remain represented in the result.
 - skills: 12-18 role-relevant competencies as a flat ATS-friendly list.
@@ -86,9 +100,11 @@ PHASE 3 — SOUND LIKE A HUMAN WROTE IT. A hiring manager must never suspect AI.
 - Do not start more than one bullet in the same role with the same verb, and avoid the classic AI verb set (Spearheaded, Orchestrated, Championed, Pioneered). Prefer plain, specific verbs a working professional would use: built, ran, led, cut, shipped, fixed, negotiated, trained, rewrote, owned, launched, scaled, sold, hired.
 - Be concrete over impressive. Name the real tools, teams, markets, products, numbers and constraints from the source resume. Specifics read human; abstractions read AI.
 - Keep the candidate's own voice and vocabulary where the source resume already reads well. Reuse their phrasing rather than replacing it with polished corporate wording.
+- The summary must be written fresh as a synthesis. Never paste or lightly reword a whole experience bullet into it; mention at most two headline numbers and leave the detail to the experience section.
 - Summary: plain first-person-implied statement of what they do, how long, and the concrete strengths that fit this role. No adjective pile-ups, no "dynamic X professional with a proven track record".
 - Cover letter: write like a competent person emailing a hiring manager, not like marketing copy. Open with a specific reason for applying tied to the company or role, give two concrete proof points from the resume, close with a simple, direct sign-off. Contractions are fine. Slight imperfection and directness are better than polish.
 - Before returning, reread every sentence and rewrite anything that sounds like a template, a LinkedIn post, or a chatbot.
+- AI-TEXT DETECTORS: some ATS products and recruiter tools score resumes and cover letters for machine-written text, and auto-reject the ones that look generated. Write so the text reads as one person's own writing and does not trip those detectors: uneven sentence and bullet lengths, plain everyday words, concrete details taken from the source, no repeated sentence frames, no stock openers or closers, no balanced three-part lists, no tidy summarising sentence at the end of a paragraph, and no vocabulary that is more formal than the candidate's own. Keep every fact true. This changes how the text reads, never what it claims.
 
 - keyAchievements: 5-7 of the candidate's strongest, most quantified wins drawn ONLY from the source resume, placed directly after Core Skills like a big-company / Fortune 500 resume template. Each one line, metric-first where the source provides numbers, under 30 words. If the source has no achievements, return an empty array.
   - coverLetter: 200-300 words, addressed to the hiring team at ${data.company || "the company"}, ${data.tone || "confident and professional"} in tone, no placeholders like [Your Name] — use the candidate's real details. Use \\n\\n between paragraphs.
@@ -131,6 +147,12 @@ PHASE 3.5 — SURVIVE GREENHOUSE / WORKDAY / LEVER RESUME PARSING. These ATS pro
 PHASE 3.6 — UNIVERSAL ATS PARSE RULES (apply to every resume, domestic or cross-border):
 ${ATS_PARSE_RULES.map((rule) => `- ${rule}`).join("\n")}
 
+${liteBoost}PHASE 3.7 — GET SELECTED BY THE ATS (recruiters filter and rank by keyword match before any human reads the resume):
+- Every must-have skill, tool, qualification and responsibility phrase in the job description that the candidate TRULY has must appear verbatim at least once in skills and at least once inside an experience bullet or the summary, in the job description's exact wording. Truthful matches only: never add a keyword the source resume does not support (the HARD RULE above still wins).
+- Put the strongest 5-8 matched keywords in the first two lines of the summary, because many parsers and recruiters weight the top of the page most.
+- The resume must read cleanly as plain text in this order: contact lines, summary, skills, experience (newest first), education, certifications. Nothing may depend on position, colour, font size or an image to make sense.
+- Each experience bullet is a full sentence on its own line: action verb, what was done, tool or method named in the job description's words, then the measurable result where the source has one.
+
 PHASE 4 — WRITE FOR THE HIRING MARKET OF THE JOB: ${market.label}. These conventions are mandatory and override any generic habit:
 ${market.rules.map((rule) => `- ${rule}`).join("\n")}
 ${crossBorder.length ? `\nPHASE 4.5 — CROSS-BORDER APPLICATION RULES (mandatory, they override Phase 4 where they conflict):\n${crossBorder.map((rule) => `- ${rule}`).join("\n")}\n` : ""}${domestic.length ? `\nPHASE 4.5 — DOMESTIC APPLICATION RULES (same country on both sides; mandatory, they override Phase 4 where they conflict):\n${domestic.map((rule) => `- ${rule}`).join("\n")}\n` : ""}
@@ -161,7 +183,7 @@ ${data.resume}`;
     let missing = findMissingFacts(data.resume, result);
     // The repair pass doubles the wait, so only pay for it when the draft is
     // genuinely thin or dropped several real facts, not for cosmetic gaps.
-    if (needsDepthRepair(result) || missing.length >= 3) {
+    if (needsDepthRepair(result) || missing.length >= 3 || missing.some((f) => /\d/.test(f))) {
       const repaired = await repairDepth(gateway, result, data, prompt, missing);
       // Only accept the repair if it did not lose ground on preservation.
       if (findMissingFacts(data.resume, repaired).length <= missing.length) {
@@ -180,6 +202,9 @@ ${data.resume}`;
       const { polishResume, QualityError } = await import("./truth-guard.server");
       const polished = polishResume(result, final);
       result = polished.result;
+      if (/lite/i.test(modelId) && !final && (result.skills?.length ?? 0) < 11) {
+        throw new QualityError(["core skills list too short"]);
+      }
       if (polished.issues.length) {
         if (!final) throw new QualityError(polished.issues);
         console.warn(`[quality] shipped after retry with notes: ${polished.issues.slice(0, 3).join("; ")}`);
@@ -189,26 +214,107 @@ ${data.resume}`;
       console.error("[truth-guard] failed", e);
     }
 
+    // Last line of defence: a numeric fact from the source that the model or the
+    // guard dropped goes back as the candidate's own source line, in the right role.
+    try {
+      const miss = findMissingFacts(data.resume, result).filter((f) => /\d/.test(f));
+      if (miss.length && result.experience?.length) {
+        const lines = data.resume.split(/\r?\n/);
+        const roleOf = (idx: number) => {
+          for (let i = idx; i >= 0; i--) {
+            const l = lines[i].toLowerCase();
+            const hit = result.experience.find((e: any) => e.company && l.includes(String(e.company).toLowerCase()));
+            if (hit) return hit as any;
+          }
+          return null;
+        };
+        for (const fact of miss) {
+          const idx = lines.findIndex((l) => /^\s*[-•*·]/.test(l) && l.toLowerCase().includes(fact.toLowerCase()));
+          if (idx < 0) continue;
+          const role = roleOf(idx);
+          if (!role) continue;
+          const text = lines[idx].replace(/^\s*[-•*·]\s*/, "").trim();
+          if (text && !(role.bullets ?? []).some((b: string) => b.toLowerCase().includes(fact.toLowerCase()))) {
+            role.bullets = [...(role.bullets ?? []), text];
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[restore-facts] failed", e);
+    }
+
+    // Key Achievements must not repeat Experience bullets; employer context
+    // lines must come from the source resume (no invented descriptors).
+    try {
+      const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((w) => w.length > 2 || /\d/.test(w));
+      const sim = (a: string, b: string) => {
+        const A = new Set(norm(a)); const B = norm(b);
+        if (!A.size || !B.length) return 0;
+        const BS = new Set(B);
+        const overlap = B.filter((w) => A.has(w)).length;
+        // Duplicate when most of the shorter line already sits inside the other one.
+        return Math.max(overlap / Math.max(A.size, BS.size), overlap / Math.min(A.size, BS.size) - 0.2);
+      };
+      const allBullets = (result.experience ?? []).flatMap((e: any) => e.bullets ?? []);
+      result.keyAchievements = (result.keyAchievements ?? []).filter(
+        (k: string) => {
+          const nums = norm(k).filter((w) => /\d/.test(w));
+          return !allBullets.some((b: string) => {
+            // Same figures and at least 2 shared words = the same achievement worded twice.
+            const sameFact = nums.length > 0 && nums.every((n) => norm(b).includes(n)) && norm(k).filter((w) => !/\d/.test(w) && norm(b).includes(w)).length >= 2;
+            if (!sameFact && sim(k, b) < 0.6) return false;
+            const bn = new Set(norm(b));
+            return nums.every((n) => bn.has(n)); // never drop a fact that lives only here
+          });
+        },
+      );
+      const srcWords = new Set(norm(data.resume));
+      for (const e of result.experience ?? []) {
+        const c = (e as any).context as string | null;
+        if (!c) continue;
+        const w = norm(c);
+        const hit = w.filter((x) => srcWords.has(x)).length;
+        if (w.length && hit / w.length < 0.8) (e as any).context = null;
+      }
+    } catch (e) {
+      console.error("[dedupe] failed", e);
+    }
+
     // Guarantee our public ATS score is always above 95%, as promised, and
     // keep the headline match score honest: it must equal its own breakdown.
+    // The match score is counted in code (same formula for every plan and model).
+    let counted: { score: number; breakdown: any } | null = null;
+    try {
+      const { computeMatchScore } = await import("@/lib/match-score.server");
+      counted = computeMatchScore({ jobDescription: data.jobDescription, role: data.role, resume: data.resume }, result);
+    } catch (e) {
+      console.error("[match-score] failed", e);
+    }
     const b = result.scoreBreakdown;
     const summed = b
       ? Math.round(b.keywordMatch + b.titleAlignment + b.formatting + b.experienceRelevance + b.quantifiedImpact)
       : null;
-    return humanize({
+    return withLetterDate(humanize({
       ...result,
-      matchScore: summed !== null ? Math.max(0, Math.min(100, summed)) : result.matchScore,
+      scoreBreakdown: counted ? counted.breakdown : result.scoreBreakdown,
+      matchScore: counted
+        ? counted.score
+        : summed !== null
+          ? Math.max(0, Math.min(100, summed))
+          : result.matchScore,
       atsScore: Math.max(95, Math.min(100, Math.round(result.atsScore ?? 95))),
-    });
+    }));
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
       try {
         const raw = (error.text ?? "").replace(/^```json\s*|```$/g, "");
-        return humanize(tailoredResumeSchema.parse(JSON.parse(raw)));
+        return withLetterDate(humanize(tailoredResumeSchema.parse(JSON.parse(raw))));
       } catch {
         throw new Error("The AI response could not be parsed. Please try again.");
       }
     }
+    if ((error as Error)?.name === "QualityError" || (error as any)?.issues) throw error;
+    console.error("[tailor] failed:", (error as Error)?.name, String((error as Error)?.message ?? error).slice(0, 300));
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
     throw new Error(aiGatewayErrorMessage(error));
   }
@@ -252,7 +358,7 @@ ${missingBlock}
 REPAIR TASK: return the SAME resume, expanded. Keep every existing fact and wording that already works, and:
 - Most recent role: 7-10 bullets. Every other role: 5-7 bullets, never fewer than 4.
 - Add the missing detail back from the source resume below: client names, partner organisations, event names, tools, budgets, percentages, follower counts, team sizes, links.
-- Fill experience[].context with a short factual line about each employer or its scope wherever the source supports it.
+- Fill experience[].context only with an employer/scope line the source resume itself states; otherwise null. Never invent a descriptor.
 - Fill skillGroups with categorised tool/skill groups covering every tool named in the source resume.
 - Do not invent anything that is not in the source resume. Do not shorten anything. Do not delete any role, project, degree, certification, language or link that is in the source.
 
@@ -364,3 +470,4 @@ export function monthStartIso(): string {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
+

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,7 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PasswordInput } from "@/components/PasswordInput";
 import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -24,12 +23,12 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Create a free GotaOfferr account to tailor 3 resumes and cover letters every month with AI.",
+          "Create a free GotaOfferr account to tailor 10 resumes and cover letters every month with AI.",
       },
       { property: "og:title", content: "Sign in — GotaOfferr" },
       {
         property: "og:description",
-        content: "Create a free GotaOfferr account to tailor 3 resumes every month with AI.",
+        content: "Create a free GotaOfferr account to tailor 10 resumes every month with AI.",
       },
       { property: "og:url", content: "https://gotaofferr.com/auth" },
     ],
@@ -200,27 +199,18 @@ function AuthPage() {
 
 
   async function google() {
-    if (import.meta.env.VITE_AUTH_MODE === "supabase") {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(next)}` },
-      });
-      if (error) toast.error("Google sign-in failed. Please try again.");
-      return;
-    }
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}${next}`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(next)}` },
     });
-    if (result.error) return toast.error("Google sign-in failed. Please try again.");
-    if (result.redirected) return;
-    navigate({ to: next, replace: true });
+    if (error) toast.error("Google sign-in failed. Please try again.");
   }
 
   return (
     <main className="mx-auto flex max-w-md flex-col px-5 py-16 sm:py-24">
       <div className="text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-          <Sparkles className="size-3 text-highlight" /> 3 free resumes every month
+          <Sparkles className="size-3 text-highlight" /> 10 free tailored resumes every month
         </span>
         <h1 className="mt-4 font-display text-3xl font-bold text-foreground">
           Sign in to GotaOfferr
@@ -437,3 +427,4 @@ function AuthPage() {
     </main>
   );
 }
+

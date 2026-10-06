@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useServerFn } from '@tanstack/react-start';
-import { toast } from 'sonner';
+import { toast } from "@/lib/toast";
 
 import { createSubscriptionCheckout } from '@/lib/payments.functions';
 
@@ -45,14 +45,25 @@ export function useStripeCheckout() {
 
   const closeCheckout = useCallback(() => setIsOpen(false), []);
 
-  const openCheckout = useCallback(
-    async (opts: CheckoutOptions) => {
+  const openCheckout: (opts: CheckoutOptions & { indianConfirmed?: boolean }) => Promise<void> = useCallback(
+    async (opts: CheckoutOptions & { indianConfirmed?: boolean }): Promise<void> => {
       setIsOpen(true);
       try {
         const [Razorpay, result] = await Promise.all([
           loadRazorpay(),
-          startCheckout({ data: { priceId: opts.priceId } }),
+          startCheckout({ data: { priceId: opts.priceId, ...(opts.indianConfirmed ? { indianConfirmed: true } : {}) } }),
         ]);
+        if ('geoNotice' in result) {
+          setIsOpen(false);
+          toast(
+            'Plot twist: you are not in India and neither is your card. We love the confidence. Pay with an Indian card/UPI, or see your own price.',
+            {
+              duration: 15000,
+              action: { label: 'I have an Indian card/UPI', onClick: () => { void openCheckout({ ...opts, indianConfirmed: true }); } },
+            },
+          );
+          return;
+        }
         if ('error' in result) throw new Error(result.error);
 
         const rzp = new Razorpay({
@@ -72,19 +83,21 @@ export function useStripeCheckout() {
         });
         rzp.on('payment.failed', (response: any) => {
           setIsOpen(false);
-          toast.error(response?.error?.description ?? 'Payment failed. Please try again.');
+          toast.error('That payment bounced like a bad tennis serve 🎾 Please try again or use a different card.');
         });
         rzp.open();
       } catch (e) {
         setIsOpen(false);
-        toast.error(e instanceof Error ? e.message : 'Could not start checkout');
+        const m = e instanceof Error ? e.message : '';
+        toast.error(m && m.length < 90 && !/key|passed|razorpay|undefined|null|token|fetch|json|\b[45]\d\d\b/i.test(m) ? m : 'Checkout hit a speed bump 🚧 Please try again in a moment.');
       }
     },
     [startCheckout],
-  );
+  ) as any;
 
   // Razorpay renders its own overlay, so nothing extra needs mounting.
   const checkoutElement = null;
 
   return { openCheckout, closeCheckout, isOpen, checkoutElement };
 }
+

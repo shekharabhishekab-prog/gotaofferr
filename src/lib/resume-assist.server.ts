@@ -65,17 +65,17 @@ function tidy(raw: string, kind: AssistInput["kind"]): string {
 
 /** Rewrites a single builder field so users get help as they type, not only at the end. */
 export async function assistField(data: AssistInput): Promise<string> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not available right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
   try {
-    const { text } = await generateText({
-      model: gateway("google/gemini-3.6-flash"),
+    const { text } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
+      model: createLovableAiGatewayProvider(key, modelId)(modelId),
       system: instruction(data),
       prompt: data.text,
       maxOutputTokens: 1200,
-    });
+    }));
     const cleaned = tidy(text ?? "", data.kind);
     if (!cleaned) throw new Error("The rewrite came back empty. Please try again.");
     return cleaned;
@@ -84,3 +84,4 @@ export async function assistField(data: AssistInput): Promise<string> {
     throw new Error(aiGatewayErrorMessage(error));
   }
 }
+

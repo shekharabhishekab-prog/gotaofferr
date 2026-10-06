@@ -22,7 +22,7 @@ export interface CurrencyPricing {
 
 
 const PRICING: Record<string, CurrencyPricing> = {
-  INR: { code: "INR", symbol: "₹", label: "India", amounts: { job_hunt: 499, career_pro: 1299 } },
+  INR: { code: "INR", symbol: "₹", label: "India", amounts: { job_hunt: 399, career_pro: 999 } },
   USD: { code: "USD", symbol: "$", label: "United States", amounts: { job_hunt: 12, career_pro: 29 } },
   EUR: { code: "EUR", symbol: "€", label: "Europe", amounts: { job_hunt: 11, career_pro: 27 } },
   GBP: { code: "GBP", symbol: "£", label: "United Kingdom", amounts: { job_hunt: 10, career_pro: 24 } },
@@ -220,7 +220,7 @@ export function detectPricing(): CurrencyPricing {
  * same relative position everywhere.
  */
 const STARTER_AMOUNTS: Record<string, number> = {
-  INR: 99, USD: 5, EUR: 5, GBP: 5, CAD: 7, AUD: 7,
+  INR: 49, USD: 5, EUR: 5, GBP: 5, CAD: 7, AUD: 7,
   NZD: 6, CHF: 4, SEK: 39, NOK: 39, DKK: 29, PLN: 12, CZK: 59, HUF: 990,
   RON: 12, BGN: 6, TRY: 79, RUB: 159, UAH: 59, ILS: 14, AED: 13, SAR: 13,
   QAR: 13, KWD: 1, EGP: 99, MAD: 19, KES: 199, GHS: 19, NGN: 1900, ZAR: 39,
@@ -321,9 +321,9 @@ export function monthlyWasAmount(pricing: CurrencyPricing, plan: PlanId): number
  */
 const FESTIVAL_AMOUNTS: Record<string, Partial<Record<PlanId, Record<BillingInterval, number>>>> = {
   INR: {
-    starter: { month: 59, year: 59 },
-    job_hunt: { month: 399, year: 399 },
-    career_pro: { month: 999, year: 999 },
+    starter: { month: 49, year: 49 },
+    job_hunt: { month: 199, year: 199 },
+    career_pro: { month: 399, year: 399 },
   },
 };
 
@@ -391,4 +391,5 @@ export function savingPercent(
 export function annualSavingPercent(pricing: CurrencyPricing, plan: PlanId): number {
   return savingPercent(pricing, plan, "year");
 }
+
 

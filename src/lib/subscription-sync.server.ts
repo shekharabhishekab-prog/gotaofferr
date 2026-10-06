@@ -6,7 +6,7 @@
  *
  * The `stripe_*` column names are historical; they hold Razorpay IDs now.
  */
-import { type StripeEnv, lookupKeyForPlanId } from '@/lib/razorpay.server';
+import { type StripeEnv, lookupKeyForPlanId, rzp } from '@/lib/razorpay.server';
 
 /** Razorpay status → the vocabulary the entitlement rules in plans.ts use. */
 export function normaliseStatus(status?: string | null): string {
@@ -16,8 +16,10 @@ export function normaliseStatus(status?: string | null): string {
     case 'created':
       return status === 'active' ? 'active' : 'trialing';
     case 'pending':
-    case 'halted':
       return 'past_due';
+    case 'halted':
+      // Razorpay halts a subscription after its 3 failed retries: no more access.
+      return 'unpaid';
     case 'cancelled':
       return 'canceled';
     case 'completed':
@@ -42,7 +44,7 @@ export async function upsertRazorpaySubscriptionRow(
   const userId = userIdOverride || subscription?.notes?.userId || null;
   if (!userId) return { ok: false, reason: 'no userId on subscription' };
 
-  const lookupKey = subscription?.notes?.lookup_key || lookupKeyForPlanId(subscription?.plan_id) || '';
+  const lookupKey = lookupKeyForPlanId(subscription?.plan_id) || subscription?.notes?.lookup_key || '';
 
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
 
@@ -57,7 +59,16 @@ export async function upsertRazorpaySubscriptionRow(
       current_period_start: iso(subscription.current_start ?? subscription.start_at),
       current_period_end: iso(subscription.current_end ?? subscription.charge_at ?? subscription.end_at),
       cancel_at_period_end:
-        options?.cancelAtPeriodEnd ?? Boolean(subscription.end_at && subscription.status === 'active'),
+        options?.cancelAtPeriodEnd ??
+        // Razorpay sets end_at on every subscription (total_count cycles ahead), so
+        // end_at alone does not mean "cancelled". It only means cancel-at-period-end
+        // when the end falls on (or within a day of) the current period's end.
+        Boolean(
+          subscription.status === 'active' &&
+            subscription.end_at &&
+            subscription.current_end &&
+            subscription.end_at <= subscription.current_end + 86400,
+        ),
       environment: env,
       updated_at: new Date().toISOString(),
     } as any,
@@ -65,6 +76,105 @@ export async function upsertRazorpaySubscriptionRow(
   );
 
   if (error) return { ok: false, reason: error.message };
+
+  // A paid, active subscription proves an honest buyer: clear any failed-payment strikes.
+  if (subscription?.status === 'active' && (subscription?.paid_count ?? 0) > 0) {
+    try {
+      const { clearStrikes } = await import('./purchase-guard.server');
+      await clearStrikes(userId);
+    } catch {
+      /* never block activation */
+    }
+  }
+
+  // Upgrade = a brand new full-price subscription. Once its first payment has
+  // gone through (status active), the plan it replaces is cancelled right away
+  // so the customer is never billed for two plans. Safe to run many times.
+  const replaces = subscription?.notes?.replaces;
+  if (
+    subscription?.status === 'active' &&
+    typeof replaces === 'string' &&
+    /^sub_[A-Za-z0-9]+$/.test(replaces) &&
+    replaces !== subscription.id
+  ) {
+    try {
+      const { data: old } = await supabaseAdmin
+        .from('subscriptions')
+        .select('status')
+        .eq('stripe_subscription_id', replaces)
+        .eq('user_id', userId)
+        .eq('environment', env)
+        .maybeSingle();
+      if (old && old.status !== 'canceled') {
+        try {
+          await rzp(`/subscriptions/${replaces}/cancel`, { method: 'POST', body: { cancel_at_cycle_end: 0 } });
+        } catch (e) {
+          console.error('[upgrade] could not cancel replaced subscription', replaces, e);
+        }
+        await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            status: 'canceled',
+            cancel_at_period_end: false,
+            current_period_end: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          } as any)
+          .eq('stripe_subscription_id', replaces)
+          .eq('user_id', userId)
+          .eq('environment', env);
+      }
+    } catch (e) {
+      console.error('[upgrade] replace step failed', e);
+    }
+  }
+  // Duplicate guard: a second checkout of the SAME plan can slip through when the
+  // first payment has not activated yet. When this newer one activates and an older
+  // active row for the same plan exists, cancel this newer one so the customer is
+  // never billed twice. No automatic refund: it is only logged for a manual refund.
+  if (subscription?.status === 'active' && !subscription?.notes?.replaces && lookupKey) {
+    try {
+      const { data: rows } = await supabaseAdmin
+        .from('subscriptions')
+        .select('stripe_subscription_id, created_at, status')
+        .eq('user_id', userId)
+        .eq('environment', env)
+        .eq('price_id', lookupKey)
+        .in('status', ['active', 'trialing']);
+      const me = (rows ?? []).find((r: any) => r.stripe_subscription_id === subscription.id);
+      const older = (rows ?? []).find(
+        (r: any) =>
+          r.stripe_subscription_id !== subscription.id &&
+          me &&
+          new Date(r.created_at ?? 0).getTime() < new Date(me.created_at ?? 0).getTime(),
+      );
+      if (me && older) {
+        try {
+          await rzp(`/subscriptions/${subscription.id}/cancel`, { method: 'POST', body: { cancel_at_cycle_end: 0 } });
+        } catch (e) {
+          console.error('[duplicate-sub] could not cancel duplicate', subscription.id, e);
+        }
+        await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            status: 'canceled',
+            cancel_at_period_end: false,
+            current_period_end: new Date().toISOString(),
+            // Keep the cancelled duplicate OLDER than the kept plan: the rest of the app
+            // reads the newest row as the user's plan, so the kept plan must stay newest.
+            created_at: new Date(new Date(older.created_at ?? 0).getTime() - 1000).toISOString(),
+            updated_at: new Date().toISOString(),
+          } as any)
+          .eq('stripe_subscription_id', subscription.id)
+          .eq('user_id', userId)
+          .eq('environment', env);
+        console.error(
+          `[duplicate-sub] REFUND-NEEDED user=${userId} duplicate=${subscription.id} kept=${older.stripe_subscription_id} plan=${lookupKey}`,
+        );
+      }
+    } catch (e) {
+      console.error('[duplicate-sub] guard failed', e);
+    }
+  }
   return { ok: true };
 }
 
@@ -81,3 +191,4 @@ export async function setSubscriptionStatus(
     .eq('stripe_subscription_id', subscriptionId)
     .eq('environment', env);
 }
+

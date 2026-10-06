@@ -12,6 +12,10 @@ export const MODEL_DAILY_CAP: Record<string, number> = {
   "gemini-3.6-flash": 20,
   "gemini-3-flash-preview": 20,
   "gemini-2.5-flash": 20,
+  // Adzuna free tier: 250/day, 2,500/month. Our own cap sits under both.
+  "adzuna-search": 65,
+  // Firecrawl searches are only counted for visibility (cap never reached).
+  "firecrawl-search": 100000,
 };
 
 const FREE_CHAIN = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
@@ -21,6 +25,7 @@ function proChain(): string[] {
 }
 
 export function chainForTier(tier: RoutingTier): string[] {
+  // Career Pro only gets the full-quality models. Free, Starter and Job Hunt use the lower models.
   return tier === "career_pro" ? proChain() : FREE_CHAIN;
 }
 
@@ -66,10 +71,8 @@ export async function countCall(model: string): Promise<boolean> {
   }
 }
 
-export function limitMessage(tier: RoutingTier): string {
-  return tier === "career_pro"
-    ? "Our best-quality writing engine is at its capacity right now. Your rewrite was not counted. Please try again in a few minutes."
-    : "We've reached today's free AI limit. Please try again tomorrow. Your rewrite was not counted.";
+export function limitMessage(_tier: RoutingTier): string {
+  return "Too many job hunters, one very tired AI. Give it a few minutes - this one wasn't counted.";
 }
 
 /** Try each model in the tier's chain; move on only for quota errors. */
@@ -88,3 +91,4 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
   void last;
   throw new Error(limitMessage(tier));
 }
+

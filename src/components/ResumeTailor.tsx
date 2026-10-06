@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import {
   AlertCircle,
   ArrowRight,
@@ -375,7 +375,7 @@ export function ResumeTailor() {
                 </Link>
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                You've used your free rewrite. A free account gives you 3 tailored resumes and cover
+                You've used your free rewrite. A free account gives you 10 tailored resumes and cover
                 letters every month.
               </p>
             </div>
@@ -415,15 +415,15 @@ export function ResumeTailor() {
               <p className="mt-4 text-center text-xs text-muted-foreground">
                 You have tailored {usage.used} of {usage.limit} this month.{" "}
                 <Link to="/pricing" className="underline">
-                  Upgrade for 200 rewrites and a saved master resume.
+                  Upgrade for 129 rewrites and a saved master resume.
                 </Link>
               </p>
             ) : (
               <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
                 {isSubscribed
                   ? tier === "career_pro"
-                    ? "400 rewrites included per month"
-                    : "200 rewrites included per month"
+                    ? "199 rewrites included per month"
+                    : "129 rewrites included per month"
                   : "Takes ~15 seconds"}
               </p>
             )}
@@ -550,7 +550,7 @@ export function ResumeTailor() {
                           </div>
                           {(e.context || e.location) && (
                             <p className="text-xs text-muted-foreground italic">
-                              {[e.context, e.location].filter(Boolean).join("  |  ")}
+                              {[e.context, e.location && e.context && e.context.toLowerCase().includes(e.location.toLowerCase().split(",")[0].trim()) ? "" : e.location].filter(Boolean).join("  |  ")}
                             </p>
                           )}
 
@@ -769,7 +769,7 @@ export function ResumeTailor() {
             <Card className="mt-6 flex flex-col items-center gap-3 border-primary/30 p-6 text-center shadow-soft">
               <p className="text-sm font-semibold">That was your free rewrite.</p>
               <p className="text-xs text-muted-foreground">
-                Create a free account to keep tailoring — 3 resumes and cover letters every month.
+                Create a free account to keep tailoring — 10 resumes and cover letters every month.
               </p>
               <Button variant="hero" asChild>
                 <Link to="/auth" search={{ redirect: "/tailor" }}>
@@ -781,7 +781,7 @@ export function ResumeTailor() {
             <p className="mt-6 text-center text-xs text-muted-foreground">
               You have tailored {usage.used} of {usage.limit} this month.{" "}
               <Link to="/pricing" className="underline">
-                Upgrade for 200 rewrites and a saved master resume.
+                Upgrade for 129 rewrites and a saved master resume.
               </Link>
             </p>
           ) : null}
@@ -826,3 +826,4 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+

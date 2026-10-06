@@ -15,8 +15,8 @@ export type StripeEnv = PaymentsEnv;
 /** Stable lookup key → Razorpay plan ID (live account, one per currency). */
 export const RAZORPAY_PLAN_IDS: Record<string, string> = {
   // Starter pack — sold in every billable currency.
-  starter_inr_monthly: 'plan_TNgVxQhH31Jbw8',
-  starter_inr_festival_monthly: 'plan_TNgVy9w3nhiaSW',
+  starter_inr_monthly: 'plan_TkMr2UqLbhbpWC',
+  starter_inr_festival_monthly: 'plan_TkMr2UqLbhbpWC',
   starter_usd_monthly: 'plan_TQMyEulrLUloQx',
   starter_eur_monthly: 'plan_TQMyFZGRW2gWzr',
   starter_gbp_monthly: 'plan_TQMyGGP0koWXfO',
@@ -24,14 +24,14 @@ export const RAZORPAY_PLAN_IDS: Record<string, string> = {
   starter_aud_monthly: 'plan_TQMyHXJLTJxlM5',
 
 
-  job_hunt_inr_monthly: 'plan_TLnhpqWzp9rzdx',
+  job_hunt_inr_monthly: 'plan_TkMsd3ra9Z9BEg',
   job_hunt_inr_yearly: 'plan_TKabJJE4LMU1z5',
-  career_pro_inr_monthly: 'plan_TLnygf5Kr1ibJr',
+  career_pro_inr_monthly: 'plan_TkMz2PtZ0MXS3f',
   career_pro_inr_yearly: 'plan_TKabKZKJXN0wi4',
 
   // Festival offer (India) — only usable while a festival window is open.
-  job_hunt_inr_festival_monthly: 'plan_TLnhrG9373SNqd',
-  career_pro_inr_festival_monthly: 'plan_TLnyhQlB0aQmrc',
+  job_hunt_inr_festival_monthly: 'plan_TkMsd3ra9Z9BEg',
+  career_pro_inr_festival_monthly: 'plan_TkMz2PtZ0MXS3f',
   job_hunt_inr_festival_yearly: 'plan_TLNSAfXNhtBgkh',
 
 
@@ -198,6 +198,31 @@ export const RAZORPAY_PLAN_IDS: Record<string, string> = {
   starter_zar_monthly: 'plan_TQNF7ZxjBWPpKm',
 };
 
+/**
+ * Plan id for a lookup key. RAZORPAY_PLAN_OVERRIDES (JSON, e.g. {"starter_inr_monthly":"plan_X"})
+ * replaces ids per environment - used by the test preview, which has its own
+ * Razorpay TEST account and therefore different plan ids. Unset on the live site.
+ */
+function planOverrides(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const name of ['RAZORPAY_PLAN_OVERRIDES', 'RAZORPAY_PLAN_OVERRIDES_INR']) {
+    const raw = process.env[name];
+    if (!raw) continue;
+    try {
+      Object.assign(out, JSON.parse(raw) as Record<string, string>);
+    } catch {
+      /* ignore bad override */
+    }
+  }
+  return out;
+}
+
+export function planIdFor(lookupKey: string): string | undefined {
+  const o = planOverrides();
+  if (o[lookupKey]) return o[lookupKey];
+  return RAZORPAY_PLAN_IDS[lookupKey];
+}
+
 /** How many billing cycles a subscription is created for. */
 export function totalCountFor(lookupKey: string): number {
   return lookupKey.endsWith('_yearly') ? 10 : 120;
@@ -208,6 +233,11 @@ export function totalCountFor(lookupKey: string): number {
  * (older INR price points, and the retired festival yearly plan).
  */
 const LEGACY_PLAN_IDS: Record<string, string> = {
+  plan_TNgVxQhH31Jbw8: 'starter_inr_monthly',
+  plan_TLnhpqWzp9rzdx: 'job_hunt_inr_monthly',
+  plan_TLnygf5Kr1ibJr: 'career_pro_inr_monthly',
+  plan_TLnhrG9373SNqd: 'job_hunt_inr_festival_monthly',
+  plan_TLnyhQlB0aQmrc: 'career_pro_inr_festival_monthly',
   plan_TLNS9IGCubVCOq: 'job_hunt_inr_monthly',
   plan_TKabJvftVhgLZd: 'career_pro_inr_monthly',
   plan_TLnhqYmWUpq4E4: 'career_pro_inr_monthly',
@@ -228,13 +258,19 @@ const LEGACY_PLAN_IDS: Record<string, string> = {
 
 export function lookupKeyForPlanId(planId?: string | null): string | null {
   if (!planId) return null;
-  const found = Object.entries(RAZORPAY_PLAN_IDS).find(([, id]) => id === planId);
+  let found = Object.entries(RAZORPAY_PLAN_IDS).find(([, id]) => id === planId);
+  if (!found) {
+    found = Object.entries(planOverrides()).find(([, id]) => id === planId);
+  }
   return found ? found[0] : (LEGACY_PLAN_IDS[planId] ?? null);
 }
 
+export function razorpayKeys(): { id?: string; secret?: string } {
+  return { id: process.env['RAZORPAY_KEY_ID'], secret: process.env['RAZORPAY_KEY_SECRET'] };
+}
+
 function authHeader(): string {
-  const id = process.env['RAZORPAY_KEY_ID'];
-  const secret = process.env['RAZORPAY_KEY_SECRET'];
+  const { id, secret } = razorpayKeys();
   if (!id || !secret) throw new Error('Payments are not configured on the server.');
   return 'Basic ' + Buffer.from(`${id}:${secret}`).toString('base64');
 }
@@ -257,9 +293,23 @@ export async function rzp<T = any>(
   return json as T;
 }
 
+/** Raw gateway text - for server logs and matching only. Never show it to customers. */
+export function rawPaymentsError(error: unknown): string {
+  return error instanceof Error ? error.message : '';
+}
+
+/** Customer-safe message. The raw gateway text is logged, never returned. */
 export function getPaymentsErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return 'Something went wrong with the payment. Please try again.';
+  const raw = rawPaymentsError(error);
+  if (raw) console.error('Payments error (hidden from customer):', raw);
+  const known = [
+    'Please sign in',
+    'Unknown plan',
+    'Yearly billing is no longer available',
+    'That festival offer has ended',
+  ];
+  if (known.some((k) => raw.startsWith(k))) return raw;
+  return "Your payment hit a speed bump 🚧 Nothing is lost. Please try again in a moment, or contact support if it keeps happening.";
 }
 
 /** Verifies the `x-razorpay-signature` HMAC over the raw request body. */
@@ -277,3 +327,4 @@ export async function verifyRazorpayWebhook(
   const body = JSON.parse(raw);
   return { event: body.event as string, payload: body.payload };
 }
+

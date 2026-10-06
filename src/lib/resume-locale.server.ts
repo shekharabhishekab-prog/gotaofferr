@@ -26,6 +26,10 @@ const GEO_HEADERS = [
 
 /** Best-effort country of the person whose resume we are rewriting. */
 export function detectCountry(): string | null {
+  try {
+  } catch {
+    /* no request */
+  }
   for (const name of GEO_HEADERS) {
     let value: string | undefined;
     try {
@@ -80,8 +84,8 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
     rules: [
       ...COMMON_NO_PHOTO,
       'Call the document a "Resume". Keep it to one page for under 10 years of experience, two pages at most.',
-      "Contact line: full name, city and state (no street address), phone in +1 (XXX) XXX-XXXX form, professional email, LinkedIn.",
-      "Use US spelling (organize, analyze, program) and MM/YYYY date ranges.",
+      "Contact items (each its own line): full name, city and state (no street address), phone in +1 (XXX) XXX-XXXX form, professional email, LinkedIn.",
+      "Use US spelling (organize, analyze, program) and Mon YYYY - Mon YYYY date ranges (month as 3 letters, so every ATS reads tenure).",
       "Use US units. Keep every money figure in the currency the source resume states; never restate it in another currency.",
       "Lead with impact and metrics. No objective statement, no references line, no personal details.",
       "Translate non-US credentials into their US equivalent in plain wording (for example, \"B.Tech (equivalent to BS in Computer Science)\"). Do not list marks/percentages; add GPA only if the source resume has one.",
@@ -91,7 +95,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
     label: "Canada",
     rules: [
       ...COMMON_NO_PHOTO,
-      "One to two pages. Contact line: name, city and province, phone, email, LinkedIn.",
+      "One to two pages. Contact items (each its own line): name, city and province, phone, email, LinkedIn.",
       "Canadian spelling (organize, but centre, labour). Quantify in CAD ($).",
       "Note Canadian work authorization only if the source resume states it.",
     ],
@@ -110,7 +114,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
   IN: {
     label: "India",
     rules: [
-      "One to two pages. Contact line: name, city, phone with +91, email, LinkedIn.",
+      "One to two pages. Contact items (each its own line): name, city, phone with +91, email, LinkedIn.",
       "Include education prominently with institution and year; keep percentage/CGPA only if the source resume has it.",
       "Keep notice period, current CTC or expected CTC only when the source resume states them. Never invent them. When the source states a notice period, state it explicitly in the header or Additional section.",
       "Indian English spelling is fine. Quantify in INR using lakh/crore where the source does (for example, ₹1.2 Cr revenue).",
@@ -171,9 +175,10 @@ export function resumeMarket(country: string | null): ResumeMarket {
   if (match) return { country: code, label: match.label, rules: [...match.rules, ...CURRENCY_TRUTH] };
   return {
     country: code,
-    label: code ? `the candidate's market (${code})` : "an international market",
+    label: code ? `the candidate's market (${code})` : "the country of the job (read it from the job description)",
     rules: [
       ...COMMON_NO_PHOTO,
+      "The resume format follows the country of the JOB, never the country where the applicant lives. Work out the job's country from the job description (city, state, currency, company address, legal terms) and use that country's resume conventions: contact details, date format, spelling, page length, which personal details are normal. Only if the ad gives no clue at all, follow the source resume's own conventions.",
       "Use a clean, internationally readable one to two page format with Mon YYYY date ranges.",
       "Keep currency, spelling and qualification names exactly as the source resume and the job description use them.",
       ...CURRENCY_TRUTH,
@@ -249,7 +254,7 @@ export function coverLetterRules(country: string | null): string[] {
 const JOB_COUNTRY_HINTS: Array<{ code: string; patterns: RegExp[] }> = [
   { code: "AU", patterns: [/\baustralia(n)?\b/i, /\bsydney\b/i, /\bmelbourne\b/i, /\bbrisbane\b/i, /\bperth\b/i, /\badelaide\b/i, /\bcanberra\b/i, /\bnsw\b/i, /\bvictoria,\s*au/i, /\bAUD\b/, /\bsuperannuation\b/i] },
   { code: "NZ", patterns: [/\bnew zealand\b/i, /\bauckland\b/i, /\bwellington\b/i, /\bchristchurch\b/i, /\bNZD\b/] },
-  { code: "US", patterns: [/\bunited states\b/i, /\bU\.?S\.?A\.?\b/, /\bnew york\b/i, /\bsan francisco\b/i, /\bchicago\b/i, /\bausti n?\b/i, /\bseattle\b/i, /\bboston\b/i, /\b401\(k\)\b/i, /\bUSD\b/] },
+  { code: "US", patterns: [/\bunited states\b/i, /\bU\.?S\.?A\.?\b/, /\bnew york\b/i, /\bsan francisco\b/i, /\bchicago\b/i, /\baustin\b/i, /\b(dallas|houston|atlanta|denver|miami|los angeles|san diego|san jose|phoenix|philadelphia|washington,?\s*d\.?c)\b/i, /,\s*(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|IL|IN|MA|MD|MI|MN|MO|NC|NJ|NY|OH|OR|PA|TX|VA|WA|WI)\s+\d{5}\b/, /,\s*(TX|NY|WA|MA|IL|GA|FL|NC|NJ|VA|CO|AZ|OH|PA)\b(?!\w)/, /\bseattle\b/i, /\bboston\b/i, /\b401\(k\)\b/i, /\bUSD\b/] },
   { code: "CA", patterns: [/\bcanada\b/i, /\btoronto\b/i, /\bvancouver\b/i, /\bmontreal\b/i, /\bottawa\b/i, /\bCAD\b/] },
   { code: "GB", patterns: [/\bunited kingdom\b/i, /\bengland\b/i, /\bscotland\b/i, /\blondon\b/i, /\bmanchester\b/i, /\bbirmingham\b/i, /\bGBP\b/, /£/] },
   { code: "IE", patterns: [/\bireland\b/i, /\bdublin\b/i, /\bcork,\s*ie/i] },
@@ -377,7 +382,16 @@ export const ATS_PARSE_RULES: string[] = [
   "Keywords must appear in the same word form the job description uses (if the ad says \"stakeholder management\", write that phrase, not \"managing stakeholders\"). Use the exact tool names too (Google Analytics 4, HubSpot, Figma).",
   "Spell an acronym out once with the short form in brackets, then use the short form after that, so both index.",
   "Skills must be a plain comma-free list of individual competencies, each parseable on its own; no skill ratings, star bars or percentages.",
-  "Contact block at the very top as plain text lines: name, city and country, phone with dialling code, email, LinkedIn URL, portfolio URL. Never inside a header, never as an icon row.",
+  "If a country rule above names a more specific contact format (for example US city and state), the country rule wins over this general one. Contact block at the very top as plain text lines: name, city and country, phone with dialling code, email, LinkedIn URL, portfolio URL. Never inside a header, never as an icon row.",
   "No hyperlinks whose visible text hides the URL, no footnotes, no abbreviations of month names beyond three letters.",
   "Do not repeat the same sentence in two sections; repeated blocks are scored as keyword stuffing and can down-rank the application.",
 ];
+
+
+/** Today's date as a cover-letter header line: "October 5, 2026" (US style) or "5 October 2026". */
+export function letterDateLine(country: string | null, now: Date = new Date()): string {
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const d = now.getUTCDate(), m = months[now.getUTCMonth()], y = now.getUTCFullYear();
+  const code = country?.toUpperCase() ?? "";
+  return ["US", "CA", "PH"].includes(code) ? `${m} ${d}, ${y}` : `${d} ${m} ${y}`;
+}

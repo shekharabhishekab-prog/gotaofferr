@@ -104,4 +104,19 @@ export default {
       });
     }
   },
+  // Cloudflare cron trigger (hourly): sends any job alert that is due.
+  async scheduled(_event: unknown, _env: unknown, ctx: { waitUntil?: (p: Promise<unknown>) => void }) {
+    const run = (async () => {
+      try {
+        const { runDueDigests } = await import("./lib/job-alert-digest.server");
+        const out = await runDueDigests();
+        console.log("[cron] job alerts", JSON.stringify(out));
+      } catch (error) {
+        console.error("[cron] job alerts failed", error);
+      }
+    })();
+    ctx?.waitUntil?.(run);
+    await run;
+  },
 };
+

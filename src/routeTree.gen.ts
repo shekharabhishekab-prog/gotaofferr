@@ -44,6 +44,7 @@ import { Route as ExamplesCoverLettersSlugRouteImport } from './routes/examples.
 import { Route as ExamplesResumesIndexRouteImport } from './routes/examples.resumes.index'
 import { Route as ExamplesResumesSlugRouteImport } from './routes/examples.resumes.$slug'
 import { Route as ApiPublicJobsDailyAlertsRouteImport } from './routes/api/public/jobs/daily-alerts'
+import { Route as ApiPublicJobsUnsubscribeRouteImport } from './routes/api/public/jobs/unsubscribe'
 import { Route as ApiPublicPaymentsRazorpayWebhookRouteImport } from './routes/api/public/payments/razorpay-webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -233,6 +234,12 @@ const ApiPublicJobsDailyAlertsRoute =
     path: '/api/public/jobs/daily-alerts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsUnsubscribeRoute =
+  ApiPublicJobsUnsubscribeRouteImport.update({
+    id: '/api/public/jobs/unsubscribe',
+    path: '/api/public/jobs/unsubscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsRazorpayWebhookRoute =
   ApiPublicPaymentsRazorpayWebhookRouteImport.update({
     id: '/api/public/payments/razorpay-webhook',
@@ -292,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/examples/cover-letters/': typeof ExamplesCoverLettersIndexRoute
   '/examples/resumes/': typeof ExamplesResumesIndexRoute
   '/api/public/jobs/daily-alerts': typeof ApiPublicJobsDailyAlertsRoute
+  '/api/public/jobs/unsubscribe': typeof ApiPublicJobsUnsubscribeRoute
   '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -333,6 +341,7 @@ export interface FileRoutesByTo {
   '/examples/cover-letters': typeof ExamplesCoverLettersIndexRoute
   '/examples/resumes': typeof ExamplesResumesIndexRoute
   '/api/public/jobs/daily-alerts': typeof ApiPublicJobsDailyAlertsRoute
+  '/api/public/jobs/unsubscribe': typeof ApiPublicJobsUnsubscribeRoute
   '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -375,6 +384,7 @@ export interface FileRoutesById {
   '/examples/cover-letters/': typeof ExamplesCoverLettersIndexRoute
   '/examples/resumes/': typeof ExamplesResumesIndexRoute
   '/api/public/jobs/daily-alerts': typeof ApiPublicJobsDailyAlertsRoute
+  '/api/public/jobs/unsubscribe': typeof ApiPublicJobsUnsubscribeRoute
   '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -418,6 +428,7 @@ export interface FileRouteTypes {
     | '/examples/cover-letters/'
     | '/examples/resumes/'
     | '/api/public/jobs/daily-alerts'
+    | '/api/public/jobs/unsubscribe'
     | '/api/public/payments/razorpay-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -459,6 +470,7 @@ export interface FileRouteTypes {
     | '/examples/cover-letters'
     | '/examples/resumes'
     | '/api/public/jobs/daily-alerts'
+    | '/api/public/jobs/unsubscribe'
     | '/api/public/payments/razorpay-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -500,6 +512,7 @@ export interface FileRouteTypes {
     | '/examples/cover-letters/'
     | '/examples/resumes/'
     | '/api/public/jobs/daily-alerts'
+    | '/api/public/jobs/unsubscribe'
     | '/api/public/payments/razorpay-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -542,6 +555,7 @@ export interface RootRouteChildren {
   ExamplesCoverLettersIndexRoute: typeof ExamplesCoverLettersIndexRoute
   ExamplesResumesIndexRoute: typeof ExamplesResumesIndexRoute
   ApiPublicJobsDailyAlertsRoute: typeof ApiPublicJobsDailyAlertsRoute
+  ApiPublicJobsUnsubscribeRoute: typeof ApiPublicJobsUnsubscribeRoute
   ApiPublicPaymentsRazorpayWebhookRoute: typeof ApiPublicPaymentsRazorpayWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -795,6 +809,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsDailyAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/unsubscribe': {
+      id: '/api/public/jobs/unsubscribe'
+      path: '/api/public/jobs/unsubscribe'
+      fullPath: '/api/public/jobs/unsubscribe'
+      preLoaderRoute: typeof ApiPublicJobsUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/razorpay-webhook': {
       id: '/api/public/payments/razorpay-webhook'
       path: '/api/public/payments/razorpay-webhook'
@@ -864,6 +885,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExamplesCoverLettersIndexRoute: ExamplesCoverLettersIndexRoute,
   ExamplesResumesIndexRoute: ExamplesResumesIndexRoute,
   ApiPublicJobsDailyAlertsRoute: ApiPublicJobsDailyAlertsRoute,
+  ApiPublicJobsUnsubscribeRoute: ApiPublicJobsUnsubscribeRoute,
   ApiPublicPaymentsRazorpayWebhookRoute: ApiPublicPaymentsRazorpayWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

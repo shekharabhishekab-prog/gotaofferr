@@ -93,14 +93,22 @@ export function fallbackPolish(draft: ResumeDraft): PolishedResume {
  * inventing employers, dates, tools or metrics that were not supplied.
  */
 export async function polishDraft(draft: ResumeDraft): Promise<PolishedResume> {
-  const key = process.env["LOVABLE_API_KEY"];
+  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not configured right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
-  const prompt = `You are a senior resume writer. Turn the candidate's rough notes into a clean, ATS-safe resume in the ${draft.template === "india" ? "Indian national" : "international"} format.
+  // No job description here, so the format follows where the user is (IP country).
+  // If the country is unknown, fall back to the template the user picked.
+  const { detectCountry, resumeMarket } = await import("./resume-locale.server");
+  const country = detectCountry();
+  const market = country ? resumeMarket(country) : null;
+  const formatLabel = market ? market.label : draft.template === "india" ? "Indian national" : "international";
+  const formatRules = market ? market.rules : TEMPLATE_RULES[draft.template];
+
+  const prompt = `You are a senior resume writer. Turn the candidate's rough notes into a clean, ATS-safe resume in the ${formatLabel} format.
 
 FORMAT RULES (mandatory):
-${TEMPLATE_RULES[draft.template].map((rule) => `- ${rule}`).join("\n")}
+${formatRules.map((rule) => `- ${rule}`).join("\n")}
 
 WRITING RULES (mandatory):
 - Never invent an employer, job title, date, degree, tool, client or number that is not in the notes. If a metric is missing, write the outcome without a number rather than making one up.
@@ -117,13 +125,13 @@ WRITING RULES (mandatory):
 ${draftToText(draft)}`;
 
   try {
-    const { output } = await generateText({
-      model: gateway("google/gemini-3.6-flash"),
+    const { output } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
+      model: createLovableAiGatewayProvider(key, modelId)(modelId),
       output: Output.object({ schema: polishedResumeSchema }),
       prompt,
       maxOutputTokens: 8000,
-    });
-    return stripPlaceholders(output);
+    }));
+    return stripPlaceholders(output, draft);
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
       try {
@@ -138,16 +146,45 @@ ${draftToText(draft)}`;
   }
 }
 
-const PLACEHOLDER = /^(n\/?a|not specified|not provided|unknown|company name|none)$/i;
+const PLACEHOLDER = /^(n\/?a|not specified|not provided|not given|unknown|company( name)?|employer|organi[sz]ation|your company|xyz|none)$/i;
 
 /** The model sometimes fills blank fields with "Not Specified"; drop those. */
-function stripPlaceholders(result: PolishedResume): PolishedResume {
+const BUILDER_CLAIMS = /return on (ad )?spend|\broas\b|\broi\b|return on investment|conversion rates?|revenue growth|\brevenue\b/i;
+const stemW = (w: string) => w.toLowerCase().replace(/(ing|ed|es|s)$/, "");
+
+/** Cuts invented tails ("... through audience segmentation") and unsupported result claims. */
+function trimInvented(text: string, notes: string): string {
+  const src = new Set((notes.toLowerCase().match(/[a-z0-9]+/g) ?? []).map(stemW));
+  const has = (w: string) => src.has(stemW(w));
+  const claimsOk = (t: string) => !BUILDER_CLAIMS.test(t) || BUILDER_CLAIMS.test(notes);
+  let out = text;
+  const m = /^(.*\S)\s+(?:through|via|using|by|to|while)\s+(.+)$/i.exec(out);
+  if (m) {
+    const tail = (m[2].toLowerCase().match(/[a-z]{4,}/g) ?? []);
+    const absent = tail.filter((w) => !has(w));
+    if (tail.length >= 2 && absent.length >= 2 && absent.length / tail.length >= 0.6) out = m[1];
+    else if (!claimsOk(m[2])) out = m[1];
+  }
+  if (!claimsOk(out)) {
+    const parts = out.split(/(?<=[.!?])\s+/);
+    const kept = parts.filter(claimsOk);
+    out = kept.length ? kept.join(" ") : out;
+  }
+  return out;
+}
+
+function stripPlaceholders(result: PolishedResume, draft: ResumeDraft): PolishedResume {
+  const notes = draftToText(draft);
+  const hadExperience = draft.experience.some((item) => item.role || item.company || item.details);
   const clean = (value: string) => (PLACEHOLDER.test((value ?? "").trim()) ? "" : value);
   return {
     ...result,
     headline: clean(result.headline),
-    experience: result.experience.map((item) => ({
+    summary: trimInvented(result.summary, notes),
+    keyAchievements: result.keyAchievements.map((k) => trimInvented(k, notes)),
+    experience: (hadExperience ? result.experience : []).map((item) => ({
       ...item,
+      bullets: item.bullets.map((b) => trimInvented(b, notes)),
       role: clean(item.role),
       company: clean(item.company),
       location: clean(item.location),
@@ -155,3 +192,4 @@ function stripPlaceholders(result: PolishedResume): PolishedResume {
     })),
   };
 }
+

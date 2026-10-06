@@ -3,8 +3,9 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 import { TESTING_UNLOCK_ALL_PLANS, TESTING_PLAN_PRICE_ID } from '@/lib/access';
 import {
   type StripeEnv,
-  RAZORPAY_PLAN_IDS,
+  planIdFor,
   getPaymentsErrorMessage,
+  rawPaymentsError,
   rzp,
   totalCountFor,
 } from '@/lib/razorpay.server';
@@ -16,6 +17,7 @@ const checkoutInputSchema = z
   .object({
     priceId: z.string().trim().min(1).max(80),
     environment: z.enum(['live', 'sandbox']).optional(),
+    indianConfirmed: z.boolean().optional(),
   })
   .strict();
 
@@ -73,6 +75,7 @@ async function resolveCustomer(email?: string, name?: string): Promise<string | 
 
 type CheckoutResult =
   | { subscriptionId: string; keyId: string; prefill: { email?: string; name?: string } }
+  | { geoNotice: true }
   | { error: string };
 
 /**
@@ -83,12 +86,12 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => {
     const data = checkoutInputSchema.parse(input);
-    if (!RAZORPAY_PLAN_IDS[data.priceId]) throw new Error('Unknown plan');
+    if (!planIdFor(data.priceId)) throw new Error('Unknown plan');
     // Festival pricing is only purchasable while the offer window is open.
     if (data.priceId.endsWith('_yearly')) {
       throw new Error('Yearly billing is no longer available. Please choose the monthly plan.');
     }
-    if (isFestivalPriceId(data.priceId) && !isFestivalActive()) {
+    if (isFestivalPriceId(data.priceId) && !isFestivalActive(Date.now(), 'IN')) {
       throw new Error('That festival offer has ended.');
     }
     return data;
@@ -98,8 +101,28 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
     try {
       const { enforcePolicy } = await import('@/lib/rate-limit.server');
       await enforcePolicy('payments-checkout', context.userId);
+      // Price-country check: India prices are for buyers in India. If the live IP is
+      // elsewhere, show our message first (the buyer can confirm an Indian card/UPI).
+      if (data.priceId.includes('_inr_') && !data.indianConfirmed) {
+        const { getRequest } = await import('@tanstack/react-start/server');
+        const h = getRequest().headers;
+        let cc = (h.get('cf-ipcountry') || '').toUpperCase();
+        if (/^[A-Z]{2}$/.test(cc) && cc !== 'XX' && cc !== 'IN') return { geoNotice: true };
+      }
+      const { getRequest: getReq } = await import('@tanstack/react-start/server');
+      const { clientIp } = await import('@/lib/rate-limit.server');
+      const { hashIp, purchaseBlockMessage } = await import('@/lib/purchase-guard.server');
+      const iph = await hashIp(clientIp(getReq()));
+      const blocked = await purchaseBlockMessage(context.userId, iph);
+      if (blocked) return { error: blocked };
       const existing = await latestSubscription(context.supabase, context.userId, environment);
+      let replaces: string | undefined;
       if (isEntitled(existing) && existing?.stripe_subscription_id) {
+        // An upgrade is a new full-price subscription that replaces the old one
+        // once its first payment succeeds. Anything else still goes through Switch plan.
+        if (planChangeKind(existing.price_id, data.priceId) === 'upgrade') {
+          replaces = existing.stripe_subscription_id;
+        } else
         return {
           error:
             'You already have an active plan. Use "Switch plan" to move between Job Hunt and Career Pro Packs.',
@@ -116,13 +139,15 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
       const subscription = await rzp<any>('/subscriptions', {
         method: 'POST',
         body: {
-          plan_id: RAZORPAY_PLAN_IDS[data.priceId],
+          plan_id: planIdFor(data.priceId),
           total_count: totalCountFor(data.priceId),
           customer_notify: 1,
           ...(customerId ? { customer_id: customerId } : {}),
           notes: {
             userId: context.userId,
             lookup_key: data.priceId,
+            iph,
+            ...(replaces ? { replaces } : {}),
             ...(email ? { email } : {}),
             ...(name ? { name } : {}),
           },
@@ -131,7 +156,7 @@ export const createSubscriptionCheckout = createServerFn({ method: 'POST' })
 
       return {
         subscriptionId: subscription.id,
-        keyId: process.env['RAZORPAY_KEY_ID']!,
+        keyId: (await import('@/lib/razorpay.server')).razorpayKeys().id!,
         prefill: { ...(email && { email }), ...(name && { name }) },
       };
     } catch (error) {
@@ -195,12 +220,12 @@ type PlanChangeResult =
 export const changePlan = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { priceId: string; environment?: StripeEnv }) => {
-    if (!RAZORPAY_PLAN_IDS[data.priceId]) throw new Error('Unknown plan');
+    if (!planIdFor(data.priceId)) throw new Error('Unknown plan');
     // Festival pricing is only purchasable while the offer window is open.
     if (data.priceId.endsWith('_yearly')) {
       throw new Error('Yearly billing is no longer available. Please choose the monthly plan.');
     }
-    if (isFestivalPriceId(data.priceId) && !isFestivalActive()) {
+    if (isFestivalPriceId(data.priceId) && !isFestivalActive(Date.now(), 'IN')) {
       throw new Error('That festival offer has ended.');
     }
     return data;
@@ -215,12 +240,18 @@ export const changePlan = createServerFn({ method: 'POST' })
     const kind = planChangeKind(current.price_id, data.priceId);
     if (kind === 'same') return { error: "You're already on this plan." };
 
+    // Upgrades charge the FULL new plan price on a new subscription (the old one
+    // is cancelled after the new payment succeeds), never a prorated difference.
+    if (kind === 'upgrade') {
+      return { error: '', needsCheckout: true };
+    }
+
     try {
       const updated = await rzp<any>(`/subscriptions/${current.stripe_subscription_id}`, {
         method: 'PATCH',
         body: {
-          plan_id: RAZORPAY_PLAN_IDS[data.priceId],
-          schedule_change_at: kind === 'upgrade' ? 'now' : 'cycle_end',
+          plan_id: planIdFor(data.priceId),
+          schedule_change_at: 'cycle_end',
           customer_notify: 1,
         },
       });
@@ -228,11 +259,9 @@ export const changePlan = createServerFn({ method: 'POST' })
       const { upsertRazorpaySubscriptionRow } = await import('@/lib/subscription-sync.server');
       await upsertRazorpaySubscriptionRow(updated, environment, context.userId);
 
-      return kind === 'upgrade'
-        ? { ok: true, kind, effective: 'now', effectiveDate: null }
-        : { ok: true, kind, effective: 'period_end', effectiveDate: current.current_period_end ?? null };
+      return { ok: true, kind, effective: 'period_end', effectiveDate: current.current_period_end ?? null };
     } catch (error) {
-      const message = getPaymentsErrorMessage(error);
+      const message = rawPaymentsError(error);
       // UPI-mandate subscriptions cannot be patched to another plan by the
       // gateway. Send the user through a fresh checkout for the new plan instead.
       const cannotUpdateInPlace =
@@ -244,7 +273,7 @@ export const changePlan = createServerFn({ method: 'POST' })
           needsCheckout: true,
         };
       }
-      return { error: message };
+      return { error: getPaymentsErrorMessage(error) };
     }
   });
 
@@ -341,3 +370,4 @@ export const setAutoRenew = createServerFn({ method: 'POST' })
       return { error: getPaymentsErrorMessage(error) };
     }
   });
+

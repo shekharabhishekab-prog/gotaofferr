@@ -26,13 +26,13 @@ export const JOB_SEARCH_MONTHLY_LIMIT = 30;
 export const JOB_HUNT_JOB_SEARCH_LIMIT = 10;
 
 /** Starter members get a small monthly job finder allowance. */
-export const STARTER_JOB_SEARCH_LIMIT = 3;
+export const STARTER_JOB_SEARCH_LIMIT = 5;
 
 /** Saved daily job alerts a Career pro member can keep. */
 export const JOB_ALERT_LIMIT = 5;
 
-/** One free AI job finder search per signed-in account, ever, as a trial. */
-export const FREE_JOB_SEARCH_TRIALS = 1;
+/** Free AI job finder searches per signed-in account per calendar month. */
+export const FREE_JOB_SEARCH_TRIALS = 2;
 
 
 
@@ -184,7 +184,7 @@ export function planLabel(priceId?: string | null): string {
 
 
 /** Days of access kept while Stripe retries a failed renewal payment. */
-export const PAST_DUE_GRACE_DAYS = 14;
+export const PAST_DUE_GRACE_DAYS = 4;
 
 export type SubscriptionRow = {
   status: string | null;
@@ -215,8 +215,11 @@ export function isEntitled(sub: SubscriptionRow | null | undefined): boolean {
     case "trialing":
       return end === null || end > now;
     case "past_due":
-    case "unpaid":
+      // Razorpay retries a failed renewal once a day, 3 times.
       return end === null || end + PAST_DUE_GRACE_DAYS * 86_400_000 > now;
+    case "unpaid":
+      // Halted after the failed retries: back to Free.
+      return false;
     case "canceled":
       return end !== null && end > now;
     default:
@@ -286,3 +289,57 @@ export function planChangeKind(currentPriceId?: string | null, nextPriceId?: str
   if (next.rank === current.rank) return "same";
   return next.rank > current.rank ? "upgrade" : "downgrade";
 }
+
+
+
+/* ------------------------------------------------------------------ *
+ * Per-plan allowances shown in the usage counters (all monthly).
+ * ------------------------------------------------------------------ */
+
+export const PLAN_LABEL: Record<PlanTier, string> = {
+  free: "Free",
+  starter: "Starter",
+  job_hunt: "Job Hunt",
+  career_pro: "Career Pro",
+};
+
+/** Resume builder: resumes a member can build and download per month. */
+export const BUILDER_MONTHLY_LIMIT: Record<PlanTier, number> = {
+  free: 5,
+  starter: 12,
+  job_hunt: 20,
+  career_pro: 50,
+};
+
+/** Job alerts a member can set up per month (each sends 3 emails, 3 days apart). */
+export const ALERT_ATTEMPT_LIMIT: Record<PlanTier, number> = {
+  free: 1,
+  starter: 3,
+  job_hunt: 5,
+  career_pro: 7,
+};
+
+/** Job finder searches per month for a tier (0 never happens: Free has a small allowance). */
+export function jobSearchLimitForTier(tier: PlanTier): number {
+  switch (tier) {
+    case "career_pro":
+      return JOB_SEARCH_MONTHLY_LIMIT;
+    case "job_hunt":
+      return JOB_HUNT_JOB_SEARCH_LIMIT;
+    case "starter":
+      return STARTER_JOB_SEARCH_LIMIT;
+    default:
+      return FREE_JOB_SEARCH_TRIALS;
+  }
+}
+
+export function nextTier(tier: PlanTier): PlanTier | null {
+  return tier === "free" ? "starter" : tier === "starter" ? "job_hunt" : tier === "job_hunt" ? "career_pro" : null;
+}
+
+/** Short "why upgrade" note. Upgrade prompts only ever point one tier up. */
+export const UPGRADE_NOTE: Record<Exclude<PlanTier, "career_pro">, string> = {
+  free: "Starter gives you 5 job searches, 20 tailored resumes and 12 builder resumes a month, plus 3 job alerts.",
+  starter: "Job Hunt gives you 10 job searches, 129 tailored resumes and 20 builder resumes a month, plus 5 job alerts.",
+  job_hunt: "Career Pro gives you 30 job searches, 199 tailored resumes and 50 builder resumes a month, plus 7 job alerts.",
+};
