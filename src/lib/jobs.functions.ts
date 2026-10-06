@@ -143,7 +143,7 @@ export const getJobSearchUsage = createServerFn({ method: "GET" })
     return {
       tier: tier as "free" | "starter" | "job_hunt" | "career_pro",
       pro: paidLimit > 0,
-      used,
+      used: Math.min(used, limit),
       limit,
       remaining: Math.max(0, limit - used) + topup,
       topup,
