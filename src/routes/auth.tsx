@@ -24,12 +24,12 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Create a free GotaOfferr account to tailor 3 resumes and cover letters every month with AI.",
+          "Create a free GotaOfferr account to tailor 10 resumes and cover letters every month with AI.",
       },
       { property: "og:title", content: "Sign in — GotaOfferr" },
       {
         property: "og:description",
-        content: "Create a free GotaOfferr account to tailor 3 resumes every month with AI.",
+        content: "Create a free GotaOfferr account to tailor 10 resumes every month with AI.",
       },
       { property: "og:url", content: "https://gotaofferr.com/auth" },
     ],
