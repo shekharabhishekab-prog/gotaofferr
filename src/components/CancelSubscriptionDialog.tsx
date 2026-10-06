@@ -105,8 +105,8 @@ export function CancelSubscriptionDialog({ open, onOpenChange, accessUntil, onCa
     },
     {
       icon: Bell,
-      title: "Jobs found for you, daily",
-      body: "The AI job finder scans the major boards on your filters and emails you matches — so you apply early, not late.",
+      title: "Job alerts by email",
+      body: "Each alert sends 3 emails, 3 days apart, with matches from the major boards on your filters — so you apply early, not late.",
     },
   ];
 
