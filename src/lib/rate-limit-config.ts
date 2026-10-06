@@ -38,7 +38,7 @@ const DEFAULTS = {
   'tailor_anon': { limit: 3, windowSeconds: 3600, tier: 'public', message: 'Too many free rewrites from this network. Please create a free account to continue.' },
   // Site-wide circuit breaker on logged-out AI spend. Per-device/IP limits can be
   // defeated by rotating IPs; this cap cannot. Override with RATE_LIMIT_TAILOR_ANON_GLOBAL.
-  'tailor_anon_global': { limit: 250, windowSeconds: 86400, tier: 'public', message: 'Free logged-out rewrites are paused for today. Create a free account to keep tailoring — 3 rewrites every month.' },
+  'tailor_anon_global': { limit: 250, windowSeconds: 86400, tier: 'public', message: 'Free logged-out rewrites are paused for today. Create a free account to keep tailoring — 10 rewrites every month.' },
   // Resume builder AI polish: free for everyone, so cap the per-IP spend.
   'resume_builder': { limit: 12, windowSeconds: 3600, tier: 'public', message: 'Too many polish requests from this network. Please wait a few minutes and try again.' },
   // Site-wide circuit breaker on builder AI spend — survives IP rotation.
@@ -54,6 +54,8 @@ const DEFAULTS = {
 
   // --- authenticated tier --------------------------------------------------
   'tailor': { limit: 10, windowSeconds: 600, tier: 'authenticated', message: "You're rewriting resumes very quickly. Please wait a few minutes and try again." },
+  'job_anon': { limit: 3, windowSeconds: 3600, tier: 'public', message: 'Too many free searches from this network. Please create a free account to continue.' },
+  'job_anon_global': { limit: 300, windowSeconds: 86400, tier: 'public', message: 'Free logged-out job searches are paused for today. Create a free account to keep searching.' },
   'job-search': { limit: 30, windowSeconds: 600, tier: 'authenticated', message: 'Too many searches in a short time. Please wait a few minutes and try again.' },
   'job-alert-write': { limit: 30, windowSeconds: 600, tier: 'authenticated', message: 'Too many alert updates. Please wait a moment and try again.' },
   'profile-write': { limit: 20, windowSeconds: 600, tier: 'authenticated', message: 'Too many profile updates. Please wait a moment and try again.' },
