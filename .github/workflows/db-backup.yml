@@ -55,13 +55,13 @@ jobs:
         run: |
           export PGPASSWORD_SRC="$PGPASSWORD"
           R="/usr/lib/postgresql/17/bin"
-          PGPASSWORD=restoretest $R/psql -h localhost -p 5433 -U postgres -c "create database restoretest" 
-          PGPASSWORD=restoretest $R/psql -h localhost -p 5433 -U postgres -d restoretest -c "create role anon; create role authenticated; create role service_role; create role supabase_auth_admin; create role authenticator;" || true
-          PGPASSWORD=restoretest $R/pg_restore -h localhost -p 5433 -U postgres -d restoretest --no-owner --no-privileges "gotaofferr-$STAMP.dump" || echo "pg_restore reported warnings (checking data next)"
+          PGSSLMODE=disable PGPASSWORD=restoretest $R/psql -h 127.0.0.1 -p 5433 -U postgres -c "create database restoretest" 
+          PGSSLMODE=disable PGPASSWORD=restoretest $R/psql -h 127.0.0.1 -p 5433 -U postgres -d restoretest -c "create role anon; create role authenticated; create role service_role; create role supabase_auth_admin; create role authenticator;" || true
+          PGSSLMODE=disable PGPASSWORD=restoretest $R/pg_restore -h 127.0.0.1 -p 5433 -U postgres -d restoretest --no-owner --no-privileges "gotaofferr-$STAMP.dump" || echo "pg_restore reported warnings (checking data next)"
           SRC_T=$($R/psql -Atc "select count(*) from information_schema.tables where table_schema='public'")
-          DST_T=$(PGPASSWORD=restoretest $R/psql -h localhost -p 5433 -U postgres -d restoretest -Atc "select count(*) from information_schema.tables where table_schema='public'")
+          DST_T=$(PGSSLMODE=disable PGPASSWORD=restoretest $R/psql -h 127.0.0.1 -p 5433 -U postgres -d restoretest -Atc "select count(*) from information_schema.tables where table_schema='public'")
           SRC_U=$($R/psql -Atc "select count(*) from auth.users")
-          DST_U=$(PGPASSWORD=restoretest $R/psql -h localhost -p 5433 -U postgres -d restoretest -Atc "select count(*) from auth.users")
+          DST_U=$(PGSSLMODE=disable PGPASSWORD=restoretest $R/psql -h 127.0.0.1 -p 5433 -U postgres -d restoretest -Atc "select count(*) from auth.users")
           echo "public tables: source=$SRC_T restored=$DST_T"
           echo "auth users:    source=$SRC_U restored=$DST_U"
           test "$SRC_T" = "$DST_T" && test "$SRC_U" = "$DST_U" && echo "RESTORE TEST PASSED"
