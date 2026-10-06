@@ -60,7 +60,7 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
 
   // Extra checklist for the lighter models so their output matches the pro models: same facts, same depth.
   const liteBoost = /lite/i.test(modelId)
-    ? `\nPHASE 3.8 — DEPTH CHECKLIST (verify every item before you answer):\n- The summary MUST contain at least two real headline numbers copied from the source resume (money figures, percentages, traffic, team size, years), written exactly as the source has them. A summary with no number is wrong when the source has numbers.\n- Core skills: list 12-14 items. Include EVERY skill, tool, platform and method from the source resume that the job description also asks for (use the job description's exact wording), then fill the rest with real, source-backed skills most relevant to the role.\n- Keep every metric the source gives for a role inside that role's bullets: do not drop or blur a number ("measurable results" is never acceptable when the source has the figure).\n- Each role keeps 3-4 bullets when the source has that much; each bullet names the tool or method in the job description's words.\n- Never repeat one achievement in two sections.\n`
+    ? `\nPHASE 3.8 — DEPTH CHECKLIST (verify every item before you answer):\n- The summary MUST contain at least two real headline numbers copied from the source resume (money figures, percentages, traffic, team size, years), written exactly as the source has them. A summary with no number is wrong when the source has numbers.\n- Core skills: list 12-14 items. Include EVERY skill, tool, platform and method from the source resume that the job description also asks for (use the job description's exact wording), then fill the rest with real, source-backed skills most relevant to the role.\n- Keep every metric the source gives for a role inside that role's bullets: do not drop or blur a number ("measurable results" is never acceptable when the source has the figure).\n- Each role keeps 3-4 bullets when the source has that much; each bullet names the tool or method in the job description's words.\n- Never repeat one achievement in two sections.\n${final ? "- YOUR PREVIOUS DRAFT HAD TOO FEW CORE SKILLS. The skills array MUST contain 12 to 14 entries this time, every one supported by the source resume (include role-level skills such as budget management, reporting, CRM, B2C growth when the source shows them).\n" : ""}`
     : "";
 
   const prompt = `You are an expert technical recruiter and resume writer.
@@ -202,6 +202,9 @@ ${data.resume}`;
       const { polishResume, QualityError } = await import("./truth-guard.server");
       const polished = polishResume(result, final);
       result = polished.result;
+      if (/lite/i.test(modelId) && !final && (result.skills?.length ?? 0) < 11) {
+        throw new QualityError(["core skills list too short"]);
+      }
       if (polished.issues.length) {
         if (!final) throw new QualityError(polished.issues);
         console.warn(`[quality] shipped after retry with notes: ${polished.issues.slice(0, 3).join("; ")}`);
