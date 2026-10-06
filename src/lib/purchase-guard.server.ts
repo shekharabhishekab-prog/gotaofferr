@@ -1,14 +1,15 @@
 /**
  * Purchase-only suspension ladder. Free features are never affected.
  * Strikes: a halted subscription, or a failed payment on a NEW checkout.
- * 3 strikes = one cycle. Cycle 1 = 2 days, cycle 2+ = 7 days (the maximum).
+ * 3 strikes = one cycle. Cycle 1 = 2 hours, cycle 2 = 2 days, cycle 3+ = 7 days (the maximum).
  * After WARN_AT_CYCLES cycles the buyer sees a final warning. After
  * BLOCK_AT_CYCLES cycles purchases are blocked for good for the account and the network address.
  * State lives in the user's auth app_metadata (no schema change); the address block
  * reuses the rate_limits table (hashed address only).
  */
 export const STRIKES_PER_CYCLE = 3;
-export const SUSPEND_FIRST_MS = 2 * 24 * 3600 * 1000;
+export const SUSPEND_FIRST_MS = 2 * 3600 * 1000;
+export const SUSPEND_SECOND_MS = 2 * 24 * 3600 * 1000;
 export const SUSPEND_NEXT_MS = 7 * 24 * 3600 * 1000;
 export const WARN_AT_CYCLES = 4;
 export const BLOCK_AT_CYCLES = 6;
@@ -62,7 +63,7 @@ export async function recordStrike(userId: string, key: string, ipHash?: string)
         if (banErr) console.error('[purchase-guard] address block write failed', banErr.message);
       }
     } else {
-      st.until = new Date(Date.now() + (st.cycles === 1 ? SUSPEND_FIRST_MS : SUSPEND_NEXT_MS)).toISOString();
+      st.until = new Date(Date.now() + (st.cycles === 1 ? SUSPEND_FIRST_MS : st.cycles === 2 ? SUSPEND_SECOND_MS : SUSPEND_NEXT_MS)).toISOString();
     }
   }
   await writeState(userId, st);
@@ -70,9 +71,9 @@ export async function recordStrike(userId: string, key: string, ipHash?: string)
 }
 
 // Kept under 90 characters so the checkout toast shows them as written.
-const FRIENDLY_BLOCK = "New purchases are unavailable on this account. Please contact us.";
-const FRIENDLY_PAUSE = "Purchases are paused on this account for a few days. Free features still work.";
-const FRIENDLY_PAUSE_FINAL = "Purchases are paused here. Further failed payments will block purchases for good.";
+const FRIENDLY_BLOCK = "Plot twist: purchases are now blocked here for good. Please contact us.";
+const FRIENDLY_PAUSE = "Purchases are in timeout for now. Please try again later. Free features still work.";
+const FRIENDLY_PAUSE_FINAL = "Final warning: one more round of failed payments and purchases are blocked for good.";
 
 /** Returns a friendly message when purchases must be refused, otherwise null. Fails open. */
 export async function purchaseBlockMessage(userId: string, ipHash?: string): Promise<string | null> {
