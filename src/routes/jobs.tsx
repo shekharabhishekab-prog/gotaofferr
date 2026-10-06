@@ -19,6 +19,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSession } from "@/hooks/useSession";
+import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
+import { getDeviceId } from "@/lib/device-id";
+import { searchJobsAnonymous } from "@/lib/anon-jobs.functions";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UsageUpsell } from "@/components/UsageUpsell";
 import {
@@ -78,6 +81,12 @@ function Jobs() {
   const { session } = useSession();
   const { tier, isSubscribed, loading: subLoading } = useSubscription();
   const runSearch = useServerFn(searchJobs);
+  const runAnonSearch = useServerFn(searchJobsAnonymous);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [anonUsed, setAnonUsed] = useState(false);
+  useEffect(() => {
+    try { if (localStorage.getItem("gao_jobs_anon_used") === "1") setAnonUsed(true); } catch { /* ignore */ }
+  }, []);
   const loadSearchUsage = useServerFn(getJobSearchUsage);
   const loadAlert = useServerFn(getJobAlert);
   const loadAlertUsage = useServerFn(getAlertUsage);
@@ -256,6 +265,32 @@ function Jobs() {
     setJobs(null);
     setQueueNote(null);
     try {
+      if (!session) {
+        const out = await runAnonSearch({
+          data: {
+            role: role.trim(),
+            location: location.trim() || undefined,
+            remoteOnly,
+            experience: experience.trim() || undefined,
+            salaryRange: salaryRange || undefined,
+            extraFilters: extraFilters.trim() || undefined,
+            deviceId: getDeviceId(),
+            turnstileToken: captchaToken ?? undefined,
+          },
+        });
+        setCaptchaToken(null);
+        resetTurnstile();
+        if ("error" in out) {
+          if (out.used) {
+            try { localStorage.setItem("gao_jobs_anon_used", "1"); } catch { /* ignore */ }
+            setAnonUsed(true);
+          } else setError(friendlyMessage(out.error));
+        } else {
+          setJobs(out.jobs); setPage(0);
+          try { localStorage.setItem("gao_jobs_anon_used", "1"); } catch { /* ignore */ }
+        }
+        return;
+      }
       const res = await runQueued(
         () =>
           runSearch({
@@ -286,6 +321,10 @@ function Jobs() {
   }
 
   async function onSaveAlert() {
+    if (!session) {
+      setAlertSaved("Create a free account to save job alerts.");
+      return;
+    }
     if (role.trim().length < 2) {
       setAlertSaved("Add a role first.");
       return;
@@ -347,14 +386,14 @@ function Jobs() {
         list — click any job to apply on the company's own page.
       </p>
 
-      {!session ? (
+      {!session && anonUsed && !jobs ? (
         <div className="mt-10 rounded-2xl border border-border bg-card p-8">
-          <p className="text-card-foreground">Sign in to use the job finder.</p>
+          <p className="text-card-foreground">Create a free account to keep searching.</p>
           <Button asChild className="mt-4">
-            <Link to="/auth" search={{ redirect: "/jobs" }}>Sign in</Link>
+            <Link to="/auth" search={{ redirect: "/jobs" }}>Sign in or create account</Link>
           </Button>
         </div>
-      ) : !subLoading && usageLoaded && !canUseFinder ? (
+      ) : session && !subLoading && usageLoaded && !canUseFinder ? (
         <div className="mt-10 rounded-2xl border border-primary/40 bg-card p-8">
           <h2 className="font-display text-xl font-semibold text-card-foreground">
             You have used your job searches for this month
@@ -380,6 +419,7 @@ function Jobs() {
           ) : null}
 
           <form onSubmit={onSearch} className="mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
+            {!session ? <TurnstileWidget onToken={setCaptchaToken} className="mb-3 flex justify-center" /> : null}
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <Label htmlFor="role">Job role</Label>
@@ -506,7 +546,7 @@ function Jobs() {
             </div>
           </form>
 
-          <div className={`mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8 ${session ? "" : "hidden"}`}>
+          <div className={`mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8 ${session || jobs ? "" : "hidden"}`}>
             <div className="flex items-center gap-2 text-card-foreground">
               <Bell className="size-4 text-primary" />
               <h2 className="font-display text-lg font-semibold">Job alert every 3 days</h2>
