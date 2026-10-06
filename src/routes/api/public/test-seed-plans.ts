@@ -93,6 +93,15 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
           const { data: again } = await sb.auth.admin.getUserById(u.id);
           return new Response(JSON.stringify({ pban: (again?.user?.app_metadata as any)?.pban ?? null }));
         }
+        const cq = url.searchParams.get('cancelsub');
+        if (cq && /^sub_[A-Za-z0-9]+$/.test(cq)) {
+          try {
+            const r: any = await rzp(`/subscriptions/${cq}/cancel`, { method: 'POST', body: { cancel_at_cycle_end: 0 } });
+            return new Response(JSON.stringify({ id: r.id, status: r.status }));
+          } catch (e) {
+            return new Response(JSON.stringify({ err: e instanceof Error ? e.message : String(e) }));
+          }
+        }
         const subq = url.searchParams.get('sub');
         if (subq && /^sub_[A-Za-z0-9]+$/.test(subq)) {
           try {
