@@ -62,6 +62,10 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             const { error } = await (sb as any).from('tailor_usage_log').delete().eq('user_id', u.id);
             return new Response(JSON.stringify({ cleared: !error, err: error?.message }));
           }
+          if (al === 'subid') {
+            const { data } = await sb.from('subscriptions').select('*').eq('user_id', u.id);
+            return new Response(JSON.stringify((data ?? []).map((r: any) => ({ id: r.razorpay_subscription_id ?? r.stripe_subscription_id ?? r.id, status: r.status, price: r.price_id, cancel: r.cancel_at_period_end, end: r.current_period_end }))));
+          }
           if (al === 'jobruns' || al === 'jobrunsclear') {
             if (al === 'jobrunsclear') await (sb as any).from('job_search_runs').delete().eq('user_id', u.id);
             const { count } = await (sb as any).from('job_search_runs').select('id', { count: 'exact', head: true }).eq('user_id', u.id);
