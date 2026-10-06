@@ -172,7 +172,7 @@ export async function runDueDigests() {
       console.log(`Job alert ${alert.id}: sent=${result.sent} ${result.reason ?? ""}`);
     } catch (error) {
       console.error(`Job alert ${alert.id} failed:`, error);
-      reasons.push("error");
+      reasons.push("error: " + (error instanceof Error ? error.message : String(error)).slice(0, 160));
     }
   }
 
