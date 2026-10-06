@@ -13,9 +13,9 @@ const WINDOW_SECONDS = 3600;
 
 export async function sendOpsAlert(kind: string, note?: unknown): Promise<void> {
   try {
-    const to = process.env.OPS_ALERT_EMAIL;
+    const to = (process.env.OPS_ALERT_EMAIL || "").split(",").map((x) => x.trim()).filter((x) => /^[^\s@]+@[^\s@]+$/.test(x)).slice(0, 5);
     const key = process.env.RESEND_API_KEY;
-    if (!to || !key) return;
+    if (!to.length || !key) return;
     const safeKind = String(kind).replace(/[^a-zA-Z0-9:_.\- ]/g, "").slice(0, 80) || "unknown";
 
     const { checkRateLimit } = await import("./rate-limit.server");
@@ -35,7 +35,7 @@ export async function sendOpsAlert(kind: string, note?: unknown): Promise<void> 
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: `GotaOfferr alerts <noreply@${domain}>`,
-        to: [to],
+        to,
         subject: `[gotaofferr alert] ${safeKind}`,
         text: `Something needs a look on gotaofferr.com.\n\nWhat: ${safeKind}\nWhen: ${new Date().toISOString()}\nNote: ${text || "(no extra detail)"}\n\nMore alerts of this same kind are held back for 1 hour.\nLogs: Cloudflare dashboard > gotaofferr-copy > Observability.`,
       }),
