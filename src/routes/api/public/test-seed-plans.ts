@@ -28,6 +28,32 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             .eq('user_id', u.id);
           return new Response(JSON.stringify({ ok: !error, err: error?.message }));
         }
+        const al = url.searchParams.get('alerts');
+        if (al) {
+          // TEST-only: drive the job-alert cadence for the QA account.
+          const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+          const sb = supabaseAdmin as any;
+          const { data: list } = await sb.auth.admin.listUsers({ page: 1, perPage: 200 });
+          const u = (list?.users ?? []).find((x: any) => x.email === 'mailboss@mail.instinct.com');
+          if (!u) return new Response('{"err":"no user"}');
+          if (al === 'seed') {
+            await sb.from('job_alerts').delete().eq('user_id', u.id);
+            const { data, error } = await sb.from('job_alerts').insert({ user_id: u.id, role: 'Digital Marketing Manager', location: 'Dubai', local_hour: 0, timezone: 'Asia/Kolkata', enabled: true }).select('id, emails_sent, last_sent_at').single();
+            return new Response(JSON.stringify({ data, err: error?.message }));
+          }
+          if (al === 'age') {
+            const { error } = await sb.from('job_alerts').update({ last_sent_at: new Date(Date.now() - 3.1 * 86400000).toISOString() }).eq('user_id', u.id);
+            return new Response(JSON.stringify({ aged: !error, err: error?.message }));
+          }
+          if (al === 'status') {
+            const { data } = await sb.from('job_alerts').select('id, enabled, emails_sent, last_sent_at, completed_at').eq('user_id', u.id);
+            return new Response(JSON.stringify(data));
+          }
+          if (al === 'run') {
+            const { runDueDigests } = await import('@/lib/job-alert-digest.server');
+            return new Response(JSON.stringify(await runDueDigests()));
+          }
+        }
         const pb = url.searchParams.get('pban');
         if (pb) {
           // TEST-only: drive the suspension ladder for the QA account.
