@@ -1,0 +1,73 @@
+name: Weekly database backup
+
+# Free backup for the Supabase Free plan (it has no automatic backups).
+# Every Sunday 02:30 UTC: dumps the database, restores it into a throwaway
+# Postgres to prove the file works, then keeps the dump for 90 days as a
+# private download in the Actions run page. Costs nothing.
+on:
+  schedule:
+    - cron: "30 2 * * 0"
+  workflow_dispatch:
+  push:
+    branches: [phase18-preview]
+    paths: [".github/workflows/db-backup.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      pg:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: restoretest
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: aws-0-ap-northeast-2.pooler.supabase.com
+      PGPORT: "5432"
+      PGUSER: postgres.oahuhnlznkhbxxrajwch
+      PGDATABASE: postgres
+      PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PGSSLMODE: require
+    steps:
+      - name: Install Postgres 17 client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-client-17
+      - name: Check the secret is set
+        run: test -n "$PGPASSWORD" || (echo "SUPABASE_DB_PASSWORD secret is missing" && exit 1)
+      - name: Dump database (public + auth data)
+        run: |
+          STAMP=$(date -u +%Y-%m-%d)
+          /usr/lib/postgresql/17/bin/pg_dump --no-owner --no-privileges \
+            --schema=public --schema=auth -Fc -f "gotaofferr-$STAMP.dump"
+          ls -l gotaofferr-*.dump
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+      - name: Restore test into a throwaway database
+        run: |
+          export PGPASSWORD_SRC="$PGPASSWORD"
+          R="/usr/lib/postgresql/17/bin"
+          PGPASSWORD=restoretest $R/psql -h localhost -p 5433 -U postgres -c "create database restoretest" 
+          PGPASSWORD=restoretest $R/psql -h localhost -p 5433 -U postgres -d restoretest -c "create role anon; create role authenticated; create role service_role; create role supabase_auth_admin; create role authenticator;" || true
+          PGPASSWORD=restoretest $R/pg_restore -h localhost -p 5433 -U postgres -d restoretest --no-owner --no-privileges "gotaofferr-$STAMP.dump" || echo "pg_restore reported warnings (checking data next)"
+          SRC_T=$($R/psql -Atc "select count(*) from information_schema.tables where table_schema='public'")
+          DST_T=$(PGPASSWORD=restoretest $R/psql -h localhost -p 5433 -U postgres -d restoretest -Atc "select count(*) from information_schema.tables where table_schema='public'")
+          SRC_U=$($R/psql -Atc "select count(*) from auth.users")
+          DST_U=$(PGPASSWORD=restoretest $R/psql -h localhost -p 5433 -U postgres -d restoretest -Atc "select count(*) from auth.users")
+          echo "public tables: source=$SRC_T restored=$DST_T"
+          echo "auth users:    source=$SRC_U restored=$DST_U"
+          test "$SRC_T" = "$DST_T" && test "$SRC_U" = "$DST_U" && echo "RESTORE TEST PASSED"
+      - name: Keep the backup file (90 days)
+        uses: actions/upload-artifact@v4
+        with:
+          name: gotaofferr-db-backup-${{ env.STAMP }}
+          path: gotaofferr-*.dump
+          retention-days: 90
