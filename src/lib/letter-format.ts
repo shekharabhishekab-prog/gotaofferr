@@ -17,6 +17,8 @@ function splitSentences(text: string): string[] {
 const CLOSING = /^(sincerely|best regards|kind regards|warm regards|regards|best|thanks|thank you|yours sincerely|yours faithfully)[,.]?$/i;
 const CLOSING_TAIL = /\s+((?:sincerely|best regards|kind regards|warm regards|yours sincerely|yours faithfully|regards)[,.]?)\s*$/i;
 
+const CLOSING_NAME_TAIL = /\s+((?:sincerely|best regards|kind regards|warm regards|yours sincerely|yours faithfully|regards)[,.]?)\s+([A-Z][\w.'’-]+(?:\s+[A-Z][\w.'’-]+){0,3})\s*$/i;
+
 export function formatLetterParagraphs(letter: string): string {
   const paras = letter
     .split(/\n\s*\n/)
@@ -42,7 +44,12 @@ export function formatLetterParagraphs(letter: string): string {
   // Closing word (and name) on their own lines.
   const last = body.length - 1;
   if (last >= 0) {
-    const t = CLOSING_TAIL.exec(body[last]);
+    const tn = CLOSING_NAME_TAIL.exec(body[last]);
+    if (tn) {
+      body[last] = body[last].slice(0, tn.index).trim();
+      tail.unshift(`${tn[1]} ${tn[2]}`);
+    }
+    const t = tn ? null : CLOSING_TAIL.exec(body[last]);
     if (t) {
       body[last] = body[last].slice(0, t.index).trim();
       tail.unshift(t[1]);
