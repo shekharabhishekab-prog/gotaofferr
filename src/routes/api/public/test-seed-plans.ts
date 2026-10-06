@@ -62,6 +62,11 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             const { error } = await (sb as any).from('tailor_usage_log').delete().eq('user_id', u.id);
             return new Response(JSON.stringify({ cleared: !error, err: error?.message }));
           }
+          if (al === 'jobruns' || al === 'jobrunsclear') {
+            if (al === 'jobrunsclear') await (sb as any).from('job_search_runs').delete().eq('user_id', u.id);
+            const { count } = await (sb as any).from('job_search_runs').select('id', { count: 'exact', head: true }).eq('user_id', u.id);
+            return new Response(JSON.stringify({ own_runs: count }));
+          }
           if (al === 'usage') {
             const { data } = await (sb as any).from('ai_model_usage').select('*').eq('day', new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }));
             return new Response(JSON.stringify(data));
