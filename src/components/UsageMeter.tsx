@@ -37,7 +37,7 @@ export function UsageMeter({ usage }: { usage: UsageValue }) {
       <div className="flex items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-xs font-semibold">
           <Zap className="size-3.5 text-highlight" />
-          Free plan usage this month
+          Your usage this month
         </p>
         <span className="font-display text-xs font-bold text-highlight">
           {usage.used} / {usage.limit} used
@@ -75,3 +75,4 @@ export function UsageMeter({ usage }: { usage: UsageValue }) {
     </div>
   );
 }
+
