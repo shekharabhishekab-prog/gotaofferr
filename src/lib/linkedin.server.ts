@@ -1,3 +1,4 @@
+import { PROMPT_GUARD } from "./prompt-guard";
 import { generateText, Output } from "ai";
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
@@ -40,6 +41,8 @@ export async function reviewProfileFree(data: LinkedInInput): Promise<LinkedInFr
 
   const prompt = `You are a LinkedIn profile reviewer who has screened thousands of candidates as a recruiter.
 
+${PROMPT_GUARD}
+
 Score this LinkedIn profile out of 100 on how well it would perform in recruiter search and in a recruiter's first ten seconds of reading. Judge: headline clarity and searchability, About-section positioning and proof, and whether the skills list matches how jobs are actually advertised.
 
 Scoring guide: 0-40 unfinished or vague, 41-60 readable but generic, 61-80 solid with clear gaps, 81-100 recruiter-ready.
@@ -71,7 +74,9 @@ export async function reviewProfilePro(data: LinkedInInput): Promise<LinkedInPro
   if (!key) throw new Error("AI is not available right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
 
-  const prompt = `You are a LinkedIn profile strategist working with a candidate targeting this role: ${data.targetRole || "the role their experience points to"}.
+  const prompt = `${PROMPT_GUARD}
+
+You are a LinkedIn profile strategist working with a candidate targeting this role: ${data.targetRole || "the role their experience points to"}.
 
 Produce:
 1. keywordAlignment — score out of 100 for how well this profile matches recruiter searches for that target role, the role keywords already present in the profile verbatim, the important ones missing, and short notes on where each missing keyword should honestly go.
