@@ -205,7 +205,10 @@ function Pricing() {
   const interval: BillingInterval = "month";
   const [switching, setSwitching] = useState<PlanKey | null>(null);
   // Resolved after mount so server and client render the same first pass.
-  const [festival, setFestival] = useState<ActiveFestival | null>(null);
+  // Seeded from the server-resolved country so the first HTML already carries the offer prices.
+  const [festival, setFestival] = useState<ActiveFestival | null>(() =>
+    activeFestival(Date.now(), pricingForCountry(ssrCountry)?.code === "INR" ? "IN" : null),
+  );
   useEffect(() => setFestival(activeFestival(Date.now(), pricing.code === "INR" ? "IN" : null)), [pricing.code]);
   const {
     plan: currentPlan,
