@@ -45,6 +45,10 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             const { error } = await sb.from('job_alerts').update({ last_sent_at: new Date(Date.now() - 3.1 * 86400000).toISOString() }).eq('user_id', u.id);
             return new Response(JSON.stringify({ aged: !error, err: error?.message }));
           }
+          if (al === 'usage') {
+            const { data } = await (sb as any).from('ai_model_usage').select('*').eq('day', new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }));
+            return new Response(JSON.stringify(data));
+          }
           if (al === 'status') {
             const { data } = await sb.from('job_alerts').select('id, enabled, emails_sent, last_sent_at, completed_at').eq('user_id', u.id);
             return new Response(JSON.stringify({ data, envlen: (process.env.JOB_ALERTS_CRON_SECRET || '').length, resend: !!process.env.RESEND_API_KEY, stamp: 'v3' }));
