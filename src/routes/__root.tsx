@@ -181,7 +181,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               children:
                 'window.adsbygoogle=window.adsbygoogle||[];(function(){var t=null,s=false;try{t=localStorage.getItem("gt_tier");for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"){s=true}}}catch(e){}'
                 + 'if(t&&t!=="free"){window.adsbygoogle.pauseAdRequests=1;return}'
-                + 'if(!t&&s){window.adsbygoogle.pauseAdRequests=1}'
+                + 'if(s){window.adsbygoogle.pauseAdRequests=1}'
                 + 'var e=document.createElement("script");e.async=true;e.crossOrigin="anonymous";e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ADSENSE_CLIENT + '";document.head.appendChild(e)})()',
             },
           ]
