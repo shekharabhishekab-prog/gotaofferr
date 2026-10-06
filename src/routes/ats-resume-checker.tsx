@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     q: "Is the ATS check free?",
-    a: "Yes. Every account gets 3 free checks and rewrites each month, and the missing-keyword list is included on all of them. Paid plans add higher monthly limits.",
+    a: "Yes. Every account gets 10 free checks and rewrites each month, and the missing-keyword list is included on all of them. Paid plans add higher monthly limits.",
   },
   {
     q: "Will my resume still read like a human wrote it?",
@@ -158,7 +158,7 @@ function AtsResumeChecker() {
           Score your resume against a real job posting
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-          Three free checks every month, missing keywords included on all of them.
+          Ten free checks every month, missing keywords included on all of them.
         </p>
         <Button asChild size="lg" className="mt-6">
           <Link to="/tailor">
@@ -169,3 +169,4 @@ function AtsResumeChecker() {
     </main>
   );
 }
+
