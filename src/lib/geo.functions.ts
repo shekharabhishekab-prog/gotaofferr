@@ -17,11 +17,6 @@ export const getVisitorCountry = createServerFn({ method: 'GET' }).handler(async
     'fastly-client-country',
   ];
   const headers = getRequest().headers;
-  // PREVIEW-ONLY test aid: active only when the Razorpay TEST keys exist (never on production).
-  if ((process.env['RAZORPAY_TEST_KEY_ID'] || '').startsWith('rzp_test_')) {
-    const m = /(?:^|;\s*)gtest_country=([A-Za-z]{2})/.exec(headers.get('cookie') || '');
-    if (m) return { country: m[1].toUpperCase() };
-  }
   for (const name of candidates) {
     const value = headers.get(name);
     if (value && /^[A-Za-z]{2}$/.test(value) && value.toUpperCase() !== 'XX') {
