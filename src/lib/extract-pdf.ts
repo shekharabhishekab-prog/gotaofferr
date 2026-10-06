@@ -127,7 +127,7 @@ export async function extractPdfText(file: File): Promise<string> {
   const pdfjs = await loadPdfjs();
 
   const buffer = await readFileAsArrayBuffer(file);
-  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer) });
+  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(buffer), isEvalSupported: false });
   const doc = await loadingTask.promise;
 
   let text = "";
@@ -189,3 +189,4 @@ export function assertLooksLikeResume(text: string): void {
     );
   }
 }
+
