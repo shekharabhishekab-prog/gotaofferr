@@ -53,7 +53,7 @@ export const tailorResumeAnonymous = createServerFn({ method: "POST" })
 
     if (await hasUsedFreeRun(identity)) {
       throw new Error(
-        "You've used your free rewrite. Create a free account to keep tailoring — 3 rewrites every month.",
+        "You've used your free rewrite. Create a free account to keep tailoring — 10 rewrites every month.",
       );
     }
 
@@ -76,3 +76,4 @@ export const captureLeadEmail = createServerFn({ method: "POST" })
     await saveCapturedEmail(data.email, data.source, data.deviceId ? hashValue(data.deviceId) : null);
     return { ok: true };
   });
+
