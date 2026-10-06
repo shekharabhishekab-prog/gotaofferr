@@ -47,7 +47,7 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
           }
           if (al === 'status') {
             const { data } = await sb.from('job_alerts').select('id, enabled, emails_sent, last_sent_at, completed_at').eq('user_id', u.id);
-            return new Response(JSON.stringify(data));
+            return new Response(JSON.stringify({ data, envlen: (process.env.JOB_ALERTS_CRON_SECRET || '').length, resend: !!process.env.RESEND_API_KEY, stamp: 'v3' }));
           }
           if (al === 'run') {
             const { runDueDigests } = await import('@/lib/job-alert-digest.server');
