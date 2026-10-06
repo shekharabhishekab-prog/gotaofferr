@@ -263,6 +263,7 @@ ${data.resume}`;
         throw new Error("The AI response could not be parsed. Please try again.");
       }
     }
+    console.error("[tailor] failed:", (error as Error)?.name, String((error as Error)?.message ?? error).slice(0, 300));
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
     throw new Error(aiGatewayErrorMessage(error));
   }
