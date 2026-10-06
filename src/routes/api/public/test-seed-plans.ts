@@ -97,10 +97,16 @@ export const Route = createFileRoute('/api/public/test-seed-plans')({
             await sb.auth.admin.updateUserById(u.id, { app_metadata: { pban: null } });
             return new Response('{"ok":true,"reset":true}');
           }
+          if (pb === 'age') {
+            const cur: any = (u.app_metadata as any)?.pban || { strikes: 0, cycles: 0 };
+            cur.recent = (cur.recent || []).map((t: number) => t - 11 * 60 * 1000);
+            await sb.auth.admin.updateUserById(u.id, { app_metadata: { ...(u.app_metadata || {}), pban: cur } });
+            return new Response(JSON.stringify({ aged: cur }));
+          }
           if (pb === 'iptest') {
             // TEST-only: 18 strikes with an address hash, then wipe the account state and check the address block alone.
             const { recordStrike, purchaseBlockMessage } = await import('@/lib/purchase-guard.server');
-            await sb.auth.admin.updateUserById(u.id, { app_metadata: { ...(u.app_metadata || {}), pban: { strikes: 2, cycles: 5, seen: [] } } });
+            await sb.auth.admin.updateUserById(u.id, { app_metadata: { ...(u.app_metadata || {}), pban: { strikes: 2, cycles: 5, seen: [], recent: [Date.now() - 1000, Date.now() - 500] } } });
             await recordStrike(u.id, `ip${Date.now()}`, 'testiphash01');
             await sb.auth.admin.updateUserById(u.id, { app_metadata: { pban: null } });
             const { data: rowChk, error: rowErr } = await sb.from('rate_limits').select('count').eq('bucket', 'ipban').eq('identifier', 'testiphash01');
