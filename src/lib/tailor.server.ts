@@ -58,6 +58,11 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   const domestic = crossBorder.length ? [] : domesticRules(sourceCountry, detectedJobCountry);
 
 
+  // Extra checklist for the lighter models so their output matches the pro models: same facts, same depth.
+  const liteBoost = /lite/i.test(modelId)
+    ? `\nPHASE 3.8 — DEPTH CHECKLIST (verify every item before you answer):\n- The summary MUST contain at least two real headline numbers copied from the source resume (money figures, percentages, traffic, team size, years), written exactly as the source has them. A summary with no number is wrong when the source has numbers.\n- Core skills: list 12-14 items. Include EVERY skill, tool, platform and method from the source resume that the job description also asks for (use the job description's exact wording), then fill the rest with real, source-backed skills most relevant to the role.\n- Keep every metric the source gives for a role inside that role's bullets: do not drop or blur a number ("measurable results" is never acceptable when the source has the figure).\n- Each role keeps 3-4 bullets when the source has that much; each bullet names the tool or method in the job description's words.\n- Never repeat one achievement in two sections.\n`
+    : "";
+
   const prompt = `You are an expert technical recruiter and resume writer.
 
 Work in two phases.
@@ -142,7 +147,7 @@ PHASE 3.5 — SURVIVE GREENHOUSE / WORKDAY / LEVER RESUME PARSING. These ATS pro
 PHASE 3.6 — UNIVERSAL ATS PARSE RULES (apply to every resume, domestic or cross-border):
 ${ATS_PARSE_RULES.map((rule) => `- ${rule}`).join("\n")}
 
-PHASE 3.7 — GET SELECTED BY THE ATS (recruiters filter and rank by keyword match before any human reads the resume):
+${liteBoost}PHASE 3.7 — GET SELECTED BY THE ATS (recruiters filter and rank by keyword match before any human reads the resume):
 - Every must-have skill, tool, qualification and responsibility phrase in the job description that the candidate TRULY has must appear verbatim at least once in skills and at least once inside an experience bullet or the summary, in the job description's exact wording. Truthful matches only: never add a keyword the source resume does not support (the HARD RULE above still wins).
 - Put the strongest 5-8 matched keywords in the first two lines of the summary, because many parsers and recruiters weight the top of the page most.
 - The resume must read cleanly as plain text in this order: contact lines, summary, skills, experience (newest first), education, certifications. Nothing may depend on position, colour, font size or an image to make sense.
