@@ -375,7 +375,7 @@ export function ResumeTailor() {
                 </Link>
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                You've used your free rewrite. A free account gives you 3 tailored resumes and cover
+                You've used your free rewrite. A free account gives you 10 tailored resumes and cover
                 letters every month.
               </p>
             </div>
