@@ -730,6 +730,7 @@ export async function searchJobListings(
       await countCall("firecrawl-search");
     } catch (error) {
       firstError = error;
+      void import("./ops-alert.server").then((m) => m.opsAlert("job source: firecrawl path failed", error)).catch(() => {});
       console.warn("[jobs] firecrawl path failed, trying Adzuna: " + String((error as any)?.message ?? error) + " | reason: " + String((error as any)?.reason?.message ?? (error as any)?.errors?.[0]?.message ?? ""));
     }
   }
