@@ -206,6 +206,35 @@ ${data.resume}`;
       console.error("[truth-guard] failed", e);
     }
 
+    // Last line of defence: a numeric fact from the source that the model or the
+    // guard dropped goes back as the candidate's own source line, in the right role.
+    try {
+      const miss = findMissingFacts(data.resume, result).filter((f) => /\d/.test(f));
+      if (miss.length && result.experience?.length) {
+        const lines = data.resume.split(/\r?\n/);
+        const roleOf = (idx: number) => {
+          for (let i = idx; i >= 0; i--) {
+            const l = lines[i].toLowerCase();
+            const hit = result.experience.find((e: any) => e.company && l.includes(String(e.company).toLowerCase()));
+            if (hit) return hit as any;
+          }
+          return null;
+        };
+        for (const fact of miss) {
+          const idx = lines.findIndex((l) => /^\s*[-•*·]/.test(l) && l.toLowerCase().includes(fact.toLowerCase()));
+          if (idx < 0) continue;
+          const role = roleOf(idx);
+          if (!role) continue;
+          const text = lines[idx].replace(/^\s*[-•*·]\s*/, "").trim();
+          if (text && !(role.bullets ?? []).some((b: string) => b.toLowerCase().includes(fact.toLowerCase()))) {
+            role.bullets = [...(role.bullets ?? []), text];
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[restore-facts] failed", e);
+    }
+
     // Key Achievements must not repeat Experience bullets; employer context
     // lines must come from the source resume (no invented descriptors).
     try {
