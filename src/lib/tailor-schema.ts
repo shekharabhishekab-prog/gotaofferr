@@ -86,7 +86,7 @@ export const tailorInputSchema = z
 export type TailorInput = z.infer<typeof tailorInputSchema>;
 
 /** Free plan allowance per calendar month. */
-export const FREE_MONTHLY_LIMIT = 10;
+export const FREE_MONTHLY_LIMIT = 5;
 
 /** Starter paid plan allowance per calendar month. */
 export const STARTER_MONTHLY_LIMIT = 20;
@@ -96,6 +96,3 @@ export const JOB_HUNT_MONTHLY_LIMIT = 129;
 
 /** Career Pro paid plan allowance per calendar month. */
 export const CAREER_PRO_MONTHLY_LIMIT = 199;
-
-
-
