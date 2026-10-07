@@ -118,23 +118,7 @@ const features = [
   },
 ];
 
-const steps = [
-  {
-    n: "01",
-    title: "Find the jobs",
-    body: "Tell us the role, salary and location — our AI searches across job boards and returns one clean list.",
-  },
-  {
-    n: "02",
-    title: "Tailor the application",
-    body: "One click sends a listing into the builder: your resume rewritten for that company, plus the cover letter.",
-  },
-  {
-    n: "03",
-    title: "Apply",
-    body: "Download ATS-safe PDFs and go straight to the company's own apply page.",
-  },
-];
+
 
 const notWhatWeAre = [
   {
@@ -412,38 +396,17 @@ function Index() {
         </div>
       </section>
 
-      {/* Steps */}
-      <section className="relative overflow-hidden border-y border-border bg-muted/40">
-        <div className="bg-grid absolute inset-0 opacity-40" aria-hidden />
-        <div className="site-container content-auto relative py-10 sm:py-20">
-          <h2 className="font-display text-3xl font-bold text-foreground sm:text-4xl">
-            Find → Tailor → Apply
-          </h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            The whole application, start to finish, in about a minute — instead of an evening spread
-            across job boards, docs and cover letter templates.
-          </p>
-
-          <div className="perspective-far mt-12 grid gap-8 md:grid-cols-3">
-            {steps.map((s) => (
-              <Tilt3D key={s.n} max={0.6}>
-                <div className="h-full rounded-2xl border border-border bg-card p-7 transition-shadow duration-300 hover:shadow-soft">
-                  <div className="font-display text-5xl font-bold text-highlight">{s.n}</div>
-                  <h3 className="mt-3 font-display text-lg font-semibold text-foreground">
-                    {s.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
-                </div>
-              </Tilt3D>
-            ))}
+      {/* Phase 1.8 design review: replaces the homepage how-it-works section. */}
+      <section id="ats-checker" className="site-container py-10 sm:py-20">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-medium text-highlight">DESIGN PREVIEW</span>
+            <h2 className="mt-2 font-display text-3xl font-bold text-foreground sm:text-4xl">ATS resume checker</h2>
+            <p className="mt-3 text-muted-foreground">Review the layout here or open the dedicated checker page. Scoring is not connected yet.</p>
           </div>
-          <Button asChild size="lg" className="group mt-12">
-            <Link to="/tailor">
-              Start now{" "}
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Button>
+          <Button asChild variant="outline"><a href="/ats-design-preview">Open dedicated checker page <ArrowRight className="ml-2 size-4" /></a></Button>
         </div>
+        <iframe src="/ats-design-preview" title="ATS checker design preview" className="mt-6 h-[1720px] w-full rounded-2xl border border-border sm:h-[1100px]" sandbox="allow-scripts allow-same-origin" />
       </section>
 
       {/* What we are / aren't */}
@@ -510,4 +473,3 @@ function Index() {
     </main>
   );
 }
-
