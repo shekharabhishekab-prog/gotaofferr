@@ -184,9 +184,9 @@ function AdminPage() {
             <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Subscriptions started" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} icon={<CreditCard className="h-4 w-4" />} />
-            <Stat label="Active subscriber share now" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
+            <Stat label="Non-QA entitled user share now" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">This month uses India time (IST). Counts are recorded activity; builder counts are download attempts. Subscriptions started counts new records, not renewals. Subscriber share is current access, not historical conversion.</p>
+          <p className="mt-3 text-sm text-muted-foreground">This month uses India time (IST). Counts are recorded activity; builder counts are download attempts. Subscriptions started counts new records, not renewals. Share excludes the two known QA accounts from both users and entitled users; it measures current access, not receipt-confirmed payments or historical conversion.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
@@ -375,4 +375,4 @@ function AdminPage() {
       </div>
     </AdminMfaGate>
   );
-}
+        }
