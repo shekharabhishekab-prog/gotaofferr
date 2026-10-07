@@ -199,9 +199,10 @@ function AdminPage() {
             <Stat label="Subscription records" value={d.totals.subscriptionRecords} icon={<CreditCard className="h-4 w-4" />} />
             <Stat label="Recorded rewrites" value={d.totals.runsTotal} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Recorded searches this month" value={d.totals.searchesThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Job alert records" value={d.totals.alertRecords} icon={<BarChart3 className="h-4 w-4" />} />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">Subscriber share is currently entitled users divided by all registered users, not historical purchase conversion. Month totals use UTC. Activity totals count recorded signed-in events and may exclude older unrecorded events or deleted accounts. Plan counts below include Free and current entitled plans.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Subscriber share is currently entitled users divided by all registered users, not historical purchase conversion. Month totals use UTC. Activity totals count recorded signed-in events and may exclude older unrecorded events or deleted accounts. Builder attempts are allowance records written before PDF generation, not confirmed files created. Plan counts below include Free and current entitled plans.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
