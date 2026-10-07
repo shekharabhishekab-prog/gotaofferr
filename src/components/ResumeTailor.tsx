@@ -1,3 +1,4 @@
+import { trackAction } from "@/components/DeferredThirdParty";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
@@ -195,6 +196,7 @@ export function ResumeTailor() {
         setResult(out.result);
         setUsage(out.usage);
       }
+      trackAction("tailor", "success");
       toast.success("Your tailored resume is ready");
       setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch (e) {
@@ -212,6 +214,7 @@ export function ResumeTailor() {
           /* storage unavailable */
         }
       }
+      trackAction("tailor", "failed");
       toast.error(message);
     } finally {
       setLoading(false);
