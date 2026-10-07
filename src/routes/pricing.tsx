@@ -94,11 +94,11 @@ const plans: Record<PlanKey, {
   free: {
     name: "Free",
     note: "forever",
-    tagline: "Try it on your next ten applications.",
+    tagline: "Try it on your next three applications.",
     bestFor: "Best for: testing whether tailoring actually gets you replies.",
     features: [
       "3 resume + cover letter tailorings per month",
-      "5 resumes in the resume builder",
+      "3 resumes in the resume builder",
       "1 AI job finder search per month",
       "1 job alert (3 emails, every 3 days)",
       "Resume builder: build a resume from scratch and download it as a PDF",
