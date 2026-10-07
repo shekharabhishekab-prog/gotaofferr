@@ -150,13 +150,14 @@ export const exportMyData = createServerFn({ method: "POST" })
     const { enforcePolicy } = await import("@/lib/rate-limit.server");
     await enforcePolicy("profile-write", context.userId);
 
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [profile, runs, alerts, subs, searches, builder] = await Promise.all([
       context.supabase.from("profiles").select("*").eq("id", context.userId).maybeSingle(),
       context.supabase.from("tailor_runs").select("*").eq("user_id", context.userId),
       context.supabase.from("job_alerts").select("*").eq("user_id", context.userId),
       context.supabase.from("subscriptions").select("*").eq("user_id", context.userId),
       context.supabase.from("job_search_runs").select("*").eq("user_id", context.userId),
-      context.supabase.from("default_resumes").select("*").eq("user_id", context.userId),
+      supabaseAdmin.from("default_resumes").select("*").eq("user_id", context.userId),
     ]);
 
     const { safeError } = await import("@/lib/safe-error.server");
