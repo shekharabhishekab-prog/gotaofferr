@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { PlanTier } from "@/lib/plans";
+import { decryptResult, encryptResult } from "./resume-crypto.server";
+import { safeError } from "./safe-error.server";
 
 type Ctx = { supabase: any; userId: string; claims?: any };
 
@@ -35,8 +37,11 @@ async function readSaves(sb: any, userId: string) {
     .select("id, label, result, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
-  if (error) return [] as any[];
-  return data ?? [];
+  if (error) throw safeError("builder-read", error, "Could not load your saved resumes right now.");
+  return Promise.all((data ?? []).map(async (row: any) => {
+    try { return { ...row, result: await decryptResult(row.result) }; }
+    catch (error) { throw safeError("builder-unlock", error, "Could not unlock that saved resume right now."); }
+  }));
 }
 
 /** The member's saved builder resumes plus how many slots their plan has. */
@@ -72,9 +77,12 @@ export const saveBuilderResume = createServerFn({ method: "POST" })
     await purgeOld(sb, ctx.userId);
     const items = await readSaves(sb, ctx.userId);
     if (items.length >= slots) return { ok: false as const, reason: "full" as const, slots };
+    let storedResult: unknown;
+    try { storedResult = await encryptResult({ draft: data.draft, polished: data.polished ?? null }); }
+    catch (error) { throw safeError("builder-encrypt", error, "Your resume could not be saved securely. Please try again."); }
     const { error } = await sb
       .from("default_resumes")
-      .insert({ user_id: ctx.userId, label: data.label || null, result: { draft: data.draft, polished: data.polished ?? null } });
+      .insert({ user_id: ctx.userId, label: data.label || null, result: storedResult });
     if (error) {
       console.error("[builder-saves] insert failed", error.message);
       return { ok: false as const, reason: "error" as const, slots };
