@@ -376,7 +376,7 @@ export function ResumeTailor() {
                 </Link>
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                You've used your free rewrite. A free account gives you 10 tailored resumes and cover
+                You've used your free rewrite. A free account gives you 5 tailored resumes and cover
                 letters every month.
               </p>
             </div>
@@ -770,7 +770,7 @@ export function ResumeTailor() {
             <Card className="mt-6 flex flex-col items-center gap-3 border-primary/30 p-6 text-center shadow-soft">
               <p className="text-sm font-semibold">That was your free rewrite.</p>
               <p className="text-xs text-muted-foreground">
-                Create a free account to keep tailoring — 10 resumes and cover letters every month.
+                Create a free account to keep tailoring — 5 resumes and cover letters every month.
               </p>
               <Button variant="hero" asChild>
                 <Link to="/auth" search={{ redirect: "/tailor" }}>
