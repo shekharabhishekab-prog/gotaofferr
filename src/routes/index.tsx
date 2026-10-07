@@ -35,7 +35,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "GotaOfferr finds matching jobs across top boards, then rebuilds your resume and cover letter for each company as ATS-ready PDFs. 10 free applications a month.",
+          "GotaOfferr finds matching jobs across top boards, then rebuilds your resume and cover letter for each company as ATS-ready PDFs. 5 free applications a month.",
       },
       { property: "og:title", content: "Find Jobs & Tailor Your Resume in One Click | GotaOfferr" },
       {
@@ -85,7 +85,7 @@ export const Route = createFileRoute("/")({
             "@type": "Offer",
             price: "0",
             priceCurrency: "INR",
-            description: "Free plan: 10 tailored resumes per month. Paid plans start at INR 49 (Limited Launch Offer, India).",
+            description: "Free plan: 5 tailored resumes per month. Paid plans start at INR 49 (Limited Launch Offer, India).",
             url: "https://gotaofferr.com/pricing",
           },
         }),
@@ -178,7 +178,7 @@ function Index() {
           <div className="text-center lg:text-left">
             <span className="animate-pulse-ring inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
               <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Tailor
-              resume · Apply — 10 free a month
+              resume · Apply — 5 free a month
             </span>
             <h1 className="animate-rise-instant mt-6 max-w-[19ch] font-display text-[2.4rem] leading-[1.05] font-bold text-balance sm:text-[3.2rem] xl:text-[4rem]">
               Find the jobs.{" "}
@@ -493,7 +493,7 @@ function Index() {
               Land the interview, not the rejection
             </h2>
             <p className="relative mt-3 text-sm opacity-85">
-              Three tailored resumes free every month. No card needed — just paste and go.
+              Five tailored resumes free every month. No card needed — just paste and go.
             </p>
             <Button
               asChild
@@ -510,4 +510,3 @@ function Index() {
     </main>
   );
 }
-
