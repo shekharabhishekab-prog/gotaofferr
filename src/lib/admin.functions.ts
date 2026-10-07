@@ -151,7 +151,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
         alertsThisMonth: monthlyAlerts.get(u.id) ?? 0,
         searchesThisMonth: monthlySearches.get(u.id) ?? 0,
         alerts: alertCounts.get(u.id) ?? 0,
-        plan: sub ? planLabel(sub.price_id) : null,
+        plan: sub && isEntitled(sub) ? planLabel(sub.price_id) : "Free",
         planStatus: sub?.status ?? null,
         planEnd: sub?.current_period_end ?? null,
       };
