@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { passwordChangeSchema, profileUpdateSchema, runIdSchema } from "./account-schema";
 
+let lastSealAt = 0;
+
 export const getAccountOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -23,14 +25,18 @@ export const getAccountOverview = createServerFn({ method: "GET" })
         .limit(7),
     ]);
 
-    // The signup trigger writes the name in plain text; seal it the first time the member visits.
-    if (profile?.full_name && !String(profile.full_name).startsWith("enc1:")) {
-      try {
-        const { encryptText } = await import("./field-crypto.server");
-        await context.supabase.from("profiles").update({ full_name: await encryptText(profile.full_name) }).eq("id", context.userId);
-      } catch (e) {
-        console.error("[profile] could not seal name");
+    // Seal rows still holding plain text (old rows, and names the signup trigger writes plain).
+    // Throttled so a busy site does this at most once every few minutes per server instance.
+    try {
+      const now = Date.now();
+      if (now - lastSealAt > 5 * 60_000) {
+        lastSealAt = now;
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { sealLegacyRows } = await import("./field-crypto.server");
+        await sealLegacyRows(supabaseAdmin as any);
       }
+    } catch (e) {
+      console.error("[seal] failed", e instanceof Error ? e.message : e);
     }
 
     const totalCount = await (await import("./tailor-usage.server")).countTailorUsage(context.supabase, context.userId);
