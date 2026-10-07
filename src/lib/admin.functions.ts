@@ -89,7 +89,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       rows(() => supabaseAdmin.from("subscriptions").select("id,user_id,price_id,status,current_period_end,cancel_at_period_end,environment,created_at").eq("environment", getStripeEnvironment()).order("created_at", { ascending: false }).order("id")),
       rows(() => supabaseAdmin.from("profiles").select("id,full_name").order("id")),
       rows(() => supabaseAdmin.from("tailor_runs").select("id,user_id,created_at").order("id")),
-      rows(() => supabaseAdmin.from("job_alerts").select("id,user_id,enabled").order("id")),
+      rows(() => supabaseAdmin.from("job_alerts").select("id,user_id,enabled,created_at").order("id")),
       rows(() => supabaseAdmin.from("tailor_usage_log").select("id,user_id,created_at").order("id")),
       rows(() => supabaseAdmin.from("job_search_runs").select("id,user_id,created_at").order("id")),
       rows(() => supabaseAdmin.from("builder_uses").select("id,user_id,created_at").order("id")),
@@ -103,10 +103,15 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     const monthStart = new Date();
     monthStart.setUTCDate(1);
     monthStart.setUTCHours(0, 0, 0, 0);
+    const asOf = new Date();
+    function inThisMonth(row: { created_at?: string | null }): boolean {
+      const time = new Date(row.created_at ?? "").getTime();
+      return Number.isFinite(time) && time >= monthStart.getTime() && time <= asOf.getTime();
+    }
     let runsThisMonth = 0;
     for (const r of usageRows) {
       runCounts.set(r.user_id, (runCounts.get(r.user_id) ?? 0) + 1);
-      if (new Date(r.created_at) >= monthStart) runsThisMonth += 1;
+      if (inThisMonth(r)) runsThisMonth += 1;
     }
 
     const alertCounts = new Map<string, number>();
@@ -145,11 +150,15 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       planBreakdown[label] = (planBreakdown[label] ?? 0) + 1;
       if (active) activeSubs += 1;
     }
-    const searchesThisMonth = searchRows.filter(r => new Date(r.created_at) >= monthStart).length;
+    const searchesThisMonth = searchRows.filter(inThisMonth).length;
 
     return {
       totals: {
         users: users.length,
+        usersThisMonth: authUsers.filter(inThisMonth).length,
+        subscriptionRecordsThisMonth: subs.filter(inThisMonth).length,
+        alertRecordsThisMonth: alertRows.filter(inThisMonth).length,
+        builderDownloadAttemptsThisMonth: builderRows.filter(inThisMonth).length,
         activeSubs,
         subscriberSharePercent: users.length ? activeSubs / users.length * 100 : 0,
         subscriptionRecords: subs.length,
