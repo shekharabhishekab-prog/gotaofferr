@@ -26,10 +26,10 @@ export const getAccountOverview = createServerFn({ method: "GET" })
     ]);
 
     // Seal rows still holding plain text (old rows, and names the signup trigger writes plain).
-    // Throttled so a busy site does this at most once every few minutes per server instance.
+    // Throttled so a busy site does this at most once every 30 seconds per server instance.
     try {
       const now = Date.now();
-      if (now - lastSealAt > 5 * 60_000) {
+      if (now - lastSealAt > 30_000) {
         lastSealAt = now;
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { sealLegacyRows } = await import("./field-crypto.server");
