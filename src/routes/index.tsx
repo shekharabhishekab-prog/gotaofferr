@@ -35,7 +35,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "GotaOfferr finds matching jobs across top boards, then rebuilds your resume and cover letter for each company as ATS-ready PDFs. 10 free applications a month.",
+          "GotaOfferr finds matching jobs across top boards, then rebuilds your resume and cover letter for each company as ATS-ready PDFs. 3 free applications a month.",
       },
       { property: "og:title", content: "Find Jobs & Tailor Your Resume in One Click | GotaOfferr" },
       {
@@ -85,7 +85,7 @@ export const Route = createFileRoute("/")({
             "@type": "Offer",
             price: "0",
             priceCurrency: "INR",
-            description: "Free plan: 10 tailored resumes per month. Paid plans start at INR 49 (Limited Launch Offer, India).",
+            description: "Free plan: 3 tailored resumes per month. Paid plans start at INR 49 (Limited Launch Offer, India).",
             url: "https://gotaofferr.com/pricing",
           },
         }),
