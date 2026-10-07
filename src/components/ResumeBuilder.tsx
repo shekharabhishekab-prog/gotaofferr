@@ -162,8 +162,8 @@ export function ResumeBuilder() {
       }
       const { buildBuilderResumePdf } = await import("@/lib/resume-builder-pdf");
       const doc = await buildBuilderResumePdf(data, polished);
-      trackAction("pdf_download", "success");
       doc.save(`${(data.fullName || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-resume.pdf`);
+      trackAction("pdf_download", "success");
     } catch {
       toast.error("Could not build the PDF. Please try again.");
     } finally {
