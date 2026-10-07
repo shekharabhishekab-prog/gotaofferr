@@ -3,8 +3,8 @@
  * for repeat offenders.
  *
  * Server-only. Workers are stateless, so counters must live in Postgres.
- * Fails OPEN on infrastructure errors (never block a paying user because the
- * limiter itself broke) but fails CLOSED once a limit is actually exceeded.
+ * Candidate: fail closed on credential, payment and provider-backed actions
+ * when the database cannot enforce a limit. Low-risk profile/download stays available.
  *
  * Thresholds are never hardcoded at the call site — see rate-limit-config.ts.
  */
@@ -47,14 +47,20 @@ async function bump(bucket: string, identifier: string, start: Date): Promise<nu
 
 async function readCount(bucket: string, identifier: string, start: Date): Promise<number> {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-  const { data } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin
     .from('rate_limits' as any)
     .select('count')
     .eq('bucket', bucket)
     .eq('identifier', identifier.slice(0, 200))
     .eq('window_start', start.toISOString())
     .maybeSingle();
+  if (error) throw error;
   return Number((data as any)?.count ?? 0);
+}
+
+const LOW_RISK_OUTAGE_BUCKETS = new Set(['profile-write', 'run-download']);
+function unavailable(): Error {
+  return userError('This action is temporarily unavailable. Please try again in a moment. This attempt was not counted.');
 }
 
 export async function checkRateLimit(
@@ -70,7 +76,8 @@ export async function checkRateLimit(
     const count = await bump(bucket, identifier, start);
     return { allowed: count <= limit, count, retryAfterSeconds };
   } catch (error) {
-    console.error('[rate-limit] check failed, allowing request:', error);
+    console.error('[rate-limit] check unavailable:', error);
+    if (!LOW_RISK_OUTAGE_BUCKETS.has(bucket)) throw unavailable();
     return { allowed: true, count: 0, retryAfterSeconds };
   }
 }
@@ -116,7 +123,7 @@ export async function enforcePolicy(bucket: RateBucket, identifier: string): Pro
       `[abuse] bucket=${bucket} tier=${policy.tier} identifier=${id.slice(0, 12)}… count=${count} violations=${violations} cooloff=${wait}s`,
     );
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    await supabaseAdmin.from('rate_limits' as any).upsert(
+    const { error: penaltyError } = await supabaseAdmin.from('rate_limits' as any).upsert(
       {
         bucket: `${bucket}:cooloff`,
         identifier: id,
@@ -126,11 +133,12 @@ export async function enforcePolicy(bucket: RateBucket, identifier: string): Pro
       { onConflict: 'bucket,identifier,window_start' } as any,
     );
 
+    if (penaltyError) throw penaltyError;
     throw userError(`${policy.message} You can try again in about ${humanWait(wait)}.`);
   } catch (error) {
     if ((error as { userFacing?: boolean })?.userFacing) throw error;
-    // Limiter infrastructure failure: fail open, but log it.
-    console.error('[rate-limit] policy check failed, allowing request:', error);
+    console.error('[rate-limit] policy check unavailable:', error);
+    if (!LOW_RISK_OUTAGE_BUCKETS.has(bucket)) throw unavailable();
   }
 }
 
