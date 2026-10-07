@@ -15,7 +15,9 @@ export function removeGoogleAds(doc: Document): number {
   const elements = Array.from(doc.querySelectorAll<HTMLElement>(GOOGLE_AD_SELECTOR));
   for (const element of elements) {
     element.style.setProperty('display', 'none', 'important');
-    element.remove();
+    // Keep script nodes: React owns some head resources and may remove them during navigation.
+    // Removing those behind React breaks reconciliation. Requests remain paused by AdPolicy.
+    if (element.tagName !== "SCRIPT") element.remove();
   }
   return elements.length;
 }
