@@ -25,6 +25,14 @@ const POSTHOG_KEY = "phc_qnxYaoAYBTXSHh2qG8tBke82cEFyx2HAGtXoAuXSYmR2";
 const POSTHOG_HOST = "https://us.i.posthog.com";
 const POSTHOG_ASSETS = "https://us-assets.i.posthog.com";
 
+const ACTION_NAMES = ["tailor", "builder_polish", "builder_save", "job_search", "pdf_download", "signup", "signin", "subscription_cancel"] as const;
+export type AnalyticsAction = typeof ACTION_NAMES[number];
+export function trackAction(action: AnalyticsAction, outcome: "success" | "failed" | "blocked") {
+  if (typeof window === "undefined" || location.pathname.startsWith("/admin")) return;
+  if (!(ACTION_NAMES as readonly string[]).includes(action) || !["success", "failed", "blocked"].includes(outcome)) return;
+  window.dispatchEvent(new CustomEvent("gt:product-action", { detail: { action, outcome } }));
+}
+
 const PUBLIC_ANALYTICS_ROUTES = new Set(["/", "/how-it-works", "/pricing", "/about", "/faq", "/contact", "/privacy", "/terms", "/examples/resumes", "/examples/cover-letters"]);
 function publicAnalyticsRoute(url: string): boolean {
   try { return PUBLIC_ANALYTICS_ROUTES.has(new URL(url, window.location.origin).pathname.replace(/\/+$/, "") || "/"); }
@@ -32,9 +40,10 @@ function publicAnalyticsRoute(url: string): boolean {
 }
 
 /** Official PostHog stub: queues calls until the real library has loaded. */
-function loadPostHog() {
+function loadPostHog(actionOnly = false) {
   const w = window as unknown as { posthog?: any; __gtPh?: boolean };
-  if ((window as any).__gtPhPrivate || !publicAnalyticsRoute(window.location.href) || w.__gtPh) return;
+  if (window.location.pathname.startsWith("/admin") || w.__gtPh) return;
+  if (!actionOnly && ((window as any).__gtPhPrivate || !publicAnalyticsRoute(window.location.href))) return;
   w.__gtPh = true;
   const ph: any = (w.posthog = w.posthog || []);
   if (ph.__SV) return;
@@ -77,6 +86,11 @@ function loadPostHog() {
     mask_all_element_attributes: true,
     capture_pageview: "history_change",
     before_send: (event: any) => {
+      if (event?.event === "product_action") {
+        const p = event.properties ?? {};
+        if (window.location.pathname.startsWith("/admin") || !(ACTION_NAMES as readonly string[]).includes(p.action) || !["success", "failed", "blocked"].includes(p.outcome)) return null;
+        return { ...event, properties: { action: p.action, outcome: p.outcome, token: POSTHOG_KEY, distinct_id: crypto.randomUUID() } };
+      }
       if (!event || !["$pageview", "$pageleave"].includes(event.event)) return null;
       if ((window as any).__gtPhPrivate || !publicAnalyticsRoute(window.location.href)) return null;
       if (!publicAnalyticsRoute(event.properties?.$current_url ?? window.location.href)) return null;
@@ -104,6 +118,15 @@ export function DeferredThirdParty({
   const { user, loading } = useSession();
   if (typeof window !== "undefined") (window as any).__gtPhPrivate = loading || Boolean(user);
   useEffect(() => {
+    const onAction = (event: Event) => {
+      if (!import.meta.env.PROD) return;
+      const detail = (event as CustomEvent).detail;
+      if (!detail || !(ACTION_NAMES as readonly string[]).includes(detail.action) || !["success", "failed", "blocked"].includes(detail.outcome)) return;
+      if (window.location.pathname.startsWith("/admin")) return;
+      loadPostHog(true);
+      (window as any).posthog?.capture("product_action", { action: detail.action, outcome: detail.outcome });
+    };
+    window.addEventListener("gt:product-action", onAction);
 
     let done = false;
     const run = () => {
@@ -152,7 +175,7 @@ export function DeferredThirdParty({
     ).requestIdleCallback;
     if (idle) idle(run, { timeout: 4000 });
 
-    return cleanup;
+    return () => { cleanup(); window.removeEventListener("gt:product-action", onAction); };
   }, [gaId, adsenseClient, loading, user?.id]);
 
   return null;
