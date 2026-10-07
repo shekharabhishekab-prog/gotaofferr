@@ -58,7 +58,27 @@ function loadPostHog() {
     ui_host: "https://us.posthog.com",
     person_profiles: "identified_only",
     disable_session_recording: true,
-    capture_pageview: true,
+    autocapture: false,
+    capture_dead_clicks: false,
+    capture_heatmaps: false,
+    capture_exceptions: false,
+    capture_performance: false,
+    rageclick: false,
+    disable_surveys: true,
+    mask_all_text: true,
+    mask_all_element_attributes: true,
+    capture_pageview: "history_change",
+    before_send: (event: any) => {
+      if (!event || !["$pageview", "$pageleave"].includes(event.event)) return null;
+      const properties = { ...event.properties };
+      for (const key of ["$current_url", "$referrer", "$initial_current_url", "$initial_referrer"]) {
+        if (typeof properties[key] !== "string") continue;
+        try { const url = new URL(properties[key]); properties[key] = url.origin + url.pathname; }
+        catch { delete properties[key]; }
+      }
+      delete properties.$title;
+      return { ...event, properties };
+    },
     capture_pageleave: true,
   });
   loadScript(`${POSTHOG_ASSETS}/static/array.js`);
