@@ -282,12 +282,6 @@ export const getSubscriptionStatus = createServerFn({ method: 'POST' })
   .inputValidator((data: { environment?: StripeEnv }) => data)
   .handler(async ({ data, context }): Promise<SubscriptionStatusResult> => {
     try {
-      // Temporary isolated preview status UI test, no DB/provider/tool mutation.
-      const { getRequest } = await import('@tanstack/react-start/server');
-      const request=getRequest();
-      if(new URL(request.url).hostname==='phase18-preview-gotaofferr-copy.shekhar-abhishekab.workers.dev' && context.userId==='d1c3f3ae-e5c9-4240-9e25-51ebccc2d1f2' && Date.now()<Date.parse('2026-10-07T14:38:23.093530Z')){
-        return {active:true,plan:'career_pro_inr_monthly',tier:'career_pro',currentPeriodEnd:'2026-10-07T14:38:23.093530Z',status:'active',cancelAtPeriodEnd:false,paymentFailing:false};
-      }
       // Temporary testing switch — see src/lib/access.ts
       if (TESTING_UNLOCK_ALL_PLANS) {
         return {
