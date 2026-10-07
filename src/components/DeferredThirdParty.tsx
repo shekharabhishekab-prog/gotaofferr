@@ -89,7 +89,7 @@ function loadPostHog(actionOnly = false) {
       if (event?.event === "product_action") {
         const p = event.properties ?? {};
         if (window.location.pathname.startsWith("/admin") || !(ACTION_NAMES as readonly string[]).includes(p.action) || !["success", "failed", "blocked"].includes(p.outcome)) return null;
-        return { ...event, properties: { action: p.action, outcome: p.outcome, token: POSTHOG_KEY, distinct_id: crypto.randomUUID() } };
+        return { event: "product_action", properties: { action: p.action, outcome: p.outcome, token: POSTHOG_KEY, distinct_id: crypto.randomUUID() } };
       }
       if (!event || !["$pageview", "$pageleave"].includes(event.event)) return null;
       if ((window as any).__gtPhPrivate || !publicAnalyticsRoute(window.location.href)) return null;
