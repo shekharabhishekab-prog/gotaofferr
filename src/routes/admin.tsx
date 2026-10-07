@@ -198,6 +198,7 @@ function AdminPage() {
             <Stat label="Active subscriber share" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
             <Stat label="Subscription records" value={d.totals.subscriptionRecords} icon={<CreditCard className="h-4 w-4" />} />
             <Stat label="Recorded rewrites" value={d.totals.runsTotal} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Recorded job searches" value={d.totals.searchRecords} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Recorded searches this month" value={d.totals.searchesThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Job alert records" value={d.totals.alertRecords} icon={<BarChart3 className="h-4 w-4" />} />
