@@ -352,7 +352,6 @@ function AdminPage() {
                     <TableRow>
                       <TableHead>Email</TableHead>
                       <TableHead>Plan</TableHead>
-                      <TableHead>Status / cancellation</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Mode</TableHead>
                       <TableHead>Renews / ends</TableHead>
@@ -393,4 +392,4 @@ function AdminPage() {
       </div>
     </AdminMfaGate>
   );
-}
+        }
