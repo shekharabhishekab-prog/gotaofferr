@@ -196,20 +196,8 @@ export const deleteMyAccount = createServerFn({ method: "POST" })
     const userId = context.userId;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    await Promise.all([
-      supabaseAdmin.from("tailor_runs").delete().eq("user_id", userId),
-      supabaseAdmin.from("job_alerts").delete().eq("user_id", userId),
-      supabaseAdmin.from("job_search_runs").delete().eq("user_id", userId),
-      supabaseAdmin.from("credit_topups").delete().eq("user_id", userId),
-      supabaseAdmin.from("subscriptions").delete().eq("user_id", userId),
-    ]);
-    await supabaseAdmin.from("profiles").delete().eq("id", userId);
-
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
-    if (error) {
-      const { safeError } = await import("@/lib/safe-error.server");
-      throw safeError("deleteMyAccount", error, "Could not delete your account right now.");
-    }
-    return { ok: true };
+    // Fail closed before destructive work while mandate and retention prerequisites
+    // are unresolved. Never delete auth after a failed app-data delete.
+    const { safeError } = await import("@/lib/safe-error.server");
+    throw safeError("deleteMyAccount", null, "Account deletion is temporarily unavailable. Please contact support so we can safely close any renewals and remove your data.");
   });
-
