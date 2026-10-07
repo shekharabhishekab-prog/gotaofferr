@@ -32,7 +32,7 @@ export const STARTER_JOB_SEARCH_LIMIT = 5;
 export const JOB_ALERT_LIMIT = 5;
 
 /** Free AI job finder searches per signed-in account per calendar month. */
-export const FREE_JOB_SEARCH_TRIALS = 2;
+export const FREE_JOB_SEARCH_TRIALS = 1;
 
 
 
@@ -305,7 +305,7 @@ export const PLAN_LABEL: Record<PlanTier, string> = {
 
 /** Resume builder: resumes a member can build and download per month. */
 export const BUILDER_MONTHLY_LIMIT: Record<PlanTier, number> = {
-  free: 5,
+  free: 3,
   starter: 12,
   job_hunt: 20,
   career_pro: 50,
