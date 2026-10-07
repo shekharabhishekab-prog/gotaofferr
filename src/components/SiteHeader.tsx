@@ -10,7 +10,7 @@ import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 
 const nav = [
-  { to: "/how-it-works", label: "How it works" },
+  { to: "/ats-design-preview", label: "ATS score" },
   { to: "/resume-builder", label: "Resume builder" },
   { to: "/examples/resumes", label: "Examples" },
   { to: "/jobs", label: "Job finder" },
