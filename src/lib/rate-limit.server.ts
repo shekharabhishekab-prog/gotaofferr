@@ -60,7 +60,7 @@ async function readCount(bucket: string, identifier: string, start: Date): Promi
 
 const LOW_RISK_OUTAGE_BUCKETS = new Set(['profile-write', 'run-download']);
 function unavailable(): Error {
-  return userError('This action is temporarily unavailable. Please try again in a moment. This attempt was not counted.');
+  return userError('This action is temporarily unavailable. Please try again in a moment.');
 }
 
 export async function checkRateLimit(
