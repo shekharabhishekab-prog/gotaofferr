@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { BarChart3, CreditCard, Download, Loader2, ShieldAlert, Users } from "lucide-react";
@@ -19,7 +20,7 @@ import { AdminMfaGate } from "@/components/AdminMfaGate";
 import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
 import { useSession } from "@/hooks/useSession";
-import { checkIsAdmin, getAdminDashboard } from "@/lib/admin.functions";
+import { checkIsAdmin, getAdminDashboard, sendApprovedOpsTest } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -94,6 +95,19 @@ function AdminPage() {
     enabled: Boolean(user),
   });
 
+  const sendOpsTest = useServerFn(sendApprovedOpsTest);
+  const [opsTestStatus, setOpsTestStatus] = useState("");
+  const [opsTestBusy, setOpsTestBusy] = useState(false);
+  const opsTestPreview = typeof window !== "undefined" && window.location.hostname === "phase18-preview-gotaofferr-copy.shekhar-abhishekab.workers.dev";
+  async function runOpsTest() {
+    setOpsTestBusy(true);
+    try {
+      const result = await sendOpsTest({});
+      setOpsTestStatus(result.accepted ? `Sender accepted TEST${result.id ? ` (${result.id})` : ""}. Check Gmail for delivery.` : "Sender rejected TEST. Delivery not proven.");
+    } catch (error) {
+      setOpsTestStatus(error instanceof Error ? error.message : "Test could not be sent.");
+    } finally { setOpsTestBusy(false); }
+  }
   const isAdmin = adminQuery.data?.isAdmin === true;
 
   const dataQuery = useQuery({
@@ -137,6 +151,14 @@ function AdminPage() {
         </p>
       </header>
 
+      {opsTestPreview && (
+        <section className="mb-6 rounded-xl border border-border p-4">
+          <h2 className="font-semibold">TEST alert delivery</h2>
+          <p className="text-sm text-muted-foreground">One TEST email to shekhar.abhishekab@gmail.com. Not a real incident.</p>
+          <Button className="mt-3" onClick={runOpsTest} disabled={opsTestBusy || Boolean(opsTestStatus)}>{opsTestBusy ? "Sending TEST..." : "Send approved TEST email"}</Button>
+          {opsTestStatus && <p role="status" className="mt-2 text-sm">{opsTestStatus}</p>}
+        </section>
+      )}
       {dataQuery.isLoading || !d ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
