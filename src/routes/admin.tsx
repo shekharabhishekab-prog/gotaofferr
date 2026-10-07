@@ -223,8 +223,6 @@ function AdminPage() {
                       [
                         "user_id",
                         "email",
-                        "phone",
-                        "email_confirmed",
                         "cancel_at_period_end",
                         "name",
                         "plan",
@@ -238,8 +236,6 @@ function AdminPage() {
                       d.users.map((u) => [
                         u.id,
                         u.email,
-                        u.phone,
-                        u.emailConfirmed,
                         u.cancelAtPeriodEnd,
                         u.fullName,
                         u.plan ?? "Free",
@@ -262,8 +258,6 @@ function AdminPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
-                      <TableHead>Phone (if collected)</TableHead>
-                      <TableHead>Email verified</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Plan</TableHead>
                       <TableHead>Status / cancellation</TableHead>
@@ -277,8 +271,6 @@ function AdminPage() {
                     {d.users.map((u) => (
                       <TableRow key={u.id}>
                         <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
-                        <TableCell>{u.phone || "Not collected"}</TableCell>
-                        <TableCell>{u.emailConfirmed ? "Verified" : "Pending"}</TableCell>
                         <TableCell>{u.fullName ?? "—"}</TableCell>
                         <TableCell>
                           <Badge variant={u.plan && u.plan !== "Free" ? "default" : "secondary"}>
