@@ -1,3 +1,13 @@
+/** Spreadsheet formula-injection-safe CSV for owner-only admin downloads. */
+function csvCell(value: unknown): string {
+  let text = value == null ? "" : String(value);
+  if (/^[\s\u0000-\u001f]*[=+\-@]/.test(text) || /^[\t\r\n]/.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+function buildAdminCsv(headers: string[], rows: unknown[][]): string {
+  return "\ufeff" + [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\r\n");
+}
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -53,19 +63,10 @@ function fmt(value: string | null | undefined) {
   });
 }
 
-function csvCell(value: unknown) {
-  const s = value === null || value === undefined ? "" : String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
-
 function downloadCsv(filename: string, headers: string[], rows: unknown[][]) {
-  const csv = [headers, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
-  const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" }));
+  const url = URL.createObjectURL(new Blob([buildAdminCsv(headers, rows)], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
 }
 
 function stamp() {
@@ -214,6 +215,9 @@ function AdminPage() {
                       [
                         "user_id",
                         "email",
+                        "phone",
+                        "email_confirmed",
+                        "cancel_at_period_end",
                         "name",
                         "plan",
                         "plan_status",
@@ -226,6 +230,9 @@ function AdminPage() {
                       d.users.map((u) => [
                         u.id,
                         u.email,
+                        u.phone,
+                        u.emailConfirmed,
+                        u.cancelAtPeriodEnd,
                         u.fullName,
                         u.plan ?? "Free",
                         u.planStatus,
@@ -247,8 +254,11 @@ function AdminPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
+                      <TableHead>Phone (if collected)</TableHead>
+                      <TableHead>Email verified</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Plan</TableHead>
+                      <TableHead>Status / cancellation</TableHead>
                       <TableHead className="text-right">Rewrites</TableHead>
                       <TableHead className="text-right">Alerts</TableHead>
                       <TableHead>Joined</TableHead>
@@ -259,12 +269,15 @@ function AdminPage() {
                     {d.users.map((u) => (
                       <TableRow key={u.id}>
                         <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
+                        <TableCell>{u.phone || "Not collected"}</TableCell>
+                        <TableCell>{u.emailConfirmed ? "Verified" : "Pending"}</TableCell>
                         <TableCell>{u.fullName ?? "—"}</TableCell>
                         <TableCell>
                           <Badge variant={u.plan && u.plan !== "Free" ? "default" : "secondary"}>
                             {u.plan ?? "Free"}
                           </Badge>
                         </TableCell>
+                        <TableCell>{u.planStatus ?? "Free"}{u.cancelAtPeriodEnd ? " / cancels at period end" : ""}</TableCell>
                         <TableCell className="text-right">{u.runsTotal}</TableCell>
                         <TableCell className="text-right">{u.alerts}</TableCell>
                         <TableCell>{fmt(u.createdAt)}</TableCell>
@@ -323,6 +336,7 @@ function AdminPage() {
                     <TableRow>
                       <TableHead>Email</TableHead>
                       <TableHead>Plan</TableHead>
+                      <TableHead>Status / cancellation</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Mode</TableHead>
                       <TableHead>Renews / ends</TableHead>
