@@ -1,3 +1,4 @@
+import { trackAction } from "@/components/DeferredThirdParty";
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
@@ -111,6 +112,7 @@ function AuthPage() {
       return toast.error(signInErrorMessage(error.message));
     }
     setFailedAttempts(0);
+    trackAction("signin", "success");
     toast.success("Welcome back");
     navigate({ to: next, replace: true });
   }
@@ -190,6 +192,7 @@ function AuthPage() {
             : error.message,
       );
     }
+    trackAction("signup", "success");
     if (!data.session) {
       setSent(true);
       return;
