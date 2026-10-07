@@ -694,6 +694,7 @@ async function adzunaPipeline(input: JobSearchInput, country: string, jobs: JobL
     identity.add(id);
     accepted.push({ ...j, match: exact ? "exact" : "related" });
   }
+  console.info(`[jobs] adzuna candidates=${extra.length} accepted=${accepted.length} existing=${jobs.length} merged=${jobs.length + accepted.length}`);
   const merged = [...jobs, ...accepted];
   merged.sort((a, b) => (a.match === b.match ? 0 : a.match === "exact" ? -1 : 1));
   return merged;
