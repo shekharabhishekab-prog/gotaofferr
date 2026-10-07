@@ -3,7 +3,7 @@ import { useRouterState } from "@tanstack/react-router";
 
 import { useSubscription } from "@/hooks/useSubscription";
 import { useSession } from "@/hooks/useSession";
-import { GOOGLE_AD_SELECTOR, removeGoogleAds, ensureGoogleAds } from "@/lib/ad-cleanup";
+import { GOOGLE_AD_SELECTOR, ensureGoogleAds } from "@/lib/ad-cleanup";
 import type { PlanTier } from "@/lib/plans";
 
 /**
@@ -42,19 +42,14 @@ export function AdPolicy() {
       try { localStorage.setItem(TIER_STORAGE_KEY, tier); } catch { /* private mode */ }
     }
     if (allowed) {
+      delete document.documentElement.dataset.gtAds;
       ensureGoogleAds(document, (import.meta.env['VITE_ADSENSE_CLIENT'] as string | undefined) || 'ca-pub-9570238585409638');
       return;
     }
-    // Runs before paint, including auth transitions, then watches late AdSense insertions.
-    const css = document.createElement("style");
-    css.dataset.gtAdPolicy = "blocked";
-    css.textContent = `${GOOGLE_AD_SELECTOR}{display:none!important;visibility:hidden!important}`;
-    document.head.appendChild(css);
-    removeGoogleAds(document);
-    const observer = new MutationObserver(() => removeGoogleAds(document));
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    return () => { observer.disconnect(); css.remove(); };
+    // Persistent selector CSS hides current and future ads without racing React or AdSense DOM ownership.
+    document.documentElement.dataset.gtAds = "blocked";
+    return () => { delete document.documentElement.dataset.gtAds; };
   }, [tier, loading, error, path, session?.user.id, sessionLoading]);
 
-  return null;
+  return <style>{GOOGLE_AD_SELECTOR.split(",").map(selector => `html[data-gt-ads="blocked"] ${selector}`).join(",") + "{display:none!important;visibility:hidden!important;pointer-events:none!important}"}</style>;
 }
