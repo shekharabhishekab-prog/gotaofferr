@@ -23,10 +23,20 @@ export const getAccountOverview = createServerFn({ method: "GET" })
         .limit(7),
     ]);
 
+    // The signup trigger writes the name in plain text; seal it the first time the member visits.
+    if (profile?.full_name && !String(profile.full_name).startsWith("enc1:")) {
+      try {
+        const { encryptText } = await import("./field-crypto.server");
+        await context.supabase.from("profiles").update({ full_name: await encryptText(profile.full_name) }).eq("id", context.userId);
+      } catch (e) {
+        console.error("[profile] could not seal name");
+      }
+    }
+
     const totalCount = await (await import("./tailor-usage.server")).countTailorUsage(context.supabase, context.userId);
 
     return {
-      fullName: profile?.full_name ?? null,
+      fullName: await (await import("./field-crypto.server")).decryptText(profile?.full_name ?? null),
       memberSince: profile?.created_at ?? null,
       runsThisMonth: count ?? 0,
       runsTotal: totalCount ?? 0,
@@ -79,7 +89,7 @@ export const updateProfile = createServerFn({ method: "POST" })
 
     const { error } = await context.supabase
       .from("profiles")
-      .upsert({ id: context.userId, full_name: data.fullName || null });
+      .upsert({ id: context.userId, full_name: await (await import("./field-crypto.server")).encryptText(data.fullName || null) });
     if (error) {
       const { safeError } = await import("@/lib/safe-error.server");
       throw safeError("updateProfile", error, "Could not save your profile right now.");
@@ -167,14 +177,15 @@ export const exportMyData = createServerFn({ method: "POST" })
       })),
     );
 
+    const fc = await import("./field-crypto.server");
     return {
       exportedAt: new Date().toISOString(),
       account: { id: context.userId, email: context.claims?.email ?? null },
-      profile: profile.data ?? null,
+      profile: profile.data ? { ...profile.data, full_name: await fc.decryptText((profile.data as any).full_name) } : null,
       tailoredResumes,
-      jobAlerts: alerts.data ?? [],
+      jobAlerts: await Promise.all((alerts.data ?? []).map((a) => fc.decryptAlertFields(a as any))),
       subscriptions: subs.data ?? [],
-      jobSearches: searches.data ?? [],
+      jobSearches: await Promise.all((searches.data ?? []).map((a) => fc.decryptSearchFields(a as any))),
     };
   });
 
