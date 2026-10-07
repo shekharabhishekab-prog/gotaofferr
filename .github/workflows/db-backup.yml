@@ -8,9 +8,6 @@ on:
   schedule:
     - cron: "30 2 * * 0"
   workflow_dispatch:
-  push:
-    branches: [phase18-preview]
-    paths: [".github/workflows/db-backup.yml"]
 
 permissions:
   contents: read
