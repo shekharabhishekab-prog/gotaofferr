@@ -199,11 +199,14 @@ export const searchJobs = createServerFn({ method: "POST" })
       const jobs = await searchJobListings(data, { tier: tier as any, country });
 
       // Recorded after a successful run so a failed search costs nothing.
-      await context.supabase.from("job_search_runs").insert({
-        user_id: context.userId,
-        role: data.role,
-        location: data.location ?? null,
-      });
+      const { encryptSearchFields } = await import("@/lib/field-crypto.server");
+      await context.supabase.from("job_search_runs").insert(
+        await encryptSearchFields({
+          user_id: context.userId,
+          role: data.role,
+          location: data.location ?? null,
+        }),
+      );
 
       return { jobs };
 
@@ -225,7 +228,8 @@ export const getJobAlert = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    return { alert: data ?? null };
+    const { decryptAlertFields } = await import("@/lib/field-crypto.server");
+    return { alert: (await decryptAlertFields(data)) ?? null };
   });
 
 function alertMonthStartIso(): string {
@@ -317,7 +321,8 @@ export const saveJobAlert = createServerFn({ method: "POST" })
     // One running cycle at a time: a new click replaces the old cycle.
     if (current) await context.supabase.from("job_alerts").update({ enabled: false }).eq("id", current.id);
 
-    const { data: saved, error } = await context.supabase.from("job_alerts").insert(row).select("id").maybeSingle();
+    const { encryptAlertFields } = await import("@/lib/field-crypto.server");
+    const { data: saved, error } = await context.supabase.from("job_alerts").insert(await encryptAlertFields(row)).select("id").maybeSingle();
     if (error || !saved) {
       return { error: safeErrorMessage("saveJobAlert", error, "Could not save this alert. Please try again.") };
     }
@@ -340,7 +345,7 @@ export const saveJobAlert = createServerFn({ method: "POST" })
 export const getAlertDigest = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase
+    let { data } = await context.supabase
       .from("job_alerts")
       .select("role, location, experience, salary_range, last_jobs, last_sent_at")
       .eq("user_id", context.userId)
@@ -348,6 +353,8 @@ export const getAlertDigest = createServerFn({ method: "GET" })
       .limit(1)
       .maybeSingle();
 
+    const { decryptAlertFields } = await import("@/lib/field-crypto.server");
+    data = (await decryptAlertFields(data)) as typeof data;
     const jobs = Array.isArray(data?.last_jobs) ? (data!.last_jobs as JobListing[]) : [];
     return {
       jobs,
