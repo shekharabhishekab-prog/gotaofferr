@@ -45,6 +45,9 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
 export type AdminUserRow = {
   id: string;
   email: string | null;
+  phone: string | null;
+  emailConfirmed: boolean;
+  cancelAtPeriodEnd: boolean;
   fullName: string | null;
   createdAt: string | null;
   lastSignInAt: string | null;
@@ -62,21 +65,34 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { planLabel } = await import("./plans");
 
-    const [{ data: authUsers }, subsRes, profilesRes, runsRes, alertsRes] = await Promise.all([
-      supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
-      supabaseAdmin
-        .from("subscriptions")
-        .select(
-          "user_id, price_id, status, current_period_end, cancel_at_period_end, environment, created_at",
-        )
-        .order("created_at", { ascending: false }),
-      supabaseAdmin.from("profiles").select("id, full_name"),
-      supabaseAdmin.from("tailor_runs").select("user_id, created_at"),
-      supabaseAdmin.from("job_alerts").select("user_id, enabled"),
+    const { safeError } = await import("./safe-error.server");
+    const { getStripeEnvironment } = await import("./stripe");
+    async function rows(makeQuery: () => any): Promise<any[]> {
+      const all: any[] = [];
+      for (let offset = 0; offset < 100000; offset += 1000) {
+        const { data, error } = await makeQuery().range(offset, offset + 999);
+        if (error) throw safeError("admin-read", error, "Could not load complete admin data. Please try again.");
+        all.push(...(data ?? []));
+        if ((data ?? []).length < 1000) return all;
+      }
+      throw new Error("Admin data is too large for this view. Please use a filtered report.");
+    }
+    const authUsers: any[] = [];
+    for (let page = 1; page <= 100; page++) {
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error) throw safeError("admin-users", error, "Could not load all users right now.");
+      authUsers.push(...(data?.users ?? []));
+      if ((data?.users ?? []).length < 1000) break;
+      if (page === 100) throw new Error("User list is too large for this view.");
+    }
+    const [subs, profileRows, runRows, alertRows] = await Promise.all([
+      rows(() => supabaseAdmin.from("subscriptions").select("id,user_id,price_id,status,current_period_end,cancel_at_period_end,environment,created_at").eq("environment", getStripeEnvironment()).order("created_at", { ascending: false }).order("id")),
+      rows(() => supabaseAdmin.from("profiles").select("id,full_name").order("id")),
+      rows(() => supabaseAdmin.from("tailor_runs").select("id,user_id,created_at").order("id")),
+      rows(() => supabaseAdmin.from("job_alerts").select("id,user_id,enabled").order("id")),
     ]);
 
-    const profiles = new Map((profilesRes.data ?? []).map((p) => [p.id, p.full_name]));
-    const subs = subsRes.data ?? [];
+    const profiles = new Map(profileRows.map((p) => [p.id, p.full_name]));
     const firstSub = new Map<string, (typeof subs)[number]>();
     for (const s of subs) if (!firstSub.has(s.user_id)) firstSub.set(s.user_id, s);
 
@@ -85,23 +101,26 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     monthStart.setUTCDate(1);
     monthStart.setUTCHours(0, 0, 0, 0);
     let runsThisMonth = 0;
-    for (const r of runsRes.data ?? []) {
+    for (const r of runRows) {
       runCounts.set(r.user_id, (runCounts.get(r.user_id) ?? 0) + 1);
       if (new Date(r.created_at) >= monthStart) runsThisMonth += 1;
     }
 
     const alertCounts = new Map<string, number>();
     let activeAlerts = 0;
-    for (const a of alertsRes.data ?? []) {
+    for (const a of alertRows) {
       alertCounts.set(a.user_id, (alertCounts.get(a.user_id) ?? 0) + 1);
       if (a.enabled) activeAlerts += 1;
     }
 
-    const users: AdminUserRow[] = (authUsers?.users ?? []).map((u) => {
+    const users: AdminUserRow[] = authUsers.map((u) => {
       const sub = firstSub.get(u.id);
       return {
         id: u.id,
         email: u.email ?? null,
+        phone: u.phone || null,
+        emailConfirmed: Boolean(u.email_confirmed_at),
+        cancelAtPeriodEnd: Boolean(sub?.cancel_at_period_end),
         fullName: profiles.get(u.id) ?? null,
         createdAt: u.created_at ?? null,
         lastSignInAt: u.last_sign_in_at ?? null,
@@ -127,7 +146,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       totals: {
         users: users.length,
         activeSubs,
-        runsTotal: runsRes.data?.length ?? 0,
+        runsTotal: runRows.length,
         runsThisMonth,
         activeAlerts,
       },
