@@ -52,6 +52,9 @@ export type AdminUserRow = {
   createdAt: string | null;
   lastSignInAt: string | null;
   runsTotal: number;
+  runsThisMonth: number;
+  alertsThisMonth: number;
+  searchesThisMonth: number;
   alerts: number;
   plan: string | null;
   planStatus: string | null;
@@ -126,6 +129,12 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       if (a.enabled) activeAlerts += 1;
     }
 
+    function monthCounts(data: any[]): Map<string, number> {
+      const counts = new Map<string, number>();
+      for (const row of data) if (inThisMonth(row)) counts.set(row.user_id, (counts.get(row.user_id) ?? 0) + 1);
+      return counts;
+    }
+    const monthlyRuns = monthCounts(usageRows), monthlyAlerts = monthCounts(alertRows), monthlySearches = monthCounts(searchRows);
     const users: AdminUserRow[] = authUsers.map((u) => {
       const sub = firstSub.get(u.id);
       return {
@@ -138,6 +147,9 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
         createdAt: u.created_at ?? null,
         lastSignInAt: u.last_sign_in_at ?? null,
         runsTotal: runCounts.get(u.id) ?? 0,
+        runsThisMonth: monthlyRuns.get(u.id) ?? 0,
+        alertsThisMonth: monthlyAlerts.get(u.id) ?? 0,
+        searchesThisMonth: monthlySearches.get(u.id) ?? 0,
         alerts: alertCounts.get(u.id) ?? 0,
         plan: sub ? planLabel(sub.price_id) : null,
         planStatus: sub?.status ?? null,
@@ -187,6 +199,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       subscriptions: subs.map((s) => ({
         userId: s.user_id,
         email: users.find((u) => u.id === s.user_id)?.email ?? null,
+        fullName: profiles.get(s.user_id) ?? null,
         plan: planLabel(s.price_id),
         priceId: s.price_id,
         status: s.status,
