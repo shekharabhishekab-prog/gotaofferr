@@ -98,7 +98,8 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       rows(() => supabaseAdmin.from("builder_uses").select("id,user_id,created_at").order("id")),
     ]);
 
-    const profiles = new Map(profileRows.map((p) => [p.id, p.full_name]));
+    const { decryptText } = await import("@/lib/field-crypto.server");
+    const profiles = new Map(await Promise.all(profileRows.map(async (p) => [p.id, await decryptText(p.full_name)] as const)));
     const firstSub = new Map<string, (typeof subs)[number]>();
     for (const s of subs) if (!firstSub.has(s.user_id)) firstSub.set(s.user_id, s);
 
