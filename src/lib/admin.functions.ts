@@ -104,9 +104,14 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     monthStart.setUTCDate(1);
     monthStart.setUTCHours(0, 0, 0, 0);
     const asOf = new Date();
+    const yearStart = new Date(Date.UTC(asOf.getUTCFullYear(), 0, 1));
     function inThisMonth(row: { created_at?: string | null }): boolean {
       const time = new Date(row.created_at ?? "").getTime();
       return Number.isFinite(time) && time >= monthStart.getTime() && time <= asOf.getTime();
+    }
+    function inThisYear(row: { created_at?: string | null }): boolean {
+      const time = new Date(row.created_at ?? "").getTime();
+      return Number.isFinite(time) && time >= yearStart.getTime() && time <= asOf.getTime();
     }
     let runsThisMonth = 0;
     for (const r of usageRows) {
@@ -156,6 +161,12 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       totals: {
         users: users.length,
         usersThisMonth: authUsers.filter(inThisMonth).length,
+        usersThisYear: authUsers.filter(inThisYear).length,
+        subscriptionRecordsThisYear: subs.filter(inThisYear).length,
+        alertRecordsThisYear: alertRows.filter(inThisYear).length,
+        builderDownloadAttemptsThisYear: builderRows.filter(inThisYear).length,
+        runsThisYear: usageRows.filter(inThisYear).length,
+        searchesThisYear: searchRows.filter(inThisYear).length,
         subscriptionRecordsThisMonth: subs.filter(inThisMonth).length,
         alertRecordsThisMonth: alertRows.filter(inThisMonth).length,
         builderDownloadAttemptsThisMonth: builderRows.filter(inThisMonth).length,
