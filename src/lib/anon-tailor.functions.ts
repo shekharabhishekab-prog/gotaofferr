@@ -53,7 +53,7 @@ export const tailorResumeAnonymous = createServerFn({ method: "POST" })
 
     if (await hasUsedFreeRun(identity)) {
       throw new Error(
-        "You've used your free rewrite. Create a free account to keep tailoring — 3 rewrites every month.",
+        "You've used your free rewrite. Create a free account to keep tailoring — 5 rewrites every month.",
       );
     }
 
