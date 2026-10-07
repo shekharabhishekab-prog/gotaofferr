@@ -20,7 +20,7 @@ function loadScript(src: string, attrs: Record<string, string> = {}) {
   document.head.appendChild(el);
 }
 
-const POSTHOG_KEY = "phc_qnxYaoAYBTXSHh2qGBtBke82cEFyx2HAGtXoAuXSYmR2";
+const POSTHOG_KEY = "phc_qnxYaoAYBTXSHh2qG8tBke82cEFyx2HAGtXoAuXSYmR2";
 const POSTHOG_HOST = "https://us.i.posthog.com";
 const POSTHOG_ASSETS = "https://us-assets.i.posthog.com";
 
@@ -125,4 +125,3 @@ export function DeferredThirdParty({
 
   return null;
 }
-
