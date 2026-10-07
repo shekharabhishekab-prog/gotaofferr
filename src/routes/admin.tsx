@@ -73,7 +73,7 @@ function stamp() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function Stat({ label, value, monthly, icon }: { label: string; value: string | number; monthly?: number; icon: React.ReactNode }) {
+function Stat({ label, value, monthly, yearly, icon }: { label: string; value: string | number; monthly?: number; yearly?: number; icon: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -82,6 +82,7 @@ function Stat({ label, value, monthly, icon }: { label: string; value: string | 
       </div>
       <p className="mt-2 text-3xl font-bold">{value}</p>
       {monthly !== undefined && <p className="mt-2 text-sm text-muted-foreground">This month (UTC): {monthly}</p>}
+      {yearly !== undefined && <p className="mt-1 text-sm text-muted-foreground">This year (UTC): {yearly}</p>}
     </div>
   );
 }
@@ -178,17 +179,17 @@ function AdminPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="Total users" value={d.totals.users} monthly={d.totals.usersThisMonth} icon={<Users className="h-4 w-4" />} />
-            <Stat label="Subscription records" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} icon={<CreditCard className="h-4 w-4" />} />
-            <Stat label="Recorded rewrites" value={d.totals.runsTotal} monthly={d.totals.runsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Recorded job searches" value={d.totals.searchRecords} monthly={d.totals.searchesThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Total users" value={d.totals.users} monthly={d.totals.usersThisMonth} yearly={d.totals.usersThisYear} icon={<Users className="h-4 w-4" />} />
+            <Stat label="Subscription records" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} yearly={d.totals.subscriptionRecordsThisYear} icon={<CreditCard className="h-4 w-4" />} />
+            <Stat label="Recorded rewrites" value={d.totals.runsTotal} monthly={d.totals.runsThisMonth} yearly={d.totals.runsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Recorded job searches" value={d.totals.searchRecords} monthly={d.totals.searchesThisMonth} yearly={d.totals.searchesThisYear} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} yearly={d.totals.builderDownloadAttemptsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} yearly={d.totals.alertRecordsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Active subscriptions now" value={d.totals.activeSubs} icon={<CreditCard className="h-4 w-4" />} />
             <Stat label="Active subscriber share now" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
             <Stat label="Active job alerts now" value={d.totals.activeAlerts} icon={<BarChart3 className="h-4 w-4" />} />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">Subscriber share is currently entitled users divided by all registered users, not historical purchase conversion. Monthly users, subscriptions and alerts are records created this UTC month, not renewals, messages sent or current-state snapshots. Activity totals count recorded signed-in events and may exclude older unrecorded events or deleted accounts. Builder attempts are allowance records written before PDF generation, not confirmed files created. Plan counts below include Free and current entitled plans.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Historical month/year subscriber share is not available from current subscription state. Subscriber share is currently entitled users divided by all registered users, not historical purchase conversion. Monthly users, subscriptions and alerts are records created this UTC month, not renewals, messages sent or current-state snapshots. Activity totals count recorded signed-in events and may exclude older unrecorded events or deleted accounts. Builder attempts are allowance records written before PDF generation, not confirmed files created. Plan counts below include Free and current entitled plans.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
