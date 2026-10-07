@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
 import { useSubscription } from "@/hooks/useSubscription";
+import { useSession } from "@/hooks/useSession";
+import { GOOGLE_AD_SELECTOR, removeGoogleAds, ensureGoogleAds } from "@/lib/ad-cleanup";
 import type { PlanTier } from "@/lib/plans";
 
 /**
@@ -25,20 +27,34 @@ export function adsAllowed(tier: PlanTier, path: string): boolean {
 export const TIER_STORAGE_KEY = "gt_tier";
 
 export function AdPolicy() {
-  const { tier, loading } = useSubscription();
+  const { tier, loading, error } = useSubscription();
+  const { session, loading: sessionLoading } = useSession();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
-  useEffect(() => {
-    if (loading) return;
-    try {
-      localStorage.setItem(TIER_STORAGE_KEY, tier);
-    } catch {
-      /* private mode */
-    }
+  useLayoutEffect(() => {
     const w = window as unknown as { adsbygoogle?: unknown[] & { pauseAdRequests?: number } };
     w.adsbygoogle = w.adsbygoogle || [];
-    w.adsbygoogle.pauseAdRequests = adsAllowed(tier, path) ? 0 : 1;
-  }, [tier, loading, path]);
+    // Fail closed for signed-in visitors until this identity's tier is confirmed.
+    const awaitingTier = sessionLoading || Boolean(session && (loading || error));
+    const allowed = !awaitingTier && adsAllowed(tier, path);
+    w.adsbygoogle.pauseAdRequests = allowed ? 0 : 1;
+    if (!loading && !sessionLoading && !error) {
+      try { localStorage.setItem(TIER_STORAGE_KEY, tier); } catch { /* private mode */ }
+    }
+    if (allowed) {
+      ensureGoogleAds(document, (import.meta.env['VITE_ADSENSE_CLIENT'] as string | undefined) || 'ca-pub-9570238585409638');
+      return;
+    }
+    // Runs before paint, including auth transitions, then watches late AdSense insertions.
+    const css = document.createElement("style");
+    css.dataset.gtAdPolicy = "blocked";
+    css.textContent = `${GOOGLE_AD_SELECTOR}{display:none!important;visibility:hidden!important}`;
+    document.head.appendChild(css);
+    removeGoogleAds(document);
+    const observer = new MutationObserver(() => removeGoogleAds(document));
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    return () => { observer.disconnect(); css.remove(); };
+  }, [tier, loading, error, path, session?.user.id, sessionLoading]);
 
   return null;
 }
