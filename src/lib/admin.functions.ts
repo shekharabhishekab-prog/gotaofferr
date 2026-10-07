@@ -167,6 +167,13 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       planBreakdown[label] = (planBreakdown[label] ?? 0) + 1;
       if (active) activeSubs += 1;
     }
+    // Known QA accounts remain in records and activity totals, but not this ratio.
+    const knownQaEmails = new Set(["mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com"]);
+    const shareUsers = users.filter((u) => !knownQaEmails.has((u.email ?? "").trim().toLowerCase()));
+    const shareEntitledUsers = shareUsers.filter((u) => {
+      const sub = firstSub.get(u.id);
+      return sub && isEntitled(sub);
+    }).length;
     const searchesThisMonth = searchRows.filter(inThisMonth).length;
 
     return {
@@ -183,7 +190,9 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
         alertRecordsThisMonth: alertRows.filter(inThisMonth).length,
         builderDownloadAttemptsThisMonth: builderRows.filter(inThisMonth).length,
         activeSubs,
-        subscriberSharePercent: users.length ? activeSubs / users.length * 100 : 0,
+        subscriberSharePercent: shareUsers.length ? shareEntitledUsers / shareUsers.length * 100 : 0,
+        subscriberShareEligibleUsers: shareUsers.length,
+        subscriberShareEntitledUsers: shareEntitledUsers,
         subscriptionRecords: subs.length,
         searchRecords: searchRows.length,
         builderDownloadAttempts: builderRows.length,
