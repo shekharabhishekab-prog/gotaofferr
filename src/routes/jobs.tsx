@@ -1,3 +1,4 @@
+import { trackAction } from "@/components/DeferredThirdParty";
 import { friendlyMessage } from "@/lib/friendly-error";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
@@ -287,6 +288,7 @@ function Jobs() {
           } else setError(friendlyMessage(out.error));
         } else {
           setJobs(out.jobs); setPage(0);
+          trackAction("job_search", "success");
           try { localStorage.setItem("gao_jobs_anon_used", "1"); } catch { /* ignore */ }
         }
         return;
@@ -310,9 +312,10 @@ function Jobs() {
       );
 
       if ("error" in res) setError(friendlyMessage(res.error));
-      else { setJobs(res.jobs); setPage(0); }
+      else { setJobs(res.jobs); setPage(0); trackAction("job_search", "success"); }
       refreshSearchUsage();
     } catch (err) {
+      trackAction("job_search", "failed");
       setError(friendlyMessage(err, "Job search hit a wall 🧱 Please try again in a moment."));
     } finally {
       setSearching(false);
@@ -818,4 +821,3 @@ function Jobs() {
   );
 
 }
-
