@@ -36,7 +36,18 @@ async function readSaves(sb: any, userId: string) {
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
   if (error) return [] as any[];
-  return data ?? [];
+  // Saved resumes are encrypted at rest. Old plaintext rows pass through unchanged.
+  const { decryptResult } = await import("@/lib/resume-crypto.server");
+  const out: any[] = [];
+  for (const row of data ?? []) {
+    try {
+      out.push({ ...row, result: await decryptResult(row.result) });
+    } catch (e) {
+      // A row sealed with a key this environment does not hold: hide it, never show raw data.
+      console.error("[builder-saves] could not unlock a saved resume");
+    }
+  }
+  return out;
 }
 
 /** The member's saved builder resumes plus how many slots their plan has. */
@@ -72,9 +83,18 @@ export const saveBuilderResume = createServerFn({ method: "POST" })
     await purgeOld(sb, ctx.userId);
     const items = await readSaves(sb, ctx.userId);
     if (items.length >= slots) return { ok: false as const, reason: "full" as const, slots };
+    // Encrypt before the write. If the key is missing or crypto fails we refuse to save, never store plaintext.
+    let sealed: unknown;
+    try {
+      const { encryptResult } = await import("@/lib/resume-crypto.server");
+      sealed = await encryptResult({ draft: data.draft, polished: data.polished ?? null });
+    } catch (e) {
+      console.error("[builder-saves] encrypt failed, nothing saved");
+      return { ok: false as const, reason: "error" as const, slots };
+    }
     const { error } = await sb
       .from("default_resumes")
-      .insert({ user_id: ctx.userId, label: data.label || null, result: { draft: data.draft, polished: data.polished ?? null } });
+      .insert({ user_id: ctx.userId, label: data.label || null, result: sealed });
     if (error) {
       console.error("[builder-saves] insert failed", error.message);
       return { ok: false as const, reason: "error" as const, slots };
