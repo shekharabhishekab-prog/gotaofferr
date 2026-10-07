@@ -64,33 +64,6 @@ export const getTailorRunResult = createServerFn({ method: "POST" })
     try {
       result = (await decryptResult(run.result)) as typeof run.result;
     } catch (err) {
-      // Temporary bounded QA-only key-format diagnostic. Booleans only: no key, hash, envelope, or resume content.
-      if (context.userId === 'd1c3f3ae-e5c9-4240-9e25-51ebccc2d1f2' &&
-          context.claims?.email === 'mailboss@mail.instinct.com' &&
-          Date.now() < Date.parse('2026-10-07T19:45:00Z')) {
-        const raw = process.env['RESUME_ENCRYPTION_KEY'] ?? '';
-        const env = run.result as { iv?: string; ct?: string };
-        const b64 = (v: string) => Uint8Array.from(atob(v), (c) => c.charCodeAt(0));
-        const forms: Record<string, string> = {
-          asis: raw,
-          trim: raw.trim(),
-          unquoted: raw.trim().replace(/^["'`]+|["'`]+$/g, ''),
-          nowhitespace: raw.replace(/\s+/g, ''),
-          lowerNoWs: raw.replace(/\s+/g, '').toLowerCase(),
-        };
-        const out: string[] = [`len=${raw.length}`, `hasWs=${/\s/.test(raw)}`, `hasQuote=${/["'`]/.test(raw)}`];
-        for (const [name, v] of Object.entries(forms)) {
-          let ok = false;
-          try {
-            const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v));
-            const k = await crypto.subtle.importKey('raw', d, { name: 'AES-GCM' }, false, ['decrypt']);
-            await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(env.iv ?? '') }, k, b64(env.ct ?? ''));
-            ok = true;
-          } catch { ok = false; }
-          out.push(`${name}=${ok}`);
-        }
-        throw new Error(`QA keyformat: ${out.join(' ')}`);
-      }
       const { safeError } = await import("@/lib/safe-error.server");
       throw safeError("getTailorRunResult", err, "Could not unlock that saved rewrite.");
     }
