@@ -286,7 +286,7 @@ function AdminPage() {
             <TabsContent value="subs" className="mt-6">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground">
-                  Paying subscribers only ({d.subscriptions.length}).
+                  Subscription records ({d.subscriptions.length}).
                 </p>
                 <Button
                   variant="outline"
