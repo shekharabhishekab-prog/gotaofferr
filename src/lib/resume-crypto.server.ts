@@ -57,37 +57,18 @@ function getKey(): Promise<CryptoKey> {
   return cachedKey;
 }
 
-function keyAvailable(): boolean {
-  return Boolean(process.env["RESUME_ENCRYPTION_KEY"]);
+/** Fail closed before AI work or writes when encryption is unavailable. */
+export async function requireResumeEncryption(): Promise<void> {
+  await getKey();
 }
 
-/**
- * Encrypts a resume payload into a JSON-safe envelope for the jsonb column.
- * If the key is missing we store plaintext rather than losing the user's
- * rewrite — availability of their own data wins over a config gap.
- */
+/** No new resume is ever stored as plaintext on configuration or crypto failure. */
 export async function encryptResult(value: unknown): Promise<unknown> {
   if (value === null || value === undefined) return value;
-  if (!keyAvailable()) return value;
-
-  try {
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const plaintext = new TextEncoder().encode(JSON.stringify(value));
-    const cipher = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
-      await getKey(),
-      plaintext,
-    );
-    const envelope: Envelope = {
-      __enc: "v1",
-      iv: toBase64(iv),
-      ct: toBase64(new Uint8Array(cipher)),
-    };
-    return envelope;
-  } catch (error) {
-    console.error("[resume-crypto] encrypt failed, storing plaintext", error);
-    return value;
-  }
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const plaintext = new TextEncoder().encode(JSON.stringify(value));
+  const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await getKey(), plaintext);
+  return { __enc: "v1", iv: toBase64(iv), ct: toBase64(new Uint8Array(cipher)) } satisfies Envelope;
 }
 
 /**
