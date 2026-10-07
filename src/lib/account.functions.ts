@@ -64,12 +64,6 @@ export const getTailorRunResult = createServerFn({ method: "POST" })
     try {
       result = (await decryptResult(run.result)) as typeof run.result;
     } catch (err) {
-      // Temporary bounded QA-only key-presence diagnostic. No key, envelope, or resume content.
-      if (context.userId === 'd1c3f3ae-e5c9-4240-9e25-51ebccc2d1f2' &&
-          context.claims?.email === 'mailboss@mail.instinct.com' &&
-          Date.now() < Date.parse('2026-10-07T14:50:00Z')) {
-        throw new Error(`QA diagnostic: encryption key ${Boolean(process.env['RESUME_ENCRYPTION_KEY']) ? 'present' : 'unavailable'} in runtime.`);
-      }
       const { safeError } = await import("@/lib/safe-error.server");
       throw safeError("getTailorRunResult", err, "Could not unlock that saved rewrite.");
     }
