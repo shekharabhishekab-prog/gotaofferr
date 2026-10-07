@@ -27,6 +27,35 @@ const STOP = new Set(
     "ability skills knowledge using use etc including such other more than into across within about").split(" "),
 );
 
+ * Built-in ATS checker (Phase 1.8 engine). Pure functions, no imports, no network.
+ * Scores plain resume text 0-100 with transparent heuristic checks and fix hints.
+ * This is not a parser test, an ATS vendor score, or a promise of hiring success.
+ * It never adds or invents skills: keyword hints only list words that are in the
+ * job description and missing from the resume, as a suggestion to the owner.
+ */
+export type AtsCheck = { id: string; label: string; points: number; max: number; hint: string | null };
+export type AtsResult = {
+  score: number;
+  band: "strong" | "good" | "needs work" | "weak";
+  checks: AtsCheck[];
+  missingKeywords: string[];
+  hints: string[];
+};
+
+const ACTION_VERBS = new Set(
+  ("led managed built created designed developed delivered improved increased reduced launched owned drove grew " +
+    "implemented analysed analyzed optimised optimized automated coordinated negotiated mentored trained wrote " +
+    "organised organized streamlined migrated resolved shipped scaled saved generated planned executed supported " +
+    "established maintained achieved won closed handled produced introduced rebuilt redesigned cut boosted " +
+    "formulated presented reviewed tested deployed configured monitored collaborated initiated spearheaded").split(" "),
+);
+const STOP = new Set(
+  ("the a an and or of to in for with on at by from as is are be will you your we our this that it their they " +
+    "have has had not but if can able work working experience years year role team strong good excellent " +
+    "required requirements responsibilities job position candidate looking join company must plus also " +
+    "ability skills knowledge using use etc including such other more than into across within about").split(" "),
+);
+
 const SECTION_ALIASES: Record<string, string[]> = {
   experience: ["experience", "work experience", "professional experience", "employment", "work history", "internships"],
   education: ["education", "academic background", "qualifications", "academics"],
@@ -35,7 +64,7 @@ const SECTION_ALIASES: Record<string, string[]> = {
 };
 
 function words(s: string): string[] {
-  return s.toLowerCase().match(/[a-z][a-z+#.\-]{1,}/g) ?? [];
+  return s.toLowerCase().match(/[a-z]+(?:[+#]+|[.\-][a-z]+)*/g) ?? [];
 }
 
 function sectionsFound(lines: string[]): Set<string> {
@@ -59,7 +88,14 @@ export function checkAts(resumeText: string, jobDescription?: string): AtsResult
 
   // 1. Contact (10)
   const email = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(text);
-  const phone = /(\+?\d[\d\s().-]{8,}\d)/.test(text);
+  const phone = nonEmpty.some((line) => {
+    // Scan one line at a time: separate employment dates are not a phone number.
+    const candidates = line.match(/\+?\d[\d ().-]{7,}\d/g) ?? [];
+    return candidates.some((value) => {
+      const digits = value.replace(/\D/g, "");
+      return digits.length >= 10 && digits.length <= 15 && !/\b(?:19|20)\d{2}\s*-\s*(?:19|20)\d{2}\b/.test(value);
+    });
+  });
   add("contact", "Email and phone are present", 10, (email ? 5 : 0) + (phone ? 5 : 0),
     !email && !phone ? "Add an email address and a phone number at the top." : !email ? "Add an email address at the top." : !phone ? "Add a phone number at the top." : null);
 
@@ -96,42 +132,51 @@ export function checkAts(resumeText: string, jobDescription?: string): AtsResult
   let lenHint: string | null = null;
   if (wc < 150) { lenPts = 2; lenHint = "The resume is very short. Add more detail on roles and results."; }
   else if (wc < 300) { lenPts = 6; lenHint = "The resume is a bit short. Aim for 300 to 900 words."; }
-  else if (wc > 1100) { lenPts = 4; lenHint = "The resume is long. Trim it to the most relevant 900 words or less."; }
-  else if (wc > 900) { lenPts = 7; lenHint = "The resume is slightly long. Trim older or less relevant details."; }
+  else if (wc > 1100) { lenPts = 0; lenHint = "The resume is long. Trim it to the most relevant 900 words or less."; }
+  else if (wc > 900) { lenPts = 4; lenHint = "The resume is slightly long. Trim older or less relevant details."; }
   add("length", "Sensible length", 10, lenPts, lenHint);
 
   // 7. Formatting hazards (10)
   let fmt = 10;
   const issues: string[] = [];
-  if (/\|.*\|/.test(text) || /\t{1,}.*\t/.test(text)) { fmt -= 4; issues.push("tables or columns"); }
+  const tableLines = nonEmpty.filter((line) => (line.match(/\|/g) ?? []).length >= 2 && !/@|https?:|\+?\d[\d ()-]{8,}/i.test(line));
+  const hasTable = tableLines.length >= 2 || nonEmpty.some((line) => /\t.*\t/.test(line));
+  if (hasTable) { fmt -= 8; issues.push("tables or columns"); }
   if (/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/u.test(text)) { fmt -= 3; issues.push("emoji or icons"); }
   if (/\[(image|photo|logo|graphic)\]/i.test(text)) { fmt -= 3; issues.push("images"); }
   add("format", "Plain, ATS-safe formatting", 10, fmt,
-    issues.length ? `Remove ${issues.join(", ")}. ATS often cannot read them.` : null);
+    issues.length ? `Remove ${issues.join(", ")}. Use a simple text layout for easier parsing.` : null);
 
   // 8. Dates (10)
   const dates = text.match(/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+(?:19|20)\d{2}\b|\b(?:19|20)\d{2}\s*[-–—to]+\s*(?:(?:19|20)\d{2}|present|current|now)\b/gi) ?? [];
   add("dates", "Dates on roles", 10, dates.length >= 2 ? 10 : dates.length === 1 ? 5 : 0,
-    dates.length < 2 ? "Add start and end dates (for example Jan 2022 - Present) to each role." : null);
+    dates.length < 2 ? "Add start and end dates (for example Jan 2022 - Present) for your roles." : null);
 
-  // 9. Keywords from JD (optional, 5 bonus-weight folded into total)
+  // 9. Keyword overlap with the job post (optional, 15 points). Not semantic fit.
   let missingKeywords: string[] = [];
-  let kwMax = 0;
-  if (jobDescription && jobDescription.trim().length > 40) {
+    if (jobDescription && jobDescription.trim().length > 40) {
     const resumeSet = new Set(words(text));
     const freq = new Map<string, number>();
     for (const w of words(jobDescription)) if (w.length > 2 && !STOP.has(w)) freq.set(w, (freq.get(w) ?? 0) + 1);
     const top = [...freq.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 20).map((e) => e[0]);
     missingKeywords = top.filter((w) => !resumeSet.has(w)).slice(0, 8);
     const hit = top.length ? (top.length - top.filter((w) => !resumeSet.has(w)).length) / top.length : 1;
-    kwMax = 15;
+    const kwMax = 15;
     add("keywords", "Matches the job description", kwMax, hit * kwMax,
       missingKeywords.length ? `Words from the job post that your resume does not use: ${missingKeywords.join(", ")}. Add only the ones that are true for you.` : null);
   }
 
   const max = checks.reduce((s, c) => s + c.max, 0);
   const got = checks.reduce((s, c) => s + c.points, 0);
-  const score = Math.round((got / max) * 100);
+  // Conservative caps keep a serious text warning from being hidden by other points.
+  // These caps are product heuristics, not measured rules from an ATS vendor.
+  let score = Math.round((got / max) * 100);
+  if (hasTable) score = Math.min(score, 79);
+  if (wc > 1100) score = Math.min(score, 79);
+  else if (wc > 900) score = Math.min(score, 84);
+  if (found.has("experience") && dates.length === 0) score = Math.min(score, 79);
+  if (!email || !phone) score = Math.min(score, 84);
+  if (wc === 0) score = 0;
   const band = score >= 85 ? "strong" : score >= 70 ? "good" : score >= 50 ? "needs work" : "weak";
   return { score, band, checks, missingKeywords, hints: checks.map((c) => c.hint).filter((h): h is string => !!h) };
 }
