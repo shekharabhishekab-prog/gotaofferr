@@ -103,9 +103,9 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     for (const s of subs) if (!firstSub.has(s.user_id)) firstSub.set(s.user_id, s);
 
     const runCounts = new Map<string, number>();
-    const monthStart = new Date();
-    monthStart.setUTCDate(1);
-    monthStart.setUTCHours(0, 0, 0, 0);
+    // Calendar month in Asia/Kolkata (fixed UTC+05:30, no daylight saving).
+    const indiaNow = new Date(Date.now() + 330 * 60_000);
+    const monthStart = new Date(Date.UTC(indiaNow.getUTCFullYear(), indiaNow.getUTCMonth(), 1) - 330 * 60_000);
     const asOf = new Date();
     const yearStart = new Date(Date.UTC(asOf.getUTCFullYear(), 0, 1));
     function inThisMonth(row: { created_at?: string | null }): boolean {
