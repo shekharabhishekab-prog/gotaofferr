@@ -101,3 +101,36 @@ export async function decryptSearchFields<T extends Record<string, any> | null |
   for (const k of ["role", "location"]) if (k in out) out[k] = await decryptText(out[k]);
   return out;
 }
+
+/**
+ * Seals any rows still holding plain text (rows written before this shipped, and
+ * names the signup trigger writes in plain). Safe to run any number of times.
+ */
+export async function sealLegacyRows(sb: any, batch = 200): Promise<{ profiles: number; alerts: number; searches: number }> {
+  const done = { profiles: 0, alerts: 0, searches: 0 };
+
+  const { data: ps } = await sb.from("profiles").select("id, full_name").not("full_name", "is", null).not("full_name", "like", "enc1:%").limit(batch);
+  for (const p of ps ?? []) {
+    const { error } = await sb.from("profiles").update({ full_name: await encryptText(p.full_name) }).eq("id", p.id);
+    if (!error) done.profiles += 1;
+  }
+
+  const { data: as } = await sb
+    .from("job_alerts")
+    .select("id, role, location, experience, salary_range, extra_filters, last_jobs")
+    .not("role", "like", "enc1:%")
+    .limit(batch);
+  for (const a of as ?? []) {
+    const { id, ...rest } = a;
+    const { error } = await sb.from("job_alerts").update(await encryptAlertFields(rest)).eq("id", id);
+    if (!error) done.alerts += 1;
+  }
+
+  const { data: ss } = await sb.from("job_search_runs").select("id, role, location").not("role", "is", null).not("role", "like", "enc1:%").limit(batch);
+  for (const s of ss ?? []) {
+    const { id, ...rest } = s;
+    const { error } = await sb.from("job_search_runs").update(await encryptSearchFields(rest)).eq("id", id);
+    if (!error) done.searches += 1;
+  }
+  return done;
+}
