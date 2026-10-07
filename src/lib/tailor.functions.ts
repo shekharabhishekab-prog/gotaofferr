@@ -149,7 +149,7 @@ export const tailorResume = createServerFn({ method: "POST" })
         );
       }
     }
-    const { countTailorUsage: countUsage, recordTailorRun } = await import("@/lib/tailor-usage.server");
+    const { countTailorUsage: countUsage, recordTailorRun, FREE_MAX_SAVED_RUNS } = await import("@/lib/tailor-usage.server");
     const used = await countUsage(context.supabase, context.userId, usageWindowStart(sub, monthStartIso()));
     // Plan allowance first; a purchased top-up credit covers the overflow.
     const { consumeTopupCredit, topupBalance } = await import("@/lib/topups.server");
@@ -177,7 +177,7 @@ export const tailorResume = createServerFn({ method: "POST" })
       result: (await encryptResult(JSON.parse(JSON.stringify(result)))) as never,
     });
 
-    await recordTailorRun(context.supabase, context.userId);
+    await recordTailorRun(context.supabase, context.userId, routingTier === "free" ? FREE_MAX_SAVED_RUNS : undefined);
 
     const nextUsed = used + 1;
     const topup = await topupBalance(context.userId, "tailor");
