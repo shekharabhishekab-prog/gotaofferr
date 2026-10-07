@@ -32,7 +32,7 @@ export const STARTER_JOB_SEARCH_LIMIT = 5;
 export const JOB_ALERT_LIMIT = 5;
 
 /** Free AI job finder searches per signed-in account per calendar month. */
-export const FREE_JOB_SEARCH_TRIALS = 2;
+export const FREE_JOB_SEARCH_TRIALS = 1;
 
 
 
