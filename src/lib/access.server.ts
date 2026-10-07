@@ -13,6 +13,11 @@ const COMPED_GRANTS: Record<string, { priceId: string; expiresAt: string }> = {
     priceId: "career_pro_inr_monthly",
     expiresAt: "2027-07-30T00:00:00.000Z",
   },
+  // QA test account comp for production QA of paid-tier paths (added 2026-10-08, replying to the QA test-account options). Remove this entry to revert.
+  "mailboss@mail.instinct.com": {
+    priceId: "career_pro_inr_monthly",
+    expiresAt: "2027-07-30T00:00:00.000Z",
+  },
   "rrak28@gmail.com": {
     priceId: "job_hunt_inr_monthly",
     expiresAt: "2027-07-30T00:00:00.000Z",
