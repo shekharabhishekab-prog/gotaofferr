@@ -150,28 +150,35 @@ export const exportMyData = createServerFn({ method: "POST" })
     const { enforcePolicy } = await import("@/lib/rate-limit.server");
     await enforcePolicy("profile-write", context.userId);
 
-    const [profile, runs, alerts, subs, searches] = await Promise.all([
+    const [profile, runs, alerts, subs, searches, builder] = await Promise.all([
       context.supabase.from("profiles").select("*").eq("id", context.userId).maybeSingle(),
       context.supabase.from("tailor_runs").select("*").eq("user_id", context.userId),
       context.supabase.from("job_alerts").select("*").eq("user_id", context.userId),
       context.supabase.from("subscriptions").select("*").eq("user_id", context.userId),
       context.supabase.from("job_search_runs").select("*").eq("user_id", context.userId),
+      context.supabase.from("default_resumes").select("*").eq("user_id", context.userId),
     ]);
 
+    const { safeError } = await import("@/lib/safe-error.server");
+    for (const response of [profile, runs, alerts, subs, searches, builder]) {
+      if (response.error) throw safeError("account-export", response.error, "Could not export your complete account data right now.");
+    }
     // The data-export copy is decrypted so the user gets readable resumes.
     const { decryptResult } = await import("@/lib/resume-crypto.server");
-    const tailoredResumes = await Promise.all(
-      (runs.data ?? []).map(async (run) => ({
-        ...run,
-        result: (await decryptResult(run.result).catch(() => null)) as typeof run.result,
-      })),
-    );
+    let tailoredResumes: any[], savedBuilderResumes: any[];
+    try {
+      tailoredResumes = await Promise.all((runs.data ?? []).map(async (run) => ({ ...run, result: await decryptResult(run.result) })));
+      savedBuilderResumes = await Promise.all((builder.data ?? []).map(async (run) => ({ ...run, result: await decryptResult(run.result) })));
+    } catch (error) {
+      throw safeError("account-export-unlock", error, "Could not unlock all your saved resumes for export. Please try again.");
+    }
 
     return {
       exportedAt: new Date().toISOString(),
       account: { id: context.userId, email: context.claims?.email ?? null },
       profile: profile.data ?? null,
       tailoredResumes,
+      savedBuilderResumes,
       jobAlerts: alerts.data ?? [],
       subscriptions: subs.data ?? [],
       jobSearches: searches.data ?? [],
