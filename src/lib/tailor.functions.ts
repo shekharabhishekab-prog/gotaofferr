@@ -150,6 +150,12 @@ export const tailorResume = createServerFn({ method: "POST" })
       }
     }
     const { countTailorUsage: countUsage, recordTailorRun } = await import("@/lib/tailor-usage.server");
+    const { encryptResult, requireResumeEncryption } = await import("./resume-crypto.server");
+    try { await requireResumeEncryption(); }
+    catch (error) {
+      const { safeError } = await import("./safe-error.server");
+      throw safeError("tailor-secure-storage", error, "Secure saving is unavailable right now. Please try again. This attempt was not counted.");
+    }
     const used = await countUsage(context.supabase, context.userId, usageWindowStart(sub, monthStartIso()));
     // Plan allowance first; a purchased top-up credit covers the overflow.
     const { consumeTopupCredit, topupBalance } = await import("@/lib/topups.server");
@@ -165,9 +171,7 @@ export const tailorResume = createServerFn({ method: "POST" })
 
     const result = await runTailor(data, detectCountry(), routingTier);
 
-    const { encryptResult } = await import("@/lib/resume-crypto.server");
-
-    await context.supabase.from("tailor_runs").insert({
+    const { error: saveError } = await context.supabase.from("tailor_runs").insert({
       user_id: context.userId,
       company: data.company ?? null,
       role: data.role ?? null,
@@ -177,6 +181,10 @@ export const tailorResume = createServerFn({ method: "POST" })
       result: (await encryptResult(JSON.parse(JSON.stringify(result)))) as never,
     });
 
+    if (saveError) {
+      const { safeError } = await import("./safe-error.server");
+      throw safeError("tailor-save", saveError, "Your rewrite could not be saved. Please try again.");
+    }
     await recordTailorRun(context.supabase, context.userId);
 
     const nextUsed = used + 1;
