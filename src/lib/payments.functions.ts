@@ -282,6 +282,14 @@ export const getSubscriptionStatus = createServerFn({ method: 'POST' })
   .inputValidator((data: { environment?: StripeEnv }) => data)
   .handler(async ({ data, context }): Promise<SubscriptionStatusResult> => {
     try {
+      // Temporary isolated QA ads test candidate. Status response only, no DB/provider write.
+      // Exact preview host + exact authenticated QA ID + short expiry; never tools/payment entitlement.
+      const { getRequest } = await import('@tanstack/react-start/server');
+      const request=getRequest();
+      const expectedHost='phase18-preview-gotaofferr-copy.shekhar-abhishekab.workers.dev';
+      if(new URL(request.url).hostname===expectedHost && process.env['PREVIEW_MAILBOSS_AD_TEST']==='mailboss-ad-test' && context.userId==='d1c3f3ae-e5c9-4240-9e25-51ebccc2d1f2' && Date.now()<Date.parse('2026-10-07T11:00:00Z')){
+        return {active:true,plan:'career_pro_inr_monthly',tier:'career_pro',currentPeriodEnd:'2026-10-07T11:00:00Z',status:'active',cancelAtPeriodEnd:false,paymentFailing:false};
+      }
       // Temporary testing switch — see src/lib/access.ts
       if (TESTING_UNLOCK_ALL_PLANS) {
         return {
@@ -370,4 +378,3 @@ export const setAutoRenew = createServerFn({ method: 'POST' })
       return { error: getPaymentsErrorMessage(error) };
     }
   });
-
