@@ -81,7 +81,7 @@ function Stat({ label, value, monthly, yearly, icon }: { label: string; value: s
         {label}
       </div>
       <p className="mt-2 text-3xl font-bold">{value}</p>
-      {monthly !== undefined && <p className="mt-2 text-sm text-muted-foreground">This month (UTC): {monthly}</p>}
+      {monthly !== undefined && <p className="mt-2 text-sm text-muted-foreground">This month: {monthly}</p>}
       {yearly !== undefined && <p className="mt-1 text-sm text-muted-foreground">This year (UTC): {yearly}</p>}
     </div>
   );
@@ -179,15 +179,15 @@ function AdminPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="Total users" value={d.totals.users} monthly={d.totals.usersThisMonth} yearly={d.totals.usersThisYear} icon={<Users className="h-4 w-4" />} />
-            <Stat label="Recorded rewrites" value={d.totals.runsTotal} monthly={d.totals.runsThisMonth} yearly={d.totals.runsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Recorded job searches" value={d.totals.searchRecords} monthly={d.totals.searchesThisMonth} yearly={d.totals.searchesThisYear} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} yearly={d.totals.builderDownloadAttemptsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} yearly={d.totals.alertRecordsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Subscriptions started" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} yearly={d.totals.subscriptionRecordsThisYear} icon={<CreditCard className="h-4 w-4" />} />
+            <Stat label="Total users" value={d.totals.users} monthly={d.totals.usersThisMonth} icon={<Users className="h-4 w-4" />} />
+            <Stat label="Recorded rewrites" value={d.totals.runsTotal} monthly={d.totals.runsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Recorded job searches" value={d.totals.searchRecords} monthly={d.totals.searchesThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Subscriptions started" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} icon={<CreditCard className="h-4 w-4" />} />
             <Stat label="Active subscriber share now" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">Active subscriptions now: {d.totals.activeSubs}. Historical month/year subscriber share is not available from current subscription state. Subscriber share is currently entitled users divided by all registered users, not historical purchase conversion. Monthly users, subscriptions and alerts are records created this UTC month, not renewals, messages sent or current-state snapshots. Activity totals count recorded signed-in events and may exclude older unrecorded events or deleted accounts. Builder attempts are allowance records written before PDF generation, not confirmed files created. Plan counts below include Free and current entitled plans.</p>
+          <p className="mt-3 text-sm text-muted-foreground">This month uses India time (IST). Counts are recorded activity; builder counts are download attempts. Subscriptions started counts new records, not renewals. Subscriber share is current access, not historical conversion.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
@@ -222,9 +222,9 @@ function AdminPage() {
                         "plan",
                         "plan_status",
                         "plan_end",
-                        "rewrites_this_month_utc",
-                        "alert_records_this_month_utc",
-                        "job_searches_this_month_utc",
+                        "rewrites_this_month_ist",
+                        "alert_records_this_month_ist",
+                        "job_searches_this_month_ist",
                         "joined",
                         "last_sign_in",
                       ],
@@ -256,8 +256,7 @@ function AdminPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Status / cancellation</TableHead>
+                      <TableHead>Plan / status</TableHead>
                       <TableHead className="text-right">Rewrites this month</TableHead>
                       <TableHead className="text-right">Alert records this month</TableHead>
                       <TableHead className="text-right">Searches this month</TableHead>
@@ -271,11 +270,8 @@ function AdminPage() {
                         <TableCell>{u.fullName ?? "—"}</TableCell>
                         <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
                         <TableCell>
-                          <Badge variant={u.plan && u.plan !== "Free" ? "default" : "secondary"}>
-                            {u.plan ?? "Free"}
-                          </Badge>
+                          {u.plan ?? "Free"} · {u.planStatus ?? "Free"}{u.cancelAtPeriodEnd ? " · cancels at period end" : ""}
                         </TableCell>
-                        <TableCell>{u.planStatus ?? "Free"}{u.cancelAtPeriodEnd ? " / cancels at period end" : ""}</TableCell>
                         <TableCell className="text-right">{u.runsThisMonth}</TableCell>
                         <TableCell className="text-right">{u.alertsThisMonth}</TableCell>
                         <TableCell className="text-right">{u.searchesThisMonth}</TableCell>
@@ -380,4 +376,4 @@ function AdminPage() {
       </div>
     </AdminMfaGate>
   );
-}
+        }
