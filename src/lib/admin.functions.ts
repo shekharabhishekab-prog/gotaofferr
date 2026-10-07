@@ -146,3 +146,15 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       })),
     };
   });
+
+/** Temporary preview-only control. No recipient or body supplied by the client. */
+export const sendApprovedOpsTest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const { requireOpsTestHost } = await import("./ops-alert-test.policy");
+    requireOpsTestHost(new URL(getRequest().url).hostname);
+    await assertAdmin(context as AdminCtx);
+    const { sendOpsDeliveryTest } = await import("./ops-alert.server");
+    return sendOpsDeliveryTest();
+  });
