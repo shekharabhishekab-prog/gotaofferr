@@ -73,7 +73,7 @@ function stamp() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function Stat({ label, value, monthly, yearly, icon }: { label: string; value: string | number; monthly?: number; yearly?: number; icon: React.ReactNode }) {
+function Stat({ label, value, monthly, icon }: { label: string; value: string | number; monthly?: number; icon: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -82,7 +82,6 @@ function Stat({ label, value, monthly, yearly, icon }: { label: string; value: s
       </div>
       <p className="mt-2 text-3xl font-bold">{value}</p>
       {monthly !== undefined && <p className="mt-2 text-sm text-muted-foreground">This month: {monthly}</p>}
-      {yearly !== undefined && <p className="mt-1 text-sm text-muted-foreground">This year (UTC): {yearly}</p>}
     </div>
   );
 }
@@ -269,7 +268,7 @@ function AdminPage() {
                       <TableRow key={u.id}>
                         <TableCell>{u.fullName ?? "—"}</TableCell>
                         <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap">
                           {u.plan ?? "Free"} · {u.planStatus ?? "Free"}{u.cancelAtPeriodEnd ? " · cancels at period end" : ""}
                         </TableCell>
                         <TableCell className="text-right">{u.runsThisMonth}</TableCell>
@@ -376,4 +375,4 @@ function AdminPage() {
       </div>
     </AdminMfaGate>
   );
-        }
+}
