@@ -313,7 +313,7 @@ export const getSubscriptionStatus = createServerFn({ method: 'POST' })
       return {
         active: isEntitled(sub),
         plan: sub?.price_id ?? null,
-        tier: tierForPriceId(sub?.price_id),
+        tier: isEntitled(sub) ? tierForPriceId(sub?.price_id) : 'free',
         currentPeriodEnd: sub?.current_period_end ?? null,
         status: sub?.status ?? null,
         cancelAtPeriodEnd: sub?.cancel_at_period_end ?? false,
@@ -370,4 +370,3 @@ export const setAutoRenew = createServerFn({ method: 'POST' })
       return { error: getPaymentsErrorMessage(error) };
     }
   });
-
