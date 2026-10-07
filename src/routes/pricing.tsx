@@ -97,9 +97,9 @@ const plans: Record<PlanKey, {
     tagline: "Try it on your next ten applications.",
     bestFor: "Best for: testing whether tailoring actually gets you replies.",
     features: [
-      "10 resume + cover letter tailorings per month",
+      "3 resume + cover letter tailorings per month",
       "5 resumes in the resume builder",
-      "2 AI job finder searches per month",
+      "1 AI job finder search per month",
       "1 job alert (3 emails, every 3 days)",
       "Resume builder: build a resume from scratch and download it as a PDF",
       "Resume rebuilt for each job description",
@@ -547,4 +547,3 @@ function Pricing() {
     </main>
   );
 }
-
