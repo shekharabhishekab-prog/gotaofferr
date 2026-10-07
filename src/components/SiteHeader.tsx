@@ -44,7 +44,9 @@ export function SiteHeader() {
 
 
         <nav className="hidden items-center gap-6 md:flex">
-          {nav.map((item) => (
+          {nav.map((item) => item.to === "/ats-design-preview" ? (
+            <a key={item.to} href="/ats-design-preview.html" className="text-sm text-muted-foreground transition-colors hover:text-foreground">{item.label}</a>
+          ) : (
             <Link
               key={item.to}
               to={item.to}
@@ -89,7 +91,9 @@ export function SiteHeader() {
       {open ? (
         <div className="border-t border-border/60 bg-background md:hidden">
           <nav className="site-container flex flex-col gap-1 py-3">
-            {nav.map((item) => (
+            {nav.map((item) => item.to === "/ats-design-preview" ? (
+              <a key={item.to} href="/ats-design-preview.html" onClick={() => setOpen(false)} className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">{item.label}</a>
+            ) : (
               <Link
                 key={item.to}
                 to={item.to}
