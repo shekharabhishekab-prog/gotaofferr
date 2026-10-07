@@ -9,7 +9,39 @@
 <h1>Check your resume before you apply.</h1><p class="intro">See what needs attention, then improve your resume using your own experience.</p>
 <div class="tabs" role="tablist"><button class="tab active" id="entryTab" role="tab" aria-selected="true" onclick="showView(false)">Resume input</button><button class="tab" id="resultTab" role="tab" aria-selected="false" onclick="showView(true)">Sample results</button></div>
 <section class="entry" id="entry"><div class="grid"><div class="panel"><div class="step">Step 01</div><h2>Your resume</h2><p>Paste the text from your current resume.</p><label for="resume">Resume text</label><textarea id="resume" placeholder="Your name and contact details&#10;&#10;Experience&#10;Role, company and dates&#10;Achievements and responsibilities&#10;&#10;Education and skills"></textarea><p class="hint">Use plain text for this layout preview.</p></div><div class="panel"><div class="step">Step 02</div><h2>The job you want</h2><p>Add a job description to compare the wording.</p><label for="jd">Job description <span class="optional">Optional</span></label><textarea id="jd" placeholder="Paste the job title, responsibilities, required skills and experience here."></textarea><p class="hint">Without a job description, check the resume on its own.</p></div></div><div class="bottom"><p class="privacy">This mockup does not upload or store your text. The button is disabled while the design is under review.</p><button class="primary" disabled>Check my resume →</button></div><div class="note">A resume check is guidance, not a hiring guarantee. It must never add skills or experience you do not have.</div></section>
-<section class="results" id="results"><div class="grid"><div class="panel"><div class="summary"><div class="score"><strong>72</strong><span>out of 100</span></div><div><div class="sample">ILLUSTRATIVE SAMPLE</div><h2>Room to improve</h2><p>Start with the fixes on the right.</p></div></div><h3>Check breakdown</h3><ul class="list"><li>Contact details<span>Complete</span></li><li>Resume sections<span>Complete</span></li><li>Dates and structure<span>Needs attention</span></li><li>Achievements<span>Needs attention</span></li><li>Job keywords<span>Some missing</span></li></ul><div class="note">Sample data for layout review. This is not a score from your resume or a result from an ATS vendor.</div></div><div class="panel"><div class="step">What to improve</div><h2>Clear, practical next steps</h2><div class="fix"><h3>1. Add dates to each role</h3><p>Use a consistent start and end date so your experience is easy to follow.</p></div><div class="fix"><h3>2. Show the result of your work</h3><p>Add real numbers or outcomes where you can support them. Do not invent figures.</p></div><div class="fix"><h3>3. Review missing keywords</h3><p>Include these only if they match your experience.</p><div class="tags"><span class="tag">SQL</span><span class="tag">Reporting</span><span class="tag">Stakeholder management</span></div></div></div></div><div class="note">The sample score, checks and keywords are placeholders. Final scoring and wording are separate from this design review.</div></section>
+<section class="results" id="results"><div class="grid" style="margin-bottom:20px"><div class="panel"><div class="step">Sample input</div><h2>Sample resume</h2><label for="sampleResume">Fictional resume text</label><textarea id="sampleResume" readonly style="height:300px">Aarav Mehta
+Business Analyst
+ aarav@example.invalid | +91 00000 00000
+
+Summary
+Business analyst supporting operations teams with dashboards and process reviews.
+
+Experience
+Business Analyst, Example Services
+2022 - Present
+- Built Excel dashboards for weekly operations reviews.
+- Prepared reports and helped teams improve processes.
+- Worked with managers to track project progress.
+
+Education
+B.Com, Example College, 2022
+
+Skills
+Excel, Power BI, data analysis, presentations</textarea></div><div class="panel"><div class="step">Sample input</div><h2>Sample job description</h2><label for="sampleJd">Fictional job posting</label><textarea id="sampleJd" readonly style="height:300px">Business Analyst - Operations
+Example Company
+
+We need a business analyst to build dashboards and turn operational data into clear recommendations.
+
+Responsibilities
+- Write SQL queries and prepare weekly reporting.
+- Build Excel and Power BI dashboards.
+- Work with teams on stakeholder management and process improvements.
+
+Required skills
+SQL, Excel, Power BI, reporting, data analysis and stakeholder management.
+
+Experience
+2+ years in business analysis or operations.</textarea></div></div><div class="grid"><div class="panel"><div class="summary"><div class="score"><strong>72</strong><span>out of 100</span></div><div><div class="sample">ILLUSTRATIVE SAMPLE</div><h2>Room to improve</h2><p>Start with the fixes on the right.</p></div></div><h3>Check breakdown</h3><ul class="list"><li>Contact details<span>Complete</span></li><li>Resume sections<span>Complete</span></li><li>Dates and structure<span>Needs attention</span></li><li>Achievements<span>Needs attention</span></li><li>Job keywords<span>Some missing</span></li></ul><div class="note">Illustrative result for the fictional inputs above. No scoring engine ran; 72 is a layout placeholder, not a vendor ATS score.</div></div><div class="panel"><div class="step">What to improve</div><h2>Clear, practical next steps</h2><div class="fix"><h3>1. Add dates to each role</h3><p>The sample uses a year-only range. Add start and end months so experience is easy to follow.</p></div><div class="fix"><h3>2. Show the result of your work</h3><p>Add real numbers or outcomes where you can support them. Do not invent figures.</p></div><div class="fix"><h3>3. Review missing keywords</h3><p>Include these only if they match your experience.</p><div class="tags"><span class="tag">SQL</span><span class="tag">Reporting</span><span class="tag">Stakeholder management</span></div></div></div></div><div class="note">The sample score, checks and keywords are placeholders. Final scoring and wording are separate from this design review.</div></section>
 </main><footer>Got Offer · Phase 1.8 design review · No live changes</footer>
 <script>function showView(result){document.getElementById('entry').classList.toggle('hidden',result);document.getElementById('results').classList.toggle('show',result);document.getElementById('entryTab').classList.toggle('active',!result);document.getElementById('resultTab').classList.toggle('active',result);document.getElementById('entryTab').setAttribute('aria-selected',!result);document.getElementById('resultTab').setAttribute('aria-selected',result)}</script>
 </body></html>
