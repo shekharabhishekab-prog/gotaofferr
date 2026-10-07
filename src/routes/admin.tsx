@@ -180,16 +180,14 @@ function AdminPage() {
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="Total users" value={d.totals.users} monthly={d.totals.usersThisMonth} yearly={d.totals.usersThisYear} icon={<Users className="h-4 w-4" />} />
-            <Stat label="Subscription records" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} yearly={d.totals.subscriptionRecordsThisYear} icon={<CreditCard className="h-4 w-4" />} />
             <Stat label="Recorded rewrites" value={d.totals.runsTotal} monthly={d.totals.runsThisMonth} yearly={d.totals.runsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Recorded job searches" value={d.totals.searchRecords} monthly={d.totals.searchesThisMonth} yearly={d.totals.searchesThisYear} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} yearly={d.totals.builderDownloadAttemptsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
             <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} yearly={d.totals.alertRecordsThisYear} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Active subscriptions now" value={d.totals.activeSubs} icon={<CreditCard className="h-4 w-4" />} />
+            <Stat label="Subscriptions started" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} yearly={d.totals.subscriptionRecordsThisYear} icon={<CreditCard className="h-4 w-4" />} />
             <Stat label="Active subscriber share now" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
-            <Stat label="Active job alerts now" value={d.totals.activeAlerts} icon={<BarChart3 className="h-4 w-4" />} />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">Historical month/year subscriber share is not available from current subscription state. Subscriber share is currently entitled users divided by all registered users, not historical purchase conversion. Monthly users, subscriptions and alerts are records created this UTC month, not renewals, messages sent or current-state snapshots. Activity totals count recorded signed-in events and may exclude older unrecorded events or deleted accounts. Builder attempts are allowance records written before PDF generation, not confirmed files created. Plan counts below include Free and current entitled plans.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Active subscriptions now: {d.totals.activeSubs}. Historical month/year subscriber share is not available from current subscription state. Subscriber share is currently entitled users divided by all registered users, not historical purchase conversion. Monthly users, subscriptions and alerts are records created this UTC month, not renewals, messages sent or current-state snapshots. Activity totals count recorded signed-in events and may exclude older unrecorded events or deleted accounts. Builder attempts are allowance records written before PDF generation, not confirmed files created. Plan counts below include Free and current entitled plans.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
@@ -226,8 +224,9 @@ function AdminPage() {
                         "plan",
                         "plan_status",
                         "plan_end",
-                        "rewrites_total",
-                        "job_alerts",
+                        "rewrites_this_month_utc",
+                        "alert_records_this_month_utc",
+                        "job_searches_this_month_utc",
                         "joined",
                         "last_sign_in",
                       ],
@@ -241,8 +240,9 @@ function AdminPage() {
                         u.plan ?? "Free",
                         u.planStatus,
                         u.planEnd,
-                        u.runsTotal,
-                        u.alerts,
+                        u.runsThisMonth,
+                        u.alertsThisMonth,
+                        u.searchesThisMonth,
                         u.createdAt,
                         u.lastSignInAt,
                       ]),
@@ -263,8 +263,9 @@ function AdminPage() {
                       <TableHead>Name</TableHead>
                       <TableHead>Plan</TableHead>
                       <TableHead>Status / cancellation</TableHead>
-                      <TableHead className="text-right">Rewrites</TableHead>
-                      <TableHead className="text-right">Alerts</TableHead>
+                      <TableHead className="text-right">Rewrites this month</TableHead>
+                      <TableHead className="text-right">Alert records this month</TableHead>
+                      <TableHead className="text-right">Searches this month</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead>Last sign-in</TableHead>
                     </TableRow>
@@ -282,8 +283,9 @@ function AdminPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>{u.planStatus ?? "Free"}{u.cancelAtPeriodEnd ? " / cancels at period end" : ""}</TableCell>
-                        <TableCell className="text-right">{u.runsTotal}</TableCell>
-                        <TableCell className="text-right">{u.alerts}</TableCell>
+                        <TableCell className="text-right">{u.runsThisMonth}</TableCell>
+                        <TableCell className="text-right">{u.alertsThisMonth}</TableCell>
+                        <TableCell className="text-right">{u.searchesThisMonth}</TableCell>
                         <TableCell>{fmt(u.createdAt)}</TableCell>
                         <TableCell>{fmt(u.lastSignInAt)}</TableCell>
                       </TableRow>
@@ -307,6 +309,7 @@ function AdminPage() {
                       [
                         "user_id",
                         "email",
+                        "name",
                         "plan",
                         "price_id",
                         "status",
@@ -318,6 +321,7 @@ function AdminPage() {
                       d.subscriptions.map((s) => [
                         s.userId,
                         s.email,
+                        s.fullName,
                         s.plan,
                         s.priceId,
                         s.status,
@@ -339,6 +343,7 @@ function AdminPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
+                      <TableHead>Name</TableHead>
                       <TableHead>Plan</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Mode</TableHead>
@@ -349,7 +354,7 @@ function AdminPage() {
                   <TableBody>
                     {d.subscriptions.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        <TableCell colSpan={7} className="text-center text-muted-foreground">
                           No subscriptions yet.
                         </TableCell>
                       </TableRow>
@@ -357,6 +362,7 @@ function AdminPage() {
                       d.subscriptions.map((s, i) => (
                         <TableRow key={`${s.userId}-${i}`}>
                           <TableCell className="font-medium">{s.email ?? s.userId}</TableCell>
+                          <TableCell>{s.fullName ?? "-"}</TableCell>
                           <TableCell>{s.plan}</TableCell>
                           <TableCell>
                             <Badge variant={s.status === "active" ? "default" : "secondary"}>
