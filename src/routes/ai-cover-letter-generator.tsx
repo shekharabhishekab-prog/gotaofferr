@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 const TITLE = "AI Cover Letter Generator — Tailored to the Job in Seconds";
 const DESCRIPTION =
-  "Generate a cover letter built around one job description, using your real resume facts and the posting's keywords. ATS-ready PDF, 10 free monthly.";
+  "Generate a cover letter built around one job description, using your real resume facts and the posting's keywords. ATS-ready PDF, 3 free monthly.";
 
 const faqs = [
   {
@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     q: "Is the cover letter generator free?",
-    a: "Yes. Every account gets 10 free tailored applications each month, and the cover letter is included with the resume rewrite on all of them. The Starter Pack adds 20 rewrites with cover letters, and larger packages go further.",
+    a: "Yes. Every account gets 3 free tailored applications each month, and the cover letter is included with the resume rewrite on all of them. The Starter Pack adds 20 rewrites with cover letters, and larger packages go further.",
   },
   {
     q: "Will it sound like AI wrote it?",
@@ -195,4 +195,3 @@ function AiCoverLetterGenerator() {
     </main>
   );
 }
-
