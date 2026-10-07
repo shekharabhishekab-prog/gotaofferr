@@ -305,7 +305,7 @@ export const PLAN_LABEL: Record<PlanTier, string> = {
 
 /** Resume builder: resumes a member can build and download per month. */
 export const BUILDER_MONTHLY_LIMIT: Record<PlanTier, number> = {
-  free: 5,
+  free: 3,
   starter: 12,
   job_hunt: 20,
   career_pro: 50,
