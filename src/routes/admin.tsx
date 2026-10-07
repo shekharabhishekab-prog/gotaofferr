@@ -154,7 +154,7 @@ function AdminPage() {
 
   return (
     <AdminMfaGate>
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold sm:text-4xl">Admin dashboard</h1>
         <p className="mt-2 text-muted-foreground">
@@ -217,8 +217,6 @@ function AdminPage() {
                       [
                         "user_id",
                         "email",
-                        "phone",
-                        "email_confirmed",
                         "cancel_at_period_end",
                         "name",
                         "plan",
@@ -233,8 +231,6 @@ function AdminPage() {
                       d.users.map((u) => [
                         u.id,
                         u.email,
-                        u.phone,
-                        u.emailConfirmed,
                         u.cancelAtPeriodEnd,
                         u.fullName,
                         u.plan ?? "Free",
@@ -253,14 +249,13 @@ function AdminPage() {
                   Download CSV
                 </Button>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-border">
-                <Table>
+              <p className="mb-2 text-xs text-muted-foreground">If needed, scroll the table sideways to see every column.</p>
+              <div role="region" aria-label="Scrollable account table" tabIndex={0} className="w-full overflow-x-auto rounded-xl border border-border [&>div]:overflow-visible" style={{ scrollbarWidth: "auto" }}>
+                <Table className="[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap" style={{ minWidth: "1100px" }}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Phone (if collected)</TableHead>
-                      <TableHead>Email verified</TableHead>
                       <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead>Plan</TableHead>
                       <TableHead>Status / cancellation</TableHead>
                       <TableHead className="text-right">Rewrites this month</TableHead>
@@ -273,10 +268,8 @@ function AdminPage() {
                   <TableBody>
                     {d.users.map((u) => (
                       <TableRow key={u.id}>
-                        <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
-                        <TableCell>{u.phone || "Not collected"}</TableCell>
-                        <TableCell>{u.emailConfirmed ? "Verified" : "Pending"}</TableCell>
                         <TableCell>{u.fullName ?? "—"}</TableCell>
+                        <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
                         <TableCell>
                           <Badge variant={u.plan && u.plan !== "Free" ? "default" : "secondary"}>
                             {u.plan ?? "Free"}
@@ -338,12 +331,13 @@ function AdminPage() {
                   Download CSV
                 </Button>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-border">
-                <Table>
+              <p className="mb-2 text-xs text-muted-foreground">If needed, scroll the table sideways to see every column.</p>
+              <div role="region" aria-label="Scrollable account table" tabIndex={0} className="w-full overflow-x-auto rounded-xl border border-border [&>div]:overflow-visible" style={{ scrollbarWidth: "auto" }}>
+                <Table className="[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap" style={{ minWidth: "1100px" }}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Email</TableHead>
                       <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
                       <TableHead>Plan</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Mode</TableHead>
@@ -361,8 +355,8 @@ function AdminPage() {
                     ) : (
                       d.subscriptions.map((s, i) => (
                         <TableRow key={`${s.userId}-${i}`}>
-                          <TableCell className="font-medium">{s.email ?? s.userId}</TableCell>
                           <TableCell>{s.fullName ?? "-"}</TableCell>
+                          <TableCell className="font-medium">{s.email ?? s.userId}</TableCell>
                           <TableCell>{s.plan}</TableCell>
                           <TableCell>
                             <Badge variant={s.status === "active" ? "default" : "secondary"}>
