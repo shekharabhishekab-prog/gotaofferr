@@ -63,7 +63,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context as AdminCtx);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { planLabel } = await import("./plans");
+    const { planLabel, isEntitled } = await import("./plans");
 
     const { safeError } = await import("./safe-error.server");
     const { getStripeEnvironment } = await import("./stripe");
@@ -85,11 +85,12 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       if ((data?.users ?? []).length < 1000) break;
       if (page === 100) throw new Error("User list is too large for this view.");
     }
-    const [subs, profileRows, runRows, alertRows] = await Promise.all([
+    const [subs, profileRows, runRows, alertRows, usageRows] = await Promise.all([
       rows(() => supabaseAdmin.from("subscriptions").select("id,user_id,price_id,status,current_period_end,cancel_at_period_end,environment,created_at").eq("environment", getStripeEnvironment()).order("created_at", { ascending: false }).order("id")),
       rows(() => supabaseAdmin.from("profiles").select("id,full_name").order("id")),
       rows(() => supabaseAdmin.from("tailor_runs").select("id,user_id,created_at").order("id")),
       rows(() => supabaseAdmin.from("job_alerts").select("id,user_id,enabled").order("id")),
+      rows(() => supabaseAdmin.from("tailor_usage_log").select("id,user_id,created_at").order("id")),
     ]);
 
     const profiles = new Map(profileRows.map((p) => [p.id, p.full_name]));
@@ -101,7 +102,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     monthStart.setUTCDate(1);
     monthStart.setUTCHours(0, 0, 0, 0);
     let runsThisMonth = 0;
-    for (const r of runRows) {
+    for (const r of usageRows) {
       runCounts.set(r.user_id, (runCounts.get(r.user_id) ?? 0) + 1);
       if (new Date(r.created_at) >= monthStart) runsThisMonth += 1;
     }
@@ -133,20 +134,20 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     });
     users.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
 
-    const activeStatuses = new Set(["active", "trialing", "past_due", "authenticated"]);
     const planBreakdown: Record<string, number> = {};
     let activeSubs = 0;
     for (const [, s] of firstSub) {
       const label = planLabel(s.price_id);
       planBreakdown[label] = (planBreakdown[label] ?? 0) + 1;
-      if (activeStatuses.has(String(s.status))) activeSubs += 1;
+      if (isEntitled(s)) activeSubs += 1;
     }
 
     return {
       totals: {
         users: users.length,
         activeSubs,
-        runsTotal: runRows.length,
+        runsTotal: usageRows.length,
+        savedResumes: runRows.length,
         runsThisMonth,
         activeAlerts,
       },
