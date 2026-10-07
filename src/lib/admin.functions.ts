@@ -85,13 +85,14 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       if ((data?.users ?? []).length < 1000) break;
       if (page === 100) throw new Error("User list is too large for this view.");
     }
-    const [subs, profileRows, runRows, alertRows, usageRows, searchRows] = await Promise.all([
+    const [subs, profileRows, runRows, alertRows, usageRows, searchRows, builderRows] = await Promise.all([
       rows(() => supabaseAdmin.from("subscriptions").select("id,user_id,price_id,status,current_period_end,cancel_at_period_end,environment,created_at").eq("environment", getStripeEnvironment()).order("created_at", { ascending: false }).order("id")),
       rows(() => supabaseAdmin.from("profiles").select("id,full_name").order("id")),
       rows(() => supabaseAdmin.from("tailor_runs").select("id,user_id,created_at").order("id")),
       rows(() => supabaseAdmin.from("job_alerts").select("id,user_id,enabled").order("id")),
       rows(() => supabaseAdmin.from("tailor_usage_log").select("id,user_id,created_at").order("id")),
       rows(() => supabaseAdmin.from("job_search_runs").select("id,user_id,created_at").order("id")),
+      rows(() => supabaseAdmin.from("builder_uses").select("id,user_id,created_at").order("id")),
     ]);
 
     const profiles = new Map(profileRows.map((p) => [p.id, p.full_name]));
@@ -153,6 +154,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
         subscriberSharePercent: users.length ? activeSubs / users.length * 100 : 0,
         subscriptionRecords: subs.length,
         searchRecords: searchRows.length,
+        builderDownloadAttempts: builderRows.length,
         searchesThisMonth,
         alertRecords: alertRows.length,
         runsTotal: usageRows.length,
