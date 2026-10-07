@@ -113,6 +113,8 @@ export default {
         console.log("[cron] job alerts", JSON.stringify(out));
       } catch (error) {
         console.error("[cron] job alerts failed", error);
+        const { opsAlert } = await import("./lib/ops-alert.server");
+        opsAlert("cron: job alerts failed", error);
       }
     })();
     ctx?.waitUntil?.(run);

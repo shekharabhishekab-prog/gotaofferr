@@ -20,6 +20,50 @@ function loadScript(src: string, attrs: Record<string, string> = {}) {
   document.head.appendChild(el);
 }
 
+const POSTHOG_KEY = "phc_qnxYaoAYBTXSHh2qGBtBke82cEFyx2HAGtXoAuXSYmR2";
+const POSTHOG_HOST = "https://us.i.posthog.com";
+const POSTHOG_ASSETS = "https://us-assets.i.posthog.com";
+
+/** Official PostHog stub: queues calls until the real library has loaded. */
+function loadPostHog() {
+  const w = window as unknown as { posthog?: any; __gtPh?: boolean };
+  if (w.__gtPh) return;
+  w.__gtPh = true;
+  const ph: any = (w.posthog = w.posthog || []);
+  if (ph.__SV) return;
+  ph._i = [];
+  ph.init = function (key: string, config: Record<string, unknown>, name?: string) {
+    const target: any = name !== undefined ? (ph[name] = []) : ph;
+    const methods =
+      "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(
+        " ",
+      );
+    for (const m of methods) {
+      const parts = m.split(".");
+      let obj = target;
+      let fn = m;
+      if (parts.length === 2) {
+        obj = obj[parts[0]] = obj[parts[0]] || [];
+        fn = parts[1];
+      }
+      obj[fn] = function (...args: unknown[]) {
+        target.push([m, ...args]);
+      };
+    }
+    ph._i.push([key, config, name]);
+  };
+  ph.__SV = 1;
+  ph.init(POSTHOG_KEY, {
+    api_host: POSTHOG_HOST,
+    ui_host: "https://us.posthog.com",
+    person_profiles: "identified_only",
+    disable_session_recording: true,
+    capture_pageview: true,
+    capture_pageleave: true,
+  });
+  loadScript(`${POSTHOG_ASSETS}/static/array.js`);
+}
+
 export function DeferredThirdParty({
   gaId,
   adsenseClient,
@@ -28,7 +72,6 @@ export function DeferredThirdParty({
   adsenseClient?: string;
 }) {
   useEffect(() => {
-    if (!gaId && !adsenseClient) return;
 
     let done = false;
     const run = () => {
@@ -53,6 +96,8 @@ export function DeferredThirdParty({
         });
         loadScript(`https://www.googletagmanager.com/gtag/js?id=${gaId}`);
       }
+
+      if (import.meta.env.PROD) loadPostHog();
 
       if (adsenseClient) {
         loadScript(
@@ -80,3 +125,4 @@ export function DeferredThirdParty({
 
   return null;
 }
+

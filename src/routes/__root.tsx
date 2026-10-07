@@ -172,20 +172,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: [
       // AdSense site-verification snippet: must be in the server-rendered <head> so Google's Verify can see it.
       // Paid members: pause ad requests before AdSense loads (tier remembered from the last visit).
+      // Ads by plan, decided BEFORE the AdSense script exists: a paid plan remembered on this device never loads
+      // the script at all (no ad request, no flash). A signed-in visitor whose plan is not known yet stays paused
+      // until AdPolicy confirms the plan. Everyone else (guests, free) loads ads as before.
       ...(ADSENSE_CLIENT
         ? [
             {
               children:
-                'window.adsbygoogle=window.adsbygoogle||[];try{var t=localStorage.getItem("gt_tier");if(t&&t!=="free")window.adsbygoogle.pauseAdRequests=1}catch(e){}',
-            },
-          ]
-        : []),
-      ...(ADSENSE_CLIENT
-        ? [
-            {
-              src: `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`,
-              async: true,
-              crossOrigin: "anonymous" as const,
+                'window.adsbygoogle=window.adsbygoogle||[];(function(){var t=null,s=false;try{t=localStorage.getItem("gt_tier");for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"){s=true}}}catch(e){}'
+                + 'if(t&&t!=="free"){window.adsbygoogle.pauseAdRequests=1;return}'
+                + 'if(s){window.adsbygoogle.pauseAdRequests=1}'
+                + 'var e=document.createElement("script");e.async=true;e.crossOrigin="anonymous";e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ADSENSE_CLIENT + '";document.head.appendChild(e)})()',
             },
           ]
         : []),

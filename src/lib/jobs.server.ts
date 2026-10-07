@@ -474,6 +474,7 @@ async function searchViaFirecrawl(input: JobSearchInput, queries: string[]): Pro
     }
   }
 
+  console.info(`[jobs] firecrawl raw=${all.length} queries_ok=${ok.length}/${settled.length}`);
   if (all.length === 0) return [];
 
   // Keep only results that actually mention the searched place. A city search
@@ -494,6 +495,7 @@ async function searchViaFirecrawl(input: JobSearchInput, queries: string[]): Pro
     : [];
   const nearbyUrls = new Set(nearby.map((c) => c.url));
   const pool = inPlace.length > 0 ? inPlace : [];
+  console.info(`[jobs] firecrawl inPlace=${inPlace.length} nearby=${nearby.length}`);
   if (pool.length === 0 && nearby.length === 0) return [];
 
   // Exact-role matches first, then the closest adjacent roles by word overlap.
@@ -643,6 +645,7 @@ ${JSON.stringify(shortlist)}`;
 
   // Open each posting and drop the ones that say applications are closed.
   const live = await dropClosedListings(jobs);
+  console.info(`[jobs] firecrawl shortlist=${shortlist.length} ai=${output?.jobs?.length ?? 0} kept=${jobs.length} afterClosedCheck=${live.length}`);
 
   // Searched place first, nearby areas strictly after; within each, exact role matches first.
   const tier = (j: JobListing) =>
@@ -727,9 +730,11 @@ export async function searchJobListings(
       await countCall("firecrawl-search");
     } catch (error) {
       firstError = error;
+      void import("./ops-alert.server").then((m) => m.opsAlert("job source: firecrawl path failed", error)).catch(() => {});
       console.warn("[jobs] firecrawl path failed, trying Adzuna: " + String((error as any)?.message ?? error) + " | reason: " + String((error as any)?.reason?.message ?? (error as any)?.errors?.[0]?.message ?? ""));
     }
   }
+  console.info(`[jobs] tier=${tier} firecrawl_jobs=${jobs.length}`);
   if (jobs.length >= MIN_RESULTS) return jobs;
 
   if (!adzunaCountry) {

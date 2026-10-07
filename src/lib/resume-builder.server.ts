@@ -1,3 +1,4 @@
+import { PROMPT_GUARD } from "./prompt-guard";
 import { generateText, NoObjectGeneratedError, Output } from "ai";
 
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
@@ -105,7 +106,9 @@ export async function polishDraft(draft: ResumeDraft): Promise<PolishedResume> {
   const formatLabel = market ? market.label : draft.template === "india" ? "Indian national" : "international";
   const formatRules = market ? market.rules : TEMPLATE_RULES[draft.template];
 
-  const prompt = `You are a senior resume writer. Turn the candidate's rough notes into a clean, ATS-safe resume in the ${formatLabel} format.
+  const prompt = `${PROMPT_GUARD}
+
+You are a senior resume writer. Turn the candidate's rough notes into a clean, ATS-safe resume in the ${formatLabel} format.
 
 FORMAT RULES (mandatory):
 ${formatRules.map((rule) => `- ${rule}`).join("\n")}

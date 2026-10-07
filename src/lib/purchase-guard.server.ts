@@ -79,6 +79,7 @@ export async function recordStrike(userId: string, key: string, ipHash?: string)
     }
   }
   await writeState(userId, st);
+  if (st.cycles > 0 && st.strikes === 0) void import('./ops-alert.server').then((m) => m.opsAlert(`payment strike round ${st.cycles}`, `cycles=${st.cycles} permanent=${!!st.permanent}`)).catch(() => {});
   console.warn(`[purchase-guard] user=${userId.slice(0, 8)} strikes=${st.strikes} cycles=${st.cycles} permanent=${!!st.permanent}`);
 }
 

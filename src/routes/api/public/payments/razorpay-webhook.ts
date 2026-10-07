@@ -65,6 +65,7 @@ export const Route = createFileRoute('/api/public/payments/razorpay-webhook')({
           }
         } catch (e) {
           console.error('Razorpay webhook error:', e);
+          void import('@/lib/ops-alert.server').then((m) => m.opsAlert('payment webhook processing error', e)).catch(() => {});
           return new Response('Webhook error', { status: 400 });
         }
 

@@ -26,7 +26,7 @@ function Privacy() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
       <h1 className="font-display text-4xl font-bold text-foreground">Privacy Policy</h1>
-      <p className="mt-4 text-sm text-muted-foreground">Last updated: 6 October 2026</p>
+      <p className="mt-4 text-sm text-muted-foreground">Last updated: 7 October 2026</p>
 
       <div className="mt-8 space-y-8 text-muted-foreground">
         <section className="space-y-4">
@@ -119,6 +119,7 @@ function Privacy() {
             <li>Razorpay — payment processing and subscription mandates.</li>
             <li>Resend — transactional email delivery (sign-in codes, alerts, receipts).</li>
             <li>Cloudflare Turnstile — bot and abuse protection.</li>
+            <li>PostHog — product analytics.</li>
             <li>Google — sign-in with Google, Google Analytics (usage measurement) and Google AdSense (advertising).</li>
           </ul>
         </section>
@@ -132,6 +133,18 @@ function Privacy() {
             slow the site down, and they may set their own cookies under Google's privacy policy.
             You can block analytics and ad cookies in your browser settings or with an ad blocker
             without breaking the core service.
+          </p>
+          <p>
+            We do not build advertising profiles ourselves. Google AdSense may use cookies for its
+            ads. You can control this at adssettings.google.com.
+          </p>
+          <p>
+            Ads depend on your plan. The Free plan shows ads. Starter and Job Hunt show fewer ads.
+            Career Pro shows no ads.
+          </p>
+          <p>
+            We also use PostHog (US servers) to count page visits and see which features are used.
+            We do not send your name, email or resume content to PostHog.
           </p>
         </section>
 
@@ -210,8 +223,7 @@ function Privacy() {
           <h2 className="text-xl font-semibold text-foreground">10. Children's data</h2>
           <p>
             GotaOfferr is intended for job seekers aged 18 and over. We do not knowingly collect
-            personal data from anyone under 18, and we do not build behavioural advertising profiles
-            of any user — ads are shown contextually. If you believe a minor has created an account,
+            personal data from anyone under 18. If you believe a minor has created an account,
             email us and we will delete it.
           </p>
         </section>

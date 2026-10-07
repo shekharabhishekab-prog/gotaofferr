@@ -1,3 +1,5 @@
+import { PROMPT_GUARD } from "./prompt-guard";
+import { formatLetterParagraphs } from "./letter-format";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
 
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
@@ -64,6 +66,10 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
     : "";
 
   const prompt = `You are an expert technical recruiter and resume writer.
+
+${PROMPT_GUARD}
+
+TODAY'S DATE IS ${new Date().toISOString().slice(0, 10)} (year ${new Date().getUTCFullYear()}). Use it for every date check: a date on or before today's month is in the past or present and is NEVER "future". Never tell the user a date is in the future unless it is later than today's date. Do not change any date.
 
 Work in two phases.
 
@@ -457,11 +463,12 @@ function humanize<T>(value: T): T {
 
 /** Same scrub, but preserves the blank lines between cover-letter paragraphs. */
 function cleanLetter(letter: string): string {
-  return letter
+  const cleaned = letter
     .split(/\n\s*\n/)
     .map((paragraph) => clean(paragraph.replace(/\n/g, " ")))
     .filter(Boolean)
     .join("\n\n");
+  return formatLetterParagraphs(cleaned);
 }
 
 
