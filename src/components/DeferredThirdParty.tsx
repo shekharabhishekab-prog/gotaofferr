@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useSession } from "@/hooks/useSession";
 
 /**
  * Loads Google Analytics and AdSense *after* the page is interactive instead of
@@ -24,10 +25,16 @@ const POSTHOG_KEY = "phc_qnxYaoAYBTXSHh2qG8tBke82cEFyx2HAGtXoAuXSYmR2";
 const POSTHOG_HOST = "https://us.i.posthog.com";
 const POSTHOG_ASSETS = "https://us-assets.i.posthog.com";
 
+const PUBLIC_ANALYTICS_ROUTES = new Set(["/", "/how-it-works", "/pricing", "/about", "/faq", "/contact", "/privacy", "/terms", "/examples/resumes", "/examples/cover-letters"]);
+function publicAnalyticsRoute(url: string): boolean {
+  try { return PUBLIC_ANALYTICS_ROUTES.has(new URL(url, window.location.origin).pathname.replace(/\/+$/, "") || "/"); }
+  catch { return false; }
+}
+
 /** Official PostHog stub: queues calls until the real library has loaded. */
 function loadPostHog() {
   const w = window as unknown as { posthog?: any; __gtPh?: boolean };
-  if (w.__gtPh) return;
+  if ((window as any).__gtPhPrivate || !publicAnalyticsRoute(window.location.href) || w.__gtPh) return;
   w.__gtPh = true;
   const ph: any = (w.posthog = w.posthog || []);
   if (ph.__SV) return;
@@ -56,7 +63,7 @@ function loadPostHog() {
   ph.init(POSTHOG_KEY, {
     api_host: POSTHOG_HOST,
     ui_host: "https://us.posthog.com",
-    person_profiles: "identified_only",
+    person_profiles: "never",
     disable_session_recording: true,
     autocapture: false,
     capture_dead_clicks: false,
@@ -65,15 +72,18 @@ function loadPostHog() {
     capture_performance: false,
     rageclick: false,
     disable_surveys: true,
+    advanced_disable_flags: true,
     mask_all_text: true,
     mask_all_element_attributes: true,
     capture_pageview: "history_change",
     before_send: (event: any) => {
       if (!event || !["$pageview", "$pageleave"].includes(event.event)) return null;
+      if ((window as any).__gtPhPrivate || !publicAnalyticsRoute(window.location.href)) return null;
+      if (!publicAnalyticsRoute(event.properties?.$current_url ?? window.location.href)) return null;
       const properties = { ...event.properties };
       for (const key of ["$current_url", "$referrer", "$initial_current_url", "$initial_referrer"]) {
         if (typeof properties[key] !== "string") continue;
-        try { const url = new URL(properties[key]); properties[key] = url.origin + url.pathname; }
+        try { const url = new URL(properties[key]); if (!publicAnalyticsRoute(url.href)) delete properties[key]; else properties[key] = url.origin + url.pathname; }
         catch { delete properties[key]; }
       }
       delete properties.$title;
@@ -91,6 +101,8 @@ export function DeferredThirdParty({
   gaId?: string;
   adsenseClient?: string;
 }) {
+  const { user, loading } = useSession();
+  if (typeof window !== "undefined") (window as any).__gtPhPrivate = loading || Boolean(user);
   useEffect(() => {
 
     let done = false;
@@ -117,7 +129,7 @@ export function DeferredThirdParty({
         loadScript(`https://www.googletagmanager.com/gtag/js?id=${gaId}`);
       }
 
-      if (import.meta.env.PROD) loadPostHog();
+      if (import.meta.env.PROD && !loading && !user) loadPostHog();
 
       if (adsenseClient) {
         loadScript(
@@ -141,7 +153,7 @@ export function DeferredThirdParty({
     if (idle) idle(run, { timeout: 4000 });
 
     return cleanup;
-  }, [gaId, adsenseClient]);
+  }, [gaId, adsenseClient, loading, user?.id]);
 
   return null;
 }
