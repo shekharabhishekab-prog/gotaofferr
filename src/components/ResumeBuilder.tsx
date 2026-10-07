@@ -1,3 +1,4 @@
+import { trackAction } from "@/components/DeferredThirdParty";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -115,6 +116,7 @@ export function ResumeBuilder() {
         data: { ...data, turnstileToken: captchaToken ?? undefined },
       });
       setPolished(result);
+      trackAction("builder_polish", "success");
       toast.success("Your resume has been rewritten in a professional tone.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not polish the resume.");
@@ -132,7 +134,7 @@ export function ResumeBuilder() {
     setSaving(true);
     try {
       const r = await saveResume({ data: { label: data.targetRole || data.fullName || "Resume", draft: data, polished } });
-      if (r.ok) toast.success("Saved to your account.");
+      if (r.ok) { trackAction("builder_save", "success"); toast.success("Saved to your account."); }
       else if (r.reason === "full") toast.error("Your saved slots are full. Delete one from your account first.");
       else toast.error("Could not save right now. Please try again.");
     } catch {
@@ -160,6 +162,7 @@ export function ResumeBuilder() {
       }
       const { buildBuilderResumePdf } = await import("@/lib/resume-builder-pdf");
       const doc = await buildBuilderResumePdf(data, polished);
+      trackAction("pdf_download", "success");
       doc.save(`${(data.fullName || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-resume.pdf`);
     } catch {
       toast.error("Could not build the PDF. Please try again.");
@@ -766,4 +769,3 @@ function PreviewBlock({ title, children }: { title: string; children: React.Reac
     </div>
   );
 }
-
