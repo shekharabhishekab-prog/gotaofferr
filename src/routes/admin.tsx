@@ -140,6 +140,14 @@ function AdminPage() {
     );
   }
 
+  if (dataQuery.isError) {
+    return <AdminMfaGate><main className="container mx-auto max-w-3xl px-4 py-12">
+      <h1 className="text-3xl font-bold">Admin dashboard</h1>
+      <p role="alert" className="mt-4">Could not load complete dashboard data. No partial numbers are shown.</p>
+      <Button className="mt-4" onClick={() => dataQuery.refetch()}>Try again</Button>
+    </main></AdminMfaGate>;
+  }
+
   const d = dataQuery.data;
 
   return (
