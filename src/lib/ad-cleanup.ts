@@ -17,7 +17,7 @@ export function removeGoogleAds(doc: Document): number {
     element.style.setProperty('display', 'none', 'important');
     // Keep script nodes: React owns some head resources and may remove them during navigation.
     // Removing those behind React breaks reconciliation. Requests remain paused by AdPolicy.
-    if (element.tagName !== "SCRIPT") element.remove();
+    // Do not remove nodes owned by React or AdSense. Persistent CSS keeps them invisible.
   }
   return elements.length;
 }
