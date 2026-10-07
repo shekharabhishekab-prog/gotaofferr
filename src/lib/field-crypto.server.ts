@@ -104,33 +104,39 @@ export async function decryptSearchFields<T extends Record<string, any> | null |
 
 /**
  * Seals any rows still holding plain text (rows written before this shipped, and
- * names the signup trigger writes in plain). Safe to run any number of times.
+ * names the signup trigger writes in plain). Safe to run any number of times. Each run does at most 35 updates (the Worker allows about 50 outbound calls per request), so large backlogs clear over a few runs.
  */
-export async function sealLegacyRows(sb: any, batch = 200): Promise<{ profiles: number; alerts: number; searches: number }> {
+export async function sealLegacyRows(sb: any, budget = 35): Promise<{ profiles: number; alerts: number; searches: number }> {
   const done = { profiles: 0, alerts: 0, searches: 0 };
 
-  const { data: ps } = await sb.from("profiles").select("id, full_name").not("full_name", "is", null).not("full_name", "like", "enc1:%").limit(batch);
+  const { data: ps } = await sb.from("profiles").select("id, full_name").not("full_name", "is", null).not("full_name", "like", "enc1:%").limit(Math.max(1, budget));
   for (const p of ps ?? []) {
     const { error } = await sb.from("profiles").update({ full_name: await encryptText(p.full_name) }).eq("id", p.id);
+    budget -= 1;
     if (!error) done.profiles += 1;
+    if (budget <= 0) return done;
   }
 
   const { data: as } = await sb
     .from("job_alerts")
     .select("id, role, location, experience, salary_range, extra_filters, last_jobs")
     .not("role", "like", "enc1:%")
-    .limit(batch);
+    .limit(Math.max(1, budget));
   for (const a of as ?? []) {
     const { id, ...rest } = a;
     const { error } = await sb.from("job_alerts").update(await encryptAlertFields(rest)).eq("id", id);
+    budget -= 1;
     if (!error) done.alerts += 1;
+    if (budget <= 0) return done;
   }
 
-  const { data: ss } = await sb.from("job_search_runs").select("id, role, location").not("role", "is", null).not("role", "like", "enc1:%").limit(batch);
+  const { data: ss } = await sb.from("job_search_runs").select("id, role, location").not("role", "is", null).not("role", "like", "enc1:%").limit(Math.max(1, budget));
   for (const s of ss ?? []) {
     const { id, ...rest } = s;
     const { error } = await sb.from("job_search_runs").update(await encryptSearchFields(rest)).eq("id", id);
+    budget -= 1;
     if (!error) done.searches += 1;
+    if (budget <= 0) return done;
   }
   return done;
 }
