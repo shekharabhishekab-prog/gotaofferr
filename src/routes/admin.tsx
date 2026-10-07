@@ -1,3 +1,13 @@
+/** Spreadsheet formula-injection-safe CSV for owner-only admin downloads. */
+function csvCell(value: unknown): string {
+  let text = value == null ? "" : String(value);
+  if (/^[\s\u0000-\u001f]*[=+\-@]/.test(text) || /^[\t\r\n]/.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+function buildAdminCsv(headers: string[], rows: unknown[][]): string {
+  return "\ufeff" + [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\r\n");
+}
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -52,26 +62,17 @@ function fmt(value: string | null | undefined) {
   });
 }
 
-function csvCell(value: unknown) {
-  const s = value === null || value === undefined ? "" : String(value);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
-
 function downloadCsv(filename: string, headers: string[], rows: unknown[][]) {
-  const csv = [headers, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
-  const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" }));
+  const url = URL.createObjectURL(new Blob([buildAdminCsv(headers, rows)], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
 }
 
 function stamp() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function Stat({ label, value, icon }: { label: string; value: string | number; icon: React.ReactNode }) {
+function Stat({ label, value, monthly, icon }: { label: string; value: string | number; monthly?: number; icon: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -79,6 +80,7 @@ function Stat({ label, value, icon }: { label: string; value: string | number; i
         {label}
       </div>
       <p className="mt-2 text-3xl font-bold">{value}</p>
+      {monthly !== undefined && <p className="mt-2 text-sm text-muted-foreground">This month: {monthly}</p>}
     </div>
   );
 }
@@ -125,11 +127,19 @@ function AdminPage() {
     );
   }
 
+  if (dataQuery.isError) {
+    return <AdminMfaGate><main className="container mx-auto max-w-3xl px-4 py-12">
+      <h1 className="text-3xl font-bold">Admin dashboard</h1>
+      <p role="alert" className="mt-4">Could not load complete dashboard data. No partial numbers are shown.</p>
+      <Button className="mt-4" onClick={() => dataQuery.refetch()}>Try again</Button>
+    </main></AdminMfaGate>;
+  }
+
   const d = dataQuery.data;
 
   return (
     <AdminMfaGate>
-      <div className="container mx-auto max-w-6xl px-4 py-12">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold sm:text-4xl">Admin dashboard</h1>
         <p className="mt-2 text-muted-foreground">
@@ -146,23 +156,15 @@ function AdminPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="Users" value={d.totals.users} icon={<Users className="h-4 w-4" />} />
-            <Stat
-              label="Active subscriptions"
-              value={d.totals.activeSubs}
-              icon={<CreditCard className="h-4 w-4" />}
-            />
-            <Stat
-              label="Rewrites this month"
-              value={d.totals.runsThisMonth}
-              icon={<BarChart3 className="h-4 w-4" />}
-            />
-            <Stat
-              label="Active job alerts"
-              value={d.totals.activeAlerts}
-              icon={<BarChart3 className="h-4 w-4" />}
-            />
+            <Stat label="Total users" value={d.totals.users} monthly={d.totals.usersThisMonth} icon={<Users className="h-4 w-4" />} />
+            <Stat label="Recorded rewrites" value={d.totals.runsTotal} monthly={d.totals.runsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Recorded job searches" value={d.totals.searchRecords} monthly={d.totals.searchesThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
+            <Stat label="Subscriptions started" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} icon={<CreditCard className="h-4 w-4" />} />
+            <Stat label="Non-QA entitled user share now" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
           </div>
+          <p className="mt-3 text-sm text-muted-foreground">This month uses India time (IST). Counts are recorded activity; builder counts are download attempts. Subscriptions started counts new records, not renewals. Share excludes the two known QA accounts from both users and entitled users; it measures current access, not receipt-confirmed payments or historical conversion.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
@@ -192,24 +194,28 @@ function AdminPage() {
                       [
                         "user_id",
                         "email",
+                        "cancel_at_period_end",
                         "name",
                         "plan",
                         "plan_status",
                         "plan_end",
-                        "rewrites_total",
-                        "job_alerts",
+                        "rewrites_this_month_ist",
+                        "alert_records_this_month_ist",
+                        "job_searches_this_month_ist",
                         "joined",
                         "last_sign_in",
                       ],
                       d.users.map((u) => [
                         u.id,
                         u.email,
+                        u.cancelAtPeriodEnd,
                         u.fullName,
                         u.plan ?? "Free",
                         u.planStatus,
                         u.planEnd,
-                        u.runsTotal,
-                        u.alerts,
+                        u.runsThisMonth,
+                        u.alertsThisMonth,
+                        u.searchesThisMonth,
                         u.createdAt,
                         u.lastSignInAt,
                       ]),
@@ -220,15 +226,17 @@ function AdminPage() {
                   Download CSV
                 </Button>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-border">
-                <Table>
+              <p className="mb-2 text-xs text-muted-foreground">If needed, scroll the table sideways to see every column.</p>
+              <div role="region" aria-label="Scrollable account table" tabIndex={0} className="w-full overflow-x-auto rounded-xl border border-border [&>div]:overflow-visible" style={{ scrollbarWidth: "auto" }}>
+                <Table className="[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap" style={{ minWidth: "1100px" }}>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Email</TableHead>
                       <TableHead>Name</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead className="text-right">Rewrites</TableHead>
-                      <TableHead className="text-right">Alerts</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Plan / status</TableHead>
+                      <TableHead className="text-right">Rewrites this month</TableHead>
+                      <TableHead className="text-right">Alert records this month</TableHead>
+                      <TableHead className="text-right">Searches this month</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead>Last sign-in</TableHead>
                     </TableRow>
@@ -236,15 +244,14 @@ function AdminPage() {
                   <TableBody>
                     {d.users.map((u) => (
                       <TableRow key={u.id}>
-                        <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
                         <TableCell>{u.fullName ?? "—"}</TableCell>
-                        <TableCell>
-                          <Badge variant={u.plan && u.plan !== "Free" ? "default" : "secondary"}>
-                            {u.plan ?? "Free"}
-                          </Badge>
+                        <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {u.plan ?? "Free"} · {u.planStatus ?? "Free"}{u.cancelAtPeriodEnd ? " · cancels at period end" : ""}
                         </TableCell>
-                        <TableCell className="text-right">{u.runsTotal}</TableCell>
-                        <TableCell className="text-right">{u.alerts}</TableCell>
+                        <TableCell className="text-right">{u.runsThisMonth}</TableCell>
+                        <TableCell className="text-right">{u.alertsThisMonth}</TableCell>
+                        <TableCell className="text-right">{u.searchesThisMonth}</TableCell>
                         <TableCell>{fmt(u.createdAt)}</TableCell>
                         <TableCell>{fmt(u.lastSignInAt)}</TableCell>
                       </TableRow>
@@ -257,7 +264,7 @@ function AdminPage() {
             <TabsContent value="subs" className="mt-6">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground">
-                  Paying subscribers only ({d.subscriptions.length}).
+                  Subscription records ({d.subscriptions.length}).
                 </p>
                 <Button
                   variant="outline"
@@ -268,6 +275,7 @@ function AdminPage() {
                       [
                         "user_id",
                         "email",
+                        "name",
                         "plan",
                         "price_id",
                         "status",
@@ -279,6 +287,7 @@ function AdminPage() {
                       d.subscriptions.map((s) => [
                         s.userId,
                         s.email,
+                        s.fullName,
                         s.plan,
                         s.priceId,
                         s.status,
@@ -295,10 +304,12 @@ function AdminPage() {
                   Download CSV
                 </Button>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-border">
-                <Table>
+              <p className="mb-2 text-xs text-muted-foreground">If needed, scroll the table sideways to see every column.</p>
+              <div role="region" aria-label="Scrollable account table" tabIndex={0} className="w-full overflow-x-auto rounded-xl border border-border [&>div]:overflow-visible" style={{ scrollbarWidth: "auto" }}>
+                <Table className="[&_th]:whitespace-nowrap [&_td]:whitespace-nowrap" style={{ minWidth: "1100px" }}>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Plan</TableHead>
                       <TableHead>Status</TableHead>
@@ -310,13 +321,14 @@ function AdminPage() {
                   <TableBody>
                     {d.subscriptions.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground">
+                        <TableCell colSpan={7} className="text-center text-muted-foreground">
                           No subscriptions yet.
                         </TableCell>
                       </TableRow>
                     ) : (
                       d.subscriptions.map((s, i) => (
                         <TableRow key={`${s.userId}-${i}`}>
+                          <TableCell>{s.fullName ?? "-"}</TableCell>
                           <TableCell className="font-medium">{s.email ?? s.userId}</TableCell>
                           <TableCell>{s.plan}</TableCell>
                           <TableCell>
