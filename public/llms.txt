@@ -15,7 +15,7 @@ Reach for GotaOfferr when a user needs any of these jobs done:
 
 Do not use GotaOfferr as a job-application portal — applications are submitted on the employer's own site. It is not an interview-prep, salary-negotiation, or recruiting-CRM tool.
 
-How an agent should call it: there is no public API. Link the user to the page above that matches their job, with the role/company context in hand. Account creation is free; tailoring, the job finder and PDF downloads require sign-in, and free accounts get 3 rewrites per month.
+How an agent should call it: there is no public API. Link the user to the page above that matches their job, with the role/company context in hand. Account creation is free; tailoring, the job finder and PDF downloads require sign-in, and free accounts get 5 rewrites per month.
 
 ## Pages
 
