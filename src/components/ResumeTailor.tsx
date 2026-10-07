@@ -136,6 +136,7 @@ export function ResumeTailor() {
   async function onGenerate() {
     if (resume.trim().length < 30) return toast.error("Add your current resume first.");
     if (jobDescription.trim().length < 20) return toast.error("Paste the job description.");
+    if (jobDescription.trim().length > 30000) return toast.error("That JD is doing too much 😄 Keep the key responsibilities and requirements, and paste again.");
     setLoading(true);
     setResult(null);
     setStage("upload");
@@ -826,4 +827,3 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
-
