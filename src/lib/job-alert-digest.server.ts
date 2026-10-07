@@ -154,6 +154,13 @@ export async function runDueDigests() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const now = new Date();
+  try {
+    const { sealLegacyRows } = await import("@/lib/field-crypto.server");
+    const sealed = await sealLegacyRows(supabaseAdmin);
+    if (sealed.profiles + sealed.alerts + sealed.searches > 0) console.log("Sealed legacy rows", sealed);
+  } catch (e) {
+    console.error("Sealing legacy rows failed", e instanceof Error ? e.message : e);
+  }
   const { data: alerts, error: alertsError } = await supabaseAdmin
     .from("job_alerts")
     .select(ALERT_COLUMNS)
