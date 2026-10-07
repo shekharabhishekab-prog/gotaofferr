@@ -1,3 +1,4 @@
+import { trackAction } from "@/components/DeferredThirdParty";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -65,6 +66,7 @@ export function CancelSubscriptionDialog({ open, onOpenChange, accessUntil, onCa
         },
       });
       if ("error" in res && res.error) throw new Error(res.error);
+      trackAction("subscription_cancel", "success");
       onCancelled();
       setStep(4);
     } catch (err) {
@@ -271,4 +273,3 @@ export function CancelSubscriptionDialog({ open, onOpenChange, accessUntil, onCa
     </Dialog>
   );
 }
-
