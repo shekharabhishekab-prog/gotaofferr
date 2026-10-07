@@ -138,7 +138,7 @@ export async function sendDigestForAlert(
     .from("job_alerts")
     .update({
       last_sent_at: now.toISOString(),
-      last_jobs: digest,
+      last_jobs: await (await import("@/lib/field-crypto.server")).encryptJson(digest),
       last_job_count: digest.length,
       emails_sent: (alert.emails_sent ?? 0) + 1,
       // After the third email the alert is finished for good.
@@ -160,7 +160,9 @@ export async function runDueDigests() {
     .eq("enabled", true);
   if (alertsError) throw alertsError;
 
-  const rows = ((alerts ?? []) as AlertRow[]).filter((alert) => isAlertDue(alert, now));
+  const { decryptAlertFields } = await import("@/lib/field-crypto.server");
+  const decrypted = (await Promise.all((alerts ?? []).map((a) => decryptAlertFields(a as any)))) as AlertRow[];
+  const rows = decrypted.filter((alert) => isAlertDue(alert, now));
   let emailed = 0;
   const reasons: string[] = [];
 
