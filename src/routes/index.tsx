@@ -1425,4 +1425,7 @@ html{scroll-behavior:smooth}
 .hp-live .rl-t{filter:blur(calc((1 - var(--rp))*5px + clamp(0, calc((var(--p) - .62)*10), 1)*3px))}
 .hp-live .rl-core{transform:scale(calc(.9 + var(--p)*.14));z-index:3;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 40px 120px -20px rgba(0,0,0,.9),0 0 90px -30px var(--highlight)}
 .hp-live .about-x{}
+
+@media(min-width:640px){.hx-outline{font-size:min(9vw,13vh)}.hx-giant{font-size:min(12vw,17vh)}.hx-mid{font-size:min(5vw,7.5vh)}.hx-first{font-size:min(3.4vw,5vh)}.hx-jobs{font-size:min(4vw,6vh)}.hx-apply{font-size:min(3.2vw,5vh)}}
+.hx-under{height:.035em;background:var(--highlight)}
 `;
