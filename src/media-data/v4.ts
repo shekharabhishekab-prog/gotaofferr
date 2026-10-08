@@ -7,6 +7,7 @@ import d5 from "./d5";
 import d6 from "./d6";
 import d7 from "./d7";
 import d8 from "./d8";
+import d9 from "./d9";
 
 const B64: Record<string, string> = {
   "hero.mp4": d0[0],
@@ -49,6 +50,28 @@ const B64: Record<string, string> = {
   "t3.webp": d8[6],
   "ab2.webp": d8[7],
   "i7859070.webp": d8[8],
+  "c1.mp4": d9[0],
+  "c2.mp4": d9[1],
+  "c3.mp4": d9[2],
+  "c1.webp": d9[3],
+  "c2.webp": d9[4],
+  "c3.webp": d9[5],
+  "i4226261.webp": d9[6],
+  "i5716008.webp": d9[7],
+  "i5411999.webp": d9[8],
+  "i5749153.webp": d9[9],
+  "i6814521.webp": d9[10],
+  "i6830879.webp": d9[11],
+  "i7641842.webp": d9[12],
+  "i7652126.webp": d9[13],
+  "i7654396.webp": d9[14],
+  "i7674645.webp": d9[15],
+  "i7875949.webp": d9[16],
+  "i8154580.webp": d9[17],
+  "i8297441.webp": d9[18],
+  "i8301225.webp": d9[19],
+  "i8441808.webp": d9[20],
+  "i8837769.webp": d9[21],
 };
 
 export function mediaBytes(name: string): Uint8Array | null {
