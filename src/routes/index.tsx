@@ -161,13 +161,13 @@ const plans = [
 const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi).slice(0, 3);
 /* Corner brackets: the framed-panel detail from the reference. */
 function HeroReel() {
-  const names = ["t1", "t2", "t3"];
+  const names = ["h1", "h2"];
   const [cur, setCur] = useState(0);
   const [seen, setSeen] = useState(1);
   const refs = useRef<(HTMLVideoElement | null)[]>([]);
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = window.setInterval(() => setCur((c) => (c + 1) % names.length), 4200);
+    const t = window.setInterval(() => setCur((c) => (c + 1) % names.length), 6500);
     return () => window.clearInterval(t);
   }, []);
   useEffect(() => {
