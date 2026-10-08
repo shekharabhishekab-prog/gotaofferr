@@ -797,14 +797,11 @@ function Index() {
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y">JOB</mark> <span className="i3-w">YOU WANT.</span></span>
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y i3-y2">RESUME</mark> <span className="i3-w">IT NEEDS.</span></span>
               </h1>
-              <span aria-hidden className="hp-note"><em>make resume from scratch</em></span>
+              <span aria-hidden className="hp-note"><em>make resume from scratch</em><svg viewBox="0 0 40 44" width="34" height="38" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M30 3C34 16 24 30 8 38" /><path d="M7 28l1 11 11-2" /></svg></span>
             </div>
 
-            <p className="hp-rise mx-auto mt-5 hidden max-w-xl text-base sm:block text-white/75 [animation-delay:140ms] sm:text-lg">
-              <span className="text-balance sm:hidden">Drop in your resume once. We find jobs and tailor it for each.</span>
-              <span className="hidden sm:inline">
-                Then apply. Real jobs, one tailored resume each.
-              </span>
+            <p className="hp-rise mx-auto mt-5 hidden max-w-md text-[0.68rem] uppercase leading-relaxed tracking-[0.16em] text-white/55 [animation-delay:140ms] sm:block sm:max-w-none">
+              Works with resumes from Indeed, LinkedIn, Naukri, Glassdoor and more
             </p>
 
             <div className="hp-rise mx-auto mt-7 flex max-w-xs flex-col items-stretch gap-3 [animation-delay:240ms] sm:mt-8 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center">
@@ -843,9 +840,6 @@ function Index() {
               <li className="hp-chip hp-chip-y">5 free a month</li>
               <li className="hp-chip hidden sm:block">No card needed</li>
             </ul>
-            <p className="hp-rise mx-auto mt-4 hidden max-w-md text-[0.68rem] uppercase leading-relaxed tracking-[0.16em] text-white/55 [animation-delay:380ms] sm:block sm:max-w-none">
-              Works with resumes from Indeed, LinkedIn, Naukri, Glassdoor and more
-            </p>
           </div>
         </div>
       </section>
@@ -1577,7 +1571,8 @@ html,body{background:#000}
 .hx-outline{color:#fff;-webkit-text-stroke:0}
 .hp-sub{display:none}
 @media(max-width:639px){.hp-note{display:none!important}}
-.hp-note{position:absolute;left:50%;bottom:-1.7rem;transform:translateX(218px) rotate(-4deg);pointer-events:none;z-index:3}
+.hp-note{position:absolute;left:50%;bottom:-.2rem;transform:translateX(250px) rotate(-3deg);pointer-events:none;z-index:3;display:flex;flex-direction:column;align-items:flex-start;color:rgba(255,255,255,.8)}
+.hp-note svg{margin:.1rem 0 0 1.6rem}
 .hp-note em{font-family:"HPHand","Caveat Brush",cursive;font-style:normal;font-size:1.25rem;line-height:1;white-space:nowrap;color:rgba(255,255,255,.8);text-shadow:0 1px 8px rgba(0,0,0,.6)}
 @media(max-width:639px){
 .hp-hero .hp-btn:not(.bg-highlight){display:inline-flex!important}
