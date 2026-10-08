@@ -441,8 +441,9 @@ function IntroOverlay() {
     return { x: 50 + Math.cos((a * Math.PI) / 180) * r * 0.9, y: 50 + Math.sin((a * Math.PI) / 180) * r * 0.62, s: 2 + (i % 3), d: (i % 15) * 0.05 };
   });
   return (
+    <>
+    <style>{GI_CSS}</style>
     <div ref={ref} className="gi" role="presentation">
-      <style>{GI_CSS}</style>
       <div className="gi-glow" />
       <span className="gi-dot" />
       {dots.map((d, i) => (
@@ -451,8 +452,9 @@ function IntroOverlay() {
       <div className="gi-mark">gota<b>offerr</b></div>
       <div className="gi-m gi-tl">Resume + job finder</div>
       <div className="gi-m gi-tr">Click to skip</div>
-      <div className="gi-m gi-bl">Sample count / jobs matched <b ref={undefined}><span ref={cnt}>0</span></b></div>
+      <div className="gi-m gi-bl">Sample count / jobs matched <b><span ref={cnt}>0</span></b></div>
     </div>
+    </>
   );
 }
 
