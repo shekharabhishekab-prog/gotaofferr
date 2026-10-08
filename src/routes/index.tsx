@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { WipSplash } from "@/components/WipSplash";
 import { WIP_ENABLED, WIP_HEAD_SCRIPT } from "@/lib/wip";
-import { ArrowRight, ArrowUpRight, Clock, Hourglass, MousePointerClick, Target } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Clock, Hourglass, MousePointerClick, Sparkles, Target } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -774,8 +774,10 @@ function Index() {
             
 
             <div className="relative mx-auto max-w-6xl">
-              <p className="i3-tag">Find jobs &middot; Make resume from scratch &middot; Tailor resume &middot; Apply &mdash; <b>5 free a month</b></p>
-              <h1 className="i3" aria-label="First find the jobs. Tailor the resume. Then apply.">
+              <span className="animate-pulse-ring i3-pill inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
+                <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Tailor resume · Apply — 5 free a month
+              </span>
+              <h1 className="i3 mt-5" aria-label="First find the jobs. Tailor the resume. Then apply.">
                 <span aria-hidden className="i3-l"><span className="i3-w">FIRST,</span> <mark className="i3-y">FIND</mark></span>
                 <span aria-hidden className="i3-l"><span className="i3-w">THE JOBS.</span> <mark className="i3-y i3-y2">TAILOR</mark></span>
                 <span aria-hidden className="i3-l"><span className="i3-w">THE RESUME.</span></span>
