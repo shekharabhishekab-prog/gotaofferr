@@ -12,7 +12,7 @@ import type { PlanTier } from "@/lib/plans";
  *   Job Hunt    no ads
  *   Career Pro  no ads
  */
-const STARTER_OK = /^\/(blog|faq)(\/|$)/;
+const STARTER_OK = /^\/(blog|faq|guides|examples)(\/|$)/;
 
 export function adsAllowed(tier: PlanTier, path: string): boolean {
   if (tier === "career_pro") return false;
