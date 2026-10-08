@@ -16,8 +16,8 @@ type Cfg = { account: string; key: string; secret: string; bucket: string };
 
 function cfg(): Cfg | null {
   const account = process.env["R2_ACCOUNT_ID"];
-  const key = process.env["R2_ACCESS_KEY_ID"];
-  const secret = process.env["R2_SECRET_ACCESS_KEY"];
+  const key = process.env["R2_ACCESS_KEY_ID"] || process.env["R2_KEY_ID_PV"];
+  const secret = process.env["R2_SECRET_ACCESS_KEY"] || process.env["R2_KEY_SECRET_PV"];
   const bucket = process.env["R2_BUCKET"];
   if (!account || !key || !secret || !bucket) return null;
   return { account, key, secret, bucket };
