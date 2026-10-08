@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/public/jobs/yearly-report")({
           return Response.json(r, { status: r.ok ? 200 : 500 });
         } catch (error) {
           console.error("Yearly report failed:", error);
-          return Response.json({ ok: false, reason: "report-error" }, { status: 500 });
+          return Response.json({ ok: false, reason: "report-error", detail: String((error as Error)?.message ?? error).slice(0, 200) }, { status: 500 });
         }
       },
     },
