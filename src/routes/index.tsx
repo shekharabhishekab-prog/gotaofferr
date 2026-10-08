@@ -443,8 +443,8 @@ function HeroPops() {
       let t = last;
       while (t === last) t = popTexts[Math.floor(Math.random() * popTexts.length)];
       last = t;
-      const l = 4 + Math.random() * (mobile ? 46 : 70);
-      const tp = 12 + Math.random() * 68;
+      const l = mobile ? 4 + Math.random() * 46 : (Math.random() < 0.5 ? 3 + Math.random() * 15 : 74 + Math.random() * 12);
+      const tp = 16 + Math.random() * 66;
       const my = ++id;
       setItems((a) => [...a.slice(-3), { id: my, t, l, tp }]);
       setTimeout(() => setItems((a) => a.filter((x) => x.id !== my)), 2900);
@@ -503,10 +503,12 @@ const GI_CSS = `
 @keyframes hx-pop{0%{opacity:0;transform:scale(.4)}10%{opacity:1;transform:scale(1.08)}16%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.85)}}
 @media(prefers-reduced-motion:reduce){.hx-rp i,.hx-pop{animation:none!important}.hx-rp i{opacity:.35;transform:scale(.8)}}
 .hx-ring,.hx-chip,.hx-rp{display:none!important}
+.hp-hero{margin-top:-3.6rem;padding-top:3.6rem}
+.i3-pill{margin-bottom:.9rem}
 .i3-tag{margin:0 auto 1.1rem;max-width:34rem;font-family:ui-monospace,Menlo,monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.78);line-height:1.7}
 .i3-tag b{color:#ffd600;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
-header.sticky{background:linear-gradient(to bottom,rgba(0,0,0,.94),rgba(0,0,0,0))!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
+header.sticky{background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,0))!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
 .hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
 @keyframes hx-ring{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(1.5)}}
