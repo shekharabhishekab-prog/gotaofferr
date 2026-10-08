@@ -17,7 +17,10 @@ export type MonthCards = {
   subscriptionsStarted: number; // all subscription records (dashboard card)
   paidSubscriptionsStarted: number; // only records that are active/paid (year-end report)
   subscriberSharePercent: number;
+  // Uses split by whether the user is a paying subscriber at the time of counting.
+  split?: { rewrites: UseSplit; searches: UseSplit; builderDownloads: UseSplit; alerts: UseSplit };
 };
+export type UseSplit = { paid: number; free: number };
 export type RegionSplit = Record<string, { users: number; subscriptions: number }>;
 export type MonthRecord = {
   month: string; // YYYY-MM
@@ -84,7 +87,7 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
   const from = new Date(monthRange(sorted[0]).start).toISOString();
   const to = new Date(monthRange(sorted[sorted.length - 1]).end).toISOString();
   const ranged = (table: string) =>
-    allRows(() => supabaseAdmin.from(table).select("id,created_at").gte("created_at", from).lt("created_at", to).order("id"));
+    allRows(() => supabaseAdmin.from(table).select("id,user_id,created_at").gte("created_at", from).lt("created_at", to).order("id"));
   const [authUsers, subs, usage, searches, builders, alerts] = await Promise.all([
     loadAuthUsers(supabaseAdmin),
     allRows(() => supabaseAdmin.from("subscriptions").select("id,user_id,price_id,status,current_period_end,cancel_at_period_end,created_at").eq("environment", getStripeEnvironment()).order("id")),
@@ -103,6 +106,7 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
     const s = firstSub.get(u.id);
     return s && isEntitled(s);
   }).length;
+  const paidUsers = new Set(authUsers.filter((u) => { const s = firstSub.get(u.id); return s && isEntitled(s); }).map((u) => u.id));
   const activeNow = authUsers.filter((u) => {
     const s = firstSub.get(u.id);
     return s && isEntitled(s);
@@ -121,6 +125,11 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
     const started = subs.filter(inMonth);
     const paidStarted = started.filter((s) => isEntitled(s));
     for (const s of paidStarted) regions[regionOf.get(s.user_id) ?? "India"].subscriptions += 1;
+    const split = (rows: any[]): UseSplit => {
+      const r = rows.filter(inMonth);
+      const paid = r.filter((x) => paidUsers.has(x.user_id)).length;
+      return { paid, free: r.length - paid };
+    };
     return {
       month: ym,
       lockedAt: null,
@@ -133,6 +142,7 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
         subscriptionsStarted: started.length,
         paidSubscriptionsStarted: paidStarted.length,
         // Share is a point-in-time number: it is the share at the moment of counting.
+        split: { rewrites: split(usage), searches: split(searches), builderDownloads: split(builders), alerts: split(alerts) },
         subscriberSharePercent: real.length ? (entitledNow / real.length) * 100 : 0,
       },
       regions,
