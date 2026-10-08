@@ -397,6 +397,49 @@ function StepArt({ i }: { i: number }) {
 }
 
 
+
+function HeroVideo() {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || nav.connection?.saveData) {
+      v.pause();
+      v.removeAttribute("src");
+      v.load();
+      return;
+    }
+    v.play().catch(() => {});
+  }, []);
+  return (
+    <div aria-hidden className="absolute inset-0 -z-20 bg-black">
+      <video ref={ref} className="i3-vid" src="/m/hero-loop.mp4" poster="/m/hero-poster.jpg" muted loop playsInline autoPlay preload="auto" tabIndex={-1} />
+    </div>
+  );
+}
+
+function HeroCounter() {
+  const el = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let n = 48213;
+    const id = window.setInterval(() => {
+      n += 1 + Math.floor(Math.random() * 4);
+      if (el.current) el.current.textContent = n.toLocaleString("en-US");
+    }, 900);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <>
+      <div aria-hidden className="i3-meta i3-bl">Jobs matched <b ref={el}>48,213</b></div>
+      <div aria-hidden className="i3-meta i3-br">This month</div>
+      <div aria-hidden className="i3-meta i3-tl">Resume + job finder</div>
+      <div aria-hidden className="i3-meta i3-tr">Free: 5 a month</div>
+    </>
+  );
+}
+
 const GI_CSS = `
 .gi{position:fixed;inset:0;z-index:2147483000;background:#000;overflow:hidden;cursor:pointer;animation:gi-auto .7s 3.5s forwards}
 .gi-glow{position:absolute;left:50%;top:50%;width:min(110vw,900px);height:min(110vw,900px);transform:translate(-50%,-50%) scale(.2);background:radial-gradient(circle,rgba(255,214,0,.5) 0,transparent 62%);opacity:0;animation:gi-glow 3s .1s ease-out forwards}
@@ -422,6 +465,34 @@ const GI_CSS = `
 .hx-c1{left:8%;top:30%;animation-delay:3.4s}.hx-c2{right:8%;top:38%;animation-delay:5.2s}.hx-c3{left:14%;bottom:24%;animation-delay:7s}
 @keyframes hx-chip{0%{opacity:0;transform:translateY(14px)}12%{opacity:1;transform:translateY(0)}60%{opacity:1;transform:translateY(-10px)}75%,100%{opacity:0;transform:translateY(-22px)}}
 @media(max-width:639px){.hx-c1{left:4%;top:20%}.hx-c2{right:4%;top:14%}.hx-c3{left:6%;bottom:30%}}
+
+.hx-meta,.hx-m3{display:none!important}
+.hp-hero .i3-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05) brightness(.62)}
+.i3{margin:0;font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-.055em;line-height:.92;color:#fff;font-size:clamp(2.9rem,14.2vw,5rem);display:flex;flex-direction:column;align-items:center;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+.i3-l{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;column-gap:.14em;white-space:nowrap}
+.i3-y{background:var(--highlight,#ffd600);color:#000;padding:.0em .1em .02em;margin:.02em 0;text-shadow:none;display:inline-block;animation:i3-in .7s cubic-bezier(.2,.8,.2,1) both}
+.i3-y2{animation-delay:.15s}
+.i3-w{display:inline-block;animation:i3-up .8s cubic-bezier(.2,.8,.2,1) both}
+.i3-l:nth-child(2) .i3-w{animation-delay:.08s}.i3-l:nth-child(3) .i3-w{animation-delay:.16s}
+@keyframes i3-in{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
+@keyframes i3-up{0%{opacity:0;transform:translateY(.35em)}100%{opacity:1;transform:none}}
+@media(min-width:640px){.i3{font-size:min(9.6vw,15.5vh)}}
+.i3-meta{position:absolute;z-index:3;font-family:ui-monospace,Menlo,monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);pointer-events:none}
+.i3-meta b{color:var(--highlight,#ffd600);font-weight:500;margin-left:.5em}
+.i3-tl{left:1.2rem;top:5.2rem}.i3-tr{right:1.2rem;top:5.2rem}.i3-bl{left:1.2rem;bottom:1.2rem}.i3-br{right:1.2rem;bottom:1.2rem}
+@media(max-width:639px){.i3-tl,.i3-tr{display:none}}
+.hx-ring{border-color:rgba(255,214,0,.8)!important;opacity:.9!important;animation:i3-drift 12s ease-in-out infinite alternate!important;left:6%!important;top:24%!important}
+.hx-ring2{left:auto!important;right:6%!important;top:48%!important;animation-duration:15s!important;animation-delay:-4s!important}
+@keyframes i3-drift{0%{transform:translate(0,0) scale(.85)}50%{transform:translate(38vw,6vh) scale(1.1)}100%{transform:translate(70vw,-4vh) scale(.9)}}
+.hx-ring2{animation-name:i3-drift2!important}
+@keyframes i3-drift2{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-30vw,-8vh) scale(.8)}100%{transform:translate(-60vw,4vh) scale(1.05)}}
+.hx-chip{opacity:1!important;animation:i3-float 6s ease-in-out infinite alternate!important}
+.hx-c1{left:6%!important;top:18%!important;right:auto!important}
+.hx-c2{right:6%!important;left:auto!important;top:28%!important;animation-duration:7.5s!important;animation-delay:-2s!important}
+.hx-c3{left:12%!important;top:62%!important;right:auto!important;animation-duration:8.5s!important;animation-delay:-4s!important}
+@keyframes i3-float{0%{transform:translate(0,0)}50%{transform:translate(18px,-14px)}100%{transform:translate(-14px,10px)}}
+@media(max-width:639px){.hx-ring{width:56vw!important}.hx-c1{top:16%!important}.hx-c2{top:70%!important}.hx-c3{display:none}}
+@media(prefers-reduced-motion:reduce){.hx-ring,.hx-chip,.i3-y,.i3-w{animation:none!important}.hx-ring2{display:none}}
 @media(prefers-reduced-motion:reduce){.gi{display:none}.hx-ring,.hx-chip{animation:none;opacity:0}}
 `;
 
@@ -637,13 +708,14 @@ function Index() {
 
       {/* Hero */}
       <section data-hero className="hp-hero relative isolate overflow-hidden">
-        <HeroReel />
+        <HeroVideo />
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,transparent_0%,#000_88%)]" />
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
 
         <div aria-hidden className="hx-ring" /><div aria-hidden className="hx-ring hx-ring2" />
         <div aria-hidden className="hx-chip hx-c1">92% match</div><div aria-hidden className="hx-chip hx-c2">Cover letter ready</div><div aria-hidden className="hx-chip hx-c3">Applied in 15 sec</div>
+        <HeroCounter />
         <div aria-hidden className="hx-meta hx-m1"><span>(01)</span> find / tailor / apply</div>
         <div aria-hidden className="hx-meta hx-m2">global roles <b>/</b> free to start</div>
         <div aria-hidden className="hx-meta hx-m3"><i /> scroll</div>
@@ -654,42 +726,17 @@ function Index() {
             
 
             <div className="relative mx-auto max-w-6xl">
-              <h1 className="hx" aria-label="Find the jobs. Tailor the resume. Apply.">
-                <span aria-hidden className="hx-line hx-l1">
-                  <span className="hx-hand hx-first">first,</span>
-                  <span className="hx-fj"><span className="hx-word hx-outline" data-t="FIND">
-                    {"FIND".split("").map((c, i) => (
-                      <i key={i} style={{ ["--d" as string]: i }}>{c}</i>
-                    ))}
-                  </span>
-                  <span className="hx-hand hx-jobs">the jobs.</span></span>
-                </span>
-                <span aria-hidden className="hx-line hx-l2">
-                  <span className="hx-pre"><span className="hx-mid">Tailor</span><span className="hx-tiny">the</span></span>
-                  <span className="hx-word hx-giant" data-t="RESUME.">
-                    {"RESUME.".split("").map((c, i) => (
-                      <i key={i} style={{ ["--d" as string]: i + 4 }}>{c}</i>
-                    ))}
-                    <b className="hx-under" />
-                  </span>
-                </span>
-                <span aria-hidden className="hx-line hx-l3">
-                  <span className="hx-track"><em /></span>
-                  <span className="hx-hand hx-apply">then apply.</span>
-                  <span className="hx-stop">next stop: your offer</span>
-                </span>
+              <h1 className="i3" aria-label="First find the jobs. Tailor the resume. Then apply.">
+                <span aria-hidden className="i3-l"><span className="i3-w">FIRST,</span> <mark className="i3-y">FIND</mark></span>
+                <span aria-hidden className="i3-l"><span className="i3-w">THE JOBS.</span> <mark className="i3-y i3-y2">TAILOR</mark></span>
+                <span aria-hidden className="i3-l"><span className="i3-w">THE RESUME.</span></span>
               </h1>
             </div>
-
-            <p aria-live="off" className="hp-hand hp-rolebox mt-4 text-xl text-highlight sm:mt-5 sm:text-3xl">
-              tailored for <span key={ri} className="hp-roleword">{role}</span>
-            </p>
 
             <p className="hp-rise mx-auto mt-5 hidden max-w-xl text-base sm:block text-white/75 [animation-delay:140ms] sm:text-lg">
               <span className="text-balance sm:hidden">Drop in your resume once. We find jobs and tailor it for each.</span>
               <span className="hidden sm:inline">
-                Drop in your resume once. Our AI finds matching roles, rebuilds your resume for each
-                company and writes the cover letter. You just hit apply.
+                Then apply. Real jobs, one tailored resume each.
               </span>
             </p>
 
