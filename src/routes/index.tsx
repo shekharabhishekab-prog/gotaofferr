@@ -161,7 +161,7 @@ const plans = [
 const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi).slice(0, 3);
 /* Corner brackets: the framed-panel detail from the reference. */
 function HeroReel() {
-  const names = ["h1", "h2", "h3"];
+  const names = ["g1", "g2", "g3"];
   const [cur, setCur] = useState(0);
   const [seen, setSeen] = useState(1);
   const refs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -338,9 +338,9 @@ const stats = [
 
 
 const flow = [
-  { n: "01", tag: "Find", title: "Find the jobs", cta: "Open job finder", clip: "s1" },
-  { n: "02", tag: "Tailor", title: "Tailor the application", cta: "Tailor a resume", clip: "s2" },
-  { n: "03", tag: "Apply", title: "Apply", cta: "Open the builder", clip: "s3" },
+  { n: "01", tag: "Find", title: "Find the jobs", cta: "Open job finder", clip: "k1" },
+  { n: "02", tag: "Tailor", title: "Tailor the application", cta: "Tailor a resume", clip: "k2" },
+  { n: "03", tag: "Apply", title: "Apply", cta: "Open the builder", clip: "k3" },
 ] as const;
 
 /* Small connector between sections: a line that grows with scroll and a
@@ -1527,5 +1527,6 @@ header .site-container{max-width:none!important;width:100%!important;margin-left
 .hx-m1,.hx-m2{display:none!important}
 .hx-mid{font-family:"HPInst",Georgia,serif!important;font-style:italic;font-weight:400}
 }
+@media(max-width:639px){#about,.y-why{display:none!important}}
 `;
 
