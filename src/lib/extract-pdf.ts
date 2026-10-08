@@ -5,8 +5,17 @@ export function isPdfFile(file: File): boolean {
 /** Hard ceiling on an uploaded resume. Real resumes are well under 1 MB. */
 export const MAX_RESUME_FILE_BYTES = 8 * 1024 * 1024;
 
-const ALLOWED_EXTENSIONS = [".pdf", ".txt", ".md"] as const;
-const ALLOWED_MIME = ["application/pdf", "text/plain", "text/markdown", ""] as const;
+const ALLOWED_EXTENSIONS = [".pdf", ".docx", ".doc"] as const;
+const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+const ALLOWED_MIME = ["application/pdf", DOCX_MIME, "application/msword", ""] as const;
+const BAD_TYPE_MSG = "Please upload a PDF or Word (DOCX) file.";
+const OLD_DOC_MSG = "Old .doc files can't be read safely. Please save your resume as PDF or DOCX and upload again.";
+/** A DOCX is a zip. Stop reading if it would unpack to more than this (zip-bomb guard). */
+const MAX_DOCX_XML_BYTES = 20 * 1024 * 1024;
+
+export function isDocxFile(file: File): boolean {
+  return file.type === DOCX_MIME || /\.docx?$/i.test(file.name);
+}
 
 async function firstBytes(file: File, length: number): Promise<Uint8Array> {
   const slice = file.slice(0, length);
@@ -33,10 +42,10 @@ async function firstBytes(file: File, length: number): Promise<Uint8Array> {
 export async function assertValidResumeFile(file: File): Promise<void> {
   const name = file.name.toLowerCase();
   if (!ALLOWED_EXTENSIONS.some((ext) => name.endsWith(ext))) {
-    throw new Error("Please upload a PDF, TXT or MD file.");
+    throw new Error(BAD_TYPE_MSG);
   }
   if (!ALLOWED_MIME.includes(file.type as (typeof ALLOWED_MIME)[number])) {
-    throw new Error("Please upload a PDF, TXT or MD file.");
+    throw new Error(BAD_TYPE_MSG);
   }
   if (file.size === 0) throw new Error("That file is empty.");
   if (file.size > MAX_RESUME_FILE_BYTES) {
@@ -51,11 +60,103 @@ export async function assertValidResumeFile(file: File): Promise<void> {
     return;
   }
 
-  // Text uploads must actually be text — reject anything with a binary
-  // signature or NUL bytes hiding behind a .txt/.md name.
-  if (isPdfSignature || head.includes(0x00)) {
-    throw new Error("That file isn't plain text. Please upload a PDF or a text resume.");
+  // Word files: a real DOCX is a zip (starts with PK). The old binary .doc
+  // format (starts with D0 CF 11 E0) is refused with a clear message.
+  const isZip = head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04;
+  const isOle = head[0] === 0xd0 && head[1] === 0xcf && head[2] === 0x11 && head[3] === 0xe0;
+  if (isOle) throw new Error(OLD_DOC_MSG);
+  if (!isZip) throw new Error("That file isn't a real Word document. Please upload a valid DOCX or a PDF.");
+}
+
+function u16(b: Uint8Array, o: number) {
+  return b[o] | (b[o + 1] << 8);
+}
+function u32(b: Uint8Array, o: number) {
+  return (b[o] | (b[o + 1] << 8) | (b[o + 2] << 16) | (b[o + 3] << 24)) >>> 0;
+}
+
+async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
+  if (typeof DecompressionStream !== "function") {
+    throw new Error("This browser can't read Word files. Please upload a PDF instead.");
   }
+  const stream = new Blob([data as BlobPart]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  const reader = stream.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > MAX_DOCX_XML_BYTES) {
+      await reader.cancel();
+      throw new Error("That Word file is too large to read safely. Please upload a PDF instead.");
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let p = 0;
+  for (const c of chunks) {
+    out.set(c, p);
+    p += c.length;
+  }
+  return out;
+}
+
+const XML_ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
+
+export function docxXmlToText(xml: string): string {
+  return xml
+    .replace(/<w:tab\b[^>]*\/>/g, "\t")
+    .replace(/<w:(br|cr)\b[^>]*\/>/g, "\n")
+    .replace(/<\/w:p>/g, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos);/gi, (m, e: string) => {
+      if (e[0] === "#") {
+        const code = e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);
+        return Number.isFinite(code) && code > 0 && code < 0x110000 ? String.fromCodePoint(code) : "";
+      }
+      return XML_ENTITIES[e.toLowerCase()] ?? m;
+    })
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/** Reads text from a DOCX with no extra library: finds word/document.xml in the zip and unpacks only that. */
+export async function extractDocxText(file: File): Promise<string> {
+  const bytes = new Uint8Array(await readFileAsArrayBuffer(file));
+  let eocd = -1;
+  for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 22 - 65535); i--) {
+    if (u32(bytes, i) === 0x06054b50) {
+      eocd = i;
+      break;
+    }
+  }
+  if (eocd < 0) throw new Error("That file isn't a valid Word document.");
+  const count = u16(bytes, eocd + 10);
+  let p = u32(bytes, eocd + 16);
+  for (let n = 0; n < count && p + 46 <= bytes.length; n++) {
+    if (u32(bytes, p) !== 0x02014b50) break;
+    const method = u16(bytes, p + 10);
+    const csize = u32(bytes, p + 20);
+    const nameLen = u16(bytes, p + 28);
+    const extraLen = u16(bytes, p + 30);
+    const commentLen = u16(bytes, p + 32);
+    const lho = u32(bytes, p + 42);
+    const name = new TextDecoder().decode(bytes.slice(p + 46, p + 46 + nameLen));
+    if (name === "word/document.xml") {
+      if (u32(bytes, lho) !== 0x04034b50) break;
+      const start = lho + 30 + u16(bytes, lho + 26) + u16(bytes, lho + 28);
+      const raw = bytes.slice(start, start + csize);
+      let xml: Uint8Array;
+      if (method === 0) xml = raw;
+      else if (method === 8) xml = await inflateRaw(raw);
+      else throw new Error("That Word file can't be read. Please upload a PDF instead.");
+      return docxXmlToText(new TextDecoder().decode(xml));
+    }
+    p += 46 + nameLen + extraLen + commentLen;
+  }
+  throw new Error("That file isn't a valid Word document.");
 }
 
 
@@ -185,8 +286,9 @@ export function resumeSignalScore(text: string): number {
 export function assertLooksLikeResume(text: string): void {
   if (resumeSignalScore(text) < 3) {
     throw new Error(
-      "This doesn't look like a resume. Please upload your CV/resume file (PDF, TXT or MD).",
+      "This doesn't look like a resume. Please upload your CV/resume file (PDF or DOCX).",
     );
   }
 }
+
 
