@@ -432,6 +432,29 @@ function HeroVideo() {
   );
 }
 
+const popTexts = ["92% match", "Cover letter ready", "Applied in 15 sec", "Resume tailored", "New match found", "ATS score 94"];
+function HeroPops() {
+  const [items, setItems] = useState<{ id: number; t: string; l: number; tp: number }[]>([]);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let id = 0, last = "";
+    const mobile = window.innerWidth < 640;
+    const spawn = () => {
+      let t = last;
+      while (t === last) t = popTexts[Math.floor(Math.random() * popTexts.length)];
+      last = t;
+      const l = 4 + Math.random() * (mobile ? 46 : 70);
+      const tp = 12 + Math.random() * 68;
+      const my = ++id;
+      setItems((a) => [...a.slice(-3), { id: my, t, l, tp }]);
+      setTimeout(() => setItems((a) => a.filter((x) => x.id !== my)), 2900);
+    };
+    const first = setTimeout(spawn, 300);
+    const iv = setInterval(spawn, 650);
+    return () => { clearTimeout(first); clearInterval(iv); };
+  }, []);
+  return (<>{items.map((x) => (<div key={x.id} aria-hidden className="hx-pop" style={{ left: x.l + "%", top: x.tp + "%" }}>{x.t}</div>))}</>);
+}
 function HeroCounter() {
   const el = useRef<HTMLSpanElement>(null);
   useEffect(() => {
@@ -471,6 +494,19 @@ const GI_CSS = `
 @keyframes gi-auto{to{opacity:0;visibility:hidden;pointer-events:none}}
 .gi-end{animation:gi-auto .6s forwards}
 .gi-skip{animation:gi-auto .25s forwards!important}
+.hx-rp{position:absolute;z-index:1;pointer-events:none;width:min(52vw,460px);aspect-ratio:1;transform:translate(-50%,-50%)}
+.hx-rp i{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,214,0,.85);opacity:0;transform:scale(.15);animation:hx-wave 5.4s cubic-bezier(.2,.6,.3,1) infinite;animation-delay:calc(var(--w)*1.35s)}
+.hx-rp1{left:24%;top:42%}.hx-rp2{left:78%;top:68%;width:min(36vw,300px)}.hx-rp2 i{animation-duration:6.4s}
+@keyframes hx-wave{0%{opacity:0;transform:scale(.15)}12%{opacity:.95}100%{opacity:0;transform:scale(1.5)}}
+@media(max-width:639px){.hx-rp1{left:30%;top:36%;width:70vw}.hx-rp2{left:72%;top:74%;width:46vw}}
+.hx-pop{position:absolute;z-index:2;background:rgba(255,255,255,.94);color:#000;border-radius:999px;padding:.4rem .85rem;font-size:.74rem;font-weight:700;pointer-events:none;white-space:nowrap;opacity:0;animation:hx-pop 1.9s ease-out forwards}
+@keyframes hx-pop{0%{opacity:0;transform:scale(.4)}10%{opacity:1;transform:scale(1.08)}16%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.85)}}
+@media(prefers-reduced-motion:reduce){.hx-rp i,.hx-pop{animation:none!important}.hx-rp i{opacity:.35;transform:scale(.8)}}
+.hx-ring,.hx-chip,.hx-rp{display:none!important}
+.i3-tag{margin:0 auto 1.1rem;max-width:34rem;font-family:ui-monospace,Menlo,monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.78);line-height:1.7}
+.i3-tag b{color:#ffd600;font-weight:600}
+@media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
+header.sticky{background:linear-gradient(to bottom,rgba(0,0,0,.94),rgba(0,0,0,0))!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
 .hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
 @keyframes hx-ring{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(1.5)}}
@@ -726,8 +762,7 @@ function Index() {
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
 
-        <div aria-hidden className="hx-ring" /><div aria-hidden className="hx-ring hx-ring2" />
-        <div aria-hidden className="hx-chip hx-c1">92% match</div><div aria-hidden className="hx-chip hx-c2">Cover letter ready</div><div aria-hidden className="hx-chip hx-c3">Applied in 15 sec</div>
+        <HeroPops />
         <HeroCounter />
         <div aria-hidden className="hx-meta hx-m1"><span>(01)</span> find / tailor / apply</div>
         <div aria-hidden className="hx-meta hx-m2">global roles <b>/</b> free to start</div>
@@ -739,6 +774,7 @@ function Index() {
             
 
             <div className="relative mx-auto max-w-6xl">
+              <p className="i3-tag">Find jobs &middot; Make resume from scratch &middot; Tailor resume &middot; Apply &mdash; <b>5 free a month</b></p>
               <h1 className="i3" aria-label="First find the jobs. Tailor the resume. Then apply.">
                 <span aria-hidden className="i3-l"><span className="i3-w">FIRST,</span> <mark className="i3-y">FIND</mark></span>
                 <span aria-hidden className="i3-l"><span className="i3-w">THE JOBS.</span> <mark className="i3-y i3-y2">TAILOR</mark></span>
