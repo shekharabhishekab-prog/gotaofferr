@@ -528,6 +528,48 @@ function Index() {
           el.removeEventListener("pointerleave", lv);
         });
       });
+      {
+        const cv = document.createElement("canvas");
+        cv.setAttribute("aria-hidden", "true");
+        cv.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:60";
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const fit = () => { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; };
+        fit();
+        document.body.appendChild(cv);
+        const cx = cv.getContext("2d");
+        const dots: { x: number; y: number; t: number; r: number }[] = [];
+        let lx = -1, ly = -1, raf = 0, lastScroll = scrollY;
+        const add = (x: number, y: number, r: number) => { dots.push({ x, y, t: performance.now(), r }); if (dots.length > 60) dots.shift(); };
+        const mv = (ev: PointerEvent) => {
+          if (lx >= 0 && Math.hypot(ev.clientX - lx, ev.clientY - ly) < 10) return;
+          lx = ev.clientX; ly = ev.clientY;
+          add(lx, ly, ev.pointerType === "touch" ? 5 : 4);
+        };
+        const sc = () => {
+          const d = scrollY - lastScroll; lastScroll = scrollY;
+          if (Math.abs(d) < 6) return;
+          add(innerWidth * (0.5 + Math.sin(scrollY / 140) * 0.35), innerHeight * 0.5 + Math.cos(scrollY / 90) * innerHeight * 0.3, 3.5);
+        };
+        const draw = (now: number) => {
+          if (cx) {
+            cx.clearRect(0, 0, cv.width, cv.height);
+            for (const d of dots) {
+              const a = 1 - (now - d.t) / 900;
+              if (a <= 0) continue;
+              cx.beginPath();
+              cx.fillStyle = `rgba(255,214,0,${(a * 0.7).toFixed(3)})`;
+              cx.arc(d.x * dpr, d.y * dpr, d.r * a * dpr + 0.6, 0, 6.2832);
+              cx.fill();
+            }
+          }
+          raf = requestAnimationFrame(draw);
+        };
+        raf = requestAnimationFrame(draw);
+        addEventListener("pointermove", mv, { passive: true });
+        addEventListener("scroll", sc, { passive: true });
+        addEventListener("resize", fit);
+        cleanups.push(() => { cancelAnimationFrame(raf); removeEventListener("pointermove", mv); removeEventListener("scroll", sc); removeEventListener("resize", fit); cv.remove(); });
+      }
       if (hero) {
         const mv = (ev: PointerEvent) => {
           const r = hero.getBoundingClientRect();
@@ -891,6 +933,8 @@ function Index() {
         </div>
       </section>
 
+      <div aria-hidden className="gap-mq gap-a"><div className="gap-mq-in">{[0, 1].map((n) => (<span key={n}>FIND <b>*</b> TAILOR <b>*</b> APPLY <b>*</b> REPEAT <b>*</b> FIND <b>*</b> TAILOR <b>*</b> APPLY <b>*</b> REPEAT <b>*</b> </span>))}</div></div>
+
       {/* About: text only, full width, rows slide left and right on scroll */}
       <section id="about" data-p className="ab2s relative overflow-hidden py-16 sm:py-24">
         <p className="hp-hand relative z-10 px-5 text-2xl text-highlight sm:px-10 sm:text-3xl">about</p>
@@ -908,6 +952,8 @@ function Index() {
           ))}
         </div>
       </section>
+
+      <div aria-hidden className="gap-mq gap-b"><div className="gap-mq-in">{[0, 1].map((n) => (<span key={n}>ONE RESUME <b>*</b> TWENTY JOBS <b>*</b> ONE RESUME <b>*</b> TWENTY JOBS <b>*</b> ONE RESUME <b>*</b> TWENTY JOBS <b>*</b> </span>))}</div></div>
 
       {/* Why */}
       <section data-p className="y-why site-container py-12 sm:py-24">
@@ -959,7 +1005,7 @@ function Index() {
         <div className="site-container">
           <div className="rl-head">
             <span className="rl-mono">( hiring, in motion )</span>
-            <p className="rl-say"><span className="hp-hand rl-fs">fifteen seconds</span> <span className="rl-aj">a job</span></p>
+            <p className="rl-say"><span className="hp-hand rl-fs" aria-label="fifteen seconds">{"fifteen seconds".split("").map((c, i) => (<i key={i} aria-hidden style={{ ["--c" as string]: i }}>{c === " " ? "\u00a0" : c}</i>))}</span> <span className="rl-aj">a job</span></p>
           </div>
           <div className="rl-grid mt-6 sm:mt-10">
             {reelTiles.map((n, k) => (
@@ -1357,4 +1403,30 @@ html{scroll-behavior:smooth}
 .hp-bar.show{visibility:visible}
 html,body{background:#000}
 @media(max-width:639px){.hx-stop,.hx-tiny,.hp-hero .hp-btn:not(.bg-highlight){display:none}.hx-hand.hx-first{display:none}.hp-hero-body .hp-rise a[href="/resume-builder"]{display:none}}
+
+/* v5d */
+.hx-giant i,.hx-outline i{translate:calc(var(--mx)*(var(--d) - 5)*3px) calc(var(--my)*(var(--d) - 5)*2px);transition:translate .25s ease-out}
+.rl-fs{background:none;-webkit-text-fill-color:var(--highlight);color:var(--highlight);animation:none;transform:rotate(-2deg)}
+.rl-fs i{display:inline-block;font-style:normal;animation:rl-wave 2.2s ease-in-out infinite;animation-delay:calc(var(--c)*-.14s)}
+@keyframes rl-wave{0%,100%{transform:translateY(0) rotate(0);color:var(--highlight)}35%{transform:translateY(-.16em) rotate(-5deg);color:#fff}70%{transform:translateY(.05em) rotate(3deg)}}
+.rl-aj{animation:rl-aj 3s ease-in-out infinite}
+@keyframes rl-aj{0%,100%{opacity:.5;transform:translateX(0)}50%{opacity:1;transform:translateX(.35em)}}
+.rl-grid{align-items:center}
+.rl-t:nth-child(3n+1){aspect-ratio:4/5}
+.rl-t:nth-child(3n+2){aspect-ratio:1/1;margin-top:.8rem}
+.rl-t:nth-child(3n){aspect-ratio:5/4;margin-top:-.4rem}
+.hp-live .rl-t{clip-path:inset(calc((1 - var(--rp))*46%) round .5rem);transform:translate(calc(var(--dx)*var(--fly)*8vw),calc(var(--dy)*var(--fly)*12vh)) rotate(calc(var(--dx)*var(--fly)*12deg)) scale(calc(.5 + var(--rp)*.5))}
+.gap-mq{overflow:hidden;white-space:nowrap;padding:1.2rem 0;user-select:none}
+.gap-mq-in{display:inline-flex;gap:1.5rem;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;font-size:clamp(3.2rem,12vw,9rem);line-height:1;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.55);animation:gap-l 28s linear infinite}
+.gap-mq-in b{color:var(--highlight);-webkit-text-stroke:0;font-weight:800;padding:0 .2em}
+.gap-b .gap-mq-in{animation-name:gap-r;-webkit-text-stroke-color:rgba(255,214,0,.7)}
+.gap-b .gap-mq-in b{color:#fff}
+@keyframes gap-l{to{transform:translateX(-50%)}}
+@keyframes gap-r{from{transform:translateX(-50%)}to{transform:none}}
+.tx-ex .tx-exname{-webkit-text-stroke:0;color:rgba(255,255,255,.5);font-size:1.1rem;font-family:ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.14em;font-weight:500;transition:color .3s}
+.tx-ex .tx-for{font-size:2.4rem;line-height:1;color:var(--highlight)}
+@media(min-width:640px){.tx-ex .tx-for{font-size:5.2rem;min-width:0;flex:1.4}.tx-ex .tx-exname{font-size:1rem;flex:1}}
+.tx-ex:hover .tx-exname{color:#fff}.tx-ex:hover .tx-for{transform:translateX(.5rem) rotate(-1.5deg)}
+.tx-ex .tx-for{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+@media(prefers-reduced-motion:reduce){.rl-fs i,.rl-aj,.gap-mq-in{animation:none}}
 `;
