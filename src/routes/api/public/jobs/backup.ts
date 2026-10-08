@@ -4,7 +4,7 @@ export const Route = createFileRoute("/api/public/jobs/backup")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        // Dedicated token. Fails closed when not configured.
+        // Dedicated token. Fails closed when the token is not configured.
         const expected = process.env.BACKUP_TRIGGER_TOKEN;
         if (!expected) return new Response("Unauthorized", { status: 401 });
         const header = request.headers.get("authorization") ?? "";
