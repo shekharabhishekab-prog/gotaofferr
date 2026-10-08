@@ -410,24 +410,59 @@ function HeroVideo() {
       return;
     }
     let dead = false;
-    import("../components/heroVideoData").then((m) => {
-      if (dead || !ref.current) return;
-      fetch(m.default)
-        .then((r) => r.blob())
-        .then((b) => {
-          if (dead || !ref.current) return;
-          ref.current.src = URL.createObjectURL(b);
-          ref.current.play().catch(() => {});
+    let idx = 0;
+    const loaders: Array<() => Promise<{ default: string }>> = [
+      () => import("../components/heroClips/clip1"),
+      () => import("../components/heroClips/clip2"),
+      () => import("../components/heroClips/clip3"),
+      () => import("../components/heroClips/clip4"),
+      () => import("../components/heroClips/clip5"),
+      () => import("../components/heroClips/clip6"),
+      () => import("../components/heroClips/clip7"),
+    ];
+    const cache = new Map<number, Promise<string>>();
+    const getUrl = (i: number) => {
+      let p = cache.get(i);
+      if (!p) {
+        p = loaders[i]()
+          .then((m) => fetch(m.default))
+          .then((r) => r.blob())
+          .then((b) => URL.createObjectURL(b));
+        cache.set(i, p);
+      }
+      return p;
+    };
+    const playAt = (i: number) => {
+      getUrl(i)
+        .then((url) => {
+          const el = ref.current;
+          if (dead || !el) return;
+          el.src = url;
+          el.play().catch(() => {});
+          getUrl((i + 1) % loaders.length).catch(() => {});
         })
-        .catch(() => {});
-    });
+        .catch(() => {
+          cache.delete(i);
+          if (!dead) {
+            idx = (i + 1) % loaders.length;
+            window.setTimeout(() => playAt(idx), 1500);
+          }
+        });
+    };
+    const onEnded = () => {
+      idx = (idx + 1) % loaders.length;
+      playAt(idx);
+    };
+    v.addEventListener("ended", onEnded);
+    playAt(0);
     return () => {
       dead = true;
+      v.removeEventListener("ended", onEnded);
     };
   }, []);
   return (
     <div aria-hidden className="absolute inset-0 -z-20 bg-black">
-      <video ref={ref} className="i3-vid" poster={HERO_POSTER} muted loop playsInline tabIndex={-1} />
+      <video ref={ref} className="i3-vid" poster={HERO_POSTER} muted playsInline tabIndex={-1} />
     </div>
   );
 }
