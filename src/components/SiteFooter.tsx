@@ -43,6 +43,11 @@ export function SiteFooter() {
 <li><Link to="/guides/india-resume-format" className="sf-a"><span>India resume format</span></Link></li></ul></div>
 </div>
 </nav>
+        <div className="sf-base">
+          <span>© {new Date().getFullYear()} GotaOfferr. Built for job seekers.</span>
+          <span>AB24 SOLUTIONS · Delhi, India</span>
+        </div>
+
         <div className="sf-word" aria-hidden>
           <svg viewBox="0 0 1000 215" width="100%" role="presentation" focusable="false">
             <text x="0" y="158" textLength="1000" lengthAdjust="spacingAndGlyphs" fontSize="205">
@@ -51,10 +56,6 @@ export function SiteFooter() {
               ))}
             </text>
           </svg>
-        </div>
-        <div className="sf-base">
-          <span>© {new Date().getFullYear()} GotaOfferr. Built for job seekers.</span>
-          <span>AB24 SOLUTIONS · Delhi, India</span>
         </div>
       </div>
     </footer>
@@ -100,6 +101,22 @@ const SF_CSS = `
 .sf-word text{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;fill:rgba(255,255,255,.14)}
 .sf-word tspan{transition:fill .3s}
 .sf-word tspan:hover{fill:var(--highlight,#ffd600)}
+
+.sf-word{margin:1.5rem 0 0;aspect-ratio:1000/120;overflow:hidden}
+.sf-base{padding-bottom:0}
+.sf-word text{fill:rgba(255,255,255,.2)}
+@supports(animation-timeline:view()){
+.sf-col,.sf-top>*{animation:sf-up both cubic-bezier(.2,.8,.2,1);animation-timeline:view();animation-range:entry 0% entry 55%}
+.sf-col:nth-child(2){animation-range:entry 8% entry 62%}.sf-col:nth-child(3){animation-range:entry 16% entry 70%}
+.sf-word svg{animation:sf-rise both linear;animation-timeline:view();animation-range:entry 10% cover 55%}
+}
+@keyframes sf-up{from{opacity:0;transform:translateY(46px)}to{opacity:1;transform:none}}
+@keyframes sf-rise{from{transform:translateY(55%)}to{transform:none}}
+.sf-btn{animation:sf-pulse 2.6s ease-in-out infinite}
+@keyframes sf-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.45)}50%{box-shadow:0 0 0 14px rgba(255,214,0,0)}}
+.sf-word tspan{transition:fill .25s}
+.sf-word tspan:hover{fill:var(--highlight,#ffd600)}
+@media(prefers-reduced-motion:reduce){.sf-btn,.sf-col,.sf-top>*,.sf-word svg{animation:none!important}}
 @media(prefers-reduced-motion:reduce){.sf-a,.sf-btn,.sf-wordx i{transition:none}}
 
 .sf-top{display:grid;gap:2rem;align-items:end}
