@@ -49,6 +49,7 @@ export type AdminUserRow = {
   emailConfirmed: boolean;
   cancelAtPeriodEnd: boolean;
   fullName: string | null;
+  region: string;
   createdAt: string | null;
   lastSignInAt: string | null;
   runsTotal: number;
@@ -145,6 +146,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
         emailConfirmed: Boolean(u.email_confirmed_at),
         cancelAtPeriodEnd: Boolean(sub?.cancel_at_period_end),
         fullName: profiles.get(u.id) ?? null,
+        region: String((u.app_metadata as Record<string, unknown> | undefined)?.signup_region ?? "India"),
         createdAt: u.created_at ?? null,
         lastSignInAt: u.last_sign_in_at ?? null,
         runsTotal: runCounts.get(u.id) ?? 0,
@@ -216,7 +218,9 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
         environment: s.environment,
         cancelAtPeriodEnd: s.cancel_at_period_end,
         currentPeriodEnd: s.current_period_end,
+        region: users.find((u) => u.id === s.user_id)?.region ?? "India",
         createdAt: s.created_at,
       })),
     };
   });
+
