@@ -14,7 +14,8 @@ export type MonthCards = {
   searches: number;
   builderDownloads: number;
   alerts: number;
-  subscriptionsStarted: number;
+  subscriptionsStarted: number; // all subscription records (dashboard card)
+  paidSubscriptionsStarted: number; // only records that are active/paid (year-end report)
   subscriberSharePercent: number;
 };
 export type RegionSplit = Record<string, { users: number; subscriptions: number }>;
@@ -118,7 +119,8 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
     const joined = authUsers.filter((u) => inMonth({ created_at: u.created_at }));
     for (const u of joined) regions[regionOf.get(u.id) ?? "India"].users += 1;
     const started = subs.filter(inMonth);
-    for (const s of started) regions[regionOf.get(s.user_id) ?? "India"].subscriptions += 1;
+    const paidStarted = started.filter((s) => isEntitled(s));
+    for (const s of paidStarted) regions[regionOf.get(s.user_id) ?? "India"].subscriptions += 1;
     return {
       month: ym,
       lockedAt: null,
@@ -129,6 +131,7 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
         builderDownloads: builders.filter(inMonth).length,
         alerts: alerts.filter(inMonth).length,
         subscriptionsStarted: started.length,
+        paidSubscriptionsStarted: paidStarted.length,
         // Share is a point-in-time number: it is the share at the moment of counting.
         subscriberSharePercent: real.length ? (entitledNow / real.length) * 100 : 0,
       },
