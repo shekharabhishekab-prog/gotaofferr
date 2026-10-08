@@ -10,6 +10,7 @@ import d8 from "./d8";
 import d9 from "./d9";
 import d10 from "./d10";
 import d11 from "./d11";
+import d13 from "./d13";
 
 const B64: Record<string, string> = {
   "h1.mp4": d10[0],
@@ -28,6 +29,7 @@ const B64: Record<string, string> = {
   "k2.webp": d6[2],
   "k1.webp": d6[3],
   "k3.webp": d6[6],
+  "syne2.ttf": d13[0],
   "bric.ttf": d11[0],
   "inst.ttf": d11[1],
   "h1.webp": d10[2],
