@@ -54,6 +54,8 @@ export async function encryptBackup(plain: Uint8Array, keyB64: string): Promise<
 export type BackupResult = { ok: true; key: string; bytes: number; tables: Record<string, number> } | { ok: false; reason: string };
 
 export async function runBackup(now = new Date()): Promise<BackupResult> {
+  const missing = ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET"].filter((n) => !process.env[n]);
+  if (missing.length) return { ok: false, reason: `r2-missing:${missing.join(",")}` };
   const keyB64 = process.env["BACKUP_ENC_KEY"];
   if (!keyB64) return { ok: false, reason: "backup-key-missing" };
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
