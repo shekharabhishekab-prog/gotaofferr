@@ -36,8 +36,10 @@ export async function sendOpsAlert(kind: string, note?: unknown): Promise<void> 
       body: JSON.stringify({
         from: `GotaOfferr alerts <noreply@${domain}>`,
         to,
-        subject: `[gotaofferr alert] ${safeKind}`,
-        text: `Something needs a look on gotaofferr.com.\n\nWhat: ${safeKind}\nWhen: ${new Date().toISOString()}\nNote: ${text || "(no extra detail)"}\n\nMore alerts of this same kind are held back for 1 hour.\nLogs: Cloudflare dashboard > gotaofferr-copy > Observability.`,
+        // One fixed subject and a shared References header so every alert lands in ONE conversation.
+        subject: "[gotaofferr alerts]",
+        headers: { References: "<gotaofferr-alerts@gotaofferr.com>", "In-Reply-To": "<gotaofferr-alerts@gotaofferr.com>" },
+        text: `Something needs a look on gotaofferr.com.\n\nAlert: ${safeKind}\nWhen: ${new Date().toISOString()}\nNote: ${text || "(no extra detail)"}\n\nMore alerts of this same kind are held back for 1 hour.\nLogs: Cloudflare dashboard > gotaofferr-copy > Observability.`,
       }),
     });
   } catch (e) {
@@ -49,3 +51,4 @@ export async function sendOpsAlert(kind: string, note?: unknown): Promise<void> 
 export function opsAlert(kind: string, note?: unknown): void {
   void sendOpsAlert(kind, note);
 }
+
