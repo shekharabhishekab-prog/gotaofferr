@@ -1555,7 +1555,7 @@ header .site-container{max-width:none!important;width:100%!important;margin-left
 .hx-l1 .hx-jobs{font-size:1.6rem}
 .hx-giant{font-size:min(13.5vw,3.5rem)!important;white-space:nowrap}
 .hx-l3{flex-direction:row!important;align-items:baseline;gap:.6rem}
-.hx-track{display:none}
+.hx-track{display:none}.hx-l2{margin-top:1rem}.hx-l3{margin-top:.6rem}
 .hx-mid{font-size:1.8rem}
 }
 .hp-live .jf-a{transform:translateX(calc((var(--p) - .5)*-10vw))}
