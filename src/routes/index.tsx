@@ -161,7 +161,7 @@ const plans = [
 const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi).slice(0, 3);
 /* Corner brackets: the framed-panel detail from the reference. */
 function HeroReel() {
-  const names = ["h1", "h2"];
+  const names = ["h1", "h2", "h3"];
   const [cur, setCur] = useState(0);
   const [seen, setSeen] = useState(1);
   const refs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -528,6 +528,53 @@ function Index() {
           el.removeEventListener("pointerleave", lv);
         });
       });
+      document.querySelectorAll<HTMLElement>(".hp-row,.tx-ex").forEach((el) => {
+        const mv = (ev: PointerEvent) => {
+          const r = el.getBoundingClientRect();
+          el.style.setProperty("--rx", `${(ev.clientX - r.left).toFixed(0)}px`);
+          el.style.setProperty("--ry", `${(ev.clientY - r.top).toFixed(0)}px`);
+        };
+        el.addEventListener("pointermove", mv);
+        cleanups.push(() => el.removeEventListener("pointermove", mv));
+      });
+      {
+        const grid = document.querySelector<HTMLElement>(".rl-grid");
+        const num = document.querySelector<HTMLElement>(".rl-n");
+        if (grid) {
+          const mv = (ev: PointerEvent) => {
+            const r = grid.getBoundingClientRect();
+            grid.style.setProperty("--gmx", (((ev.clientX - r.left) / r.width - 0.5) * 2).toFixed(3));
+            grid.style.setProperty("--gmy", (((ev.clientY - r.top) / r.height - 0.5) * 2).toFixed(3));
+          };
+          const sc = () => {
+            const r = grid.getBoundingClientRect();
+            const v = Math.max(-1, Math.min(1, ((r.top + r.height / 2) / window.innerHeight - 0.5) * 2));
+            grid.style.setProperty("--rs", v.toFixed(3));
+          };
+          grid.addEventListener("pointermove", mv);
+          addEventListener("scroll", sc, { passive: true });
+          sc();
+          cleanups.push(() => { grid.removeEventListener("pointermove", mv); removeEventListener("scroll", sc); });
+        }
+        if (num) {
+          let done = false;
+          const io = new IntersectionObserver((es) => {
+            es.forEach((e) => {
+              if (!e.isIntersecting || done) return;
+              done = true;
+              const t0 = performance.now();
+              const tick = (now: number) => {
+                const k = Math.min(1, (now - t0) / 1300);
+                num.textContent = String(Math.round(15 * (1 - Math.pow(1 - k, 3))));
+                if (k < 1) requestAnimationFrame(tick); else num.classList.add("done");
+              };
+              requestAnimationFrame(tick);
+            });
+          }, { threshold: 0.4 });
+          io.observe(num);
+          cleanups.push(() => io.disconnect());
+        }
+      }
       if (hero) {
         const mv = (ev: PointerEvent) => {
           const r = hero.getBoundingClientRect();
@@ -589,8 +636,7 @@ function Index() {
                   <span className="hx-hand hx-jobs">the jobs.</span>
                 </span>
                 <span aria-hidden className="hx-line hx-l2">
-                  <span className="hx-mid">Tailor</span>
-                  <span className="hx-tiny">the</span>
+                  <span className="hx-pre"><span className="hx-mid">Tailor</span><span className="hx-tiny">the</span></span>
                   <span className="hx-word hx-giant" data-t="RESUME.">
                     {"RESUME.".split("").map((c, i) => (
                       <i key={i} style={{ ["--d" as string]: i + 4 }}>{c}</i>
@@ -640,10 +686,12 @@ function Index() {
                 >
                   <Link to="/resume-builder">Resume builder</Link>
                 </Button>
+                <small className="hp-sub">Make resume from scratch</small>
               </span>
             </div>
 
             <p className="hp-rise mt-4 text-[0.68rem] uppercase tracking-[0.2em] text-white/60 sm:hidden"><span className="text-highlight">5 free</span> a month / no card</p>
+            <p className="hp-rise mt-2 text-[0.58rem] uppercase tracking-[0.16em] text-white/45 sm:hidden">Works with resume from Indeed, LinkedIn</p>
 
             <ul className="hp-rise mt-6 hidden flex-wrap justify-center gap-2 sm:flex text-[0.66rem] uppercase tracking-[0.16em] text-white/75 [animation-delay:320ms] sm:text-xs">
               {["Job search", "Resume", "Cover letter"].map((c) => (
@@ -837,7 +885,7 @@ function Index() {
                 style={{ ["--k" as string]: k }}
               >
                 <span className="tx-n">0{k + 1}</span>
-                <span className="hp-hand tx-for">tailored for {example.role}</span>
+                <span className="tx-for"><span className="tx-tf">Tailored for</span> <span className="tx-role" data-t={example.role}>{example.role}</span></span>
                 <span className="tx-exname">{example.role} resume</span>
                 <ArrowUpRight className="tx-arr size-7 shrink-0 sm:size-10" />
               </Link>
@@ -963,7 +1011,7 @@ function Index() {
         <div className="site-container">
           <div className="rl-head">
             <span className="rl-mono">( hiring, in motion )</span>
-            <p className="rl-say"><span className="hp-hand rl-fs" aria-label="fifteen seconds">{"fifteen seconds".split("").map((c, i) => (<i key={i} aria-hidden style={{ ["--c" as string]: i }}>{c === " " ? "\u00a0" : c}</i>))}</span> <span className="rl-aj">a job</span></p>
+            <p className="rl-say" aria-label="fifteen seconds a job"><span aria-hidden className="rl-n" data-to="15">15</span><span aria-hidden className="rl-sec">seconds</span><span aria-hidden className="rl-aj">a job</span></p>
           </div>
           <div className="rl-grid mt-6 sm:mt-10">
             {reelTiles.map((n, k) => (
@@ -1388,4 +1436,77 @@ html,body{background:#000}
 .tx-ex .tx-for{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
 @media(prefers-reduced-motion:reduce){.rl-fs i,.rl-aj,.gap-mq-in{animation:none}}
 .rl-grid>.rl-core{align-self:stretch;min-height:16rem}
+
+/* v6c */
+@font-face{font-family:"HPBric";src:url("/m/bric.ttf") format("truetype");font-weight:800;font-display:swap}
+@font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-weight:400;font-display:swap}
+.hx{display:grid;grid-template-columns:auto auto auto;justify-content:center;align-items:baseline;column-gap:.35em}
+.hx-l1,.hx-l2{display:contents}
+.hx-l3{grid-column:1/-1;display:flex;justify-content:center}
+.hx-l1 .hx-first{grid-column:1;justify-self:end;rotate:-3deg}
+.hx-l1 .hx-outline{grid-column:2;justify-self:start}
+.hx-l1 .hx-jobs{grid-column:3;justify-self:start;rotate:-2deg}
+.hx-pre{grid-column:1;grid-row:2;justify-self:end;display:inline-flex;align-items:baseline;gap:.35em}
+.hx-l2 .hx-giant{grid-column:2;grid-row:2;justify-self:start}
+.hx-l1 .hx-first,.hx-l1 .hx-outline,.hx-l1 .hx-jobs{grid-row:1}
+.hx-giant,.hx-outline{font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;letter-spacing:-.025em}
+.hx-outline::before,.hx-outline::after{display:none}
+@media(min-width:640px){.hx-m1{left:2rem;top:4.3rem}.hx-m2{right:2rem;top:4.3rem}.hx-m3{left:2rem;bottom:2.8rem}.hx-m4{right:2rem;bottom:2.8rem}}
+/* four tools */
+.hp-row{--rx:50%;--ry:50%}
+.hp-row::before{content:"";position:absolute;inset:0;background:radial-gradient(20rem circle at var(--rx) var(--ry),rgba(255,214,0,.16),transparent 62%);opacity:0;transition:opacity .35s;pointer-events:none}
+.hp-row:hover::before{opacity:1}
+.hp-rowimg{opacity:.12;transform:translateX(calc(var(--rx)*.05 - 18px)) scale(1.05);transition:opacity .5s,transform .25s ease-out}
+.hp-row:hover .hp-rowimg{opacity:.55;transform:translateX(calc(var(--rx)*.05 - 18px)) scale(1.05)}
+.hp-row .font-display{transition:transform .45s cubic-bezier(.2,.7,.2,1),color .3s,letter-spacing .45s}
+.hp-row:hover .font-display{transform:translateX(1.2rem) skewX(-7deg);letter-spacing:.03em}
+.hp-row>span:first-child{transition:transform .4s}
+.hp-row:hover>span:nth-child(2){transform:scale(1.5) rotate(-8deg);display:inline-block}
+/* examples */
+.tx-ex{position:relative;overflow:hidden;--rx:50%;--ry:50%}
+.tx-ex::before{content:"";position:absolute;inset:0;background:radial-gradient(22rem circle at var(--rx) var(--ry),rgba(255,214,0,.13),transparent 62%);opacity:0;transition:opacity .35s;pointer-events:none}
+.tx-ex:hover::before{opacity:1}
+.tx-ex .tx-for{font-family:"HPInst",Georgia,serif;font-style:italic;font-weight:400;transform:none;color:#fff;font-size:2.2rem;line-height:1;display:inline-block;min-width:0;flex:1 1 100%}
+.tx-tf{color:#fff;font-family:"HPInst",Georgia,serif;font-style:italic;font-size:1em;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.tx-role{position:relative;display:inline-block;font-family:"HPBric",var(--font-display,inherit),sans-serif;font-style:normal;font-weight:800;color:var(--highlight);font-size:.9em;letter-spacing:-.02em}
+.tx-role::after{content:attr(data-t);position:absolute;left:0;top:0;color:#fff;clip-path:inset(0 100% 0 0);transition:clip-path .6s cubic-bezier(.7,0,.2,1);white-space:nowrap}
+.tx-ex:hover .tx-role::after{clip-path:inset(0 0 0 0)}
+.tx-ex:hover .tx-tf{transform:translateX(.4em);color:var(--highlight)}
+@media(min-width:640px){.tx-ex .tx-for{font-size:4.2rem;flex:1.6}}
+/* showreel */
+.rl-say{align-items:flex-end;gap:0 .4em;transform:none}
+.rl-n{font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;font-size:8.5rem;line-height:.8;color:var(--highlight);letter-spacing:-.05em;display:inline-block;font-variant-numeric:tabular-nums;transform-origin:0 100%;transition:transform .6s cubic-bezier(.2,.9,.2,1.4)}
+.rl-n.done{transform:scale(1.04) rotate(-3deg)}
+.rl-sec{font-family:"HPInst",Georgia,serif;font-style:italic;font-size:3.2rem;line-height:1;color:#fff;position:relative;padding-bottom:.1em}
+.rl-sec::after{content:"";position:absolute;left:0;right:0;bottom:-.02em;height:2px;background:var(--highlight);transform-origin:0 50%;animation:rl-ul 3.6s cubic-bezier(.7,0,.2,1) infinite}
+@keyframes rl-ul{0%{transform:scaleX(0)}45%,70%{transform:scaleX(1);transform-origin:0 50%}71%{transform-origin:100% 50%}100%{transform:scaleX(0);transform-origin:100% 50%}}
+.rl-aj{font-family:"HPInst",Georgia,serif;font-style:italic;animation:none;color:rgba(255,255,255,.6);font-size:1.8rem}
+@media(min-width:640px){.rl-n{font-size:20rem}.rl-sec{font-size:7rem}.rl-aj{font-size:3.4rem}}
+.rl-grid{--gmx:0;--gmy:0;--rs:0}
+.rl-t{--z:1;--dir:1;position:relative;top:calc(var(--rs)*var(--dir)*34px);rotate:calc(var(--gmx)*var(--z)*2.2deg);animation:rl-fl 6s ease-in-out infinite;animation-delay:calc(var(--k)*-.7s)}
+.rl-t:nth-child(2n){--dir:-1;--z:-1;animation-duration:7.5s}
+.rl-t:nth-child(3n){--z:1.6}
+@keyframes rl-fl{0%,100%{translate:0 0}50%{translate:calc(var(--gmx)*var(--z)*8px) -9px}}
+@media(prefers-reduced-motion:reduce){.rl-t{animation:none}}
+.hx-outline{color:#fff;-webkit-text-stroke:0}
+.hp-sub{display:none}
+@media(max-width:639px){
+.hp-hero .hp-btn:not(.bg-highlight){display:inline-flex!important}
+.hp-hero-body .hp-rise a[href="/resume-builder"]{display:inline-flex!important}
+.hp-hero-body div.hp-rise.flex .hp-mag{display:flex;flex-direction:column;align-items:stretch;text-align:center}
+.hp-hero-body div.hp-rise.flex .hp-btn{width:100%;justify-content:center}
+.hp-sub{display:block;margin-top:.35rem;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.hp-hero-body .hp-rolebox{margin-top:.5rem}
+.hp-hero-body div.hp-rise.flex{margin-top:1rem}
+}
+/* mobile fixes */
+html,body{overflow-x:clip}
+@media(max-width:639px){
+.gap-mq{display:none}
+.ab2s{min-height:0;padding-top:2.5rem;padding-bottom:2.5rem;justify-content:flex-start}
+.ab2-row{white-space:normal;transform:none!important;padding:0 1.25rem}
+.ab2-in{flex-wrap:wrap;font-size:clamp(2rem,9.5vw,3rem)}
+.rl-n{font-size:7rem}
+.hx-l1 .hx-outline{font-size:3.6rem}
+}
 `;
