@@ -6,7 +6,7 @@ export const Route = createFileRoute("/api/public/jobs/backup")({
       POST: async ({ request }) => {
         // Dedicated token. Fails closed when the token is not configured.
         const expected = process.env.BACKUP_TRIGGER_TOKEN;
-        if (!expected) return new Response("Unauthorized", { status: 401 });
+        if (!expected) return new Response("Backup not configured", { status: 503 });
         const header = request.headers.get("authorization") ?? "";
         const provided = header.startsWith("Bearer ") ? header.slice(7) : "";
         const { timingSafeEqual } = await import("node:crypto");
