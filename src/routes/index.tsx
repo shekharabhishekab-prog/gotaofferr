@@ -629,12 +629,12 @@ function Index() {
               <h1 className="hx" aria-label="Find the jobs. Tailor the resume. Apply.">
                 <span aria-hidden className="hx-line hx-l1">
                   <span className="hx-hand hx-first">first,</span>
-                  <span className="hx-word hx-outline" data-t="FIND">
+                  <span className="hx-fj"><span className="hx-word hx-outline" data-t="FIND">
                     {"FIND".split("").map((c, i) => (
                       <i key={i} style={{ ["--d" as string]: i }}>{c}</i>
                     ))}
                   </span>
-                  <span className="hx-hand hx-jobs">the jobs.</span>
+                  <span className="hx-hand hx-jobs">the jobs.</span></span>
                 </span>
                 <span aria-hidden className="hx-line hx-l2">
                   <span className="hx-pre"><span className="hx-mid">Tailor</span><span className="hx-tiny">the</span></span>
@@ -1504,6 +1504,9 @@ html,body{background:#000}
 .hx-giant{text-transform:lowercase}
 .hx-first{font-size:1.9rem}
 @media(max-width:639px){.hx-bgR{font-size:62vh;right:-10vw;bottom:-6vh}.hx-giant{font-size:4.6rem}}
+.hx-fj{grid-column:2;grid-row:1;justify-self:start;display:inline-flex;align-items:baseline;gap:.35em}
+.hx-l1 .hx-outline,.hx-l1 .hx-jobs{grid-column:auto;grid-row:auto}
+.hx{row-gap:.14em}
 /* mobile fixes */
 html,body{overflow-x:clip}
 @media(max-width:639px){
@@ -1515,4 +1518,4 @@ html,body{overflow-x:clip}
 .hx-l1 .hx-outline{font-size:3.6rem}
 }
 `;
-/* v6d retrigger */
+
