@@ -9,7 +9,7 @@
  *   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET
  */
 
-export const WRITE_STOP_BYTES = 9_000_000_000; // 9 GB decimal stop, safely under the 10 GB free tier
+export const WRITE_STOP_BYTES = 9_800_000_000; // 9.8 GB decimal stop (owner decision), under the 10 GB free tier
 const USAGE_CACHE_MS = 60 * 1000;
 
 type Cfg = { account: string; key: string; secret: string; bucket: string };
