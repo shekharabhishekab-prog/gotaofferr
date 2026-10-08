@@ -8,7 +8,7 @@ import type { PlanTier } from "@/lib/plans";
  * Ads by plan. No new ad slots and no layout change: the existing AdSense
  * script stays as is, this only pauses or resumes its requests.
  *   Free        ads everywhere, as today
- *   Starter     none on the homepage or tools; only low-interaction reading pages (blog, FAQ)
+ *   Starter     none on the homepage or tools; only low-interaction reading pages (blog, FAQ, guides, examples)
  *   Job Hunt    no ads
  *   Career Pro  no ads
  */
