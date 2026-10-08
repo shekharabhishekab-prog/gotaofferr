@@ -1022,6 +1022,11 @@ function Index() {
               </Link>
             ))}
           </div>
+          <div className="mt-10 flex justify-center sm:mt-14">
+            <Link to="/examples/resumes" data-rv className="hp-r inline-flex items-center gap-2 rounded-full bg-highlight px-8 py-3.5 text-sm font-semibold text-black transition hover:brightness-110">
+              See all examples <ArrowRight className="size-4" />
+            </Link>
+          </div>
         </section>
       ) : null}
 
