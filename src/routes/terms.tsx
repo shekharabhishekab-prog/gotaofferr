@@ -138,11 +138,14 @@ function Terms() {
             to the Free plan.
           </p>
           <p>
-            <strong>Repeated failed payments.</strong> If payments fail again and again on an
-            account, we may pause new purchases on it for 2 hours, then for 2 days, then for 3
-            days. After several rounds we may block new purchases for good on that account and the
-            network address it uses. Free features keep working. Existing renewals follow the retry
-            rules above.
+            <strong>Repeated failed payments.</strong> Three failed new-checkout payment attempts
+            within 10 minutes pause purchases on that account. The pause increases by round:
+            15 minutes, 30 minutes, 1 hour, 1 day, 2 days, 5 days, 7 days, 10 days, 15 days,
+            then 30 days. Further rounds add 15 days each. There is no permanent payment-failure
+            ban and other accounts on the same network are not blocked. A successful payment
+            or 30 days without a failed payment resets the counter. Free features keep working.
+            Existing subscription renewals follow the retry rules above and do not count toward
+            these checkout pauses.
           </p>
           <h3 className="pt-2 text-lg font-semibold text-foreground">
             Upgrades, renewal and cancellation
