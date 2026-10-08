@@ -426,10 +426,10 @@ const stripA = ["i5439438", "i5668859", "i3760072", "i19451448", "i5439455"];
 const stripB = ["i5668863", "i5989927", "i36766896", "i7606041", "i8730781"];
 const rowImgs = ["i30677714", "i5439449", "i5668858", "i3760069"];
 const aboutLines: { t: string; c: string; m?: boolean }[][] = [
-  [{ t: "One", c: "s" }, { t: "resume.", c: "xl" }],
+  [{ t: "One", c: "s" }, { t: "resume.", c: "xl y" }],
   [{ t: "Twenty", c: "xl", m: true }, { t: "jobs.", c: "xl o" }],
-  [{ t: "Twenty", c: "xs" }, { t: "different", c: "s" }, { t: "applications,", c: "l", m: true }],
-  [{ t: "without", c: "xs" }, { t: "twenty", c: "m" }, { t: "evenings", c: "l" }, { t: "of", c: "xs" }, { t: "editing.", c: "xl", m: true }],
+  [{ t: "Twenty", c: "xs" }, { t: "different", c: "s" }, { t: "applications,", c: "l y", m: true }],
+  [{ t: "without", c: "xs" }, { t: "twenty", c: "m" }, { t: "evenings", c: "l" }, { t: "of", c: "xs" }, { t: "editing.", c: "xl y" }],
 ];
 
 /* Stats from the current live site. Edit the wording here (second entry: 10 hrs a week shown as 600+ min). */
@@ -825,8 +825,8 @@ function Index() {
 
       {/* About: text on the left, living visual on the right */}
       <section id="about" data-p className="site-container py-16 sm:py-28">
-        <div className="grid items-stretch gap-10 lg:grid-cols-2 lg:gap-14">
-          <div className="flex flex-col justify-center">
+        <div className="ab-grid relative grid items-stretch gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-0">
+          <div className="relative z-10 flex flex-col justify-center">
             <p className="hp-hand text-2xl text-highlight sm:text-3xl">about</p>
             <p data-fill className="ab-t mt-4 font-display font-semibold uppercase">
               {aboutLines.map((ln, li) => (
@@ -842,9 +842,13 @@ function Index() {
             <span aria-hidden className="hp-hand hp-pnote mt-3 inline-block -rotate-3 self-end text-2xl text-highlight sm:text-4xl">
               one resume, every job
             </span>
+            <svg aria-hidden viewBox="0 0 300 60" className="ab-arrow hidden lg:block">
+              <path d="M2 40 C 80 5, 160 70, 290 22" pathLength="1" />
+              <path d="M270 8 L292 22 L268 36" pathLength="1" />
+            </svg>
           </div>
-          <div data-spot className="hp-about relative">
-            <div className="hp-about-card relative h-full min-h-[13rem] overflow-hidden rounded-2xl border border-white/15 sm:min-h-[20rem]">
+          <div data-spot className="hp-about relative lg:-ml-28">
+            <div className="hp-about-card ab-card relative h-full min-h-[13rem] overflow-hidden rounded-2xl border border-white/15 sm:min-h-[22rem]">
               <LazyVideo name="ab2" className="absolute inset-0 h-full w-full object-cover opacity-85" />
               <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
               <Brackets />
@@ -1428,4 +1432,16 @@ html{scroll-behavior:smooth}
 
 @media(min-width:640px){.hx-outline{font-size:min(9vw,13vh)}.hx-giant{font-size:min(12vw,17vh)}.hx-mid{font-size:min(5vw,7.5vh)}.hx-first{font-size:min(3.4vw,5vh)}.hx-jobs{font-size:min(4vw,6vh)}.hx-apply{font-size:min(3.2vw,5vh)}}
 .hx-under{height:.035em;background:var(--highlight)}
+
+/* about connect */
+.ab-line{gap:0 .28em;margin-bottom:.2em;line-height:.95}
+.ab-t{letter-spacing:-.01em}
+.hp-live .hp-w.ab-y,.ab-y{color:var(--highlight)}
+.hp-live .hp-w.ab-y:not(.on){color:rgba(255,214,0,.35)}
+.ab-card{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 32%);mask-image:linear-gradient(90deg,transparent 0,#000 32%);border-color:transparent}
+.ab-t{text-shadow:0 2px 24px rgba(0,0,0,.85)}
+.ab-arrow{position:absolute;left:62%;bottom:-.5rem;width:11rem;height:3rem;z-index:11;overflow:visible;fill:none;stroke:var(--highlight);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.ab-arrow path{stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--p)*2.2);}
+.hp-pnote{position:relative;z-index:11}
+@media(prefers-reduced-motion:reduce){.ab-arrow path{stroke-dashoffset:0}}
 `;
