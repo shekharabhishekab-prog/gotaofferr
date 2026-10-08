@@ -16,49 +16,41 @@ export function SiteFooter() {
             </p>
           </div>
         </div>
-        <nav className="sf-cols" aria-label="Footer">
-          <div className="sf-col">
-            <h2 className="sf-h2">Product</h2>
-            <ul>
-            <li><Link to="/tailor" className="sf-a"><span>Resume tailor</span></Link></li>
-            <li><Link to="/resume-builder" className="sf-a"><span>Resume builder</span></Link></li>
-            <li><Link to="/ats-resume-checker" className="sf-a"><span>ATS resume checker</span></Link></li>
-            <li><Link to="/ai-cover-letter-generator" className="sf-a"><span>AI cover letter generator</span></Link></li>
-            <li><Link to="/jobs" search={{ alert: undefined }} className="sf-a"><span>Job finder</span></Link></li>
-            <li><Link to="/linkedin-profile-reviewer" className="sf-a"><span>LinkedIn profile reviewer</span></Link></li>
-            <li><Link to="/how-it-works" className="sf-a"><span>How it works</span></Link></li>
-            <li><Link to="/pricing" className="sf-a"><span>Pricing</span></Link></li>
-            </ul>
-          </div>
-          <div className="sf-col">
-            <h2 className="sf-h2">Guides</h2>
-            <ul>
-            <li><Link to="/examples/resumes" className="sf-a"><span>Resume examples</span></Link></li>
-            <li><Link to="/examples/cover-letters" className="sf-a"><span>Cover letter examples</span></Link></li>
-            <li><Link to="/guides/dubai-resume-format" className="sf-a"><span>Dubai resume format</span></Link></li>
-            <li><Link to="/guides/canada-resume-format" className="sf-a"><span>Canada resume format</span></Link></li>
-            <li><Link to="/guides/australia-resume-format" className="sf-a"><span>Australia resume format</span></Link></li>
-            <li><Link to="/guides/uk-resume-format" className="sf-a"><span>UK CV format</span></Link></li>
-            <li><Link to="/guides/germany-resume-format" className="sf-a"><span>Germany CV format</span></Link></li>
-            <li><Link to="/guides/singapore-resume-format" className="sf-a"><span>Singapore resume format</span></Link></li>
-            <li><Link to="/guides/india-resume-format" className="sf-a"><span>India resume format</span></Link></li>
-            </ul>
-          </div>
-          <div className="sf-col">
-            <h2 className="sf-h2">Company</h2>
-            <ul>
-            <li><Link to="/about" className="sf-a"><span>About</span></Link></li>
-            <li><Link to="/faq" className="sf-a"><span>FAQ</span></Link></li>
-            <li><Link to="/contact" className="sf-a"><span>Contact</span></Link></li>
-            <li><Link to="/privacy" className="sf-a"><span>Privacy policy</span></Link></li>
-            <li><Link to="/terms" className="sf-a"><span>Terms &amp; conditions</span></Link></li>
-            </ul>
-          </div>
-        </nav>
+        <nav aria-label="Footer">
+<div className="sf-grp">
+<div className="sf-col"><h2 className="sf-h2">Product</h2><ul className="sf-list"><li><Link to="/tailor" className="sf-a"><span>Resume tailor</span></Link></li>
+<li><Link to="/resume-builder" className="sf-a"><span>Resume builder</span></Link></li>
+<li><Link to="/ats-resume-checker" className="sf-a"><span>ATS resume checker</span></Link></li>
+<li><Link to="/ai-cover-letter-generator" className="sf-a"><span>AI cover letter generator</span></Link></li>
+<li><Link to="/jobs" search={{ alert: undefined }} className="sf-a"><span>Job finder</span></Link></li>
+<li><Link to="/linkedin-profile-reviewer" className="sf-a"><span>LinkedIn profile reviewer</span></Link></li>
+<li><Link to="/how-it-works" className="sf-a"><span>How it works</span></Link></li>
+<li><Link to="/pricing" className="sf-a"><span>Pricing</span></Link></li></ul></div>
+<div className="sf-col"><h2 className="sf-h2">Company</h2><ul className="sf-list"><li><Link to="/about" className="sf-a"><span>About</span></Link></li>
+<li><Link to="/faq" className="sf-a"><span>FAQ</span></Link></li>
+<li><Link to="/contact" className="sf-a"><span>Contact</span></Link></li>
+<li><Link to="/privacy" className="sf-a"><span>Privacy policy</span></Link></li>
+<li><Link to="/terms" className="sf-a"><span>Terms &amp; conditions</span></Link></li></ul></div>
+<div className="sf-col"><h2 className="sf-h2">Guides</h2>
+<p className="sf-sub">Examples</p><ul className="sf-chips"><li><Link to="/examples/resumes" className="sf-a"><span>Resume examples</span></Link></li>
+<li><Link to="/examples/cover-letters" className="sf-a"><span>Cover letter examples</span></Link></li></ul>
+<p className="sf-sub">Resume formats by country</p><ul className="sf-chips"><li><Link to="/guides/dubai-resume-format" className="sf-a"><span>Dubai resume format</span></Link></li>
+<li><Link to="/guides/canada-resume-format" className="sf-a"><span>Canada resume format</span></Link></li>
+<li><Link to="/guides/australia-resume-format" className="sf-a"><span>Australia resume format</span></Link></li>
+<li><Link to="/guides/uk-resume-format" className="sf-a"><span>UK CV format</span></Link></li>
+<li><Link to="/guides/germany-resume-format" className="sf-a"><span>Germany CV format</span></Link></li>
+<li><Link to="/guides/singapore-resume-format" className="sf-a"><span>Singapore resume format</span></Link></li>
+<li><Link to="/guides/india-resume-format" className="sf-a"><span>India resume format</span></Link></li></ul></div>
+</div>
+</nav>
         <div className="sf-word" aria-hidden>
-          {"gotaofferr".split("").map((c, i) => (
-            <i key={i} style={{ ["--i" as string]: i }}>{c}</i>
-          ))}
+          <svg viewBox="0 0 1000 215" width="100%" role="presentation" focusable="false">
+            <text x="0" y="158" textLength="1000" lengthAdjust="spacingAndGlyphs" fontSize="205">
+              {"gotaofferr".split("").map((c, i) => (
+                <tspan key={i}>{c}</tspan>
+              ))}
+            </text>
+          </svg>
         </div>
         <div className="sf-base">
           <span>© {new Date().getFullYear()} GotaOfferr. Built for job seekers.</span>
@@ -91,8 +83,8 @@ const SF_CSS = `
 .sf-a::before{content:"→";position:absolute;left:-1.1rem;opacity:0;color:var(--highlight,#ffd600);transition:opacity .25s}
 .sf-a:hover::before{opacity:1}
 .sf-word{display:flex;justify-content:center;font-family:"HPSyne","HPBric",sans-serif;font-weight:800;letter-spacing:-.05em;line-height:.8;font-size:clamp(3rem,17.5vw,17rem);margin:3.5rem 0 -.1em;color:rgba(255,255,255,.07);user-select:none;white-space:nowrap}
-.sf-word i{font-style:normal;display:inline-block;transition:color .3s,transform .5s cubic-bezier(.2,.9,.2,1.3)}
-.sf-word i:hover{color:var(--highlight,#ffd600);transform:translateY(-.08em) rotate(calc((var(--i) - 4.5)*1.6deg))}
+.sf-wordx i{font-style:normal;display:inline-block;transition:color .3s,transform .5s cubic-bezier(.2,.9,.2,1.3)}
+.sf-wordx i:hover{color:var(--highlight,#ffd600);transform:translateY(-.08em) rotate(calc((var(--i) - 4.5)*1.6deg))}
 .sf-base{display:flex;flex-direction:column;gap:.3rem;padding:1.4rem 0 1.8rem;font-size:.74rem;color:rgba(255,255,255,.45)}
 @media(min-width:900px){
 .sf{padding-top:7rem}
@@ -102,5 +94,28 @@ const SF_CSS = `
 .sf-col:first-child{grid-column:auto}
 .sf-base{flex-direction:row;justify-content:space-between}
 }
-@media(prefers-reduced-motion:reduce){.sf-a,.sf-btn,.sf-word i{transition:none}}
+
+.sf-word{display:block;margin:3rem 0 0;line-height:0;font-size:0}
+.sf-word svg{display:block;overflow:visible;width:100%;height:auto}
+.sf-word text{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;fill:rgba(255,255,255,.14)}
+.sf-word tspan{transition:fill .3s}
+.sf-word tspan:hover{fill:var(--highlight,#ffd600)}
+@media(prefers-reduced-motion:reduce){.sf-a,.sf-btn,.sf-wordx i{transition:none}}
+
+.sf-top{display:grid;gap:2rem;align-items:end}
+.sf-grp{margin-top:3rem;display:grid;gap:2.4rem}
+.sf-grp .sf-col ul{display:flex;flex-wrap:wrap;gap:.5rem .5rem;margin-top:1rem}
+.sf-a{display:inline-flex;align-items:center;font-size:.92rem;color:rgba(255,255,255,.8)}
+.sf-a::before{content:none}
+.sf-col ul.sf-list{display:grid;gap:.55rem}
+.sf-col ul.sf-chips li a{border:0;background:rgba(255,255,255,.07);padding:.5rem .95rem;border-radius:999px;transition:background .25s,color .25s,transform .3s cubic-bezier(.2,.8,.2,1)}
+.sf-col ul.sf-chips li a:hover{background:var(--highlight,#ffd600);color:#000;transform:translateY(-2px)}
+.sf-col ul.sf-list .sf-a:hover{transform:translateX(6px)}
+.sf-sub{margin:1.4rem 0 .3rem;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);font-family:ui-monospace,Menlo,monospace}
+.sf-word{justify-content:flex-start;margin-left:-.04em}
+@media(min-width:900px){
+.sf-top{grid-template-columns:1.6fr 1fr;align-items:end}
+.sf-grp{grid-template-columns:1fr 1fr 2.4fr;gap:3rem;margin-top:5rem}
+.sf-grp .sf-col:first-child{grid-column:auto}
+}
 `;
