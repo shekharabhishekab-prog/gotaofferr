@@ -75,6 +75,13 @@ function Privacy() {
             one-time free limit and prevent abuse.
           </p>
           <p>
+            To manage repeated failed new-checkout payments, we keep account-linked payment event
+            identifiers, failure times, completed pause rounds and pause expiry times. Three rapid
+            failures trigger a temporary checkout pause on that account only, never a permanent
+            payment-failure or shared-network ban. A successful payment or 30 days without a failed
+            payment resets the counter. Renewals and free features are not blocked by this policy.
+          </p>
+          <p>
             <strong>Bot-protection and security data:</strong> Cloudflare Turnstile checks some actions
             (sign-ups, downloads, resume builder) to block automated abuse, and we keep short-lived
             rate-limit records keyed by IP or account.
