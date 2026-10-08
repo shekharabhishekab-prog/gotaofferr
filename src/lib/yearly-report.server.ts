@@ -39,6 +39,24 @@ function totalsPdf(year: number, months: MonthRecord[]): Uint8Array {
   );
   const last = months[months.length - 1];
   if (last) doc.p(`Users in total at the end of ${monthName(last.month)}: ${last.totalUsersAtEnd}. Active subscribers then: ${last.activeSubscribersAtEnd}.`);
+  doc.h("Who uses each service: paid or free users");
+  const sp = (k: "rewrites" | "searches" | "builderDownloads" | "alerts") => {
+    const paid = sum(months, (m) => m.cards.split?.[k].paid ?? 0);
+    const free = sum(months, (m) => m.cards.split?.[k].free ?? 0);
+    const total = paid + free;
+    return [String(total), String(paid), String(free), total ? pct((paid / total) * 100) : "-"];
+  };
+  doc.table(
+    ["Service", "Total uses", "By paid", "By free", "Paid share"],
+    [
+      ["Resume tailor", ...sp("rewrites")],
+      ["Job search", ...sp("searches")],
+      ["Resume builder", ...sp("builderDownloads")],
+      ["Job alerts", ...sp("alerts")],
+    ],
+    [16, 11, 8, 8, 10],
+  );
+  doc.p("Uses are counted, not people. A user counts as paid if they hold an active paid plan when the number is counted. Past months counted before this was tracked may show everything as free.", 8);
   doc.h("By region (whole year)");
   doc.table(
     ["Region", "Users joined", "Paid subscriptions started"],
@@ -69,6 +87,11 @@ export function insightLines(year: number, months: MonthRecord[]): { happened: s
   }
   happened.push(`${rewrites} resume rewrites, ${searches} job searches and ${subs} paid subscriptions started in the year.`);
   happened.push(`${last.activeSubscribersAtEnd} active subscribers at the end of the latest month; paid share ${pct(last.cards.subscriberSharePercent)} of real users.`);
+  const tot = (k: "rewrites" | "searches" | "builderDownloads" | "alerts") => ({ paid: sum(months, (m) => m.cards.split?.[k].paid ?? 0), free: sum(months, (m) => m.cards.split?.[k].free ?? 0) });
+  for (const [label, k] of [["Resume tailor", "rewrites"], ["Job search", "searches"], ["Resume builder", "builderDownloads"], ["Job alerts", "alerts"]] as const) {
+    const t = tot(k);
+    if (t.paid + t.free > 0) happened.push(`${label}: ${t.paid} uses by paid users, ${t.free} by free users.`);
+  }
   const byRegion = REGIONS.map((r) => ({ r, u: sum(months, (m) => m.regions[r]?.users ?? 0) })).sort((a, b) => b.u - a.u);
   happened.push(`Most new users came from ${byRegion[0].r} (${byRegion[0].u}).`);
   const outsideIndia = byRegion.filter((x) => x.r !== "India").reduce((a, x) => a + x.u, 0);
