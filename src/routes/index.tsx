@@ -223,6 +223,7 @@ const reelTiles = [
   "i7641842", "i7652126", "i7654396", "i7674645",
   "i7875949", "i8154580", "i8297441", "i8301225", "i8441808", "i8837769",
 ];
+const reelPos: [number, number][] = [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[0,1],[5,1],[0,2],[5,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3]];
 const reelRing = [3, 2, 1, 1, 2, 3, 2, 2, 2, 2, 3, 2, 1, 1, 2, 3];
 
 function ReelCentre() {
@@ -880,14 +881,20 @@ function Index() {
               <span data-rv className="hp-wd text-highlight" style={{ ["--k" as string]: 1 }}>tailored</span>{" "}
               <span data-rv className="hp-wd" style={{ ["--k" as string]: 2 }}>in 15 seconds</span>
             </div>
-            <svg aria-hidden viewBox="0 0 120 120" className="hp-badge absolute right-0 top-1/2 size-20 -translate-y-1/2 sm:size-32">
-              <defs>
-                <path id="hpc" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
-              </defs>
-              <text fontSize="11" letterSpacing="3" fill="currentColor">
-                <textPath href="#hpc">FIND • TAILOR • APPLY • REPEAT •</textPath>
-              </text>
-            </svg>
+            <div aria-hidden className="wy-badge absolute right-0 top-1/2 -translate-y-1/2">
+              <svg viewBox="0 0 120 120" className="wy-b1">
+                <defs>
+                  <path id="hpc" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
+                </defs>
+                <text fontSize="12" letterSpacing="3.4" fill="currentColor">
+                  <textPath href="#hpc">FIND • TAILOR • APPLY • REPEAT •</textPath>
+                </text>
+              </svg>
+              <svg viewBox="0 0 120 120" className="wy-b2">
+                <circle cx="60" cy="60" r="30" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 7" />
+              </svg>
+              <i className="wy-core" />
+            </div>
           </div>
 <ul className="mt-6 flex flex-wrap gap-2 text-[0.66rem] uppercase tracking-[0.16em] text-white/70 sm:mt-10 sm:text-xs">
             {["Job finder", "Resume tailor", "Cover letter", "Resume builder"].map((t, i) => (
@@ -1024,11 +1031,11 @@ function Index() {
         <div className="site-container">
           <div className="rl-head">
             <span className="rl-mono">( hiring, in motion )</span>
-            <p className="hp-hand rl-say">fifteen seconds a job</p>
+            <p className="rl-say"><span className="hp-hand rl-fs">fifteen seconds</span> <span className="rl-aj">a job</span></p>
           </div>
           <div className="rl-grid mt-6 sm:mt-10">
             {reelTiles.map((n, k) => (
-              <div key={n} aria-hidden className="rl-t" style={{ ["--k" as string]: k, ["--d" as string]: reelRing[k] }}>
+              <div key={n} aria-hidden className="rl-t" style={{ ["--k" as string]: k, ["--d" as string]: reelRing[k], ["--dx" as string]: reelPos[k][0] - 2.5, ["--dy" as string]: reelPos[k][1] - 1.5 }}>
                 <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" />
                 {k % 5 === 2 ? <i className="rl-dot" /> : null}
                 {k % 4 === 1 ? <em className="rl-tag">{String(k + 1).padStart(2, "0")}</em> : null}
@@ -1444,4 +1451,22 @@ html{scroll-behavior:smooth}
 .ab-arrow path{stroke-dasharray:1;stroke-dashoffset:calc(1 - var(--p)*2.2);}
 .hp-pnote{position:relative;z-index:11}
 @media(prefers-reduced-motion:reduce){.ab-arrow path{stroke-dashoffset:0}}
+
+/* v4e: motion */
+.wy-badge{width:5.5rem;height:5.5rem;color:var(--highlight)}
+.wy-badge svg{position:absolute;inset:0;width:100%;height:100%}
+.wy-b1{animation:hp-spin 9s linear infinite}
+.wy-b2{animation:hp-spin 6s linear infinite reverse}
+.wy-core{position:absolute;left:50%;top:50%;width:.9rem;height:.9rem;margin:-.45rem;border-radius:99px;background:var(--highlight);animation:wy-pulse 1.6s ease-in-out infinite}
+@keyframes wy-pulse{0%,100%{transform:scale(.7);box-shadow:0 0 0 0 rgba(255,214,0,.5)}50%{transform:scale(1.15);box-shadow:0 0 0 .9rem rgba(255,214,0,0)}}
+@media(min-width:640px){.wy-badge{width:8.5rem;height:8.5rem}}
+.hp-grid2.hp-strip-a{animation-duration:26s}
+.rl-say{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .3em;line-height:.95;transform:none}
+.rl-fs{font-size:3rem;background:linear-gradient(100deg,var(--highlight) 0 40%,#fff6bf 50%,var(--highlight) 60% 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rl-shim 3.2s linear infinite;display:inline-block;transform:rotate(-2deg)}
+.rl-aj{font-family:Georgia,serif;font-style:italic;font-size:1.5rem;color:rgba(255,255,255,.65)}
+@media(min-width:640px){.rl-fs{font-size:7rem}.rl-aj{font-size:3rem}}
+@keyframes rl-shim{from{background-position:120% 0}to{background-position:-120% 0}}
+.hp-live .rl-t{--fly:calc(1 - var(--rp) + clamp(0, calc((var(--p) - .68)*3.4), 1));transform:translate(calc(var(--dx)*var(--fly)*6vw),calc(var(--dy)*var(--fly)*9vh)) rotate(calc(var(--dx)*var(--fly)*9deg)) scale(calc(.7 + var(--rp)*.3));animation:rl-float 5s ease-in-out infinite;animation-delay:calc(var(--k)*-.45s)}
+@keyframes rl-float{0%,100%{translate:0 0}50%{translate:0 -.35rem}}
+@media(prefers-reduced-motion:reduce){.rl-fs,.wy-b1,.wy-b2,.wy-core{animation:none}.hp-live .rl-t{animation:none;translate:none}}
 `;
