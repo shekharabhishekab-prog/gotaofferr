@@ -482,6 +482,11 @@ function Pricing() {
         })}
       </div>
 
+      <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+        3 rapid failed attempts may pause checkout.{" "}
+        <Link to="/terms" className="whitespace-nowrap underline">Payment policy</Link>
+      </p>
+
       <section className="mt-16 rounded-2xl border border-border bg-card p-7 sm:p-10">
         <h2 className="font-display text-2xl font-bold text-card-foreground">
           Job Hunt Pack or Career Pro Pack?
