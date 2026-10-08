@@ -31,7 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { assertLooksLikeResume, assertValidResumeFile, extractPdfText, isPdfFile } from "@/lib/extract-pdf";
+import { assertLooksLikeResume, assertValidResumeFile, extractDocxText, extractPdfText, isPdfFile } from "@/lib/extract-pdf";
 import { buildCoverLetterPdf, buildResumePdf, slug } from "@/lib/resume-pdf";
 import { getUsage, tailorResume, type TailoredResume } from "@/lib/tailor.functions";
 import { runQueued, queueMessage } from "@/lib/ai-queue";
@@ -116,7 +116,7 @@ export function ResumeTailor() {
     try {
       // Type, size and real content are all checked before we parse anything.
       await assertValidResumeFile(file);
-      const text = isPdfFile(file) ? await extractPdfText(file) : await file.text();
+      const text = isPdfFile(file) ? await extractPdfText(file) : await extractDocxText(file);
       if (text.trim().length < 30) throw new Error("Almost no text found — is this a scanned PDF?");
       assertLooksLikeResume(text);
       setResume(text);
@@ -284,14 +284,14 @@ export function ResumeTailor() {
             </span>
             <div>
               <h2 className="text-base font-semibold">Your current resume</h2>
-              <p className="text-xs text-muted-foreground">Upload a PDF or paste the text</p>
+              <p className="text-xs text-muted-foreground">Upload a PDF or DOCX, or paste the text</p>
             </div>
           </div>
 
           <input
             ref={fileRef}
             type="file"
-            accept="application/pdf,text/plain,.pdf,.txt,.md"
+            accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.docx,.doc"
             className="hidden"
             onChange={(e) => onFile(e.target.files?.[0])}
           />
@@ -306,9 +306,9 @@ export function ResumeTailor() {
               <Upload className="size-5 text-muted-foreground" />
             )}
             <span className="text-sm font-medium">
-              {fileName || (parsing ? "Reading file…" : "Upload resume PDF")}
+              {fileName || (parsing ? "Reading file…" : "Upload resume (PDF or DOCX)")}
             </span>
-            <span className="text-xs text-muted-foreground">PDF, TXT or MD</span>
+            <span className="text-xs text-muted-foreground">PDF or DOCX</span>
           </button>
 
           <Textarea
@@ -827,3 +827,4 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+
