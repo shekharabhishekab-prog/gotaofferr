@@ -321,6 +321,7 @@ function LazyVideo({ name, className = "" }: { name: string; className?: string 
 const stripA = ["i5439438", "i5668859", "i3760072", "i19451448", "i5439455"];
 const stripB = ["i5668863", "i5989927", "i36766896", "i7606041", "i8730781"];
 const rowImgs = ["i30677714", "i5439449", "i5668858", "i3760069"];
+void rowImgs;
 const aboutLines: { t: string; c: string; m?: boolean }[][] = [
   [{ t: "One", c: "s" }, { t: "resume.", c: "xl y" }],
   [{ t: "Twenty", c: "xl", m: true }, { t: "jobs.", c: "xl o" }],
@@ -755,44 +756,38 @@ function Index() {
       </section>
 
       {/* Scope: rows with a hover image */}
-      <section className="site-container py-16 sm:py-28">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <h2 data-rv className="hp-r font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
-            Four tools. <span className="hp-hand normal-case text-highlight">one place</span>
-          </h2>
-          <p data-rv className="hp-r hidden max-w-sm text-sm text-white/60 sm:block">
-            Each one links straight to the real thing, no sign-up wall to look around.
-          </p>
-        </div>
-        <ul className="mt-10 border-t border-white/15 sm:mt-12">
-          {scope.map((s, i) => {
-            const img = rowImgs[i];
-            const inner = (
-              <>
-                <img src={`/m/${img}.webp`} alt="" aria-hidden loading="lazy" decoding="async" className="hp-rowimg" />
-                <span className="relative text-sm text-highlight">{s.n}</span>
-                <span className="relative font-display text-2xl font-semibold uppercase sm:text-3xl">{s.title}</span>
-                <span className="relative text-sm text-white/65">{s.body}</span>
-                <ArrowUpRight className="relative hidden size-6 text-white/40 transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-highlight sm:block" />
-              </>
-            );
-            const cls =
-              "hp-row group relative grid items-center gap-x-6 gap-y-2 overflow-hidden py-6 sm:grid-cols-[4rem_1fr_1.2fr_2rem] sm:py-9";
-            return (
-              <li key={s.n} data-rv className="hp-r border-b border-white/15">
-                {s.to === "/jobs" ? (
-                  <Link to="/jobs" search={{ alert: undefined }} className={cls}>
-                    {inner}
-                  </Link>
-                ) : (
-                  <Link to={s.to} className={cls}>
-                    {inner}
-                  </Link>
-                )}
+      <section id="jobfinder" className="jf site-container py-16 sm:py-28">
+        <div className="jf-grid">
+          <div className="jf-l">
+            <span data-rv className="hp-r jf-chip">AI job finder</span>
+            <h2 data-rv className="hp-r jf-h">
+              <span className="jf-a">Stop opening ten job boards.</span>
+              <span className="jf-b">Get one merged list.</span>
+            </h2>
+            <p data-rv className="hp-r jf-p">
+              Type the role, location, experience and salary once. Our AI searches Indeed, LinkedIn, Glassdoor, Naukri and more at the same time, filters out the mismatches, and hands you one clean list — then tailors your resume for any listing in a click.
+            </p>
+            <div data-rv className="hp-r jf-cta">
+              <Link to="/jobs" search={{ alert: undefined }} className="jf-btn jf-btn-y">Try the job finder free <ArrowRight className="size-4" /></Link>
+              <a href="#plans" className="jf-btn jf-btn-o">See plans</a>
+            </div>
+            <p data-rv className="hp-r jf-note">One free search on any account — no card needed.</p>
+          </div>
+          <ol className="jf-r">
+            {[
+              ["Every major board, one search", "Results merged and de-duplicated across job boards, sorted by how well they fit you."],
+              ["Filters that actually hold", "Role, seniority, location, remote and salary band in your own currency — mismatches are dropped."],
+              ["Daily alerts by email", "Save a search and get fresh roles every morning at the hour and timezone you pick."],
+              ["One click to tailor", "Send any listing straight into the builder for a rewritten resume and cover letter."],
+            ].map(([t, d], i) => (
+              <li key={t} data-rv className="hp-r jf-it" style={{ ["--k" as string]: i }}>
+                <span className="jf-n">{String(i + 1).padStart(2, "0")}</span>
+                <span className="jf-t">{t}</span>
+                <span className="jf-d">{d}</span>
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ol>
+        </div>
       </section>
 
       <Bridge label="how it works" href="#how" />
@@ -978,7 +973,7 @@ function Index() {
       </section>
 
       {/* Plans */}
-      <section className="site-container pb-16 sm:pb-28">
+      <section id="plans" className="site-container pb-16 sm:pb-28">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <h2 data-rv className="hp-r font-display text-4xl font-bold uppercase leading-none sm:text-6xl">Plans</h2>
           <p data-rv className="hp-r hidden max-w-sm text-sm text-white/60 sm:block">
@@ -1528,5 +1523,24 @@ header .site-container{max-width:none!important;width:100%!important;margin-left
 .hx-mid{font-family:"HPInst",Georgia,serif!important;font-style:italic;font-weight:400}
 }
 @media(max-width:639px){#about,.y-why{display:none!important}}
+.jf-grid{display:grid;gap:2.2rem}
+.jf-chip{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:#000;background:var(--highlight);padding:.35rem .7rem;border-radius:999px;font-weight:700}
+.jf-h{margin-top:1.1rem;font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;text-transform:uppercase;line-height:.92;letter-spacing:-.03em;font-size:clamp(2.1rem,10.5vw,3.2rem);color:#fff}
+.jf-a{display:block}.jf-b{display:block;color:var(--highlight);font-family:"HPInst",Georgia,serif;font-style:italic;font-weight:400;text-transform:none;letter-spacing:-.01em;font-size:1.2em;margin-top:.1em}
+.jf-p{margin-top:1.3rem;max-width:34rem;font-size:.95rem;line-height:1.55;color:rgba(255,255,255,.72)}
+.jf-cta{margin-top:1.6rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.jf-btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:999px;padding:.7rem 1.2rem;font-size:.9rem;font-weight:600;transition:transform .25s,background .25s}
+.jf-btn:hover{transform:translateY(-2px)}
+.jf-btn-y{background:var(--highlight);color:#000}
+.jf-btn-o{border:1.5px solid var(--highlight);color:#fff}.jf-btn-o:hover{background:rgba(255,214,0,.12)}
+.jf-note{margin-top:.9rem;font-size:.78rem;color:rgba(255,255,255,.5)}
+.jf-r{list-style:none;margin:0;padding:0;display:grid;gap:1.6rem;align-content:center}
+.jf-it{display:grid;grid-template-columns:3.2rem 1fr;column-gap:.8rem;row-gap:.25rem;align-items:baseline;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.jf-it:hover{transform:translateX(10px)}
+.jf-n{grid-row:1/3;font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;font-size:2.4rem;line-height:.9;color:var(--highlight);letter-spacing:-.05em;transition:transform .35s}
+.jf-it:hover .jf-n{transform:scale(1.15) rotate(-4deg)}
+.jf-t{font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;font-size:1.15rem;color:#fff;letter-spacing:-.01em}
+.jf-d{font-size:.88rem;line-height:1.5;color:rgba(255,255,255,.62)}
+@media(min-width:900px){.jf-grid{grid-template-columns:1.1fr 1fr;gap:5rem;align-items:center}.jf-h{font-size:clamp(3rem,5.2vw,5rem)}.jf-p{font-size:1.05rem}.jf-n{font-size:3.6rem}.jf-it{grid-template-columns:5rem 1fr}.jf-t{font-size:1.4rem}.jf-d{font-size:.95rem}}
 `;
 
