@@ -450,7 +450,7 @@ function HeroPops() {
       setTimeout(() => setItems((a) => a.filter((x) => x.id !== my)), 2900);
     };
     const first = setTimeout(spawn, 300);
-    const iv = setInterval(spawn, 650);
+    const iv = setInterval(spawn, 520);
     return () => { clearTimeout(first); clearInterval(iv); };
   }, []);
   return (<>{items.map((x) => (<div key={x.id} aria-hidden className="hx-pop" style={{ left: x.l + "%", top: x.tp + "%" }}>{x.t}</div>))}</>);
@@ -499,7 +499,7 @@ const GI_CSS = `
 .hx-rp1{left:24%;top:42%}.hx-rp2{left:78%;top:68%;width:min(36vw,300px)}.hx-rp2 i{animation-duration:6.4s}
 @keyframes hx-wave{0%{opacity:0;transform:scale(.15)}12%{opacity:.95}100%{opacity:0;transform:scale(1.5)}}
 @media(max-width:639px){.hx-rp1{left:30%;top:36%;width:70vw}.hx-rp2{left:72%;top:74%;width:46vw}}
-.hx-pop{position:absolute;z-index:2;background:rgba(255,255,255,.94);color:#000;border-radius:999px;padding:.4rem .85rem;font-size:.74rem;font-weight:700;pointer-events:none;white-space:nowrap;opacity:0;animation:hx-pop 1.9s ease-out forwards}
+.hx-pop{position:absolute;z-index:2;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);border-radius:999px;padding:.4rem .85rem;font-size:.74rem;font-weight:700;pointer-events:none;white-space:nowrap;opacity:0;animation:hx-pop 1.6s ease-out forwards}
 @keyframes hx-pop{0%{opacity:0;transform:scale(.4)}10%{opacity:1;transform:scale(1.08)}16%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.85)}}
 @media(prefers-reduced-motion:reduce){.hx-rp i,.hx-pop{animation:none!important}.hx-rp i{opacity:.35;transform:scale(.8)}}
 .hx-ring,.hx-chip,.hx-rp{display:none!important}
@@ -775,7 +775,7 @@ function Index() {
 
             <div className="relative mx-auto max-w-6xl">
               <span className="animate-pulse-ring i3-pill inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
-                <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Tailor resume · Apply — 5 free a month
+                <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Make resume from scratch · Tailor resume · Apply — 5 free a month
               </span>
               <h1 className="i3 mt-5" aria-label="First find the jobs. Tailor the resume. Then apply.">
                 <span aria-hidden className="i3-l"><span className="i3-w">FIRST,</span> <mark className="i3-y">FIND</mark></span>
