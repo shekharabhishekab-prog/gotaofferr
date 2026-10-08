@@ -5,10 +5,9 @@ export function SiteFooter() {
     <footer className="sf">
       <style>{SF_CSS}</style>
       <div className="sf-in">
-        <p className="sf-tag sf-h2">(01) / Next step / Apply</p>
         <div className="sf-top">
           <p className="sf-say">
-            Ready for the <em>offer?</em>
+            <span className="sf-r">Ready</span> <span className="sf-ft">for the</span> <em>offer?</em>
           </p>
           <div className="sf-cta">
             <Link to="/tailor" className="sf-btn">Tailor my resume</Link>
@@ -44,7 +43,6 @@ export function SiteFooter() {
 <li><Link to="/guides/india-resume-format" className="sf-a"><span>India resume format</span></Link></li></ul></div>
 </div>
 </nav>
-        <div className="sf-meta sf-h2"><span>Est. 2026</span><span>Last update Q4 2026</span></div>
         <div className="sf-base">
           <span>© {new Date().getFullYear()} GotaOfferr. Built for job seekers.</span>
           <span>AB24 SOLUTIONS · Delhi, India</span>
@@ -59,7 +57,6 @@ export function SiteFooter() {
             ))}
           </text>
         </svg>
-        <span className="sf-script" aria-hidden>less noise, more offers.</span>
       </div>
     </footer>
   );
@@ -135,26 +132,14 @@ const SF_CSS = `
 .sf-grp .sf-col:nth-child(3)>.sf-sub:nth-of-type(2){grid-column:2;grid-row:2}
 .sf-grp .sf-col:nth-child(3)>ul:nth-of-type(2){grid-column:2;grid-row:3;align-content:start}
 }
-@media(max-width:899px){
-.sf{padding-top:3.5rem}
-.sf-say{font-size:clamp(3rem,15vw,5rem)}
-.sf-btn{width:100%;justify-content:center;padding:1.05rem 1.5rem;font-size:1.05rem}
-.sf-grp{gap:2.6rem;margin-top:3rem}
-.sf-col ul.sf-list{gap:.2rem}
-.sf-col ul.sf-list .sf-a{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:1.75rem;letter-spacing:-.03em;text-transform:uppercase;color:#fff;line-height:1.15;padding:.2rem 0;width:100%;justify-content:space-between}
-.sf-col ul.sf-list .sf-a::after{content:"\\2197";color:var(--highlight,#ffd600);font-size:1.1rem}
-.sf-col:nth-child(2) ul.sf-list .sf-a{font-size:1.25rem;color:rgba(255,255,255,.7)}
-.sf-h2{font-size:.72rem}
-.sf-col ul.sf-chips li a{font-size:.9rem;padding:.6rem 1rem}
 
-.sf-word{aspect-ratio:auto!important;overflow:visible!important;position:relative;margin-top:2rem;padding:0 1.5rem}
-.sf-word svg{animation:none!important}.sf-word text{fill:rgba(255,255,255,.92)}
-.sf-script{display:block;position:absolute;right:7%;bottom:.1rem;color:var(--highlight,#ffd600);font-family:"HPInst",Georgia,serif;font-style:italic;font-size:1.5rem;transform:rotate(-4deg);text-shadow:0 2px 12px #000}
-.sf-meta{display:flex;justify-content:space-between;margin-top:1.6rem}.sf-tag{display:block}
-.sf-btn{box-sizing:border-box}
-}
-.sf-script,.sf-tag,.sf-meta{display:none}
-@media(max-width:899px){.sf-script{display:block}.sf-tag{display:block}.sf-meta{display:flex}}
+.sf-say{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.22em;row-gap:0}
+.sf-say .sf-r{flex-basis:100%}
+.sf-say em{display:inline-block;transform:rotate(-5deg) translateY(-.04em);transform-origin:left bottom;margin-left:.06em;font-size:1.05em}
+.sf-top{gap:1rem}
+.sf-cta{margin-top:-.4rem}
+@media(min-width:900px){.sf-top{gap:4rem}.sf-cta{transform:translateY(-1.6rem)}}
+.sf-word svg{animation:none!important}
 @media(prefers-reduced-motion:reduce){.sf-btn,.sf-col,.sf-top>*,.sf-word svg{animation:none!important}}
 @media(prefers-reduced-motion:reduce){.sf-a,.sf-btn,.sf-wordx i{transition:none}}
 
