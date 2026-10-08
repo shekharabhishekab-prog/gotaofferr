@@ -402,6 +402,88 @@ function StepArt({ i }: { i: number }) {
   );
 }
 
+
+function IntroOverlay() {
+  const ref = useRef<HTMLDivElement>(null);
+  const cnt = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let done = false;
+    const seen = (() => { try { return sessionStorage.getItem("gto-intro") === "1"; } catch { return false; } })();
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finish = (fast: boolean) => {
+      if (done) return;
+      done = true;
+      try { sessionStorage.setItem("gto-intro", "1"); } catch { /* ignore */ }
+      el.classList.add(fast ? "gi-skip" : "gi-end");
+      window.setTimeout(() => el.remove(), fast ? 320 : 700);
+    };
+    if (seen || reduce) { el.remove(); return; }
+    const t0 = performance.now();
+    let raf = 0;
+    const tick = (t: number) => {
+      const q = Math.min(1, (t - t0) / 2800);
+      if (cnt.current) cnt.current.textContent = Math.round(48213 * (1 - Math.pow(1 - q, 3))).toLocaleString("en-US");
+      if (q < 1 && !done) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    const timer = window.setTimeout(() => finish(false), 3500);
+    const skip = () => { if (cnt.current) cnt.current.textContent = "48,213"; finish(true); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") skip(); };
+    el.addEventListener("pointerdown", skip);
+    window.addEventListener("keydown", onKey);
+    return () => { cancelAnimationFrame(raf); window.clearTimeout(timer); window.removeEventListener("keydown", onKey); };
+  }, []);
+  const dots = Array.from({ length: 90 }, (_, i) => {
+    const a = (i * 137.5) % 360;
+    const r = 18 + ((i * 53) % 62);
+    return { x: 50 + Math.cos((a * Math.PI) / 180) * r * 0.9, y: 50 + Math.sin((a * Math.PI) / 180) * r * 0.62, s: 2 + (i % 3), d: (i % 15) * 0.05 };
+  });
+  return (
+    <div ref={ref} className="gi" role="presentation">
+      <style>{GI_CSS}</style>
+      <div className="gi-glow" />
+      <span className="gi-dot" />
+      {dots.map((d, i) => (
+        <i key={i} className="gi-p" style={{ left: d.x + "%", top: d.y + "%", width: d.s, height: d.s, ["--dl" as string]: d.d + "s", ["--tx" as string]: (50 - d.x) + "vw", ["--ty" as string]: (50 - d.y) + "vh" }} />
+      ))}
+      <div className="gi-mark">gota<b>offerr</b></div>
+      <div className="gi-m gi-tl">Resume + job finder</div>
+      <div className="gi-m gi-tr">Click to skip</div>
+      <div className="gi-m gi-bl">Sample count / jobs matched <b ref={undefined}><span ref={cnt}>0</span></b></div>
+    </div>
+  );
+}
+
+const GI_CSS = `
+.gi{position:fixed;inset:0;z-index:2147483000;background:#000;overflow:hidden;cursor:pointer;animation:gi-auto .7s 3.5s forwards}
+.gi-glow{position:absolute;left:50%;top:50%;width:min(110vw,900px);height:min(110vw,900px);transform:translate(-50%,-50%) scale(.2);background:radial-gradient(circle,rgba(255,214,0,.5) 0,transparent 62%);opacity:0;animation:gi-glow 3s .1s ease-out forwards}
+.gi-dot{position:absolute;left:50%;top:50%;width:12px;height:12px;border-radius:50%;background:#ffd600;transform:translate(-50%,-50%) scale(0);box-shadow:0 0 40px 10px rgba(255,214,0,.7);animation:gi-dot 1.1s .05s cubic-bezier(.2,.8,.2,1) forwards}
+.gi-p{position:absolute;border-radius:50%;background:#ffd600;box-shadow:0 0 6px #ffd600;opacity:0;animation:gi-p 2.3s calc(.5s + var(--dl)) ease-in-out forwards}
+.gi-mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);font-weight:800;font-size:clamp(2.2rem,7vw,4.5rem);letter-spacing:-.04em;color:#fff;opacity:0;animation:gi-mark 2.6s .7s cubic-bezier(.2,.8,.2,1) forwards;white-space:nowrap}
+.gi-mark b{color:#ffd600}
+.gi-m{position:absolute;font:500 .7rem ui-monospace,Menlo,monospace;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.65);opacity:0;animation:gi-fade .5s .3s forwards}
+.gi-m b{color:#ffd600;font-weight:500}
+.gi-tl{left:1.2rem;top:1.2rem}.gi-tr{right:1.2rem;top:1.2rem}.gi-bl{left:1.2rem;bottom:1.2rem}
+@keyframes gi-glow{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}35%{opacity:1;transform:translate(-50%,-50%) scale(.8)}100%{opacity:.35;transform:translate(-50%,-50%) scale(1.2)}}
+@keyframes gi-dot{0%{transform:translate(-50%,-50%) scale(0)}40%{transform:translate(-50%,-50%) scale(1.4)}70%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-50%,-50%) scale(1);opacity:.0}}
+@keyframes gi-p{0%{opacity:0;transform:translate(0,0) scale(.3)}25%{opacity:1;transform:translate(0,0) scale(1)}70%{opacity:.9;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(.4)}}
+@keyframes gi-mark{0%{opacity:0;transform:translate(-50%,-50%) scale(.9);filter:blur(10px)}25%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0)}75%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)}}
+@keyframes gi-fade{to{opacity:1}}
+@keyframes gi-auto{to{opacity:0;visibility:hidden;pointer-events:none}}
+.gi-end{animation:gi-auto .6s forwards}
+.gi-skip{animation:gi-auto .25s forwards!important}
+.hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s 3.2s ease-out infinite}
+.hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
+@keyframes hx-ring{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(1.5)}}
+.hx-chip{position:absolute;z-index:2;background:rgba(255,255,255,.92);color:#000;border-radius:999px;padding:.35rem .8rem;font-size:.72rem;font-weight:700;pointer-events:none;opacity:0;animation:hx-chip 7s ease-in-out infinite}
+.hx-c1{left:8%;top:30%;animation-delay:3.4s}.hx-c2{right:8%;top:38%;animation-delay:5.2s}.hx-c3{left:14%;bottom:24%;animation-delay:7s}
+@keyframes hx-chip{0%{opacity:0;transform:translateY(14px)}12%{opacity:1;transform:translateY(0)}60%{opacity:1;transform:translateY(-10px)}75%,100%{opacity:0;transform:translateY(-22px)}}
+@media(max-width:639px){.hx-c1{left:4%;top:20%}.hx-c2{right:4%;top:14%}.hx-c3{left:6%;bottom:30%}}
+@media(prefers-reduced-motion:reduce){.gi{display:none}.hx-ring,.hx-chip{animation:none;opacity:0}}
+`;
+
 function Index() {
   const [rv, setRv] = useState(false);
   const [showBar, setShowBar] = useState(false);
@@ -605,6 +687,7 @@ function Index() {
     <main ref={rootRef} className={`hp bg-black text-white ${rv ? "hp-rv hp-live" : ""}`}>
       <style>{HP_CSS}</style>
       <WipSplash />
+      <IntroOverlay />
       <div aria-hidden className="hp-prog">
         <span data-bar />
       </div>
@@ -616,6 +699,8 @@ function Index() {
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
 
+        <div aria-hidden className="hx-ring" /><div aria-hidden className="hx-ring hx-ring2" />
+        <div aria-hidden className="hx-chip hx-c1">92% match</div><div aria-hidden className="hx-chip hx-c2">Cover letter ready</div><div aria-hidden className="hx-chip hx-c3">Applied in 15 sec</div>
         <div aria-hidden className="hx-meta hx-m1"><span>(01)</span> find / tailor / apply</div>
         <div aria-hidden className="hx-meta hx-m2">global roles <b>/</b> free to start</div>
         <div aria-hidden className="hx-meta hx-m3"><i /> scroll</div>
