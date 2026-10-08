@@ -9,6 +9,7 @@ function buildAdminCsv(headers: string[], rows: unknown[][]): string {
 }
 
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { BarChart3, CreditCard, Download, Loader2, ShieldAlert, Users } from "lucide-react";
@@ -30,6 +31,7 @@ import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
 import { useSession } from "@/hooks/useSession";
 import { checkIsAdmin, getAdminDashboard } from "@/lib/admin.functions";
+import { REGIONS } from "@/lib/region";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -87,6 +89,7 @@ function Stat({ label, value, monthly, icon }: { label: string; value: string | 
 
 function AdminPage() {
   const { user, loading: sessionLoading } = useSession();
+  const [region, setRegion] = useState<string>("All");
   const isAdminFn = useServerFn(checkIsAdmin);
   const dashboardFn = useServerFn(getAdminDashboard);
 
@@ -136,6 +139,9 @@ function AdminPage() {
   }
 
   const d = dataQuery.data;
+  const shownUsers = (d?.users ?? []).filter((u) => region === "All" || u.region === region);
+  const shownSubs = (d?.subscriptions ?? []).filter((x) => region === "All" || x.region === region);
+  const regionCounts = Object.fromEntries(["All", ...REGIONS].map((r) => [r, r === "All" ? (d?.users.length ?? 0) : (d?.users ?? []).filter((u) => u.region === r).length]));
 
   return (
     <AdminMfaGate>
@@ -174,6 +180,18 @@ function AdminPage() {
             ))}
           </div>
 
+          <div className="mt-8" role="group" aria-label="Region filter">
+            <p className="mb-2 text-sm font-medium">Region (users and subscriptions below)</p>
+            <div className="flex flex-wrap gap-2">
+              {["All", ...REGIONS].map((r) => (
+                <Button key={r} size="sm" variant={region === r ? "default" : "outline"} aria-pressed={region === r} onClick={() => setRegion(r)}>
+                  {r} ({regionCounts[r]})
+                </Button>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">Region comes from the connection country at first sign-in, so someone on a VPN may show a different region than where they really are. Accounts made before this was tracked count as India.</p>
+          </div>
+
           <Tabs defaultValue="users" className="mt-10">
             <TabsList>
               <TabsTrigger value="users">Users</TabsTrigger>
@@ -183,7 +201,7 @@ function AdminPage() {
             <TabsContent value="users" className="mt-6">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground">
-                  All {d.users.length} accounts (free and paid).
+                  All {shownUsers.length} accounts (free and paid).
                 </p>
                 <Button
                   variant="outline"
@@ -205,7 +223,7 @@ function AdminPage() {
                         "joined",
                         "last_sign_in",
                       ],
-                      d.users.map((u) => [
+                      shownUsers.map((u) => [
                         u.id,
                         u.email,
                         u.cancelAtPeriodEnd,
@@ -242,7 +260,7 @@ function AdminPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {d.users.map((u) => (
+                    {shownUsers.map((u) => (
                       <TableRow key={u.id}>
                         <TableCell>{u.fullName ?? "—"}</TableCell>
                         <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
@@ -264,7 +282,7 @@ function AdminPage() {
             <TabsContent value="subs" className="mt-6">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground">
-                  Subscription records ({d.subscriptions.length}).
+                  Subscription records ({shownSubs.length}).
                 </p>
                 <Button
                   variant="outline"
@@ -284,7 +302,7 @@ function AdminPage() {
                         "current_period_end",
                         "started",
                       ],
-                      d.subscriptions.map((s) => [
+                      shownSubs.map((s) => [
                         s.userId,
                         s.email,
                         s.fullName,
@@ -298,7 +316,7 @@ function AdminPage() {
                       ]),
                     )
                   }
-                  disabled={d.subscriptions.length === 0}
+                  disabled={shownSubs.length === 0}
                 >
                   <Download className="mr-2 h-4 w-4" />
                   Download CSV
@@ -319,14 +337,14 @@ function AdminPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {d.subscriptions.length === 0 ? (
+                    {shownSubs.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center text-muted-foreground">
                           No subscriptions yet.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      d.subscriptions.map((s, i) => (
+                      shownSubs.map((s, i) => (
                         <TableRow key={`${s.userId}-${i}`}>
                           <TableCell>{s.fullName ?? "-"}</TableCell>
                           <TableCell className="font-medium">{s.email ?? s.userId}</TableCell>
@@ -354,3 +372,4 @@ function AdminPage() {
     </AdminMfaGate>
   );
 }
+
