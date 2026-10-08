@@ -1408,7 +1408,7 @@ html{scroll-behavior:smooth}
 .hp-bar{background:#000;visibility:hidden}
 .hp-bar.show{visibility:visible}
 html,body{background:#000}
-@media(max-width:639px){.hx-stop,.hx-tiny,.hp-hero .hp-btn:not(.bg-highlight){display:none}.hx-hand.hx-first{display:none}.hp-hero-body .hp-rise a[href="/resume-builder"]{display:none}}
+@media(max-width:639px){.hx-stop,.hp-hero .hp-btn:not(.bg-highlight){display:none}.hx-tiny{font-size:.62rem;letter-spacing:.2em}.hx-hand.hx-first{font-size:1.4rem}.hp-hero-body .hp-rise a[href="/resume-builder"]{display:none}}
 
 /* v5d */
 .hx-giant i,.hx-outline i{translate:calc(var(--mx)*(var(--d) - 5)*3px) calc(var(--my)*(var(--d) - 5)*2px);transition:translate .25s ease-out}
