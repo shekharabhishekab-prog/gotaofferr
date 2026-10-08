@@ -390,7 +390,7 @@ function Index() {
               <span aria-hidden className="hp-hand hp-hero-note">one click, per job</span>
             </div>
 
-            <p className="hp-rise mx-auto mt-8 max-w-xl text-base text-white/75 [animation-delay:140ms] sm:text-lg">
+            <p className="hp-rise mx-auto mt-14 max-w-xl text-base text-white/75 [animation-delay:140ms] sm:text-lg">
               Drop in your resume once. Our AI finds matching roles, rebuilds your resume for each
               company and writes the cover letter. You just hit apply.
             </p>
@@ -576,7 +576,7 @@ function Index() {
             </div>
           ))}
           <div className="hp-core relative z-10 w-[58vw] max-w-xl overflow-hidden rounded-xl border border-white/25 sm:w-[34vw]">
-            <LazyVideo name="hero" className="aspect-[4/5] w-full object-cover" />
+            <LazyVideo name="commute" className="aspect-[4/5] w-full object-cover" />
             <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 to-transparent p-4">
               <span className="text-xs uppercase tracking-[0.2em]">Real people. Real applications.</span>
             </div>
@@ -730,7 +730,7 @@ const HP_CSS = `
 .hp-live .hp-echo-2{transform:translateY(calc(var(--hp)*150px));opacity:.4}
 .hp-echo{display:none}
 .hp-live .hp-echo{display:block}
-.hp-hero-note{position:absolute;right:-2%;bottom:-2.2rem;color:var(--highlight);font-size:1.5rem;transform:rotate(-6deg)}
+.hp-hero-note{position:absolute;right:-2%;bottom:-2.9rem;color:var(--highlight);font-size:1.5rem;transform:rotate(-6deg)}
 @media(min-width:640px){.hp-hero-note{font-size:2.4rem;bottom:-2.6rem;right:-6%}}
 .hp-grid{background-image:linear-gradient(to right,rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.04) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(ellipse at 50% 40%,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 20%,transparent 75%)}
 .hp-br{position:absolute;width:12px;height:12px;border-color:rgba(255,255,255,.5)}
