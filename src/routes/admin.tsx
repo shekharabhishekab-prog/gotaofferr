@@ -30,7 +30,7 @@ import { AdminMfaGate } from "@/components/AdminMfaGate";
 import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
 import { useSession } from "@/hooks/useSession";
-import { checkIsAdmin, getAdminDashboard } from "@/lib/admin.functions";
+import { checkIsAdmin, getAdminDashboard, getMonthCards } from "@/lib/admin.functions";
 import { REGIONS } from "@/lib/region";
 
 export const Route = createFileRoute("/admin")({
@@ -54,6 +54,10 @@ export const Route = createFileRoute("/admin")({
   errorComponent: RouteError,
   notFoundComponent: RouteNotFound,
 });
+
+function monthLabel(ym: string) {
+  return new Date(`${ym}-01T00:00:00Z`).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
 
 function fmt(value: string | null | undefined) {
   if (!value) return "—";
@@ -90,6 +94,8 @@ function Stat({ label, value, monthly, icon }: { label: string; value: string | 
 function AdminPage() {
   const { user, loading: sessionLoading } = useSession();
   const [region, setRegion] = useState<string>("All");
+  const [month, setMonth] = useState<string>("");
+  const monthFn = useServerFn(getMonthCards);
   const isAdminFn = useServerFn(checkIsAdmin);
   const dashboardFn = useServerFn(getAdminDashboard);
 
@@ -106,6 +112,14 @@ function AdminPage() {
     queryFn: () => dashboardFn({}),
     enabled: isAdmin && adminQuery.data?.mfaVerified === true,
   });
+
+  const cardsQuery = useQuery({
+    queryKey: ["admin-month-cards", month],
+    queryFn: () => monthFn({ data: { month: month || undefined } }),
+    enabled: isAdmin && adminQuery.data?.mfaVerified === true,
+    refetchInterval: month === "" ? 60_000 : false,
+  });
+  const cards = cardsQuery.data;
 
   if (sessionLoading || (user && adminQuery.isLoading)) {
     return (
@@ -161,16 +175,34 @@ function AdminPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="Total users" value={d.totals.users} monthly={d.totals.usersThisMonth} icon={<Users className="h-4 w-4" />} />
-            <Stat label="Recorded rewrites" value={d.totals.runsTotal} monthly={d.totals.runsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Recorded job searches" value={d.totals.searchRecords} monthly={d.totals.searchesThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Subscriptions started" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} icon={<CreditCard className="h-4 w-4" />} />
-            <Stat label="Non-QA entitled user share now" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <label htmlFor="month-select" className="text-sm font-medium">Month</label>
+            <select
+              id="month-select"
+              value={cards?.month ?? ""}
+              onChange={(e) => setMonth(e.target.value)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              {(cards?.months ?? []).map((m) => (
+                <option key={m} value={m}>{monthLabel(m)}{m === cards?.current ? " (this month, live)" : ""}</option>
+              ))}
+            </select>
+            <span className="text-sm text-muted-foreground">Year {cards?.month?.slice(0, 4) ?? ""}</span>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">This month uses India time (IST). Counts are recorded activity; builder counts are download attempts. Subscriptions started counts new records, not renewals. Share excludes the two known QA accounts from both users and entitled users; it measures current access, not receipt-confirmed payments or historical conversion.</p>
+          {cards?.record ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat label="New users" value={cards.record.cards.users} icon={<Users className="h-4 w-4" />} />
+              <Stat label="Recorded rewrites" value={cards.record.cards.rewrites} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Recorded job searches" value={cards.record.cards.searches} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Recorded builder download attempts" value={cards.record.cards.builderDownloads} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Job alert records" value={cards.record.cards.alerts} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Subscriptions started" value={cards.record.cards.subscriptionsStarted} icon={<CreditCard className="h-4 w-4" />} />
+              <Stat label={cards.month === cards.current ? "Non-QA entitled user share now" : "Non-QA entitled user share at month end"} value={`${cards.record.cards.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">{cardsQuery.isLoading ? "Loading month numbers..." : "No saved numbers for this month."}</p>
+          )}
+          <p className="mt-3 text-sm text-muted-foreground">Each number counts only the chosen month (India time). The current month grows live and starts again from 0 on the 1st. A finished month is locked at about 22:30 IST on its last day. Counts are recorded activity; builder counts are download attempts. Subscriptions started counts new records, not renewals. Share excludes the two known QA accounts.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
