@@ -728,7 +728,7 @@ function Index() {
               tailored for <span key={ri} className="hp-roleword">{role}</span>
             </p>
 
-            <p className="hp-rise mx-auto mt-5 max-w-xl text-base text-white/75 [animation-delay:140ms] sm:text-lg">
+            <p className="hp-rise mx-auto mt-5 hidden max-w-xl text-base sm:block text-white/75 [animation-delay:140ms] sm:text-lg">
               <span className="text-balance sm:hidden">Drop in your resume once. We find jobs and tailor it for each.</span>
               <span className="hidden sm:inline">
                 Drop in your resume once. Our AI finds matching roles, rebuilds your resume for each
@@ -1118,7 +1118,7 @@ function Index() {
         </div>
       </section>
 
-      <div className={`hp-bar sm:hidden ${showBar ? "show" : ""}`}>
+      <div className={`hp-bar bg-black sm:hidden ${showBar ? "show" : ""}`}>
         <Link
           to="/tailor"
           className="flex items-center justify-center gap-2 rounded-full bg-highlight px-6 py-3 text-sm font-semibold text-highlight-foreground shadow-[0_8px_30px_rgba(0,0,0,.6)]"
@@ -1469,4 +1469,11 @@ html{scroll-behavior:smooth}
 @keyframes y-sw{from{background-position:120% 0}to{background-position:-120% 0}}
 .y-why .tx-n{display:inline-block;animation:hp-spin 8s linear infinite}
 @media(prefers-reduced-motion:reduce){.y-why .tx-big,.y-why .tx-n{animation:none}}
+
+/* v4f mobile */
+.hp-bar{background:#000;visibility:hidden}
+.hp-bar.show{visibility:visible}
+html,body{background:#000}
+.hx-giant{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:900;letter-spacing:-.03em}
+@media(max-width:639px){.hx-stop,.hx-tiny,.hp-hero .hp-btn:not(.bg-highlight){display:none}.hx-hand.hx-first{display:none}.hp-hero-body .hp-rise a[href="/resume-builder"]{display:none}}
 `;
