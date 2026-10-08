@@ -220,11 +220,10 @@ const stripB = ["i5668863", "i5989927", "i36766896", "i7606041", "i8730781"];
 const rowImgs = ["i30677714", "i5439449", "i5668858", "i3760069"];
 const marked = new Set(["Twenty", "jobs.", "applications,"]);
 
-/* Stats from the current live site. Edit the wording here (the pending
-   "10+ hrs saved weekly" line is the second entry). */
+/* Stats from the current live site. Edit the wording here (second entry: 10 hrs a week shown as 600+ min). */
 const stats = [
   { to: 15, pre: "", suf: " sec", label: "to a tailored resume", body: "Upload once. Rebuild for every company instantly.", Icon: Clock },
-  { to: 10, pre: "", suf: "+ hrs", label: "saved weekly", body: "Stop spending 1-2 hours every day hunting jobs and rewriting CVs.", Icon: Hourglass },
+  { to: 600, pre: "", suf: "+ min", label: "saved weekly", body: "Stop spending 1-2 hours every day hunting jobs and rewriting CVs.", Icon: Hourglass },
   { to: 1000, pre: "", suf: "+", label: "applications automated", body: "The reality of getting hired: hundreds of applications. We do the searching and tailoring for you.", Icon: Target },
   { to: 1, pre: "", suf: " click", label: "to apply", body: "Find, tailor, download, then go straight to the company.", Icon: MousePointerClick },
 ] as const;
@@ -556,6 +555,39 @@ function Index() {
         </div>
       </div>
 
+      {/* Numbers */}
+      <section id="numbers" className="site-container py-12 sm:py-24">
+        <div className="text-center">
+          <span data-rv className="hp-r hp-chip hp-chip-y inline-block text-[0.66rem] uppercase tracking-[0.16em] sm:text-xs">
+            Built for speed
+          </span>
+          <h2 data-rv className="hp-r mt-5 font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
+            Numbers that <span className="hp-hand normal-case text-highlight">actually</span> matter
+          </h2>
+          <p data-rv className="hp-r mt-4 text-sm text-white/60 sm:text-base">Stop counting tabs. Start counting replies.</p>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 lg:grid-cols-4">
+          {stats.map((st, k) => (
+            <div
+              key={st.label}
+              data-rv
+              data-spot
+              className="hp-r hp-spot hp-stat relative overflow-hidden border border-white/10 bg-white/[0.03] p-4 sm:p-7"
+              style={{ ["--k" as string]: k }}
+            >
+              <Brackets />
+              <st.Icon aria-hidden className="hp-sicon absolute right-3 top-3 size-5 text-highlight sm:right-5 sm:top-5 sm:size-6" />
+              <p className="relative mt-6 font-display text-4xl font-bold leading-none sm:mt-10 sm:text-6xl">
+                <span data-count={st.to} data-suf={st.suf}>{st.to}{st.suf}</span>
+              </p>
+              <p className="relative mt-3 text-sm font-semibold text-highlight sm:text-base">{st.label}</p>
+              <p className="relative mt-2 hidden text-sm text-white/60 sm:block">{st.body}</p>
+              <span aria-hidden className="hp-sbar" />
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* About: text on the left, living visual on the right */}
       <section id="about" data-p className="site-container py-16 sm:py-28">
         <div className="grid items-center gap-12 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
@@ -599,39 +631,6 @@ function Index() {
               20 jobs, 1 resume
             </span>
           </div>
-        </div>
-      </section>
-
-      {/* Numbers */}
-      <section id="numbers" className="site-container py-12 sm:py-24">
-        <div className="text-center">
-          <span data-rv className="hp-r hp-chip hp-chip-y inline-block text-[0.66rem] uppercase tracking-[0.16em] sm:text-xs">
-            Built for speed
-          </span>
-          <h2 data-rv className="hp-r mt-5 font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
-            Numbers that <span className="hp-hand normal-case text-highlight">actually</span> matter
-          </h2>
-          <p data-rv className="hp-r mt-4 text-sm text-white/60 sm:text-base">Stop counting tabs. Start counting replies.</p>
-        </div>
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 lg:grid-cols-4">
-          {stats.map((st, k) => (
-            <div
-              key={st.label}
-              data-rv
-              data-spot
-              className="hp-r hp-spot hp-stat relative overflow-hidden border border-white/10 bg-white/[0.03] p-4 sm:p-7"
-              style={{ ["--k" as string]: k }}
-            >
-              <Brackets />
-              <st.Icon aria-hidden className="hp-sicon absolute right-3 top-3 size-5 text-highlight sm:right-5 sm:top-5 sm:size-6" />
-              <p className="relative mt-6 font-display text-4xl font-bold leading-none sm:mt-10 sm:text-6xl">
-                <span data-count={st.to} data-suf={st.suf}>{st.to}{st.suf}</span>
-              </p>
-              <p className="relative mt-3 text-sm font-semibold text-highlight sm:text-base">{st.label}</p>
-              <p className="relative mt-2 hidden text-sm text-white/60 sm:block">{st.body}</p>
-              <span aria-hidden className="hp-sbar" />
-            </div>
-          ))}
         </div>
       </section>
 
