@@ -87,6 +87,7 @@ function securityHeaders(nonce?: string, hostname?: string): Record<string, stri
       "style-src-elem 'self' 'unsafe-inline' data:",
       "style-src-attr 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
+      "media-src 'self' blob:",
       "font-src 'self' data:",
       "worker-src 'self' blob:",
       "child-src 'self' blob: https://*.razorpay.com https://challenges.cloudflare.com https://*.googlesyndication.com https://*.doubleclick.net",
@@ -179,4 +180,5 @@ export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
   requestMiddleware: [errorMiddleware, securityHeadersMiddleware, csrfMiddleware],
 }));
+
 
