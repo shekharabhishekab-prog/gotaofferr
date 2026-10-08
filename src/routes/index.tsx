@@ -756,7 +756,7 @@ function Index() {
       </section>
 
       {/* Scope: rows with a hover image */}
-      <section id="jobfinder" className="jf site-container py-16 sm:py-28">
+      <section id="jobfinder" data-p className="jf site-container py-16 sm:py-28">
         <div className="jf-grid">
           <div className="jf-l">
             <span data-rv className="hp-r jf-chip">AI job finder</span>
@@ -1558,5 +1558,13 @@ header .site-container{max-width:none!important;width:100%!important;margin-left
 .hx-track{display:none}
 .hx-mid{font-size:1.8rem}
 }
+.hp-live .jf-a{transform:translateX(calc((var(--p) - .5)*-10vw))}
+.hp-live .jf-b{transform:translateX(calc((var(--p) - .5)*10vw))}
+.hp-live .jf-it{--q:clamp(0,calc(var(--p)*3.4 - .6 - var(--k)*.28),1);opacity:calc(.15 + var(--q)*.85);translate:calc((1 - var(--q))*14vw) 0;filter:blur(calc((1 - var(--q))*4px))}
+.hp-live .jf-n{display:inline-block;transform:rotate(calc((1 - var(--q))*-14deg))}
+.hp-live .jf-chip{animation:jf-pulse 2.8s ease-in-out infinite}
+@keyframes jf-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.0)}50%{box-shadow:0 0 0 .5rem rgba(255,214,0,.16)}}
+.jf-btn-y::after{content:"";position:absolute}
+@media(prefers-reduced-motion:reduce){.hp-live .jf-a,.hp-live .jf-b{transform:none}.hp-live .jf-it{translate:none;opacity:1;filter:none}.hp-live .jf-chip{animation:none}}
 `;
 
