@@ -528,48 +528,6 @@ function Index() {
           el.removeEventListener("pointerleave", lv);
         });
       });
-      {
-        const cv = document.createElement("canvas");
-        cv.setAttribute("aria-hidden", "true");
-        cv.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:60";
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const fit = () => { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; };
-        fit();
-        document.body.appendChild(cv);
-        const cx = cv.getContext("2d");
-        const dots: { x: number; y: number; t: number; r: number }[] = [];
-        let lx = -1, ly = -1, raf = 0, lastScroll = scrollY;
-        const add = (x: number, y: number, r: number) => { dots.push({ x, y, t: performance.now(), r }); if (dots.length > 60) dots.shift(); };
-        const mv = (ev: PointerEvent) => {
-          if (lx >= 0 && Math.hypot(ev.clientX - lx, ev.clientY - ly) < 10) return;
-          lx = ev.clientX; ly = ev.clientY;
-          add(lx, ly, ev.pointerType === "touch" ? 5 : 4);
-        };
-        const sc = () => {
-          const d = scrollY - lastScroll; lastScroll = scrollY;
-          if (Math.abs(d) < 6) return;
-          add(innerWidth * (0.5 + Math.sin(scrollY / 140) * 0.35), innerHeight * 0.5 + Math.cos(scrollY / 90) * innerHeight * 0.3, 3.5);
-        };
-        const draw = (now: number) => {
-          if (cx) {
-            cx.clearRect(0, 0, cv.width, cv.height);
-            for (const d of dots) {
-              const a = 1 - (now - d.t) / 900;
-              if (a <= 0) continue;
-              cx.beginPath();
-              cx.fillStyle = `rgba(255,214,0,${(a * 0.7).toFixed(3)})`;
-              cx.arc(d.x * dpr, d.y * dpr, d.r * a * dpr + 0.6, 0, 6.2832);
-              cx.fill();
-            }
-          }
-          raf = requestAnimationFrame(draw);
-        };
-        raf = requestAnimationFrame(draw);
-        addEventListener("pointermove", mv, { passive: true });
-        addEventListener("scroll", sc, { passive: true });
-        addEventListener("resize", fit);
-        cleanups.push(() => { cancelAnimationFrame(raf); removeEventListener("pointermove", mv); removeEventListener("scroll", sc); removeEventListener("resize", fit); cv.remove(); });
-      }
       if (hero) {
         const mv = (ev: PointerEvent) => {
           const r = hero.getBoundingClientRect();
