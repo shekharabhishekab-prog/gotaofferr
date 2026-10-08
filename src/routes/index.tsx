@@ -517,7 +517,7 @@ const GI_CSS = `
 .hx-ring,.hx-chip,.hx-rp{display:none!important}
 .hp-hero{margin-top:-3.6rem;padding-top:3.6rem}
 .i3-pill{margin-bottom:.9rem;font-size:.64rem!important;padding:.15rem .6rem!important}
-@media(max-width:639px){.i3-pill{font-size:7px!important;padding:.15rem .42rem!important;white-space:nowrap;gap:.25rem!important;letter-spacing:-.01em}.i3-pill svg{width:.6rem!important;height:.6rem!important}}
+@media(max-width:639px){.pill-d{display:none}.i3-pill{font-size:9px!important;padding:.15rem .42rem!important;white-space:nowrap;gap:.25rem!important;letter-spacing:-.01em}.i3-pill svg{width:.6rem!important;height:.6rem!important}}
 .i3-tag{margin:0 auto 1.1rem;max-width:34rem;font-family:ui-monospace,Menlo,monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.78);line-height:1.7}
 .i3-tag b{color:#ffd600;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
@@ -791,7 +791,7 @@ function Index() {
 
             <div className="relative mx-auto max-w-6xl">
               <span className="animate-pulse-ring i3-pill inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
-                <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Make resume from scratch · Tailor resume · Apply — 5 free a month
+                <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · <span className="pill-d">Make resume from scratch · </span>Tailor resume · Apply — 5 free a month
               </span>
               <h1 className="i3 mt-5" aria-label="The job you want. The resume it needs.">
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y">JOB</mark> <span className="i3-w">YOU WANT.</span></span>
@@ -1577,7 +1577,7 @@ html,body{background:#000}
 .hx-outline{color:#fff;-webkit-text-stroke:0}
 .hp-sub{display:none}
 @media(max-width:639px){.hp-note{display:none!important}}
-.hp-note{position:absolute;left:50%;bottom:-1.7rem;transform:translateX(140px) rotate(-4deg);pointer-events:none;z-index:3}
+.hp-note{position:absolute;left:50%;bottom:-1.7rem;transform:translateX(218px) rotate(-4deg);pointer-events:none;z-index:3}
 .hp-note em{font-family:"HPHand","Caveat Brush",cursive;font-style:normal;font-size:1.25rem;line-height:1;white-space:nowrap;color:rgba(255,255,255,.8);text-shadow:0 1px 8px rgba(0,0,0,.6)}
 @media(max-width:639px){
 .hp-hero .hp-btn:not(.bg-highlight){display:inline-flex!important}
