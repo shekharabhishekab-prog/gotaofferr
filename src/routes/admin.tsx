@@ -182,13 +182,19 @@ function AdminPage() {
 
           <div className="mt-8" role="group" aria-label="Region filter">
             <p className="mb-2 text-sm font-medium">Region (users and subscriptions below)</p>
-            <div className="flex flex-wrap gap-2">
+            <label className="sr-only" htmlFor="region-select">Region</label>
+            <select
+              id="region-select"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="h-10 w-full max-w-xs rounded-md border border-input bg-background px-3 text-sm"
+            >
               {["All", ...REGIONS].map((r) => (
-                <Button key={r} size="sm" variant={region === r ? "default" : "outline"} aria-pressed={region === r} onClick={() => setRegion(r)}>
+                <option key={r} value={r}>
                   {r} ({regionCounts[r]})
-                </Button>
+                </option>
               ))}
-            </div>
+            </select>
             <p className="mt-2 text-xs text-muted-foreground">Region comes from the connection country at first sign-in, so someone on a VPN may show a different region than where they really are. Accounts made before this was tracked count as India.</p>
           </div>
 
