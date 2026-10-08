@@ -567,7 +567,7 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 @media(max-width:639px){.hx-c1{left:4%;top:20%}.hx-c2{right:4%;top:14%}.hx-c3{left:6%;bottom:30%}}
 
 .hx-meta,.hx-m3{display:none!important}
-.hp-hero .i3-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05) brightness(.62)}
+.hp-hero .i3-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05) brightness(.52)}@media(max-width:639px){.hp-hero .i3-vid{filter:grayscale(1) contrast(1.05) brightness(.4)}}
 .i3{margin:0;font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-.055em;line-height:.92;color:#fff;font-size:clamp(2.9rem,14.2vw,5rem);display:flex;flex-direction:column;align-items:center;text-shadow:0 2px 30px rgba(0,0,0,.35)}
 .i3-l{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;column-gap:.14em;white-space:nowrap}
 .i3-y{background:var(--highlight,#ffd600);color:#000;padding:.0em .1em .02em;margin:.02em 0;text-shadow:none;display:inline-block;animation:i3-in .7s cubic-bezier(.2,.8,.2,1) both}
