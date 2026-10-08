@@ -73,63 +73,74 @@ export function userRegion(u: any): string {
   return String(u?.app_metadata?.signup_region ?? regionForCountry(u?.app_metadata?.signup_country ?? null));
 }
 
-export async function computeMonth(ym: string): Promise<MonthRecord> {
+/** Counts several months with ONE round of database reads (the Worker allows only about 50 outbound calls per request). */
+export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
+  if (!yms.length) return [];
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { isEntitled } = await import("./plans");
   const { getStripeEnvironment } = await import("./stripe");
-  const { start, end } = monthRange(ym);
-  const upTo = Math.min(end, Date.now());
-  const inMonth = (row: { created_at?: string | null }) => {
-    const t = new Date(row.created_at ?? "").getTime();
-    return Number.isFinite(t) && t >= start && t < upTo + 1 && t < end;
-  };
+  const sorted = [...yms].sort();
+  const from = new Date(monthRange(sorted[0]).start).toISOString();
+  const to = new Date(monthRange(sorted[sorted.length - 1]).end).toISOString();
+  const ranged = (table: string) =>
+    allRows(() => supabaseAdmin.from(table).select("id,created_at").gte("created_at", from).lt("created_at", to).order("id"));
   const [authUsers, subs, usage, searches, builders, alerts] = await Promise.all([
     loadAuthUsers(supabaseAdmin),
     allRows(() => supabaseAdmin.from("subscriptions").select("id,user_id,price_id,status,current_period_end,cancel_at_period_end,created_at").eq("environment", getStripeEnvironment()).order("id")),
-    allRows(() => supabaseAdmin.from("tailor_usage_log").select("id,created_at").gte("created_at", new Date(start).toISOString()).lt("created_at", new Date(end).toISOString()).order("id")),
-    allRows(() => supabaseAdmin.from("job_search_runs").select("id,created_at").gte("created_at", new Date(start).toISOString()).lt("created_at", new Date(end).toISOString()).order("id")),
-    allRows(() => supabaseAdmin.from("builder_uses").select("id,created_at").gte("created_at", new Date(start).toISOString()).lt("created_at", new Date(end).toISOString()).order("id")),
-    allRows(() => supabaseAdmin.from("job_alerts").select("id,created_at").gte("created_at", new Date(start).toISOString()).lt("created_at", new Date(end).toISOString()).order("id")),
+    ranged("tailor_usage_log"),
+    ranged("job_search_runs"),
+    ranged("builder_uses"),
+    ranged("job_alerts"),
   ]);
   const regionOf = new Map<string, string>();
   for (const u of authUsers) regionOf.set(u.id, userRegion(u));
-  const regions: RegionSplit = {};
-  for (const r of REGIONS) regions[r] = { users: 0, subscriptions: 0 };
-  const joined = authUsers.filter((u) => inMonth({ created_at: u.created_at }));
-  for (const u of joined) regions[regionOf.get(u.id) ?? "India"].users += 1;
-  const started = subs.filter(inMonth);
-  for (const s of started) regions[regionOf.get(s.user_id) ?? "India"].subscriptions += 1;
-
-  // Same QA exclusion as the admin page share number.
   const qa = new Set(["mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com"]);
   const firstSub = new Map<string, any>();
   for (const s of subs) if (!firstSub.has(s.user_id)) firstSub.set(s.user_id, s);
   const real = authUsers.filter((u) => !qa.has(String(u.email ?? "").trim().toLowerCase()));
-  const entitled = real.filter((u) => {
+  const entitledNow = real.filter((u) => {
     const s = firstSub.get(u.id);
     return s && isEntitled(s);
   }).length;
-  const activeSubscribers = authUsers.filter((u) => {
+  const activeNow = authUsers.filter((u) => {
     const s = firstSub.get(u.id);
     return s && isEntitled(s);
   }).length;
 
-  return {
-    month: ym,
-    lockedAt: null,
-    cards: {
-      users: joined.length,
-      rewrites: usage.length,
-      searches: searches.length,
-      builderDownloads: builders.length,
-      alerts: alerts.length,
-      subscriptionsStarted: started.length,
-      subscriberSharePercent: real.length ? (entitled / real.length) * 100 : 0,
-    },
-    regions,
-    totalUsersAtEnd: authUsers.filter((u) => new Date(u.created_at ?? "").getTime() < end).length,
-    activeSubscribersAtEnd: activeSubscribers,
-  };
+  return yms.map((ym) => {
+    const { start, end } = monthRange(ym);
+    const inMonth = (row: { created_at?: string | null }) => {
+      const t = new Date(row.created_at ?? "").getTime();
+      return Number.isFinite(t) && t >= start && t < end;
+    };
+    const regions: RegionSplit = {};
+    for (const r of REGIONS) regions[r] = { users: 0, subscriptions: 0 };
+    const joined = authUsers.filter((u) => inMonth({ created_at: u.created_at }));
+    for (const u of joined) regions[regionOf.get(u.id) ?? "India"].users += 1;
+    const started = subs.filter(inMonth);
+    for (const s of started) regions[regionOf.get(s.user_id) ?? "India"].subscriptions += 1;
+    return {
+      month: ym,
+      lockedAt: null,
+      cards: {
+        users: joined.length,
+        rewrites: usage.filter(inMonth).length,
+        searches: searches.filter(inMonth).length,
+        builderDownloads: builders.filter(inMonth).length,
+        alerts: alerts.filter(inMonth).length,
+        subscriptionsStarted: started.length,
+        // Share is a point-in-time number: it is the share at the moment of counting.
+        subscriberSharePercent: real.length ? (entitledNow / real.length) * 100 : 0,
+      },
+      regions,
+      totalUsersAtEnd: authUsers.filter((u) => new Date(u.created_at ?? "").getTime() < end).length,
+      activeSubscribersAtEnd: activeNow,
+    };
+  });
+}
+
+export async function computeMonth(ym: string): Promise<MonthRecord> {
+  return (await computeMonths([ym]))[0];
 }
 
 const lockKey = (ym: string) => `reports/monthly/${ym}.json`;
@@ -156,23 +167,29 @@ export async function lockMonth(ym: string, opts: { dry?: boolean } = {}): Promi
 
 /** Locked months for a year, plus the live current month if it falls in that year. */
 export async function monthsForYear(year: number): Promise<MonthRecord[]> {
-  const out: MonthRecord[] = [];
   const cur = currentMonthIST();
+  const yms: string[] = [];
   for (let m = 1; m <= 12; m++) {
     const ym = `${year}-${String(m).padStart(2, "0")}`;
     if (ym > cur) break;
-    const locked = await readLocked(ym);
-    // A month that was never locked is counted from the database rows that still exist.
-    out.push(locked ?? (await computeMonth(ym)));
+    yms.push(ym);
   }
-  return out;
+  const locked = new Map<string, MonthRecord>();
+  for (const ym of yms) {
+    const l = await readLocked(ym);
+    if (l) locked.set(ym, l);
+  }
+  // A month that was never locked is counted from the database rows that still exist.
+  const missing = yms.filter((ym) => !locked.has(ym));
+  const counted = new Map((await computeMonths(missing)).map((r) => [r.month, r] as const));
+  return yms.map((ym) => locked.get(ym) ?? (counted.get(ym) as MonthRecord));
 }
 
 export async function lockedMonthList(): Promise<string[]> {
   const list: string[] = [];
   const now = currentMonthIST();
   const [yNow] = now.split("-").map(Number);
-  for (let y = yNow - 1; y <= yNow; y++) {
+  for (let y = yNow; y <= yNow; y++) {
     for (let m = 1; m <= 12; m++) {
       const ym = `${y}-${String(m).padStart(2, "0")}`;
       if (ym >= now) break;
