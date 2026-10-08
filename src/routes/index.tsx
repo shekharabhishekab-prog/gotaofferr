@@ -701,7 +701,7 @@ function Index() {
       });
       {
         const grid = document.querySelector<HTMLElement>(".rl-grid");
-        const num = document.querySelector<HTMLElement>(".rl-n");
+        const num = document.querySelector<HTMLElement>(".rl-n[data-to]");
         if (grid) {
           const mv = (ev: PointerEvent) => {
             const r = grid.getBoundingClientRect();
@@ -1021,10 +1021,14 @@ function Index() {
               </Link>
             ))}
           </div>
-          <div className="mt-10 flex justify-center sm:mt-14">
-            <Link to="/examples/resumes" data-rv className="hp-r inline-flex items-center gap-2 rounded-full bg-highlight px-8 py-3.5 text-sm font-semibold text-black transition hover:brightness-110">
-              See all examples <ArrowRight className="size-4" />
+          <div className="sae-wrap mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 sm:mt-14">
+            <Link to="/examples/resumes" data-rv className="hp-r sae-btn group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-highlight px-8 py-4 text-base font-bold text-black">
+              <span className="sae-dot" aria-hidden />
+              <span className="relative z-10">See all examples</span>
+              <ArrowRight className="sae-arrow relative z-10 size-5" />
+              <span className="sae-shine" aria-hidden />
             </Link>
+            <span className="sae-note text-xs uppercase tracking-[.18em] text-white/55">Search, preview and download every resume</span>
           </div>
         </section>
       ) : null}
@@ -1119,7 +1123,7 @@ function Index() {
         <div className="site-container">
           <div className="rl-head">
             <span className="rl-mono">( hiring, in motion )</span>
-            <p className="rl-say" aria-label="fifteen seconds a job"><span aria-hidden className="rl-n" data-to="15">15</span><span aria-hidden className="rl-sec">seconds</span><span aria-hidden className="rl-aj">a job</span></p>
+            <p className="rl-say" aria-label="Real people. Real offers."><span aria-hidden className="rl-n rl-w">Real</span><span aria-hidden className="rl-sec">people.</span><span aria-hidden className="rl-aj">Real offers.</span></p>
           </div>
           <div className="rl-grid mt-6 sm:mt-10">
             {reelTiles.map((n, k) => (
@@ -1574,6 +1578,8 @@ html,body{background:#000}
 @media(prefers-reduced-motion:reduce){.rl-t{animation:none}}
 .hx-outline{color:#fff;-webkit-text-stroke:0}
 .hp-sub{display:none}
+.sae-btn{transition:transform .25s ease,box-shadow .25s ease}.sae-btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px -10px rgba(245,205,0,.55)}.sae-dot{width:8px;height:8px;border-radius:9999px;background:#000;position:relative;z-index:10;animation:saePulse 1.8s ease-in-out infinite}.sae-arrow{animation:saeNudge 1.6s ease-in-out infinite}.sae-btn:hover .sae-arrow{animation-duration:.7s}.sae-shine{position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:saeShine 3.6s ease-in-out infinite}@keyframes saePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.6)}}@keyframes saeNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}@keyframes saeShine{0%,55%{left:-60%}100%{left:130%}}@media(prefers-reduced-motion:reduce){.sae-dot,.sae-arrow,.sae-shine{animation:none}}
+.rl-n.rl-w{font-size:5.5rem;letter-spacing:-.04em;line-height:.85}@media(min-width:640px){.rl-n.rl-w{font-size:13rem}.rl-sec{font-size:5.5rem}.rl-aj{font-size:3rem}}
 @media(min-width:640px){.hp-sub{display:block;margin-top:.55rem;text-align:center;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);white-space:nowrap}.hp-hero-body div.hp-rise.flex{align-items:flex-start}}
 @media(max-width:639px){.hp-note{display:none!important}}
 .hp-note{position:absolute;left:50%;bottom:-.2rem;transform:translateX(250px) rotate(-3deg);pointer-events:none;z-index:3;display:flex;flex-direction:column;align-items:flex-start;color:rgba(255,255,255,.8)}
