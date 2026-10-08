@@ -456,7 +456,7 @@ function Index() {
               <h1 className="hp-h1 hp-rise relative">
                 {heroWords.map((w, i) => (
                   <span key={i} className={`hp-hw ${w === "resume." ? "text-highlight" : ""}`}>
-                    {w}{" "}
+                    {w}
                   </span>
                 ))}
               </h1>
@@ -664,35 +664,43 @@ function Index() {
 
       {/* How it works: cards stack over each other; titles are links */}
       <section id="how">
-        <div className="site-container py-10 sm:py-20">
-          <h2 data-rv className="hp-r max-w-3xl font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
+        <div className="site-container py-16 sm:py-32">
+          <h2 data-rv className="hp-r max-w-4xl font-display text-5xl font-bold uppercase leading-none sm:text-8xl">
             How it works
           </h2>
           <div className="mt-10 sm:mt-14">
             {flow.map((s, i) => {
               const body = steps[i]?.body ?? "";
-              const titleCls = "hp-tlink inline-flex items-center gap-2 font-display text-3xl font-bold uppercase sm:text-5xl";
+              const titleCls = "hp-tlink inline-flex items-center gap-2 font-display text-4xl font-bold uppercase sm:text-7xl";
               const titleIn = (
                 <>
                   {s.title}
-                  <ArrowUpRight className="hp-tarrow size-6 sm:size-9" />
+                  <ArrowUpRight className="hp-tarrow size-7 sm:size-12" />
                 </>
               );
               const ctaCls =
                 "hp-btn mt-4 inline-flex items-center gap-2 rounded-full border border-highlight/50 px-4 py-2 text-xs uppercase tracking-[0.14em] text-highlight transition-colors hover:bg-highlight hover:text-highlight-foreground";
               return (
                 <div key={s.n} className="hp-stack" style={{ ["--i" as string]: i }}>
-                  <div className="hp-stackcard relative overflow-hidden border border-white/15 bg-black p-5 sm:p-10">
-                    <LazyVideo name={s.clip} className="absolute inset-0 h-full w-full object-cover opacity-[0.28]" />
+                  <div data-p className="hp-stackcard relative overflow-hidden border border-white/15 bg-black p-6 sm:p-14">
+                    <span aria-hidden className="hp-bignum">{s.n}</span>
+                    <LazyVideo name={s.clip} className="hp-cardvid absolute inset-0 h-full w-full object-cover opacity-[0.34]" />
                     <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-transparent" />
                     <Brackets />
                     <StepArt i={i} />
-                    <div className="relative flex min-h-[12rem] flex-col justify-between sm:min-h-[17rem]">
+                    <div className="relative flex min-h-[15rem] flex-col justify-between sm:min-h-[26rem]">
                       <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] text-white/60">
                         <span>{s.n} /</span>
                         <span className="hp-hand text-xl normal-case tracking-normal text-highlight">{s.tag}</span>
                       </div>
                       <div>
+                        <div aria-hidden className="hp-kw mb-4 overflow-hidden">
+                          <div className="animate-marquee flex w-max gap-6 text-xs uppercase tracking-[0.3em] text-white/30">
+                            {[0, 1, 2, 3].map((k) => (
+                              <span key={k} className="whitespace-nowrap">{s.tag} <span className="text-highlight/60">/</span> {s.title} <span className="text-highlight/60">/</span></span>
+                            ))}
+                          </div>
+                        </div>
                         <h3>
                           {i === 0 ? (
                             <Link to="/jobs" search={{ alert: undefined }} className={titleCls}>{titleIn}</Link>
@@ -724,25 +732,31 @@ function Index() {
 
       {/* Showreel */}
       <section id="reel" data-p className="relative overflow-hidden py-10 sm:py-24">
-        <div className="relative mx-auto flex h-[42vh] max-w-6xl items-center justify-center sm:h-[60vh]">
-          {reel.map((t) => (
-            <div
-              key={t.n}
-              aria-hidden
-              className={`hp-tile absolute overflow-hidden rounded-lg border border-white/15 ${t.w}`}
-              style={{ ["--dx" as string]: t.dx, ["--dy" as string]: t.dy, ["--rot" as string]: t.rot }}
-            >
-              <img src={`/m/${t.n}.webp`} alt="" loading="lazy" decoding="async" className="aspect-[4/5] h-full w-full object-cover opacity-65" />
+        <div className="site-container">
+          <div className="hp-reel mx-auto grid max-w-5xl grid-cols-[1fr_1.5fr_1fr] items-center gap-2 sm:gap-5">
+            <div className="hp-rcol-l">
+              <div aria-hidden className="hp-rtile overflow-hidden rounded-lg border border-white/15" style={{ ["--r" as string]: "-2deg" }}>
+                <img src="/m/i5439153.webp" alt="" loading="lazy" decoding="async" className="aspect-[3/4] w-full object-cover opacity-70" />
+              </div>
             </div>
-          ))}
-          <div className="hp-core relative z-10 w-[56vw] max-w-xl overflow-hidden rounded-xl border border-white/25 sm:w-[32vw]">
-            <LazyVideo name="core" className="aspect-[4/5] w-full object-cover" />
-            <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 to-transparent p-4">
-              <span className="text-xs uppercase tracking-[0.2em]">Interview ready</span>
+            <div className="hp-core relative overflow-hidden rounded-xl border border-white/25">
+              <LazyVideo name="core" className="aspect-[4/5] w-full object-cover" />
+              <Brackets />
+              <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
+                <span className="text-[0.6rem] uppercase tracking-[0.2em] sm:text-xs">Interview ready</span>
+              </div>
+            </div>
+            <div className="hp-rcol-r space-y-2 sm:space-y-5">
+              <div aria-hidden className="hp-rtile overflow-hidden rounded-lg border border-white/15" style={{ ["--r" as string]: "2deg" }}>
+                <img src="/m/i8093001.webp" alt="" loading="lazy" decoding="async" className="aspect-[3/4] w-full object-cover opacity-70" />
+              </div>
+              <div aria-hidden className="hp-rtile overflow-hidden rounded-lg border border-white/15" style={{ ["--r" as string]: "-1deg" }}>
+                <img src="/m/shake2.webp" alt="" loading="lazy" decoding="async" className="aspect-[3/4] w-full object-cover opacity-70" />
+              </div>
             </div>
           </div>
         </div>
-        <p className="hp-hand mt-8 text-center text-3xl text-highlight sm:text-5xl">fifteen seconds a job</p>
+        <p className="hp-hand mt-10 text-center text-3xl text-highlight sm:text-5xl">fifteen seconds a job</p>
       </section>
 
       {/* Why */}
@@ -984,4 +998,17 @@ html{scroll-behavior:smooth}
 .hp-sr{transform:translateX(calc((var(--p) - .5)*12vw))}
 @media(prefers-reduced-motion:reduce){.hp-job,.hp-file,.hp-down,.hp-badge,.hp-pulse{animation:none}.hp-sweep::after{animation:none;transform:none}.hp-wd{opacity:1!important;transform:none!important}.hp-pecho{display:none!important}}
 @media(max-width:639px){.hp-art{display:none}}
+
+
+.hp-rcol-l{transform:translateY(calc((.5 - var(--p))*90px))}
+.hp-rcol-r{transform:translateY(calc((var(--p) - .5)*90px))}
+.hp-rtile{transform:rotate(var(--r,0deg));transition:transform .4s}
+.hp-rtile:hover{transform:rotate(0deg) scale(1.04)}
+.hp-core{transform:scale(calc(.9 + var(--p)*.1));box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 80px -30px color-mix(in oklab,var(--highlight) 35%,transparent)}
+.hp-hw{margin-right:.26em}
+.hp-bignum{position:absolute;right:1rem;bottom:-1.5rem;font-family:var(--font-display,inherit);font-weight:800;font-size:9rem;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.14);transform:translateY(calc((1 - var(--p))*70px));pointer-events:none}
+@media(min-width:640px){.hp-bignum{font-size:20rem;right:3rem;bottom:-3rem}}
+.hp-cardvid{transform:scale(calc(1.18 - var(--p)*.18))}
+.hp-stackcard{--p:.5}
+@media(prefers-reduced-motion:reduce){.hp-rcol-l,.hp-rcol-r,.hp-core,.hp-bignum,.hp-cardvid{transform:none!important}}
 `;
