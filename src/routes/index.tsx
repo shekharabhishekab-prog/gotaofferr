@@ -151,12 +151,6 @@ const notWhat = [
   },
 ];
 
-const plans = [
-  { name: "Free", tailor: "5", search: "1" },
-  { name: "Starter", tailor: "20", search: "5" },
-  { name: "Job Hunt", tailor: "129", search: "10" },
-  { name: "Career Pro", tailor: "199", search: "30" },
-];
 
 const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi).slice(0, 3);
 /* Corner brackets: the framed-panel detail from the reference. */
@@ -856,7 +850,7 @@ function Index() {
             </p>
             <div data-rv className="hp-r jf-cta">
               <Link to="/jobs" search={{ alert: undefined }} className="jf-btn jf-btn-y">Try the job finder free <ArrowRight className="size-4" /></Link>
-              <a href="#plans" className="jf-btn jf-btn-o">See plans</a>
+              <Link to="/pricing" className="jf-btn jf-btn-o">See plans</Link>
             </div>
             <p data-rv className="hp-r jf-note">One free search on any account — no card needed.</p>
           </div>
@@ -1056,33 +1050,6 @@ function Index() {
               <p className="tx-sm">{n.body}</p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Plans */}
-      <section id="plans" className="site-container pb-16 sm:pb-28">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <h2 data-rv className="hp-r font-display text-4xl font-bold uppercase leading-none sm:text-6xl">Plans</h2>
-          <p data-rv className="hp-r hidden max-w-sm text-sm text-white/60 sm:block">
-            Start free. Monthly allowances, upgrade only when you need more.
-          </p>
-        </div>
-        <div className="tx-plans mt-10 sm:mt-16">
-          {plans.map((p, k) => (
-            <div key={p.name} data-rv className="hp-r tx-plan" style={{ ["--k" as string]: k }}>
-              <p className="tx-pn">{p.name}</p>
-              <p className={`tx-pnum ${k === 3 ? "tx-yel" : k % 2 ? "tx-out" : ""}`}>{p.tailor}</p>
-              <p className="tx-pl">tailored resumes a month</p>
-              <p className="tx-ps">
-                <span>{p.search}</span> job {p.search === "1" ? "search" : "searches"} a month
-              </p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-8">
-          <Link to="/pricing" className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-highlight">
-            See prices and what each plan includes <ArrowRight className="size-4" />
-          </Link>
         </div>
       </section>
 
