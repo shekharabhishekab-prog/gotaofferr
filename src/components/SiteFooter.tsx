@@ -119,7 +119,7 @@ const SF_CSS = `
 
 .sf-in{padding-left:clamp(1.5rem,3.2vw,4rem);padding-right:clamp(1.5rem,3.2vw,4rem)}
 .sf-base{flex-direction:column!important;align-items:center;justify-content:center!important;text-align:center;gap:.35rem;padding:2.5rem 0 1.2rem}
-.sf-word{width:100%;margin:.5rem 0 0;aspect-ratio:1000/150;overflow:hidden;padding:0}
+.sf-word{width:100%;margin:.5rem 0 0;aspect-ratio:1000/118;overflow:hidden;padding:0}
 .sf-word svg{width:100%}
 @media(min-width:900px){.sf-grp{grid-template-columns:1fr 1fr 2.6fr}}
 @media(prefers-reduced-motion:reduce){.sf-btn,.sf-col,.sf-top>*,.sf-word svg{animation:none!important}}
