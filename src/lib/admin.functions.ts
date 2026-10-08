@@ -145,7 +145,8 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
         phone: u.phone || null,
         emailConfirmed: Boolean(u.email_confirmed_at),
         cancelAtPeriodEnd: Boolean(sub?.cancel_at_period_end),
-        fullName: profiles.get(u.id) ?? null,
+        // If the stored profile name cannot be read, fall back to the name the user typed at signup.
+        fullName: profiles.get(u.id) ?? ((u.user_metadata as Record<string, unknown> | undefined)?.full_name ? String((u.user_metadata as Record<string, unknown>).full_name) : null),
         region: String((u.app_metadata as Record<string, unknown> | undefined)?.signup_region ?? "India"),
         createdAt: u.created_at ?? null,
         lastSignInAt: u.last_sign_in_at ?? null,
@@ -211,7 +212,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       subscriptions: subs.map((s) => ({
         userId: s.user_id,
         email: users.find((u) => u.id === s.user_id)?.email ?? null,
-        fullName: profiles.get(s.user_id) ?? null,
+        fullName: users.find((u) => u.id === s.user_id)?.fullName ?? null,
         plan: planLabel(s.price_id),
         priceId: s.price_id,
         status: s.status,
