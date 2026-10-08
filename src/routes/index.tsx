@@ -415,7 +415,7 @@ const GI_CSS = `
 @keyframes gi-auto{to{opacity:0;visibility:hidden;pointer-events:none}}
 .gi-end{animation:gi-auto .6s forwards}
 .gi-skip{animation:gi-auto .25s forwards!important}
-.hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s 3.2s ease-out infinite}
+.hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
 @keyframes hx-ring{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(1.5)}}
 .hx-chip{position:absolute;z-index:2;background:rgba(255,255,255,.92);color:#000;border-radius:999px;padding:.35rem .8rem;font-size:.72rem;font-weight:700;pointer-events:none;opacity:0;animation:hx-chip 7s ease-in-out infinite}
@@ -627,6 +627,7 @@ function Index() {
   return (
     <main ref={rootRef} className={`hp bg-black text-white ${rv ? "hp-rv hp-live" : ""}`}>
       <style>{HP_CSS}</style>
+      <style>{GI_CSS}</style>
       <WipSplash />
       <div aria-hidden className="hp-prog">
         <span data-bar />
