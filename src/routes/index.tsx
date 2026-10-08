@@ -439,6 +439,7 @@ function HeroPops() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let id = 0, last = "";
     const mobile = window.innerWidth < 640;
+    if (mobile) return;
     const spawn = () => {
       let t = last;
       while (t === last) t = popTexts[Math.floor(Math.random() * popTexts.length)];
@@ -499,7 +500,8 @@ const GI_CSS = `
 .hx-rp1{left:24%;top:42%}.hx-rp2{left:78%;top:68%;width:min(36vw,300px)}.hx-rp2 i{animation-duration:6.4s}
 @keyframes hx-wave{0%{opacity:0;transform:scale(.15)}12%{opacity:.95}100%{opacity:0;transform:scale(1.5)}}
 @media(max-width:639px){.hx-rp1{left:30%;top:36%;width:70vw}.hx-rp2{left:72%;top:74%;width:46vw}}
-.hx-pop{position:absolute;z-index:2;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);border-radius:999px;padding:.4rem .85rem;font-size:.74rem;font-weight:700;pointer-events:none;white-space:nowrap;opacity:0;animation:hx-pop 1.6s ease-out forwards}
+.hx-pop{position:absolute;z-index:2;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);border-radius:999px;padding:.18rem .5rem;font-size:.58rem;font-weight:600;pointer-events:none;white-space:nowrap;opacity:0;animation:hx-pop 1.6s ease-out forwards}
+@media(max-width:639px){.hx-pop{display:none!important}}
 @keyframes hx-pop{0%{opacity:0;transform:scale(.4)}10%{opacity:1;transform:scale(1.08)}16%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.85)}}
 @media(prefers-reduced-motion:reduce){.hx-rp i,.hx-pop{animation:none!important}.hx-rp i{opacity:.35;transform:scale(.8)}}
 .hx-ring,.hx-chip,.hx-rp{display:none!important}
