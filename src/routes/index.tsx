@@ -483,8 +483,6 @@ function HeroCounter() {
     <>
       <div aria-hidden className="i3-meta i3-bl">Jobs matched <b ref={el}>48,213</b></div>
       <div aria-hidden className="i3-meta i3-br">This month</div>
-      <div aria-hidden className="i3-meta i3-tl">Resume + job finder</div>
-      <div aria-hidden className="i3-meta i3-tr">Free: 5 a month</div>
     </>
   );
 }
@@ -524,7 +522,7 @@ const GI_CSS = `
 .i3-tag b{color:#ffd600;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
 header.sticky,header.sticky>div{border-bottom-width:0!important;border-color:transparent!important}
-header.sticky{background-color:rgba(0,0,0,calc(var(--hd,0)*.95))!important;background-image:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,0))!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
+header.sticky{background-color:transparent!important;background-image:linear-gradient(to bottom,rgba(0,0,0,calc(.55 + var(--hd,0)*.43)) 0,rgba(0,0,0,calc(.3 + var(--hd,0)*.4)) 55%,rgba(0,0,0,0) 100%)!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
 .hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
 @keyframes hx-ring{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(1.5)}}
