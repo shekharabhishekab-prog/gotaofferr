@@ -1,4 +1,5 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { guardedFetch } from "./prompt-guard.server";
 
 /**
  * AI provider.
@@ -15,6 +16,7 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
       baseURL: "https://ai.gateway.lovable.dev/v1",
       // Required so structured output sends a strict json_schema the model must follow.
       supportsStructuredOutputs: true,
+      fetch: guardedFetch(fetch),
       headers: {
         "Lovable-API-Key": lovableApiKey,
         "X-Lovable-AIG-SDK": "vercel-ai-sdk",
@@ -44,7 +46,7 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
       } catch {
         /* never block on counting */
       }
-      return fetch(input, init);
+      return guardedFetch(fetch)(input, init);
     },
   });
   const override = forceModel || process.env.GEMINI_MODEL_OVERRIDE;
@@ -52,3 +54,4 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
     provider(override || modelId.replace(/^google\//, ""))) as typeof provider;
   return Object.assign(wrapped, provider);
 }
+
