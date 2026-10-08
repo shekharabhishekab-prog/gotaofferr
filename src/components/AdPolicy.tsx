@@ -8,17 +8,16 @@ import type { PlanTier } from "@/lib/plans";
  * Ads by plan. No new ad slots and no layout change: the existing AdSense
  * script stays as is, this only pauses or resumes its requests.
  *   Free        ads everywhere, as today
- *   Starter     content pages only (guides, examples, blog, FAQ); never on tools
- *   Job Hunt    guides and examples only (very nominal)
+ *   Starter     none on the homepage or tools; only low-interaction reading pages (blog, FAQ)
+ *   Job Hunt    no ads
  *   Career Pro  no ads
  */
-const CONTENT = /^\/(blog|guides|examples|faq|how-it-works|about)(\/|$)/;
-const GUIDES = /^\/(guides|examples)(\/|$)/;
+const STARTER_OK = /^\/(blog|faq)(\/|$)/;
 
 export function adsAllowed(tier: PlanTier, path: string): boolean {
   if (tier === "career_pro") return false;
-  if (tier === "job_hunt") return GUIDES.test(path);
-  if (tier === "starter") return CONTENT.test(path);
+  if (tier === "job_hunt") return false;
+  if (tier === "starter") return STARTER_OK.test(path);
   return true;
 }
 
