@@ -160,6 +160,51 @@ const plans = [
 
 const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi).slice(0, 3);
 /* Corner brackets: the framed-panel detail from the reference. */
+function HeroReel() {
+  const names = ["t1", "t2", "t3"];
+  const [cur, setCur] = useState(0);
+  const [seen, setSeen] = useState(1);
+  const refs = useRef<(HTMLVideoElement | null)[]>([]);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setInterval(() => setCur((c) => (c + 1) % names.length), 4200);
+    return () => window.clearInterval(t);
+  }, []);
+  useEffect(() => {
+    setSeen((n) => Math.min(names.length, Math.max(n, cur + 2)));
+    refs.current.forEach((v, k) => {
+      if (!v) return;
+      if (k === cur) {
+        v.currentTime = 0;
+        v.play().catch(() => {});
+      } else {
+        window.setTimeout(() => v.pause(), 1100);
+      }
+    });
+  }, [cur]);
+  return (
+    <div aria-hidden className="absolute inset-0 -z-20">
+      {names.map((n, k) => (
+        <video
+          key={n}
+          ref={(el) => {
+            refs.current[k] = el;
+          }}
+          muted
+          loop
+          playsInline
+          preload="auto"
+          tabIndex={-1}
+          poster={`/m/${n}.webp`}
+          src={k < seen ? `/m/${n}.mp4` : undefined}
+          className="hp-hv absolute inset-0 h-full w-full object-cover"
+          style={{ opacity: k === cur ? 0.42 : 0 }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function Brackets() {
   return (
     <>
@@ -173,6 +218,67 @@ function Brackets() {
 
 /* Muted looping clip. Loads only when near the screen, pauses when away,
    stays a still poster for reduced-motion and data-saver visitors. */
+const reelTiles = [
+  "i4226261", "i5716008", "i5411999", "i5749153", "i6814521", "i6830879",
+  "i7641842", "i7652126", "i7654396", "i7674645",
+  "i7875949", "i8154580", "i8297441", "i8301225", "i8441808", "i8837769",
+];
+const reelRing = [3, 2, 1, 1, 2, 3, 2, 2, 2, 2, 3, 2, 1, 1, 2, 3];
+
+function ReelCentre() {
+  const names = ["c1", "c2", "c3"];
+  const [cur, setCur] = useState(0);
+  const refs = useRef<(HTMLVideoElement | null)[]>([]);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setInterval(() => setCur((c) => (c + 1) % names.length), 5000);
+    return () => window.clearInterval(t);
+  }, []);
+  useEffect(() => {
+    refs.current.forEach((v, k) => {
+      if (!v) return;
+      if (k === cur) {
+        v.currentTime = 0;
+        v.play().catch(() => {});
+      } else {
+        window.setTimeout(() => v.pause(), 1000);
+      }
+    });
+  }, [cur]);
+  const labels = ["Reviewing the resume", "Panel conversation", "Hiring decision"];
+  return (
+    <div className="rl-core relative overflow-hidden rounded-xl border border-white/25">
+      {names.map((n, k) => (
+        <video
+          key={n}
+          ref={(el) => {
+            refs.current[k] = el;
+          }}
+          muted
+          loop
+          playsInline
+          preload={k === 0 ? "auto" : "metadata"}
+          tabIndex={-1}
+          aria-hidden
+          poster={`/m/${n}.webp`}
+          src={`/m/${n}.mp4`}
+          className="hp-hv absolute inset-0 h-full w-full object-cover"
+          style={{ opacity: k === cur ? 1 : 0 }}
+        />
+      ))}
+      <Brackets />
+      <div className="absolute inset-0 flex items-end justify-between gap-3 bg-gradient-to-t from-black/80 via-transparent to-transparent p-3 sm:p-4">
+        <span className="rl-mono">{labels[cur]}</span>
+        <span className="flex gap-1.5" aria-hidden>
+          {names.map((n, k) => (
+            <i key={n} className={`rl-seg ${k === cur ? "on" : ""}`} />
+          ))}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function LazyVideo({ name, className = "" }: { name: string; className?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
@@ -209,16 +315,16 @@ function LazyVideo({ name, className = "" }: { name: string; className?: string 
   );
 }
 
-const reel = [
-  { n: "i5439153", dx: "-34vw", dy: "-6vh", w: "w-[26vw] sm:w-[15vw]", rot: "-4deg" },
-  { n: "i8093001", dx: "34vw", dy: "-8vh", w: "w-[26vw] sm:w-[15vw]", rot: "3deg" },
-  { n: "shake2", dx: "-26vw", dy: "11vh", w: "w-[22vw] sm:w-[13vw]", rot: "2deg" },
-];
 
 const stripA = ["i5439438", "i5668859", "i3760072", "i19451448", "i5439455"];
 const stripB = ["i5668863", "i5989927", "i36766896", "i7606041", "i8730781"];
 const rowImgs = ["i30677714", "i5439449", "i5668858", "i3760069"];
-const marked = new Set(["Twenty", "jobs.", "applications,"]);
+const aboutLines: { t: string; c: string; m?: boolean }[][] = [
+  [{ t: "One", c: "s" }, { t: "resume.", c: "xl" }],
+  [{ t: "Twenty", c: "xl", m: true }, { t: "jobs.", c: "xl o" }],
+  [{ t: "Twenty", c: "xs" }, { t: "different", c: "s" }, { t: "applications,", c: "l", m: true }],
+  [{ t: "without", c: "xs" }, { t: "twenty", c: "m" }, { t: "evenings", c: "l" }, { t: "of", c: "xs" }, { t: "editing.", c: "xl", m: true }],
+];
 
 /* Stats from the current live site. Edit the wording here (second entry: 10 hrs a week shown as 600+ min). */
 const stats = [
@@ -228,8 +334,6 @@ const stats = [
   { to: 1, pre: "", suf: " click", label: "to apply", body: "Find, tailor, download, then go straight to the company.", Icon: MousePointerClick },
 ] as const;
 
-const fillText =
-  "One resume. Twenty jobs. Twenty different applications, without twenty evenings of editing.";
 
 const flow = [
   { n: "01", tag: "Find", title: "Find the jobs", cta: "Open job finder", clip: "s1" },
@@ -445,10 +549,8 @@ function Index() {
     };
   }, []);
 
-  const words = fillText.split(" ");
-  const role = roles[ri % roles.length];
-  const heroWords = ["Find", "the", "jobs.", "Tailor", "the", "resume.", "Apply."];
-
+    const role = roles[ri % roles.length];
+  
   return (
     <main ref={rootRef} className={`hp bg-black text-white ${rv ? "hp-rv" : ""}`}>
       <style>{HP_CSS}</style>
@@ -459,7 +561,7 @@ function Index() {
 
       {/* Hero */}
       <section data-hero className="hp-hero relative isolate overflow-hidden">
-        <LazyVideo name="hero" className="absolute inset-0 -z-20 h-full w-full object-cover opacity-[0.38]" />
+        <HeroReel />
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,transparent_0%,#000_88%)]" />
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
@@ -481,31 +583,48 @@ function Index() {
               </div>
             </div>
 
-            <div className="relative mx-auto max-w-5xl">
-              <span aria-hidden className="hp-echo hp-echo-1 hp-h1">Find the jobs. Tailor the resume. Apply.</span>
-              <span aria-hidden className="hp-echo hp-echo-2 hp-h1">Find the jobs. Tailor the resume. Apply.</span>
-              <h1 className="hp-h1 hp-rise relative">
-                {heroWords.map((w, i) => (
-                  <span key={i} className={`hp-hw ${w === "resume." ? "text-highlight" : ""}`}>
-                    {w}
+            <div className="relative mx-auto max-w-6xl">
+              <h1 className="hx" aria-label="Find the jobs. Tailor the resume. Apply.">
+                <span aria-hidden className="hx-line hx-l1">
+                  <span className="hx-hand hx-first">first,</span>
+                  <span className="hx-word hx-outline" data-t="FIND">
+                    {"FIND".split("").map((c, i) => (
+                      <i key={i} style={{ ["--d" as string]: i }}>{c}</i>
+                    ))}
                   </span>
-                ))}
+                  <span className="hx-hand hx-jobs">the jobs.</span>
+                </span>
+                <span aria-hidden className="hx-line hx-l2">
+                  <span className="hx-mid">Tailor</span>
+                  <span className="hx-tiny">the</span>
+                  <span className="hx-word hx-giant" data-t="RESUME.">
+                    {"RESUME.".split("").map((c, i) => (
+                      <i key={i} style={{ ["--d" as string]: i + 4 }}>{c}</i>
+                    ))}
+                    <b className="hx-under" />
+                  </span>
+                </span>
+                <span aria-hidden className="hx-line hx-l3">
+                  <span className="hx-track"><em /></span>
+                  <span className="hx-hand hx-apply">then apply.</span>
+                  <span className="hx-stop">next stop: your offer</span>
+                </span>
               </h1>
             </div>
 
-            <p aria-live="off" className="hp-hand hp-rolebox mt-5 text-2xl text-highlight sm:text-4xl">
+            <p aria-live="off" className="hp-hand hp-rolebox mt-4 text-xl text-highlight sm:mt-5 sm:text-3xl">
               tailored for <span key={ri} className="hp-roleword">{role}</span>
             </p>
 
             <p className="hp-rise mx-auto mt-5 max-w-xl text-base text-white/75 [animation-delay:140ms] sm:text-lg">
-              <span className="sm:hidden">Drop in your resume once. We find the jobs and tailor it for each.</span>
+              <span className="text-balance sm:hidden">Drop in your resume once. We find jobs and tailor it for each.</span>
               <span className="hidden sm:inline">
                 Drop in your resume once. Our AI finds matching roles, rebuilds your resume for each
                 company and writes the cover letter. You just hit apply.
               </span>
             </p>
 
-            <div className="hp-rise mt-8 flex flex-wrap justify-center gap-3 [animation-delay:240ms]">
+            <div className="hp-rise mx-auto mt-7 flex max-w-xs flex-col items-stretch gap-3 [animation-delay:240ms] sm:mt-8 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center">
               <span data-mag className="hp-mag inline-block">
                 <Button
                   asChild
@@ -530,14 +649,16 @@ function Index() {
               </span>
             </div>
 
-            <ul className="hp-rise mt-7 flex flex-wrap justify-center gap-2 text-[0.66rem] uppercase tracking-[0.16em] text-white/75 [animation-delay:320ms] sm:text-xs">
+            <p className="hp-rise mt-4 text-[0.68rem] uppercase tracking-[0.2em] text-white/60 sm:hidden"><span className="text-highlight">5 free</span> a month / no card</p>
+
+            <ul className="hp-rise mt-6 hidden flex-wrap justify-center gap-2 sm:flex text-[0.66rem] uppercase tracking-[0.16em] text-white/75 [animation-delay:320ms] sm:text-xs">
               {["Job search", "Resume", "Cover letter"].map((c) => (
                 <li key={c} className="hp-chip">{c}</li>
               ))}
               <li className="hp-chip hp-chip-y">5 free a month</li>
               <li className="hp-chip hidden sm:block">No card needed</li>
             </ul>
-            <p className="hp-rise mx-auto mt-4 max-w-md text-[0.68rem] uppercase leading-relaxed tracking-[0.16em] text-white/55 [animation-delay:380ms] sm:max-w-none">
+            <p className="hp-rise mx-auto mt-4 hidden max-w-md text-[0.68rem] uppercase leading-relaxed tracking-[0.16em] text-white/55 [animation-delay:380ms] sm:block sm:max-w-none">
               Works with resumes from Indeed, LinkedIn, Naukri, Glassdoor and more
             </p>
           </div>
@@ -556,33 +677,36 @@ function Index() {
       </div>
 
       {/* Numbers */}
-      <section id="numbers" className="site-container py-12 sm:py-24">
-        <div className="text-center">
+      <section id="numbers" className="site-container py-14 sm:py-28">
+        <div className="relative">
           <span data-rv className="hp-r hp-chip hp-chip-y inline-block text-[0.66rem] uppercase tracking-[0.16em] sm:text-xs">
             Built for speed
           </span>
-          <h2 data-rv className="hp-r mt-5 font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
-            Numbers that <span className="hp-hand normal-case text-highlight">actually</span> matter
+          <h2 data-rv className="hp-r nx-h mt-4 font-display font-bold uppercase">
+            <span className="nx-a">Numbers that</span>
+            <span className="nx-b">
+              <span className="hp-hand nx-act normal-case text-highlight">actually</span>
+              <span className="nx-m">matter</span>
+            </span>
           </h2>
-          <p data-rv className="hp-r mt-4 text-sm text-white/60 sm:text-base">Stop counting tabs. Start counting replies.</p>
+          <p data-rv className="hp-r mt-5 max-w-xs text-sm text-white/60 sm:ml-auto sm:max-w-sm sm:text-base">
+            Stop counting tabs. Start counting replies.
+          </p>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 lg:grid-cols-4">
+        <div className="nx-list mt-10 sm:mt-16">
           {stats.map((st, k) => (
-            <div
-              key={st.label}
-              data-rv
-              data-spot
-              className="hp-r hp-spot hp-stat relative overflow-hidden border border-white/10 bg-white/[0.03] p-4 sm:p-7"
-              style={{ ["--k" as string]: k }}
-            >
-              <Brackets />
-              <st.Icon aria-hidden className="hp-sicon absolute right-3 top-3 size-5 text-highlight sm:right-5 sm:top-5 sm:size-6" />
-              <p className="relative mt-6 font-display text-4xl font-bold leading-none sm:mt-10 sm:text-6xl">
-                <span data-count={st.to} data-suf={st.suf}>{st.to}{st.suf}</span>
+            <div key={st.label} data-rv className={`hp-r nx-row ${k % 2 ? "nx-r" : ""}`} style={{ ["--k" as string]: k }}>
+              <p className="nx-num font-display font-bold leading-none">
+                <span data-count={st.to} data-suf="">{st.to}</span>
+                <span className="nx-suf">{st.suf.trim()}</span>
               </p>
-              <p className="relative mt-3 text-sm font-semibold text-highlight sm:text-base">{st.label}</p>
-              <p className="relative mt-2 hidden text-sm text-white/60 sm:block">{st.body}</p>
-              <span aria-hidden className="hp-sbar" />
+              <div className="nx-txt">
+                <p className="hp-hand nx-lab text-highlight">
+                  <st.Icon aria-hidden className="hp-sicon mr-2 inline size-5 align-[-3px]" />
+                  {st.label}
+                </p>
+                <p className="mt-1 hidden max-w-xs text-sm text-white/60 sm:block">{st.body}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -590,46 +714,40 @@ function Index() {
 
       {/* About: text on the left, living visual on the right */}
       <section id="about" data-p className="site-container py-16 sm:py-28">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
-          <div>
+        <div className="grid items-stretch gap-10 lg:grid-cols-2 lg:gap-14">
+          <div className="flex flex-col justify-center">
             <p className="hp-hand text-2xl text-highlight sm:text-3xl">about</p>
-            <div className="relative mt-4">
-              <p aria-hidden className="hp-pecho font-display text-[1.9rem] font-semibold uppercase leading-[1.12] sm:text-5xl">
-                {fillText}
-              </p>
-              <p
-                data-fill
-                className="relative font-display text-[1.9rem] font-semibold uppercase leading-[1.12] sm:text-5xl"
-              >
-                {words.map((w, i) => (
-                  <span key={i} className={`hp-w ${marked.has(w) ? "hp-mark" : ""}`}>
-                    {w}
-                  </span>
-                ))}
-              </p>
-              <span aria-hidden className="hp-hand hp-pnote absolute -bottom-9 right-2 text-2xl text-highlight sm:-bottom-12 sm:text-4xl">
-                one resume, every job
-              </span>
-            </div>
+            <p data-fill className="ab-t mt-4 font-display font-semibold uppercase">
+              {aboutLines.map((ln, li) => (
+                <span key={li} className="ab-line">
+                  {ln.map((w, i) => (
+                    <span key={i} className={`hp-w ab-${w.c} ${w.m ? "hp-mark" : ""}`} style={{ ["--k" as string]: li * 3 + i }}>
+                      {w.t}
+                    </span>
+                  ))}
+                </span>
+              ))}
+            </p>
+            <span aria-hidden className="hp-hand hp-pnote mt-3 inline-block -rotate-3 self-end text-2xl text-highlight sm:text-4xl">
+              one resume, every job
+            </span>
           </div>
-          <div data-spot className="hp-about relative mx-auto w-full max-w-sm lg:max-w-none">
-            <div className="hp-about-card relative overflow-hidden rounded-2xl border border-white/15">
-              <LazyVideo name="about" className="aspect-[4/5] w-full object-cover opacity-85" />
-              <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30" />
+          <div data-spot className="hp-about relative">
+            <div className="hp-about-card relative h-full min-h-[13rem] overflow-hidden rounded-2xl border border-white/15 sm:min-h-[20rem]">
+              <LazyVideo name="ab2" className="absolute inset-0 h-full w-full object-cover opacity-85" />
+              <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
               <Brackets />
               <span className="absolute left-4 top-4 text-[0.65rem] uppercase tracking-[0.2em] text-white/70">
                 The interview is next
               </span>
             </div>
-            <div aria-hidden className="hp-doc hot hp-about-doc absolute -left-3 bottom-8 w-40 sm:-left-8 sm:w-48">
+            <div aria-hidden className="hp-doc hot hp-about-doc absolute -left-3 bottom-6 w-40 sm:-left-8 sm:w-48">
               <b>
                 Tailored <u>for the job</u>
               </b>
               <i /><i className="y" /><i className="s y" />
             </div>
-            <span aria-hidden className="hp-hand hp-about-note absolute -right-1 top-1/3 text-2xl text-highlight sm:text-3xl">
-              20 jobs, 1 resume
-            </span>
+            
           </div>
         </div>
       </section>
@@ -639,16 +757,15 @@ function Index() {
       {/* Split headline + moving image strips */}
       <section id="tools" data-p className="relative overflow-hidden py-10 sm:py-20">
         <div className="site-container">
-          <div className="hp-split relative font-display text-[3rem] font-bold uppercase leading-[0.92] sm:text-[7.5vw]">
-            <div className="hp-sl whitespace-nowrap text-left">
-              <span data-rv className="hp-wd" style={{ ["--k" as string]: 0 }}>What</span>{" "}
-              <span data-rv className="hp-wd" style={{ ["--k" as string]: 1 }}>you</span>
+          <div className="wy relative font-display font-bold uppercase">
+            <div className="wy-l">
+              <span data-rv className="hp-wd" style={{ ["--k" as string]: 0 }}>Your next application,</span>
             </div>
-            <div className="hp-sr whitespace-nowrap text-right text-highlight">
-              <span data-rv className="hp-wd" style={{ ["--k" as string]: 2 }}>can</span>{" "}
-              <span data-rv className="hp-wd" style={{ ["--k" as string]: 3 }}>do</span>
+            <div className="wy-l">
+              <span data-rv className="hp-wd text-highlight" style={{ ["--k" as string]: 1 }}>tailored</span>{" "}
+              <span data-rv className="hp-wd" style={{ ["--k" as string]: 2 }}>in 15 seconds</span>
             </div>
-            <svg aria-hidden viewBox="0 0 120 120" className="hp-badge absolute right-0 top-0 size-20 sm:size-28">
+            <svg aria-hidden viewBox="0 0 120 120" className="hp-badge absolute right-0 top-1/2 size-20 -translate-y-1/2 sm:size-32">
               <defs>
                 <path id="hpc" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
               </defs>
@@ -657,7 +774,7 @@ function Index() {
               </text>
             </svg>
           </div>
-          <ul className="mt-6 flex flex-wrap gap-2 text-[0.66rem] uppercase tracking-[0.16em] text-white/70 sm:mt-10 sm:text-xs">
+<ul className="mt-6 flex flex-wrap gap-2 text-[0.66rem] uppercase tracking-[0.16em] text-white/70 sm:mt-10 sm:text-xs">
             {["Job finder", "Resume tailor", "Cover letter", "Resume builder"].map((t, i) => (
               <li key={t} data-rv className="hp-chip hp-wd" style={{ ["--k" as string]: 4 + i }}>
                 {t}
@@ -665,18 +782,11 @@ function Index() {
             ))}
           </ul>
         </div>
-        <div aria-hidden className="mt-10 space-y-3 sm:mt-14">
-          <div className="hp-strip hp-strip-a flex w-max gap-3">
-            {stripA.map((n, i) => (
-              <div key={i} className="relative h-24 w-44 shrink-0 overflow-hidden rounded-lg border border-white/10 sm:h-48 sm:w-80">
-                <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover opacity-55" />
-              </div>
-            ))}
-          </div>
-          <div className="hp-strip hp-strip-b flex w-max gap-3">
-            {stripB.map((n, i) => (
-              <div key={i} className="relative h-24 w-44 shrink-0 overflow-hidden rounded-lg border border-white/10 sm:h-48 sm:w-80">
-                <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover opacity-55" />
+        <div aria-hidden className="mt-10 overflow-hidden sm:mt-14">
+          <div className="hp-strip hp-strip-a hp-grid2">
+            {[...stripA.flatMap((a, i) => [a, stripB[i]]), ...stripA.flatMap((a, i) => [a, stripB[i]])].map((n, i) => (
+              <div key={i} className="hp-tl relative overflow-hidden rounded-lg border border-white/10">
+                <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover opacity-60" />
               </div>
             ))}
           </div>
@@ -795,32 +905,23 @@ function Index() {
       <Bridge label="real people, real applications" href="#reel" />
 
       {/* Showreel */}
-      <section id="reel" data-p className="relative overflow-hidden py-10 sm:py-24">
+      <section id="reel" data-p className="rl relative overflow-hidden py-12 sm:py-28">
         <div className="site-container">
-          <div className="hp-reel mx-auto grid max-w-5xl grid-cols-[1fr_1.5fr_1fr] items-center gap-2 sm:gap-5">
-            <div className="hp-rcol-l">
-              <div aria-hidden className="hp-rtile overflow-hidden rounded-lg border border-white/15" style={{ ["--r" as string]: "-2deg" }}>
-                <img src="/m/i5439153.webp" alt="" loading="lazy" decoding="async" className="aspect-[3/4] w-full object-cover opacity-70" />
+          <div className="rl-head">
+            <span className="rl-mono">( hiring, in motion )</span>
+            <p className="hp-hand rl-say">fifteen seconds a job</p>
+          </div>
+          <div className="rl-grid mt-6 sm:mt-10">
+            {reelTiles.map((n, k) => (
+              <div key={n} aria-hidden className="rl-t" style={{ ["--k" as string]: k, ["--d" as string]: reelRing[k] }}>
+                <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" />
+                {k % 5 === 2 ? <i className="rl-dot" /> : null}
+                {k % 4 === 1 ? <em className="rl-tag">{String(k + 1).padStart(2, "0")}</em> : null}
               </div>
-            </div>
-            <div className="hp-core relative overflow-hidden rounded-xl border border-white/25">
-              <LazyVideo name="core" className="aspect-[4/5] w-full object-cover" />
-              <Brackets />
-              <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 to-transparent p-3 sm:p-4">
-                <span className="text-[0.6rem] uppercase tracking-[0.2em] sm:text-xs">Interview ready</span>
-              </div>
-            </div>
-            <div className="hp-rcol-r space-y-2 sm:space-y-5">
-              <div aria-hidden className="hp-rtile overflow-hidden rounded-lg border border-white/15" style={{ ["--r" as string]: "2deg" }}>
-                <img src="/m/i8093001.webp" alt="" loading="lazy" decoding="async" className="aspect-[3/4] w-full object-cover opacity-70" />
-              </div>
-              <div aria-hidden className="hp-rtile overflow-hidden rounded-lg border border-white/15" style={{ ["--r" as string]: "-1deg" }}>
-                <img src="/m/shake2.webp" alt="" loading="lazy" decoding="async" className="aspect-[3/4] w-full object-cover opacity-70" />
-              </div>
-            </div>
+            ))}
+            <ReelCentre />
           </div>
         </div>
-        <p className="hp-hand mt-10 text-center text-3xl text-highlight sm:text-5xl">fifteen seconds a job</p>
       </section>
 
       {/* Why */}
@@ -828,12 +929,12 @@ function Index() {
         <h2 data-rv className="hp-r max-w-3xl font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
           Built for applying at scale
         </h2>
-        <div className="mt-10 grid gap-3 sm:mt-12 sm:gap-4 md:grid-cols-3">
-          {notWhat.map((n) => (
-            <div key={n.title} data-rv data-spot className="hp-r hp-spot relative border border-white/10 bg-white/[0.03] p-5 sm:p-9">
-              <Brackets />
-              <h3 className="relative font-display text-lg font-semibold uppercase sm:text-xl">{n.title}</h3>
-              <p className="relative mt-3 hidden text-sm text-white/65 sm:block">{n.body}</p>
+        <div className="mt-8 sm:mt-14">
+          {notWhat.map((n, k) => (
+            <div key={n.title} data-rv className="hp-r tx-why" style={{ ["--k" as string]: k }}>
+              <span className="tx-n">0{k + 1}</span>
+              <h3 className={`tx-big ${k === 1 ? "tx-out" : ""} ${k === 2 ? "tx-yel" : ""}`}>{n.title}</h3>
+              <p className="tx-sm">{n.body}</p>
             </div>
           ))}
         </div>
@@ -850,24 +951,20 @@ function Index() {
               All examples <ArrowRight className="size-4" />
             </Link>
           </div>
-          <div className="mt-10 grid gap-3 sm:mt-12 sm:gap-4 md:grid-cols-3">
-            {showcaseExamples.map((example) => (
+          <div className="mt-8 sm:mt-14">
+            {showcaseExamples.map((example, k) => (
               <Link
                 key={example.slug}
                 to="/examples/resumes/$slug"
                 params={{ slug: example.slug }}
                 data-rv
-                data-spot
-                className="hp-r hp-spot group relative flex min-h-[9rem] flex-col justify-between border border-white/10 bg-white/[0.03] p-5 sm:min-h-[14rem] sm:p-6"
+                className="hp-r tx-ex group"
+                style={{ ["--k" as string]: k }}
               >
-                <Brackets />
-                <span className="relative text-xs uppercase leading-relaxed tracking-[0.14em] text-highlight">
-                  Tailored for <span className="whitespace-nowrap">{example.role}</span>
-                </span>
-                <span className="relative mt-6 flex items-end justify-between gap-4 sm:mt-10">
-                  <span className="font-display text-xl font-semibold uppercase sm:text-2xl">{example.role} resume</span>
-                  <ArrowUpRight className="size-5 shrink-0 text-white/40 transition-colors group-hover:text-highlight" />
-                </span>
+                <span className="tx-n">0{k + 1}</span>
+                <span className="hp-hand tx-for">tailored for {example.role}</span>
+                <span className="tx-exname">{example.role} resume</span>
+                <ArrowUpRight className="tx-arr size-7 shrink-0 sm:size-10" />
               </Link>
             ))}
           </div>
@@ -882,15 +979,14 @@ function Index() {
             Start free. Monthly allowances, upgrade only when you need more.
           </p>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-12 sm:gap-4 lg:grid-cols-4">
-          {plans.map((p) => (
-            <div key={p.name} data-rv data-spot className="hp-r hp-spot relative border border-white/10 p-4 sm:p-6">
-              <Brackets />
-              <p className="relative text-xs uppercase tracking-[0.18em] text-white/55">{p.name}</p>
-              <p className="relative mt-4 font-display text-4xl font-bold sm:mt-8 sm:text-5xl">{p.tailor}</p>
-              <p className="relative mt-1 text-xs text-white/65 sm:text-sm">tailored resumes a month</p>
-              <p className="relative mt-3 text-xs text-white/65 sm:mt-4 sm:text-sm">
-                <span className="text-highlight">{p.search}</span> job {p.search === "1" ? "search" : "searches"} a month
+        <div className="tx-plans mt-10 sm:mt-16">
+          {plans.map((p, k) => (
+            <div key={p.name} data-rv className="hp-r tx-plan" style={{ ["--k" as string]: k }}>
+              <p className="tx-pn">{p.name}</p>
+              <p className={`tx-pnum ${k === 3 ? "tx-yel" : k % 2 ? "tx-out" : ""}`}>{p.tailor}</p>
+              <p className="tx-pl">tailored resumes a month</p>
+              <p className="tx-ps">
+                <span>{p.search}</span> job {p.search === "1" ? "search" : "searches"} a month
               </p>
             </div>
           ))}
@@ -908,7 +1004,7 @@ function Index() {
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_50%,transparent_0%,#000_80%)]" />
         <div className="site-container">
           <h2 data-rv className="hp-r mx-auto max-w-4xl font-display text-4xl font-bold uppercase leading-[1.02] sm:text-7xl">
-            Your next application, <span className="text-highlight">tailored</span> in 15 seconds
+            What you <span className="text-highlight">can do</span>
           </h2>
           <p className="hp-hand mt-4 text-3xl text-white/85 sm:text-4xl">go get that offer</p>
           <div data-rv className="hp-r mt-10 flex flex-wrap justify-center gap-3">
@@ -1064,11 +1160,11 @@ html{scroll-behavior:smooth}
 @media(max-width:639px){.hp-art{display:none}}
 
 
-.hp-rcol-l{transform:translateY(calc((.5 - var(--p))*90px))}
-.hp-rcol-r{transform:translateY(calc((var(--p) - .5)*90px))}
-.hp-rtile{transform:rotate(var(--r,0deg));transition:transform .4s}
-.hp-rtile:hover{transform:rotate(0deg) scale(1.04)}
-.hp-core{transform:scale(calc(.9 + var(--p)*.1));box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 80px -30px color-mix(in oklab,var(--highlight) 35%,transparent)}
+.hp-rcol-l{}
+.hp-rcol-r{}
+.hp-rtile{transition:transform .4s}
+.hp-rtile:hover{transform:scale(1.03)}
+.hp-core{transform:none;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 80px -30px color-mix(in oklab,var(--highlight) 35%,transparent)}
 .hp-hw{margin-right:.26em}
 .hp-bignum{position:absolute;right:1rem;bottom:-1.5rem;font-family:var(--font-display,inherit);font-weight:800;font-size:9rem;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.14);transform:translateY(calc((1 - var(--p))*70px));pointer-events:none}
 @media(min-width:640px){.hp-bignum{font-size:20rem;right:3rem;bottom:-3rem}}
@@ -1081,4 +1177,118 @@ html{scroll-behavior:smooth}
 .hp-sicon{animation:hp-bob2 3.4s ease-in-out infinite;animation-delay:calc(var(--k)*.4s)}
 @keyframes hp-bob2{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(6deg)}}
 @media(prefers-reduced-motion:reduce){.hp-sicon{animation:none}.hp-sbar{transform:scaleX(1)}}
+
+/* v4 */
+.hp-hv{transition:opacity 1.1s ease}
+.hx{display:block;margin:0;font-family:var(--font-display,inherit);text-transform:uppercase;line-height:.9}
+.hx-line{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0 .35em}
+.hx-hand{font-family:"HPHand","Caveat Brush",cursive;text-transform:none;color:var(--highlight);font-weight:400;display:inline-block;opacity:0;animation:hx-in .8s cubic-bezier(.2,.7,.2,1) forwards}
+.hx-first{font-size:1.6rem;transform:rotate(-6deg);animation-delay:.1s}
+.hx-jobs{font-size:2rem;transform:rotate(-4deg);animation-delay:1s}
+.hx-apply{font-size:1.8rem;animation-delay:1.7s}
+.hx-word{position:relative;display:inline-block;font-weight:800}
+.hx-word i{font-style:normal;display:inline-block;opacity:0;transform:translateY(.5em) rotate(6deg);filter:blur(8px);animation:hx-let .8s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--d)*70ms + 250ms)}
+.hx-outline{font-size:4.4rem;color:transparent;-webkit-text-stroke:2px #fff}
+.hx-giant{font-size:5.2rem;color:var(--highlight)}
+.hx-giant::before{content:attr(data-t);position:absolute;left:0;top:0;transform:translate(.045em,.045em);color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.55);z-index:-1;animation:hx-shift 5s ease-in-out infinite}
+.hx-outline::before{content:attr(data-t);position:absolute;left:0;top:0;transform:translate(-.04em,.04em);color:rgba(255,214,0,.16);z-index:-1}
+.hx-mid{font-size:2.2rem;font-weight:500;font-family:Georgia,"Times New Roman",serif;font-style:italic;text-transform:none;letter-spacing:0;opacity:0;animation:hx-in .8s .5s forwards}
+.hx-tiny{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;letter-spacing:.3em;color:rgba(255,255,255,.65);opacity:0;animation:hx-in .8s .8s forwards}
+.hx-under{position:absolute;left:0;right:0;bottom:.02em;height:.07em;background:#fff;transform:scaleX(0);transform-origin:0 50%;animation:hx-line 1s 1.4s cubic-bezier(.2,.7,.2,1) forwards}
+.hx-l2{margin-top:.1em}.hx-l3{margin-top:.5rem;gap:1rem}
+.hx-track{position:relative;display:inline-block;width:min(34vw,12rem);height:10px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 2px,transparent 2px 12px);background-size:12px 10px;animation:hx-run 1s linear infinite;opacity:.7;align-self:center}
+.hx-track em{position:absolute;left:0;right:0;top:4px;height:2px;background:rgba(255,255,255,.35)}
+.hx-stop{font-family:ui-monospace,Menlo,monospace;font-size:.68rem;letter-spacing:.2em;color:rgba(255,255,255,.6);opacity:0;animation:hx-in .8s 2.1s forwards}
+@media(min-width:640px){.hx-outline{font-size:7rem}.hx-giant{font-size:9rem}.hx-mid{font-size:3.6rem}.hx-first{font-size:2.6rem}.hx-jobs{font-size:3.4rem}.hx-apply{font-size:2.8rem}.hx-tiny{font-size:1rem}.hx-stop{font-size:.8rem}}
+@media(min-width:1024px){.hx-outline{font-size:9rem}.hx-giant{font-size:12rem}.hx-mid{font-size:4.6rem}}
+@keyframes hx-in{to{opacity:1}}
+@keyframes hx-let{to{opacity:1;transform:none;filter:none}}
+@keyframes hx-line{to{transform:scaleX(1)}}
+@keyframes hx-run{to{background-position:-12px 0}}
+@keyframes hx-shift{0%,100%{transform:translate(.045em,.045em)}50%{transform:translate(.09em,.07em)}}
+.hx-first,.hx-jobs{animation-fill-mode:forwards}
+.hx-hand.hx-first{animation:hx-in .8s .1s forwards}
+@media(prefers-reduced-motion:reduce){.hx-word i,.hx-hand,.hx-mid,.hx-tiny,.hx-stop{opacity:1!important;transform:none!important;filter:none!important;animation:none!important}.hx-under{transform:none;animation:none}.hx-track,.hx-giant::before{animation:none}}
+/* numbers */
+.nx-h{line-height:.88}
+.nx-a{display:block;font-size:3.2rem}
+.nx-b{display:flex;align-items:baseline;gap:.25em;padding-left:1.2rem}
+.nx-m{font-size:2rem;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.7);font-family:Georgia,serif;font-style:italic;text-transform:none;font-weight:400}
+.nx-act{font-size:3.6rem;transform:rotate(-5deg);display:inline-block}
+@media(min-width:640px){.nx-a{font-size:8rem}.nx-b{padding-left:6rem}.nx-m{font-size:5.5rem}.nx-act{font-size:7rem}}
+.nx-list{display:flex;flex-direction:column;gap:1.8rem}
+.nx-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.4rem 1.5rem}
+.nx-r{justify-content:flex-end;text-align:right}
+.nx-num{font-size:5rem;display:flex;align-items:baseline;gap:.15em}
+.nx-suf{font-size:.34em;font-family:Georgia,serif;font-style:italic;font-weight:400;color:#fff;opacity:.85}
+.nx-row:nth-child(1) .nx-num{font-size:6.5rem}.nx-row:nth-child(2) .nx-num{font-size:5rem}.nx-row:nth-child(3) .nx-num{font-size:6rem}.nx-row:nth-child(4) .nx-num{font-size:5.5rem}
+.nx-lab{font-size:1.5rem;transform:rotate(-3deg)}
+@media(min-width:640px){.nx-list{gap:.5rem}.nx-row:nth-child(1) .nx-num{font-size:13rem}.nx-row:nth-child(2) .nx-num{font-size:9rem}.nx-row:nth-child(3) .nx-num{font-size:11rem}.nx-row:nth-child(4) .nx-num{font-size:8rem}.nx-lab{font-size:2.2rem}.nx-row{padding:0 4%}}
+/* about */
+.ab-t{line-height:1;font-size:1rem}
+.ab-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .3em;margin-bottom:.15em}
+.ab-t .hp-w{margin-right:0}
+.ab-xs{font-family:ui-monospace,Menlo,monospace;font-size:.85rem;letter-spacing:.2em;font-weight:500}
+.ab-s{font-family:Georgia,serif;font-style:italic;text-transform:none;font-size:1.6rem;font-weight:400}
+.ab-m{font-size:1.5rem}
+.ab-l{font-size:2.2rem}
+.ab-xl{font-size:3.4rem;font-weight:800}
+.ab-o{color:transparent!important;-webkit-text-stroke:2px var(--highlight)}
+.hp-live .ab-o.on{color:transparent}
+.ab-xl{animation:hp-bob2 5s ease-in-out infinite;animation-delay:calc(var(--k)*.3s)}
+@media(min-width:640px){.ab-xs{font-size:1rem}.ab-s{font-size:2.6rem}.ab-m{font-size:2.4rem}.ab-l{font-size:3.6rem}.ab-xl{font-size:6rem}}
+@media(min-width:1024px){.ab-xl{font-size:5.6rem}}
+@media(prefers-reduced-motion:reduce){.ab-xl{animation:none}}
+/* what you can do */
+.wy{font-size:2.3rem;line-height:.95;padding-right:5.5rem}.wy-l{white-space:normal!important}
+.wy-l{white-space:nowrap;text-align:left}
+@media(min-width:640px){.wy{font-size:min(5.4vw,4.6rem);padding-right:9rem}.wy-l{white-space:nowrap!important}}
+.hp-grid2{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,1fr);grid-auto-columns:11rem;gap:.75rem;width:max-content;padding-left:max(1rem,calc((100vw - 80rem)/2 + 1rem))}
+.hp-tl{height:5.2rem;width:100%}
+@media(min-width:640px){.hp-grid2{grid-auto-columns:20rem;gap:.9rem}.hp-tl{height:10.5rem}}
+.hp-grid2.hp-strip-a{animation:hp-gmv 60s linear infinite}
+@keyframes hp-gmv{to{transform:translateX(calc(-50% - .4rem))}}
+@media(prefers-reduced-motion:reduce){.hp-grid2.hp-strip-a{animation:none}}
+
+/* v4 sections */
+.tx-n{font-family:ui-monospace,Menlo,monospace;font-size:.75rem;letter-spacing:.25em;color:var(--highlight)}
+.tx-sm{font-size:.9rem;color:rgba(255,255,255,.6);max-width:20rem}
+.tx-why{display:flex;flex-wrap:wrap;align-items:baseline;gap:.3rem 1.2rem;padding:.9rem 0;transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+.tx-why:hover{transform:translateX(1.2rem)}
+.tx-big{font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;line-height:.95;font-size:2rem;transition:color .3s}
+.tx-out{color:transparent;-webkit-text-stroke:1.5px #fff;font-family:Georgia,serif;font-style:italic;text-transform:none;font-weight:400}
+.tx-yel{color:var(--highlight)}
+.tx-why:hover .tx-big{color:var(--highlight)}.tx-why:hover .tx-out{color:transparent;-webkit-text-stroke-color:var(--highlight)}
+@media(min-width:640px){.tx-big{font-size:5.2rem}.tx-why{padding:1.2rem 0 1.2rem 0}.tx-why:nth-child(2){margin-left:8%}.tx-why:nth-child(3){margin-left:16%}.tx-sm{font-size:1rem}}
+.tx-ex{display:flex;flex-wrap:wrap;align-items:baseline;gap:.2rem 1rem;padding:.9rem 0;transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+.tx-ex:hover{transform:translateX(1rem)}
+.tx-for{font-size:1.3rem;color:var(--highlight);transform:rotate(-2deg);display:inline-block}
+.tx-exname{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:1;font-size:1.6rem;flex:1 1 100%;order:3;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.75);transition:color .3s,-webkit-text-stroke-color .3s}
+.tx-arr{color:rgba(255,255,255,.4);transition:transform .3s,color .3s;order:4}
+.tx-ex:hover .tx-exname{color:#fff;-webkit-text-stroke-color:#fff}
+.tx-ex:hover .tx-arr{color:var(--highlight);transform:translate(4px,-4px)}
+@media(min-width:640px){.tx-ex{flex-wrap:nowrap;align-items:center;gap:1.5rem;padding:1.4rem 0}.tx-exname{flex:1;order:0;font-size:3.6rem}.tx-for{font-size:1.9rem;min-width:15rem;order:-1}.tx-n{order:-2}.tx-arr{order:0}}
+.tx-plans{display:grid;grid-template-columns:1fr 1fr;gap:2.2rem 1rem}
+.tx-pn{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.tx-pnum{font-family:var(--font-display,inherit);font-weight:800;font-size:5rem;line-height:.9;margin-top:.4rem}
+.tx-pl{font-family:Georgia,serif;font-style:italic;color:rgba(255,255,255,.8);font-size:1rem;margin-top:.3rem}
+.tx-ps{font-size:.85rem;color:rgba(255,255,255,.6);margin-top:.5rem}.tx-ps span{color:var(--highlight);font-weight:700}
+@media(min-width:1024px){.tx-plans{grid-template-columns:repeat(4,1fr);gap:1rem 2rem}.tx-pnum{font-size:8.5rem}.tx-plan:nth-child(even){margin-top:2.5rem}.tx-pl{font-size:1.15rem}}
+/* showreel */
+.rl-head{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem}
+.rl-mono{font-family:ui-monospace,Menlo,monospace;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.rl-say{font-size:3rem;line-height:.95;color:var(--highlight);transform:rotate(-2deg);transform-origin:0 50%}
+@media(min-width:640px){.rl-say{font-size:7.5rem}.rl-mono{font-size:.8rem}}
+.rl-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.35rem}
+@media(min-width:640px){.rl-grid{gap:.6rem}}
+.rl-t{position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:.5rem;opacity:calc(var(--rp,1));transform:scale(calc(.7 + var(--rp,1)*.3));transition:transform .35s,outline-color .3s;outline:1px solid transparent}
+.rl-t img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.72;transition:opacity .3s,transform .6s}
+.rl-t:hover{outline-color:var(--highlight);z-index:2}.rl-t:hover img{opacity:1;transform:scale(1.08)}
+.rl-core{grid-column:2/6;grid-row:2/4}
+.rl-dot{position:absolute;left:.35rem;top:.35rem;width:.4rem;height:.4rem;border-radius:99px;background:var(--highlight);animation:hp-pulse 1.8s ease-in-out infinite}
+.rl-tag{position:absolute;right:.3rem;bottom:.2rem;font:normal .55rem ui-monospace,Menlo,monospace;color:#fff;opacity:.85}
+.rl-seg{display:block;width:1.2rem;height:2px;background:rgba(255,255,255,.35)}.rl-seg.on{background:var(--highlight)}
+.hp-live .rl{--rp0:0}
+.hp-live .rl-t{--rp:clamp(0, calc(var(--p)*3.2 - var(--d)*.28), 1);opacity:calc(var(--rp)*(1 - clamp(0, calc((var(--p) - .78)*4), 1)*.7))}
+@media(prefers-reduced-motion:reduce){.rl-t{transform:none!important;opacity:1!important}}
 `;
