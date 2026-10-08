@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { mediaBytes } from "@/media-data";
+import { mediaBytes } from "@/media-data/v4";
 import type {} from "@tanstack/react-start";
 
 export const Route = createFileRoute("/m/$file")({
