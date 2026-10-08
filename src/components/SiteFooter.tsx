@@ -1,6 +1,24 @@
+import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 
 export function SiteFooter() {
+  const wm = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const fit = () => {
+      const svg = wm.current;
+      const tx = svg?.querySelector("text");
+      if (!svg || !tx) return;
+      try {
+        const b = (tx as SVGGraphicsElement).getBBox();
+        if (b.width > 50) svg.setAttribute("viewBox", `${b.x} 0 ${b.width} ${(b.width * 215) / 984}`);
+      } catch { /* ignore */ }
+    };
+    fit();
+    const f = (document as Document & { fonts?: { ready: Promise<unknown> } }).fonts;
+    if (f) f.ready.then(fit);
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
   return (
     <footer className="sf">
       <style>{SF_CSS}</style>
@@ -50,8 +68,8 @@ export function SiteFooter() {
 
       </div>
       <div className="sf-word" aria-hidden>
-        <svg viewBox="8 0 984 215" width="100%" role="presentation" focusable="false">
-          <text x="0" y="158" textLength="1000" lengthAdjust="spacingAndGlyphs" fontSize="205">
+        <svg ref={wm} viewBox="8 0 984 215" width="100%" role="presentation" focusable="false">
+          <text x="0" y="158" fontSize="205">
             {"gotaofferr".split("").map((c, i) => (
               <tspan key={i}>{c}</tspan>
             ))}
@@ -104,7 +122,7 @@ const SF_CSS = `
 
 .sf-word{margin:1.5rem 0 0;aspect-ratio:1000/120;overflow:hidden}
 .sf-base{padding-bottom:0}
-.sf-word text{fill:rgba(255,255,255,.2)}
+.sf-word text{fill:rgba(255,255,255,.28)}
 @supports(animation-timeline:view()){
 .sf-col,.sf-top>*{animation:sf-up both cubic-bezier(.2,.8,.2,1);animation-timeline:view();animation-range:entry 0% entry 55%}
 .sf-col:nth-child(2){animation-range:entry 8% entry 62%}.sf-col:nth-child(3){animation-range:entry 16% entry 70%}
@@ -133,8 +151,9 @@ const SF_CSS = `
 .sf-grp .sf-col:nth-child(3)>ul:nth-of-type(2){grid-column:2;grid-row:3;align-content:start}
 }
 
-.sf-say{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.22em;row-gap:0}
+.sf-say{font-size:clamp(1.9rem,7.6vw,5.6rem)!important;display:flex;flex-wrap:wrap;align-items:baseline;column-gap:.22em;row-gap:0}
 .sf-say .sf-r{flex-basis:100%}
+.sf-say .sf-ft,.sf-say em{white-space:nowrap}
 .sf-say em{display:inline-block;transform:rotate(-5deg) translateY(-.04em);transform-origin:left bottom;margin-left:.06em;font-size:1.05em}
 .sf-top{gap:1rem}
 .sf-cta{margin-top:-.4rem}
