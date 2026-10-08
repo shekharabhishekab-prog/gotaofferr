@@ -1015,7 +1015,7 @@ function Index() {
           </div>
           <div className="rl-grid mt-6 sm:mt-10">
             {reelTiles.map((n, k) => (
-              <div key={n} aria-hidden className="rl-t" style={{ ["--k" as string]: k, ["--d" as string]: reelRing[k], ["--dx" as string]: reelPos[k][0] - 2.5, ["--dy" as string]: reelPos[k][1] - 1.5 }}>
+              <div key={n} aria-hidden className="rl-t" style={{ ["--k" as string]: k, ["--d" as string]: reelRing[k], ["--dx" as string]: reelPos[k][0] - 2.5, ["--dy" as string]: reelPos[k][1] - 1.5, ["--rd" as string]: reelPos[k][1] % 2 ? 1 : -1 }}>
                 <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" />
                 {k % 5 === 2 ? <i className="rl-dot" /> : null}
                 {k % 4 === 1 ? <em className="rl-tag">{String(k + 1).padStart(2, "0")}</em> : null}
@@ -1484,10 +1484,10 @@ html,body{background:#000}
 .rl-aj{font-family:"HPInst",Georgia,serif;font-style:italic;animation:none;color:rgba(255,255,255,.6);font-size:1.8rem}
 @media(min-width:640px){.rl-n{font-size:20rem}.rl-sec{font-size:7rem}.rl-aj{font-size:3.4rem}}
 .rl-grid{--gmx:0;--gmy:0;--rs:0}
-.rl-t{--z:1;--dir:1;position:relative;top:calc(var(--rs)*var(--dir)*34px);rotate:calc(var(--gmx)*var(--z)*2.2deg);animation:rl-fl 6s ease-in-out infinite;animation-delay:calc(var(--k)*-.7s)}
-.rl-t:nth-child(2n){--dir:-1;--z:-1;animation-duration:7.5s}
-.rl-t:nth-child(3n){--z:1.6}
-@keyframes rl-fl{0%,100%{translate:0 0}50%{translate:calc(var(--gmx)*var(--z)*8px) -9px}}
+.rl-t{position:relative;animation:none!important;rotate:none;top:0;translate:calc(var(--rs)*var(--rd,1)*11vw) 0;transition:translate .5s cubic-bezier(.2,.7,.2,1)}
+
+.rl-head{gap:.9rem;margin-bottom:1.4rem}.rl-say{padding-bottom:.25em;line-height:1;position:relative;z-index:2}.rl-n{padding-top:.08em;margin-bottom:-.1em}.rl-aj{white-space:nowrap;position:relative;top:0;margin-bottom:.35em}
+@keyframes rl-fl-old{0%,100%{translate:0 0}50%{translate:calc(var(--gmx)*var(--z)*8px) -9px}}
 @media(prefers-reduced-motion:reduce){.rl-t{animation:none}}
 .hx-outline{color:#fff;-webkit-text-stroke:0}
 .hp-sub{display:none}
