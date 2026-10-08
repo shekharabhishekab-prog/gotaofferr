@@ -70,7 +70,7 @@ export function useStripeCheckout() {
           key: result.keyId,
           subscription_id: result.subscriptionId,
           name: 'GotaOfferr',
-          description: `${opts.title ?? 'Subscription'} — auto-renews monthly until you cancel`,
+          description: `${opts.title ?? 'Subscription'} - auto-renews monthly. 3 rapid failed attempts may pause checkout.`,
           image: `${window.location.origin}/favicon.png`,
           prefill: result.prefill,
           theme: { color: '#000000' },
