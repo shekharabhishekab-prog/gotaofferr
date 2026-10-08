@@ -1545,6 +1545,7 @@ header .site-container{max-width:none!important;width:100%!important;margin-left
 @font-face{font-family:"HPSyne";src:url("/m/syne2.ttf") format("truetype");font-weight:400 800;font-display:swap}
 .hx-giant,.hx-outline{font-family:"HPSyne","HPBric",sans-serif!important;font-weight:800!important;letter-spacing:-.04em!important}
 @media(min-width:640px){.hx-giant{font-size:min(9.6vw,14.5vh)!important}.hx-outline{font-size:min(7.4vw,11.5vh)!important}}
+.hx-word,.hx-giant,.hx-outline{white-space:nowrap!important;overflow-wrap:normal!important;word-break:keep-all!important}.hx-l2 .hx-pre{white-space:nowrap}
 @media(max-width:639px){
 .hx{display:flex!important;flex-direction:column;align-items:flex-start;padding:0 1.6rem;text-align:left;row-gap:.3rem;transform:none!important}
 .hx-line{display:flex!important;flex-direction:column;align-items:flex-start;gap:.15rem;width:100%}
