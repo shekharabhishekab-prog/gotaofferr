@@ -225,3 +225,29 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
     };
   });
 
+
+/** Cards for one month. The current month is counted live; older months come from the locked numbers. */
+export const getMonthCards = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => {
+    const m = (input as { month?: unknown } | null | undefined)?.month;
+    return { month: typeof m === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(m) ? m : undefined };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as AdminCtx);
+    const { currentMonthIST, computeMonth, readLocked, lockedMonthList } = await import("./monthly-stats.server");
+    const current = currentMonthIST();
+    const month = data.month ?? current;
+    let months: string[] = [current];
+    let record = null as Awaited<ReturnType<typeof computeMonth>> | null;
+    try {
+      months = [...(await lockedMonthList()), current].filter((m, i, all) => all.indexOf(m) === i).reverse();
+    } catch (e) {
+      console.error("[admin] locked month list failed", e);
+    }
+    if (month === current) record = await computeMonth(current);
+    else {
+      try { record = await readLocked(month); } catch (e) { console.error("[admin] locked month read failed", e); }
+    }
+    return { month, current, months, record };
+  });
