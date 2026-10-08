@@ -412,8 +412,14 @@ function HeroVideo() {
     let dead = false;
     import("../components/heroVideoData").then((m) => {
       if (dead || !ref.current) return;
-      ref.current.src = m.default;
-      ref.current.play().catch(() => {});
+      fetch(m.default)
+        .then((r) => r.blob())
+        .then((b) => {
+          if (dead || !ref.current) return;
+          ref.current.src = URL.createObjectURL(b);
+          ref.current.play().catch(() => {});
+        })
+        .catch(() => {});
     });
     return () => {
       dead = true;
@@ -494,11 +500,11 @@ const GI_CSS = `
 .hx-ring2{animation-name:i3-drift2!important}
 @keyframes i3-drift2{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-30vw,-8vh) scale(.8)}100%{transform:translate(-60vw,4vh) scale(1.05)}}
 .hx-chip{opacity:1!important;animation:i3-float 6s ease-in-out infinite alternate!important}
-.hx-c1{left:6%!important;top:18%!important;right:auto!important}
-.hx-c2{right:6%!important;left:auto!important;top:28%!important;animation-duration:7.5s!important;animation-delay:-2s!important}
-.hx-c3{left:12%!important;top:62%!important;right:auto!important;animation-duration:8.5s!important;animation-delay:-4s!important}
+.hx-c1{left:5%!important;top:20%!important;right:auto!important;bottom:auto!important}
+.hx-c2{right:4%!important;left:auto!important;top:13%!important;bottom:auto!important;animation-duration:7.5s!important;animation-delay:-2s!important}
+.hx-c3{left:6%!important;top:64%!important;right:auto!important;bottom:auto!important;animation-duration:8.5s!important;animation-delay:-4s!important}
 @keyframes i3-float{0%{transform:translate(0,0)}50%{transform:translate(18px,-14px)}100%{transform:translate(-14px,10px)}}
-@media(max-width:639px){.hx-ring{width:56vw!important}.hx-c1{top:16%!important}.hx-c2{top:70%!important}.hx-c3{display:none}}
+@media(max-width:639px){.hx-ring{width:56vw!important}.hx-c1{top:16%!important}.hx-c2{top:72%!important;right:4%!important}.hx-c3{display:none}}
 @media(prefers-reduced-motion:reduce){.hx-ring,.hx-chip,.i3-y,.i3-w{animation:none!important}.hx-ring2{display:none}}
 @media(prefers-reduced-motion:reduce){.gi{display:none}.hx-ring,.hx-chip{animation:none;opacity:0}}
 `;
