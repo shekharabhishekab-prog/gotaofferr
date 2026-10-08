@@ -443,7 +443,7 @@ function HeroPops() {
       let t = last;
       while (t === last) t = popTexts[Math.floor(Math.random() * popTexts.length)];
       last = t;
-      const l = mobile ? 4 + Math.random() * 46 : (Math.random() < 0.5 ? 3 + Math.random() * 15 : 74 + Math.random() * 12);
+      const l = mobile ? 4 + Math.random() * 46 : (Math.random() < 0.5 ? 2 + Math.random() * 9 : 85 + Math.random() * 5);
       const tp = 16 + Math.random() * 66;
       const my = ++id;
       setItems((a) => [...a.slice(-3), { id: my, t, l, tp }]);
@@ -508,6 +508,7 @@ const GI_CSS = `
 .i3-tag{margin:0 auto 1.1rem;max-width:34rem;font-family:ui-monospace,Menlo,monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.78);line-height:1.7}
 .i3-tag b{color:#ffd600;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
+header.sticky,header.sticky>div{border-bottom-width:0!important;border-color:transparent!important}
 header.sticky{background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,0))!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
 .hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
