@@ -504,7 +504,9 @@ function Index() {
       }
       const pastHero = window.scrollY > vh * 0.7;
       const ctaTop = cta ? cta.getBoundingClientRect().top : Infinity;
-      setShowBar(pastHero && ctaTop > vh * 0.6);
+      const ftEl = document.querySelector("footer.sf");
+      const ftTop = ftEl ? ftEl.getBoundingClientRect().top : Infinity;
+      setShowBar(pastHero && ctaTop > vh * 0.6 && ftTop > vh);
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(tick);
