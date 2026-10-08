@@ -776,9 +776,9 @@ function Index() {
             <p className="hp-rise mt-2 text-[0.58rem] uppercase tracking-[0.16em] text-white/45 sm:hidden">Works with resume from Indeed, LinkedIn</p>
 
             <ul className="hp-rise mt-6 hidden flex-wrap justify-center gap-2 sm:flex text-[0.66rem] uppercase tracking-[0.16em] text-white/75 [animation-delay:320ms] sm:text-xs">
-              {["Job search", "Resume", "Cover letter"].map((c) => (
-                <li key={c} className="hp-chip">{c}</li>
-              ))}
+              <li><Link to="/jobs" search={{ alert: undefined }} className="hp-chip">Job finder</Link></li>
+              <li><Link to="/tailor" className="hp-chip">Resume tailor</Link></li>
+              <li><Link to="/resume-builder" className="hp-chip">Resume builder</Link></li>
               <li className="hp-chip hp-chip-y">5 free a month</li>
               <li className="hp-chip hidden sm:block">No card needed</li>
             </ul>
