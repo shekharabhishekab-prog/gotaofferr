@@ -255,8 +255,8 @@ function Index() {
           </div>
 
           <div className="relative py-14 text-center sm:py-16">
-            <ResumeSheet variant="before" className="absolute left-0 top-4 hidden w-52 -rotate-6 lg:block hp-float-a" />
-            <ResumeSheet variant="after" className="absolute right-0 top-10 hidden w-52 rotate-6 lg:block hp-float-b" />
+            <ResumeSheet variant="before" className="absolute bottom-6 left-0 hidden w-44 lg:block hp-float-a" />
+            <ResumeSheet variant="after" className="absolute bottom-6 right-0 hidden w-44 lg:block hp-float-b" />
 
             <h1 className="hp-rise mx-auto max-w-[16ch] font-display text-[2.6rem] font-bold uppercase leading-[0.98] tracking-tight text-balance sm:text-[4.2rem] lg:text-[5.6rem]">
               Find the jobs. Tailor the <span className="text-highlight">resume.</span> Apply.
@@ -284,6 +284,10 @@ function Index() {
               >
                 <Link to="/resume-builder">Resume builder</Link>
               </Button>
+            </div>
+            <div className="mt-12 flex justify-center gap-3 lg:hidden">
+              <ResumeSheet variant="before" className="w-36 -rotate-3 sm:w-44" />
+              <ResumeSheet variant="after" className="mt-4 w-36 rotate-3 sm:w-44" />
             </div>
           </div>
 
