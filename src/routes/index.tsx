@@ -1520,5 +1520,17 @@ html,body{overflow-x:clip}
 .rl-n{font-size:7rem}
 .hx-l1 .hx-outline{font-size:3.6rem}
 }
+@media(min-width:640px){
+header .site-container{max-width:none;padding-left:1.25rem;padding-right:1.25rem}
+.hx-m1,.hx-m3{left:1.25rem}.hx-m2,.hx-m4{right:1.25rem}
+.hx-m1,.hx-m2{top:5rem;line-height:1}
+.hx{width:fit-content;margin-left:auto;margin-right:auto;padding:2.2rem 3.2rem 2.4rem;background:rgba(250,204,0,.62);border-radius:.4rem;backdrop-filter:blur(2px)}
+.hx .hx-hand,.hx .hx-giant,.hx .hx-outline,.hx .hx-mid,.hx .hx-tiny,.hx .hx-stop{color:#0b0b0b}
+.hx .hx-tiny,.hx .hx-stop{color:rgba(0,0,0,.7)}
+.hx .hx-under{background:#0b0b0b}
+.hx .hx-track{background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.6) 0 2px,transparent 2px 12px)}
+.hx .hx-track em{background:rgba(0,0,0,.4)}
+.hx-giant::before{color:#fff}.hx-giant::after{color:#0b0b0b}
+}
 `;
 
