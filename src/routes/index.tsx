@@ -536,6 +536,8 @@ header.sticky{background-color:rgba(0,0,0,calc(var(--hd,0)*.95))!important;backg
 .hx-meta,.hx-m3{display:none!important}
 .hp-hero .i3-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05) brightness(.62)}
 .i3{margin:0;font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-.055em;line-height:.92;color:#fff;font-size:clamp(2.9rem,14.2vw,5rem);display:flex;flex-direction:column;align-items:center;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+@media(min-width:900px) and (prefers-reduced-motion:no-preference){.i3{animation:i3-glitch 2.2s steps(1,end) 1.6s infinite}}
+@keyframes i3-glitch{0%,93%,100%{transform:none;text-shadow:0 2px 30px rgba(0,0,0,.35)}94%{transform:translateX(-3px) skewX(-1.5deg);text-shadow:3px 0 rgba(255,214,0,.75),-3px 0 rgba(255,255,255,.45)}96%{transform:translateX(3px);text-shadow:-3px 0 rgba(255,214,0,.7),3px 0 rgba(255,255,255,.4)}98%{transform:translateX(-1px) skewX(1deg);text-shadow:2px 0 rgba(255,214,0,.5),-2px 0 rgba(255,255,255,.3)}}
 .i3-l{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;column-gap:.14em;white-space:nowrap}
 .i3-y{background:var(--highlight,#ffd600);color:#000;padding:.0em .1em .02em;margin:.02em 0;text-shadow:none;display:inline-block;animation:i3-in .7s cubic-bezier(.2,.8,.2,1) both}
 .i3-y2{animation-delay:.15s}
@@ -795,10 +797,9 @@ function Index() {
               <span className="animate-pulse-ring i3-pill inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
                 <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · Make resume from scratch · Tailor resume · Apply — 5 free a month
               </span>
-              <h1 className="i3 mt-5" aria-label="First find the jobs. Tailor the resume. Then apply.">
-                <span aria-hidden className="i3-l"><span className="i3-w">FIRST,</span> <mark className="i3-y">FIND</mark></span>
-                <span aria-hidden className="i3-l"><span className="i3-w">THE JOBS.</span> <mark className="i3-y i3-y2">TAILOR</mark></span>
-                <span aria-hidden className="i3-l"><span className="i3-w">THE RESUME.</span></span>
+              <h1 className="i3 mt-5" aria-label="The job you want. The resume it needs.">
+                <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y">JOB</mark> <span className="i3-w">YOU WANT.</span></span>
+                <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y i3-y2">RESUME</mark> <span className="i3-w">IT NEEDS.</span></span>
               </h1>
             </div>
 
