@@ -1512,7 +1512,7 @@ html,body{overflow-x:clip}
 @media(max-width:639px){
 .gap-mq{display:none}
 .ab2s{min-height:0;padding-top:2.5rem;padding-bottom:2.5rem;justify-content:flex-start}
-.ab2-row{white-space:normal;transform:none!important;padding:0 1.25rem}
+.ab2-row{white-space:normal;padding:0 1.6rem}.ab2-rl{transform:translateX(calc((var(--p) - .5)*-9vw))!important}.ab2-rr{transform:translateX(calc((var(--p) - .5)*9vw))!important}
 .ab2-in{flex-wrap:wrap;font-size:clamp(2rem,9.5vw,3rem)}
 .rl-n{font-size:7rem}
 .hx-l1 .hx-outline{font-size:3.6rem}
