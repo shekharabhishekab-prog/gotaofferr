@@ -833,7 +833,7 @@ function Index() {
             </div>
 
             <p className="hp-rise mt-4 text-[0.68rem] uppercase tracking-[0.2em] text-white/60 sm:hidden"><span className="text-highlight">5 free</span> a month / no card</p>
-            <p className="hp-rise mt-2 text-[0.58rem] uppercase tracking-[0.16em] text-white/45 sm:hidden">Works with resume from Indeed, LinkedIn</p>
+            <p className="hp-rise mt-2 text-[0.5rem] uppercase tracking-[0.1em] text-white/45 whitespace-nowrap sm:hidden">Works with Indeed, LinkedIn, Glassdoor, Naukri</p>
 
             <ul className="hp-rise mt-6 hidden flex-wrap justify-center gap-2 sm:flex text-[0.66rem] uppercase tracking-[0.16em] text-white/75 [animation-delay:320ms] sm:text-xs">
               <li><Link to="/jobs" search={{ alert: undefined }} className="hp-chip">Job finder</Link></li>
@@ -1585,7 +1585,7 @@ html,body{background:#000}
 .hp-hero-body div.hp-rise.flex{margin-top:1rem;flex-direction:row!important;flex-wrap:nowrap!important;gap:.6rem!important;align-items:flex-start}
 .hp-hero-body div.hp-rise.flex .hp-mag{flex:1 1 0;min-width:0}
 .hp-hero-body div.hp-rise.flex .hp-btn{height:2.6rem;padding-left:.5rem!important;padding-right:.5rem!important;font-size:.82rem;white-space:nowrap}
-.hp-sub{font-size:.52rem;letter-spacing:.1em;margin-top:.3rem;text-align:center}
+.hp-sub{font-size:.44rem;letter-spacing:.06em;margin-top:.3rem;text-align:center;white-space:nowrap;max-width:100%;overflow:hidden}
 }
 .hx-bgR{position:absolute;z-index:-5;right:-3vw;bottom:-14vh;font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;font-size:92vh;line-height:.8;letter-spacing:-.06em;color:rgba(255,214,0,.13);-webkit-text-stroke:2px rgba(255,214,0,.22);pointer-events:none;user-select:none;transform:translate(calc(var(--mx)*-18px),calc(var(--my)*-12px));transition:transform .3s ease-out;mix-blend-mode:screen}
 .hx-giant{text-transform:lowercase}
