@@ -517,7 +517,7 @@ const GI_CSS = `
 .hx-ring,.hx-chip,.hx-rp{display:none!important}
 .hp-hero{margin-top:-3.6rem;padding-top:3.6rem}
 .i3-pill{margin-bottom:.9rem;font-size:.64rem!important;padding:.15rem .6rem!important}
-@media(max-width:639px){.pill-d{display:none}.i3-pill{font-size:9px!important;padding:.15rem .42rem!important;white-space:nowrap;gap:.25rem!important;letter-spacing:-.01em}.i3-pill svg{width:.6rem!important;height:.6rem!important}}
+@media(max-width:639px){.pill-d{display:none}.i3-pill{font-size:7.5px!important;padding:.15rem .42rem!important;white-space:nowrap;gap:.25rem!important;letter-spacing:-.01em}.i3-pill svg{width:.6rem!important;height:.6rem!important}}
 .i3-tag{margin:0 auto 1.1rem;max-width:34rem;font-family:ui-monospace,Menlo,monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.78);line-height:1.7}
 .i3-tag b{color:#ffd600;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
@@ -797,7 +797,6 @@ function Index() {
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y">JOB</mark> <span className="i3-w">YOU WANT.</span></span>
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y i3-y2">RESUME</mark> <span className="i3-w">IT NEEDS.</span></span>
               </h1>
-              <span aria-hidden className="hp-note"><em>make resume from scratch</em><svg viewBox="0 0 40 44" width="34" height="38" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M30 3C34 16 24 30 8 38" /><path d="M7 28l1 11 11-2" /></svg></span>
             </div>
 
             <p className="hp-rise mx-auto mt-5 hidden max-w-md text-[0.68rem] uppercase leading-relaxed tracking-[0.16em] text-white/55 [animation-delay:140ms] sm:block sm:max-w-none">
@@ -1575,6 +1574,7 @@ html,body{background:#000}
 @media(prefers-reduced-motion:reduce){.rl-t{animation:none}}
 .hx-outline{color:#fff;-webkit-text-stroke:0}
 .hp-sub{display:none}
+@media(min-width:640px){.hp-sub{display:block;margin-top:.55rem;text-align:center;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55);white-space:nowrap}.hp-hero-body div.hp-rise.flex{align-items:flex-start}}
 @media(max-width:639px){.hp-note{display:none!important}}
 .hp-note{position:absolute;left:50%;bottom:-.2rem;transform:translateX(250px) rotate(-3deg);pointer-events:none;z-index:3;display:flex;flex-direction:column;align-items:flex-start;color:rgba(255,255,255,.8)}
 .hp-note svg{margin:.1rem 0 0 1.6rem}
