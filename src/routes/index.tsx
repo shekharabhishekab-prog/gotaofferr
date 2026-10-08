@@ -1075,31 +1075,6 @@ function Index() {
         </div>
       </section>
 
-      {/* Final CTA over a clip */}
-      <section data-cta className="relative isolate overflow-hidden py-24 text-center sm:py-44">
-        <LazyVideo name="cta" className="absolute inset-0 -z-20 h-full w-full object-cover opacity-[0.3]" />
-        <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_50%,transparent_0%,#000_80%)]" />
-        <div className="site-container">
-          <h2 data-rv className="hp-r mx-auto max-w-4xl font-display text-4xl font-bold uppercase leading-[1.02] sm:text-7xl">
-            What you <span className="text-highlight">can do</span>
-          </h2>
-          <p className="hp-hand mt-4 text-3xl text-white/85 sm:text-4xl">go get that offer</p>
-          <div data-rv className="hp-r mt-10 flex flex-wrap justify-center gap-3">
-            <span data-mag className="hp-mag inline-block">
-              <Button
-                asChild
-                size="lg"
-                className="hp-btn group rounded-full bg-highlight px-8 text-highlight-foreground hover:bg-highlight/90"
-              >
-                <Link to="/tailor">
-                  Tailor my resume
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </span>
-          </div>
-        </div>
-      </section>
 
       <div className={`hp-bar bg-black sm:hidden ${showBar ? "show" : ""}`}>
         <Link
