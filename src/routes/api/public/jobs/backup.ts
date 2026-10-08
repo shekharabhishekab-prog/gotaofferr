@@ -13,6 +13,12 @@ export const Route = createFileRoute("/api/public/jobs/backup")({
         const a = Buffer.from(provided);
         const b = Buffer.from(expected);
         if (a.length !== b.length || !timingSafeEqual(a, b)) return new Response("Unauthorized", { status: 401 });
+        const verify = new URL(request.url).searchParams.get("verify");
+        if (verify) {
+          const { verifyBackup } = await import("@/lib/backup.server");
+          const v = await verifyBackup(verify);
+          return Response.json(v, { status: v.ok ? 200 : 500 });
+        }
         try {
           const { runBackup } = await import("@/lib/backup.server");
           const r = await runBackup();
@@ -30,3 +36,4 @@ export const Route = createFileRoute("/api/public/jobs/backup")({
     },
   },
 });
+
