@@ -614,6 +614,7 @@ function Index() {
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,transparent_0%,#000_88%)]" />
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
+        <div aria-hidden className="hx-bgR">R</div>
 
         <div aria-hidden className="hx-meta hx-m1"><span>(01)</span> find / tailor / apply</div>
         <div aria-hidden className="hx-meta hx-m2">global roles <b>/</b> free to start</div>
@@ -1499,6 +1500,10 @@ html,body{background:#000}
 .hp-hero-body .hp-rolebox{margin-top:.5rem}
 .hp-hero-body div.hp-rise.flex{margin-top:1rem}
 }
+.hx-bgR{position:absolute;z-index:-5;right:-3vw;bottom:-14vh;font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;font-size:92vh;line-height:.8;letter-spacing:-.06em;color:rgba(255,214,0,.13);-webkit-text-stroke:2px rgba(255,214,0,.22);pointer-events:none;user-select:none;transform:translate(calc(var(--mx)*-18px),calc(var(--my)*-12px));transition:transform .3s ease-out;mix-blend-mode:screen}
+.hx-giant{text-transform:lowercase}
+.hx-first{font-size:1.9rem}
+@media(max-width:639px){.hx-bgR{font-size:62vh;right:-10vw;bottom:-6vh}.hx-giant{font-size:4.6rem}}
 /* mobile fixes */
 html,body{overflow-x:clip}
 @media(max-width:639px){
