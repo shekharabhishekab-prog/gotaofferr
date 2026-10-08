@@ -1429,4 +1429,5 @@ html,body{background:#000}
 .tx-ex:hover .tx-exname{color:#fff}.tx-ex:hover .tx-for{transform:translateX(.5rem) rotate(-1.5deg)}
 .tx-ex .tx-for{transition:transform .35s cubic-bezier(.2,.7,.2,1)}
 @media(prefers-reduced-motion:reduce){.rl-fs i,.rl-aj,.gap-mq-in{animation:none}}
+.rl-grid>.rl-core{align-self:stretch;min-height:16rem}
 `;
