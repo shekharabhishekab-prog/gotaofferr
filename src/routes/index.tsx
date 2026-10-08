@@ -824,97 +824,6 @@ function Index() {
         </div>
       </section>
 
-      {/* About: text on the left, living visual on the right */}
-      <section id="about" data-p className="site-container py-16 sm:py-28">
-        <div className="ab-grid relative grid items-stretch gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-0">
-          <div className="relative z-10 flex flex-col justify-center">
-            <p className="hp-hand text-2xl text-highlight sm:text-3xl">about</p>
-            <p data-fill className="ab-t mt-4 font-display font-semibold uppercase">
-              {aboutLines.map((ln, li) => (
-                <span key={li} className="ab-line">
-                  {ln.map((w, i) => (
-                    <span key={i} className={`hp-w ab-${w.c} ${w.m ? "hp-mark" : ""}`} style={{ ["--k" as string]: li * 3 + i }}>
-                      {w.t}
-                    </span>
-                  ))}
-                </span>
-              ))}
-            </p>
-            <span aria-hidden className="hp-hand hp-pnote mt-3 inline-block -rotate-3 self-end text-2xl text-highlight sm:text-4xl">
-              one resume, every job
-            </span>
-            <svg aria-hidden viewBox="0 0 300 60" className="ab-arrow hidden lg:block">
-              <path d="M2 40 C 80 5, 160 70, 290 22" pathLength="1" />
-              <path d="M270 8 L292 22 L268 36" pathLength="1" />
-            </svg>
-          </div>
-          <div data-spot className="hp-about relative lg:-ml-28">
-            <div className="hp-about-card ab-card relative h-full min-h-[13rem] overflow-hidden rounded-2xl border border-white/15 sm:min-h-[22rem]">
-              <LazyVideo name="ab2" className="absolute inset-0 h-full w-full object-cover opacity-85" />
-              <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-              <Brackets />
-              <span className="absolute left-4 top-4 text-[0.65rem] uppercase tracking-[0.2em] text-white/70">
-                The interview is next
-              </span>
-            </div>
-            <div aria-hidden className="hp-doc hot hp-about-doc absolute -left-3 bottom-6 w-40 sm:-left-8 sm:w-48">
-              <b>
-                Tailored <u>for the job</u>
-              </b>
-              <i /><i className="y" /><i className="s y" />
-            </div>
-            
-          </div>
-        </div>
-      </section>
-
-      <Bridge label="see what you can do" href="#tools" />
-
-      {/* Split headline + moving image strips */}
-      <section id="tools" data-p className="relative overflow-hidden py-10 sm:py-20">
-        <div className="site-container">
-          <div className="wy relative font-display font-bold uppercase">
-            <div className="wy-l">
-              <span data-rv className="hp-wd" style={{ ["--k" as string]: 0 }}>Your next application,</span>
-            </div>
-            <div className="wy-l">
-              <span data-rv className="hp-wd text-highlight" style={{ ["--k" as string]: 1 }}>tailored</span>{" "}
-              <span data-rv className="hp-wd" style={{ ["--k" as string]: 2 }}>in 15 seconds</span>
-            </div>
-            <div aria-hidden className="wy-badge absolute right-0 top-1/2 -translate-y-1/2">
-              <svg viewBox="0 0 120 120" className="wy-b1">
-                <defs>
-                  <path id="hpc" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
-                </defs>
-                <text fontSize="12" letterSpacing="3.4" fill="currentColor">
-                  <textPath href="#hpc">FIND • TAILOR • APPLY • REPEAT •</textPath>
-                </text>
-              </svg>
-              <svg viewBox="0 0 120 120" className="wy-b2">
-                <circle cx="60" cy="60" r="30" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 7" />
-              </svg>
-              <i className="wy-core" />
-            </div>
-          </div>
-<ul className="mt-6 flex flex-wrap gap-2 text-[0.66rem] uppercase tracking-[0.16em] text-white/70 sm:mt-10 sm:text-xs">
-            {["Job finder", "Resume tailor", "Cover letter", "Resume builder"].map((t, i) => (
-              <li key={t} data-rv className="hp-chip hp-wd" style={{ ["--k" as string]: 4 + i }}>
-                {t}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div aria-hidden className="mt-10 overflow-hidden sm:mt-14">
-          <div className="hp-strip hp-strip-a hp-grid2">
-            {[...stripA.flatMap((a, i) => [a, stripB[i]]), ...stripA.flatMap((a, i) => [a, stripB[i]])].map((n, i) => (
-              <div key={i} className="hp-tl relative overflow-hidden rounded-lg border border-white/10">
-                <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover opacity-60" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Scope: rows with a hover image */}
       <section className="site-container py-16 sm:py-28">
         <div className="flex flex-wrap items-end justify-between gap-6">
@@ -1024,44 +933,6 @@ function Index() {
         </div>
       </section>
 
-      <Bridge label="real people, real applications" href="#reel" />
-
-      {/* Showreel */}
-      <section id="reel" data-p className="rl relative overflow-hidden py-12 sm:py-28">
-        <div className="site-container">
-          <div className="rl-head">
-            <span className="rl-mono">( hiring, in motion )</span>
-            <p className="rl-say"><span className="hp-hand rl-fs">fifteen seconds</span> <span className="rl-aj">a job</span></p>
-          </div>
-          <div className="rl-grid mt-6 sm:mt-10">
-            {reelTiles.map((n, k) => (
-              <div key={n} aria-hidden className="rl-t" style={{ ["--k" as string]: k, ["--d" as string]: reelRing[k], ["--dx" as string]: reelPos[k][0] - 2.5, ["--dy" as string]: reelPos[k][1] - 1.5 }}>
-                <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" />
-                {k % 5 === 2 ? <i className="rl-dot" /> : null}
-                {k % 4 === 1 ? <em className="rl-tag">{String(k + 1).padStart(2, "0")}</em> : null}
-              </div>
-            ))}
-            <ReelCentre />
-          </div>
-        </div>
-      </section>
-
-      {/* Why */}
-      <section className="site-container py-12 sm:py-24">
-        <h2 data-rv className="hp-r max-w-3xl font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
-          Built for applying at scale
-        </h2>
-        <div className="mt-8 sm:mt-14">
-          {notWhat.map((n, k) => (
-            <div key={n.title} data-rv className="hp-r tx-why" style={{ ["--k" as string]: k }}>
-              <span className="tx-n">0{k + 1}</span>
-              <h3 className={`tx-big ${k === 1 ? "tx-out" : ""} ${k === 2 ? "tx-yel" : ""}`}>{n.title}</h3>
-              <p className="tx-sm">{n.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Examples */}
       {showcaseExamples.length > 0 ? (
         <section className="site-container pb-16 sm:pb-28">
@@ -1093,6 +964,85 @@ function Index() {
         </section>
       ) : null}
 
+      {/* Split headline + moving image strips */}
+      <section id="tools" data-p className="relative overflow-hidden py-10 sm:py-20">
+        <div className="site-container">
+          <div className="wy relative font-display font-bold uppercase">
+            <div className="wy-l">
+              <span data-rv className="hp-wd" style={{ ["--k" as string]: 0 }}>Your next application,</span>
+            </div>
+            <div className="wy-l">
+              <span data-rv className="hp-wd text-highlight" style={{ ["--k" as string]: 1 }}>tailored</span>{" "}
+              <span data-rv className="hp-wd" style={{ ["--k" as string]: 2 }}>in 15 seconds</span>
+            </div>
+            <div aria-hidden className="wy-badge absolute right-0 top-1/2 -translate-y-1/2">
+              <svg viewBox="0 0 120 120" className="wy-b1">
+                <defs>
+                  <path id="hpc" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
+                </defs>
+                <text fontSize="12" letterSpacing="3.4" fill="currentColor">
+                  <textPath href="#hpc">FIND • TAILOR • APPLY • REPEAT •</textPath>
+                </text>
+              </svg>
+              <svg viewBox="0 0 120 120" className="wy-b2">
+                <circle cx="60" cy="60" r="30" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 7" />
+              </svg>
+              <i className="wy-core" />
+            </div>
+          </div>
+<ul className="mt-6 flex flex-wrap gap-2 text-[0.66rem] uppercase tracking-[0.16em] text-white/70 sm:mt-10 sm:text-xs">
+            {["Job finder", "Resume tailor", "Cover letter", "Resume builder"].map((t, i) => (
+              <li key={t} data-rv className="hp-chip hp-wd" style={{ ["--k" as string]: 4 + i }}>
+                {t}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div aria-hidden className="mt-10 overflow-hidden sm:mt-14">
+          <div className="hp-strip hp-strip-a hp-grid2">
+            {[...stripA.flatMap((a, i) => [a, stripB[i]]), ...stripA.flatMap((a, i) => [a, stripB[i]])].map((n, i) => (
+              <div key={i} className="hp-tl relative overflow-hidden rounded-lg border border-white/10">
+                <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover opacity-60" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About: text only, full width, rows slide left and right on scroll */}
+      <section id="about" data-p className="ab2s relative overflow-hidden py-16 sm:py-24">
+        <p className="hp-hand relative z-10 px-5 text-2xl text-highlight sm:px-10 sm:text-3xl">about</p>
+        <div className="ab2-rows mt-4 font-display font-bold uppercase">
+          {aboutLines.map((ln, li) => (
+            <div key={li} className={`ab2-row ${li % 2 ? "ab2-rr" : "ab2-rl"}`} style={{ ["--k" as string]: li }}>
+              <span className="ab2-in">
+                {ln.map((w, i) => (
+                  <span key={i} className={`ab2-w ab2-${w.c.split(" ").join(" ab2-")} ${w.m ? "hp-mark" : ""}`}>
+                    {w.t}
+                  </span>
+                ))}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Why */}
+      <section data-p className="y-why site-container py-12 sm:py-24">
+        <h2 data-rv className="hp-r max-w-3xl font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
+          Built for applying at scale
+        </h2>
+        <div className="mt-8 sm:mt-14">
+          {notWhat.map((n, k) => (
+            <div key={n.title} data-rv className="hp-r tx-why" style={{ ["--k" as string]: k }}>
+              <span className="tx-n">0{k + 1}</span>
+              <h3 className={`tx-big ${k === 1 ? "tx-out" : ""} ${k === 2 ? "tx-yel" : ""}`}>{n.title}</h3>
+              <p className="tx-sm">{n.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Plans */}
       <section className="site-container pb-16 sm:pb-28">
         <div className="flex flex-wrap items-end justify-between gap-6">
@@ -1117,6 +1067,28 @@ function Index() {
           <Link to="/pricing" className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-highlight">
             See prices and what each plan includes <ArrowRight className="size-4" />
           </Link>
+        </div>
+      </section>
+
+      <Bridge label="real people, real applications" href="#reel" />
+
+      {/* Showreel */}
+      <section id="reel" data-p className="rl relative overflow-hidden py-12 sm:py-28">
+        <div className="site-container">
+          <div className="rl-head">
+            <span className="rl-mono">( hiring, in motion )</span>
+            <p className="rl-say"><span className="hp-hand rl-fs">fifteen seconds</span> <span className="rl-aj">a job</span></p>
+          </div>
+          <div className="rl-grid mt-6 sm:mt-10">
+            {reelTiles.map((n, k) => (
+              <div key={n} aria-hidden className="rl-t" style={{ ["--k" as string]: k, ["--d" as string]: reelRing[k], ["--dx" as string]: reelPos[k][0] - 2.5, ["--dy" as string]: reelPos[k][1] - 1.5 }}>
+                <img src={`/m/${n}.webp`} alt="" loading="lazy" decoding="async" />
+                {k % 5 === 2 ? <i className="rl-dot" /> : null}
+                {k % 4 === 1 ? <em className="rl-tag">{String(k + 1).padStart(2, "0")}</em> : null}
+              </div>
+            ))}
+            <ReelCentre />
+          </div>
         </div>
       </section>
 
@@ -1469,4 +1441,32 @@ html{scroll-behavior:smooth}
 .hp-live .rl-t{--fly:calc(1 - var(--rp) + clamp(0, calc((var(--p) - .68)*3.4), 1));transform:translate(calc(var(--dx)*var(--fly)*6vw),calc(var(--dy)*var(--fly)*9vh)) rotate(calc(var(--dx)*var(--fly)*9deg)) scale(calc(.7 + var(--rp)*.3));animation:rl-float 5s ease-in-out infinite;animation-delay:calc(var(--k)*-.45s)}
 @keyframes rl-float{0%,100%{translate:0 0}50%{translate:0 -.35rem}}
 @media(prefers-reduced-motion:reduce){.rl-fs,.wy-b1,.wy-b2,.wy-core{animation:none}.hp-live .rl-t{animation:none;translate:none}}
+
+/* v4f: about full-bleed rows + why motion */
+.ab2s{min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+.ab2-rows{display:flex;flex-direction:column;gap:.2rem}
+.ab2-row{white-space:nowrap;line-height:.92;will-change:transform}
+.ab2-in{display:inline-flex;align-items:baseline;gap:.25em;font-size:clamp(2.6rem,11.5vw,12rem)}
+.ab2-rl{transform:translateX(calc(var(--p)*-26vw + 8vw))}
+.ab2-rr{transform:translateX(calc(var(--p)*26vw - 26vw))}
+.ab2-w{display:inline-block;color:#fff}
+.ab2-xs{font-size:.34em;font-family:ui-monospace,Menlo,monospace;letter-spacing:.2em;color:rgba(255,255,255,.6);font-weight:500}
+.ab2-s{font-size:.5em;font-family:Georgia,serif;font-style:italic;text-transform:none;color:rgba(255,255,255,.85);font-weight:400}
+.ab2-m{font-size:.7em}
+.y-why{overflow-x:clip}
+.ab2-xl{font-size:1em}
+.ab2-o{color:transparent;-webkit-text-stroke:2px #fff}
+.ab2-y{color:var(--highlight)}
+.ab2-w.hp-mark{background:none}
+.ab2-row:nth-child(2) .ab2-w:first-child{color:var(--highlight)}
+.ab2-row::after{content:"";display:block;height:0}
+.y-why .tx-why{transform:translateX(calc((var(--p) - .5)*var(--dir,1)*14vw))}
+.y-why .tx-why:nth-child(odd){--dir:-1}
+.y-why .tx-why:hover{transform:translateX(calc((var(--p) - .5)*var(--dir,1)*14vw + 1rem))}
+.y-why .tx-big{background:linear-gradient(100deg,currentColor 0 45%,var(--highlight) 50%,currentColor 55% 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:y-sw 5s linear infinite;animation-delay:calc(var(--k,0)*-1.4s)}
+.y-why .tx-out{-webkit-text-fill-color:transparent;background:none;-webkit-text-stroke:2px #fff;animation:none}
+.y-why .tx-yel{background:linear-gradient(100deg,var(--highlight) 0 45%,#fff 50%,var(--highlight) 55% 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+@keyframes y-sw{from{background-position:120% 0}to{background-position:-120% 0}}
+.y-why .tx-n{display:inline-block;animation:hp-spin 8s linear infinite}
+@media(prefers-reduced-motion:reduce){.y-why .tx-big,.y-why .tx-n{animation:none}}
 `;
