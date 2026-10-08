@@ -48,15 +48,15 @@ export function SiteFooter() {
           <span>AB24 SOLUTIONS · Delhi, India</span>
         </div>
 
-        <div className="sf-word" aria-hidden>
-          <svg viewBox="0 0 1000 215" width="100%" role="presentation" focusable="false">
-            <text x="0" y="158" textLength="1000" lengthAdjust="spacingAndGlyphs" fontSize="205">
-              {"gotaofferr".split("").map((c, i) => (
-                <tspan key={i}>{c}</tspan>
-              ))}
-            </text>
-          </svg>
-        </div>
+      </div>
+      <div className="sf-word" aria-hidden>
+        <svg viewBox="0 0 1000 215" width="100%" role="presentation" focusable="false">
+          <text x="0" y="158" textLength="1000" lengthAdjust="spacingAndGlyphs" fontSize="205">
+            {"gotaofferr".split("").map((c, i) => (
+              <tspan key={i}>{c}</tspan>
+            ))}
+          </text>
+        </svg>
       </div>
     </footer>
   );
@@ -67,7 +67,7 @@ const SF_CSS = `
 @font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-display:swap}
 @font-face{font-family:"HPSyne";src:url("/m/syne2.ttf") format("truetype");font-weight:400 800;font-display:swap}
 .sf{position:relative;background:#000;color:#fff;overflow:hidden;padding-top:4.5rem}
-.sf-in{max-width:80rem;margin:0 auto;padding:0 1.5rem}
+.sf-in{max-width:120rem;margin:0 auto;padding:0 1.5rem}
 .sf-top{display:grid;gap:1.8rem}
 .sf-say{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:-.04em;line-height:.95;font-size:clamp(2.2rem,9vw,5.6rem);margin:0}
 .sf-say em{display:block;color:var(--highlight,#ffd600);font-family:"HPInst",Georgia,serif;font-style:italic;font-weight:400;text-transform:none;letter-spacing:-.01em;font-size:1.15em}
@@ -116,6 +116,12 @@ const SF_CSS = `
 @keyframes sf-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.45)}50%{box-shadow:0 0 0 14px rgba(255,214,0,0)}}
 .sf-word tspan{transition:fill .25s}
 .sf-word tspan:hover{fill:var(--highlight,#ffd600)}
+
+.sf-in{padding-left:clamp(1.5rem,3.2vw,4rem);padding-right:clamp(1.5rem,3.2vw,4rem)}
+.sf-base{flex-direction:column!important;align-items:center;justify-content:center!important;text-align:center;gap:.35rem;padding:2.5rem 0 1.2rem}
+.sf-word{width:100%;margin:.5rem 0 0;aspect-ratio:1000/150;overflow:hidden;padding:0}
+.sf-word svg{width:100%}
+@media(min-width:900px){.sf-grp{grid-template-columns:1fr 1fr 2.6fr}}
 @media(prefers-reduced-motion:reduce){.sf-btn,.sf-col,.sf-top>*,.sf-word svg{animation:none!important}}
 @media(prefers-reduced-motion:reduce){.sf-a,.sf-btn,.sf-wordx i{transition:none}}
 
