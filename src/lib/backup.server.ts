@@ -85,7 +85,8 @@ export async function runBackup(now = new Date()): Promise<BackupResult> {
     await r2Put(key, sealed, "application/octet-stream");
   } catch (e) {
     if (e instanceof R2FullError) return { ok: false, reason: "r2-write-stop" };
-    return { ok: false, reason: "r2-put-failed" };
+    const m = e instanceof Error ? e.message : "";
+    return { ok: false, reason: /^r2-[a-z-]+(-\d{3})?$/.test(m) ? m : "r2-put-failed" };
   }
   return { ok: true, key, bytes: sealed.byteLength, tables: counts };
 }
