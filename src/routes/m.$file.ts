@@ -10,7 +10,7 @@ export const Route = createFileRoute("/m/$file")({
         const name = params.file;
         const bytes = mediaBytes(name);
         if (!bytes) return new Response("Not found", { status: 404 });
-        const type = name.endsWith(".mp4") ? "video/mp4" : "image/webp";
+        const type = name.endsWith(".mp4") ? "video/mp4" : name.endsWith(".ttf") ? "font/ttf" : "image/webp";
         return new Response(bytes, {
           headers: {
             "Content-Type": type,
