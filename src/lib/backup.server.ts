@@ -93,3 +93,32 @@ export async function runBackup(now = new Date()): Promise<BackupResult> {
   }
   return { ok: true, key, bytes: sealed.byteLength, tables: counts };
 }
+
+async function gunzipBytes(data: Uint8Array): Promise<Uint8Array> {
+  const stream = new Blob([data as BlobPart]).stream().pipeThrough(new DecompressionStream("gzip"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+/** Restore check: read a backup object, decrypt, unzip, and return row counts only. Never returns row data. */
+export async function verifyBackup(name: string): Promise<{ ok: true; taken_at: string; tables: Record<string, number> } | { ok: false; reason: string }> {
+  if (!/^dow-[0-6]$/.test(name)) return { ok: false, reason: "bad-name" };
+  const keyB64 = process.env["BACKUP_ENC_KEY"];
+  if (!keyB64) return { ok: false, reason: "backup-key-missing" };
+  try {
+    const { r2Get } = await import("./r2.server");
+    const res = await r2Get(`backups/${name}.enc`);
+    if (!res.ok) return { ok: false, reason: `r2-get-${res.status}` };
+    const buf = new Uint8Array(await res.arrayBuffer());
+    if (new TextDecoder().decode(buf.slice(0, 5)) !== "GOBK1") return { ok: false, reason: "bad-format" };
+    const iv = buf.slice(5, 17);
+    const ct = buf.slice(17);
+    const key = await crypto.subtle.importKey("raw", b64ToBytes(keyB64) as BufferSource, "AES-GCM", false, ["decrypt"]);
+    const plain = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct));
+    const parsed = JSON.parse(new TextDecoder().decode(await gunzipBytes(plain)));
+    const tables: Record<string, number> = {};
+    for (const t of BACKUP_TABLES) tables[t] = Array.isArray(parsed.tables?.[t]) ? parsed.tables[t].length : -1;
+    return { ok: true, taken_at: String(parsed.taken_at), tables };
+  } catch {
+    return { ok: false, reason: "restore-check-failed" };
+  }
+}
