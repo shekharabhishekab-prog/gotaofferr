@@ -444,7 +444,7 @@ function HeroPops() {
       while (t === last) t = popTexts[Math.floor(Math.random() * popTexts.length)];
       last = t;
       const l = mobile ? 4 + Math.random() * 46 : (Math.random() < 0.5 ? 2 + Math.random() * 9 : 85 + Math.random() * 5);
-      const tp = 16 + Math.random() * 66;
+      const tp = mobile ? (Math.random() < 0.5 ? 9 + Math.random() * 12 : 76 + Math.random() * 12) : 16 + Math.random() * 66;
       const my = ++id;
       setItems((a) => [...a.slice(-3), { id: my, t, l, tp }]);
       setTimeout(() => setItems((a) => a.filter((x) => x.id !== my)), 2900);
