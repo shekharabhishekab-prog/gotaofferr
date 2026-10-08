@@ -162,8 +162,8 @@ export async function monthsForYear(year: number): Promise<MonthRecord[]> {
     const ym = `${year}-${String(m).padStart(2, "0")}`;
     if (ym > cur) break;
     const locked = await readLocked(ym);
-    if (locked) out.push(locked);
-    else if (ym === cur) out.push(await computeMonth(ym));
+    // A month that was never locked is counted from the database rows that still exist.
+    out.push(locked ?? (await computeMonth(ym)));
   }
   return out;
 }
