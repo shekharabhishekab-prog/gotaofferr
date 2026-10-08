@@ -1476,4 +1476,5 @@ html{scroll-behavior:smooth}
 html,body{background:#000}
 .hx-giant{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:900;letter-spacing:-.03em}
 @media(max-width:639px){.hx-stop,.hx-tiny,.hp-hero .hp-btn:not(.bg-highlight){display:none}.hx-hand.hx-first{display:none}.hp-hero-body .hp-rise a[href="/resume-builder"]{display:none}}
+.hx-word.hx-giant i{font-style:italic}
 `;
