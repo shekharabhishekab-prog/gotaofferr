@@ -27,23 +27,23 @@ function totalsPdf(year: number, months: MonthRecord[]): Uint8Array {
   doc.p("Month by month. A month is a calendar month in India time. Finished months are locked numbers; the last row may be a month still running.");
   doc.h("Totals per month");
   doc.table(
-    ["Month", "New users", "Rewrites", "Searches", "Builder", "Alerts", "Subs started", "Paid share"],
-    months.map((m) => [monthName(m.month), m.cards.users, m.cards.rewrites, m.cards.searches, m.cards.builderDownloads, m.cards.alerts, m.cards.subscriptionsStarted, pct(m.cards.subscriberSharePercent)]),
-    [9, 9, 8, 8, 7, 6, 12, 10],
+    ["Month", "New users", "Rewrites", "Searches", "Builder", "Alerts", "Paid subs", "Paid share"],
+    months.map((m) => [monthName(m.month), m.cards.users, m.cards.rewrites, m.cards.searches, m.cards.builderDownloads, m.cards.alerts, (m.cards.paidSubscriptionsStarted ?? 0), pct(m.cards.subscriberSharePercent)]),
+    [9, 9, 8, 8, 7, 6, 9, 10],
   );
   doc.gap(8);
   doc.table(
-    ["Year total", "New users", "Rewrites", "Searches", "Builder", "Alerts", "Subs started"],
-    [["", sum(months, (m) => m.cards.users), sum(months, (m) => m.cards.rewrites), sum(months, (m) => m.cards.searches), sum(months, (m) => m.cards.builderDownloads), sum(months, (m) => m.cards.alerts), sum(months, (m) => m.cards.subscriptionsStarted)]],
-    [10, 9, 8, 8, 7, 6, 12],
+    ["Year total", "New users", "Rewrites", "Searches", "Builder", "Alerts", "Paid subs"],
+    [["", sum(months, (m) => m.cards.users), sum(months, (m) => m.cards.rewrites), sum(months, (m) => m.cards.searches), sum(months, (m) => m.cards.builderDownloads), sum(months, (m) => m.cards.alerts), sum(months, (m) => (m.cards.paidSubscriptionsStarted ?? 0))]],
+    [10, 9, 8, 8, 7, 6, 9],
   );
   const last = months[months.length - 1];
   if (last) doc.p(`Users in total at the end of ${monthName(last.month)}: ${last.totalUsersAtEnd}. Active subscribers then: ${last.activeSubscribersAtEnd}.`);
   doc.h("By region (whole year)");
   doc.table(
-    ["Region", "Users joined", "Subscriptions started"],
+    ["Region", "Users joined", "Paid subscriptions started"],
     REGIONS.map((r) => [r, sum(months, (m) => m.regions[r]?.users ?? 0), sum(months, (m) => m.regions[r]?.subscriptions ?? 0)]),
-    [16, 13, 22],
+    [16, 13, 26],
   );
   doc.p("Region comes from the connection country at first sign-in. A VPN can show a different region. Accounts made before tracking began count as India.", 8);
   return doc.build();
@@ -55,7 +55,7 @@ export function insightLines(year: number, months: MonthRecord[]): { happened: s
   if (!months.length) return { happened: ["No monthly numbers were recorded this year."], next: ["Check that the month-end lock job ran."] };
   const users = sum(months, (m) => m.cards.users);
   const rewrites = sum(months, (m) => m.cards.rewrites);
-  const subs = sum(months, (m) => m.cards.subscriptionsStarted);
+  const subs = sum(months, (m) => (m.cards.paidSubscriptionsStarted ?? 0));
   const searches = sum(months, (m) => m.cards.searches);
   const last = months[months.length - 1];
   happened.push(`${users} people signed up in ${year}. ${last.totalUsersAtEnd} accounts exist now.`);
@@ -67,7 +67,7 @@ export function insightLines(year: number, months: MonthRecord[]): { happened: s
     const rel = prev.cards.users ? ` (${d >= 0 ? "+" : ""}${((d / prev.cards.users) * 100).toFixed(0)}%)` : "";
     happened.push(`Last month versus the month before: ${last.cards.users} against ${prev.cards.users} signups${rel}.`);
   }
-  happened.push(`${rewrites} resume rewrites, ${searches} job searches and ${subs} subscriptions started in the year.`);
+  happened.push(`${rewrites} resume rewrites, ${searches} job searches and ${subs} paid subscriptions started in the year.`);
   happened.push(`${last.activeSubscribersAtEnd} active subscribers at the end of the latest month; paid share ${pct(last.cards.subscriberSharePercent)} of real users.`);
   const byRegion = REGIONS.map((r) => ({ r, u: sum(months, (m) => m.regions[r]?.users ?? 0) })).sort((a, b) => b.u - a.u);
   happened.push(`Most new users came from ${byRegion[0].r} (${byRegion[0].u}).`);
