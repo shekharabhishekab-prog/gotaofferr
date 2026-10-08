@@ -602,7 +602,7 @@ function Index() {
     const role = roles[ri % roles.length];
   
   return (
-    <main ref={rootRef} className={`hp bg-black text-white ${rv ? "hp-rv" : ""}`}>
+    <main ref={rootRef} className={`hp bg-black text-white ${rv ? "hp-rv hp-live" : ""}`}>
       <style>{HP_CSS}</style>
       <WipSplash />
       <div aria-hidden className="hp-prog">
