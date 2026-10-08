@@ -4,7 +4,7 @@ export const Route = createFileRoute("/api/public/jobs/backup")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        // Dedicated token. Fails closed when the token secret is absent.
+        // Dedicated token. Fails closed when the token secret is not present.
         const expected = process.env.BACKUP_TRIGGER_TOKEN;
         if (!expected) return new Response("Backup not configured", { status: 503 });
         const header = request.headers.get("authorization") ?? "";
