@@ -797,6 +797,7 @@ function Index() {
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y">JOB</mark> <span className="i3-w">YOU WANT.</span></span>
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y i3-y2">RESUME</mark> <span className="i3-w">IT NEEDS.</span></span>
               </h1>
+              <span aria-hidden className="hp-note"><em>make resume from scratch</em></span>
             </div>
 
             <p className="hp-rise mx-auto mt-5 hidden max-w-xl text-base sm:block text-white/75 [animation-delay:140ms] sm:text-lg">
@@ -828,7 +829,7 @@ function Index() {
                 >
                   <Link to="/resume-builder">Resume builder</Link>
                 </Button>
-                <small className="hp-sub">Make resume from scratch</small><span aria-hidden className="hp-note"><svg viewBox="0 0 30 24" width="22" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21C5 12 13 6 24 5" /><path d="M18 2l7 3-5 6" /></svg><em>make resume from scratch</em></span>
+                <small className="hp-sub">Make resume from scratch</small>
               </span>
             </div>
 
@@ -1576,9 +1577,8 @@ html,body{background:#000}
 .hx-outline{color:#fff;-webkit-text-stroke:0}
 .hp-sub{display:none}
 @media(max-width:639px){.hp-note{display:none!important}}
-.hp-note{display:flex;align-items:flex-end;justify-content:center;gap:.3rem;margin-top:.15rem;color:rgba(255,255,255,.72);pointer-events:none}
-.hp-note svg{transform:translateY(-.1rem) rotate(-8deg);flex:none}
-.hp-note em{font-family:var(--font-hand,"Caveat","Segoe Script",cursive);font-style:normal;font-size:.95rem;line-height:1;white-space:nowrap;background:rgba(255,255,255,.12);padding:.1rem .5rem;border-radius:999px}
+.hp-note{position:absolute;left:50%;bottom:-1.7rem;transform:translateX(140px) rotate(-4deg);pointer-events:none;z-index:3}
+.hp-note em{font-family:"HPHand","Caveat Brush",cursive;font-style:normal;font-size:1.25rem;line-height:1;white-space:nowrap;color:rgba(255,255,255,.8);text-shadow:0 1px 8px rgba(0,0,0,.6)}
 @media(max-width:639px){
 .hp-hero .hp-btn:not(.bg-highlight){display:inline-flex!important}
 .hp-hero-body .hp-rise a[href="/resume-builder"]{display:inline-flex!important}
