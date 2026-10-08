@@ -397,61 +397,6 @@ function StepArt({ i }: { i: number }) {
 }
 
 
-function IntroOverlay() {
-  const ref = useRef<HTMLDivElement>(null);
-  const cnt = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    let done = false;
-    const seen = (() => { try { return sessionStorage.getItem("gto-intro") === "1"; } catch { return false; } })();
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const finish = (fast: boolean) => {
-      if (done) return;
-      done = true;
-      try { sessionStorage.setItem("gto-intro", "1"); } catch { /* ignore */ }
-      el.classList.add(fast ? "gi-skip" : "gi-end");
-      window.setTimeout(() => el.remove(), fast ? 320 : 700);
-    };
-    if (seen || reduce) { el.remove(); return; }
-    const t0 = performance.now();
-    let raf = 0;
-    const tick = (t: number) => {
-      const q = Math.min(1, (t - t0) / 2800);
-      if (cnt.current) cnt.current.textContent = Math.round(48213 * (1 - Math.pow(1 - q, 3))).toLocaleString("en-US");
-      if (q < 1 && !done) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    const timer = window.setTimeout(() => finish(false), 3500);
-    const skip = () => { if (cnt.current) cnt.current.textContent = "48,213"; finish(true); };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") skip(); };
-    el.addEventListener("pointerdown", skip);
-    window.addEventListener("keydown", onKey);
-    return () => { cancelAnimationFrame(raf); window.clearTimeout(timer); window.removeEventListener("keydown", onKey); };
-  }, []);
-  const dots = Array.from({ length: 90 }, (_, i) => {
-    const a = (i * 137.5) % 360;
-    const r = 18 + ((i * 53) % 62);
-    return { x: 50 + Math.cos((a * Math.PI) / 180) * r * 0.9, y: 50 + Math.sin((a * Math.PI) / 180) * r * 0.62, s: 2 + (i % 3), d: (i % 15) * 0.05 };
-  });
-  return (
-    <>
-    <style>{GI_CSS}</style>
-    <div ref={ref} className="gi" role="presentation">
-      <div className="gi-glow" />
-      <span className="gi-dot" />
-      {dots.map((d, i) => (
-        <i key={i} className="gi-p" style={{ left: d.x + "%", top: d.y + "%", width: d.s, height: d.s, ["--dl" as string]: d.d + "s", ["--tx" as string]: (50 - d.x) + "vw", ["--ty" as string]: (50 - d.y) + "vh" }} />
-      ))}
-      <div className="gi-mark">gota<b>offerr</b></div>
-      <div className="gi-m gi-tl">Resume + job finder</div>
-      <div className="gi-m gi-tr">Click to skip</div>
-      <div className="gi-m gi-bl">Sample count / jobs matched <b><span ref={cnt}>0</span></b></div>
-    </div>
-    </>
-  );
-}
-
 const GI_CSS = `
 .gi{position:fixed;inset:0;z-index:2147483000;background:#000;overflow:hidden;cursor:pointer;animation:gi-auto .7s 3.5s forwards}
 .gi-glow{position:absolute;left:50%;top:50%;width:min(110vw,900px);height:min(110vw,900px);transform:translate(-50%,-50%) scale(.2);background:radial-gradient(circle,rgba(255,214,0,.5) 0,transparent 62%);opacity:0;animation:gi-glow 3s .1s ease-out forwards}
@@ -683,7 +628,6 @@ function Index() {
     <main ref={rootRef} className={`hp bg-black text-white ${rv ? "hp-rv hp-live" : ""}`}>
       <style>{HP_CSS}</style>
       <WipSplash />
-      <IntroOverlay />
       <div aria-hidden className="hp-prog">
         <span data-bar />
       </div>
