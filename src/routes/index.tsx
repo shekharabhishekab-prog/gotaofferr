@@ -103,9 +103,9 @@ const steps = [
   },
   {
     n: "03",
-    tag: "Apply",
-    title: "Apply",
-    body: "Download ATS-safe PDFs and go straight to the company's own apply page.",
+    tag: "Build",
+    title: "Make resume from scratch",
+    body: "Build an ATS-friendly resume with AI help on every field, then download the PDF.",
   },
 ];
 
@@ -335,7 +335,7 @@ const stats = [
 const flow = [
   { n: "01", tag: "Find", title: "Find the jobs", cta: "Open job finder", clip: "k1" },
   { n: "02", tag: "Tailor", title: "Tailor the application", cta: "Tailor a resume", clip: "k2" },
-  { n: "03", tag: "Apply", title: "Apply", cta: "Open the builder", clip: "k3" },
+  { n: "03", tag: "Build", title: "Make resume from scratch", cta: "Open the builder", clip: "k3" },
 ] as const;
 
 /* Small connector between sections: a line that grows with scroll and a
@@ -828,7 +828,7 @@ function Index() {
                 >
                   <Link to="/resume-builder">Resume builder</Link>
                 </Button>
-                <small className="hp-sub">Make resume from scratch</small>
+                <span aria-hidden className="hp-note"><svg viewBox="0 0 30 24" width="22" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21C5 12 13 6 24 5" /><path d="M18 2l7 3-5 6" /></svg><em>make resume from scratch</em></span>
               </span>
             </div>
 
@@ -1575,6 +1575,9 @@ html,body{background:#000}
 @media(prefers-reduced-motion:reduce){.rl-t{animation:none}}
 .hx-outline{color:#fff;-webkit-text-stroke:0}
 .hp-sub{display:none}
+.hp-note{display:flex;align-items:flex-end;justify-content:center;gap:.3rem;margin-top:.15rem;color:rgba(255,255,255,.72);pointer-events:none}
+.hp-note svg{transform:translateY(-.1rem) rotate(-8deg);flex:none}
+.hp-note em{font-family:var(--font-hand,"Caveat","Segoe Script",cursive);font-style:normal;font-size:.95rem;line-height:1;white-space:nowrap;background:rgba(255,255,255,.12);padding:.1rem .5rem;border-radius:999px}
 @media(max-width:639px){
 .hp-hero .hp-btn:not(.bg-highlight){display:inline-flex!important}
 .hp-hero-body .hp-rise a[href="/resume-builder"]{display:inline-flex!important}
