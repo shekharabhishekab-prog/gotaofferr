@@ -279,6 +279,112 @@ function ReelCentre() {
   );
 }
 
+function HeroTunnel() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    const hero = c.closest("[data-hero]") as HTMLElement | null;
+    const small = window.innerWidth < 640;
+    const dpr = Math.min(window.devicePixelRatio || 1, small ? 1 : 1.5);
+    let w = 0;
+    let h = 0;
+    const size = () => {
+      w = c.clientWidth;
+      h = c.clientHeight;
+      c.width = Math.round(w * dpr);
+      c.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    size();
+    const RINGS = small ? 14 : 24;
+    const SPOKES = small ? 14 : 28;
+    const pts = Array.from({ length: small ? 40 : 110 }, () => ({ a: Math.random() * 6.283, z: Math.random(), r: 0.2 + Math.random() * 0.8 }));
+    let tx = 0;
+    let ty = 0;
+    let cx = 0;
+    let cy = 0;
+    let boost = 0;
+    let lastY = window.scrollY;
+    let run = true;
+    let raf = 0;
+    let t = 0;
+    const move = (e: PointerEvent) => {
+      tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      ty = (e.clientY / window.innerHeight - 0.5) * 2;
+      if (hero) {
+        hero.style.setProperty("--rx", (-ty * 5).toFixed(2));
+        hero.style.setProperty("--ry", (tx * 7).toFixed(2));
+        hero.style.setProperty("--gx", (tx * 10).toFixed(1) + "px");
+      }
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    const io = new IntersectionObserver(([e]) => {
+      run = e.isIntersecting;
+      if (run && !raf) raf = requestAnimationFrame(draw);
+    });
+    io.observe(c);
+    window.addEventListener("resize", size);
+    function draw() {
+      raf = 0;
+      if (!run) return;
+      t += 0.004;
+      const sy = window.scrollY;
+      boost = boost * 0.92 + Math.min(0.06, Math.abs(sy - lastY) * 0.0009);
+      lastY = sy;
+      cx += (tx * w * 0.06 - cx) * 0.06;
+      cy += (ty * h * 0.06 - cy) * 0.06;
+      ctx!.clearRect(0, 0, w, h);
+      const ox = w / 2 + cx;
+      const oy = h * 0.46 + cy;
+      const R = Math.max(w, h) * 0.85;
+      for (let i = 0; i < RINGS; i++) {
+        const z = (((i / RINGS) + t * 1.4 + boost * 6) % 1);
+        const k = Math.pow(z, 2.4);
+        const rx = R * k + 4;
+        const ry = rx * 0.62;
+        const wob = Math.sin(t * 6 + i) * 6 * k;
+        const alpha = Math.sin(z * Math.PI) * 0.5;
+        ctx!.beginPath();
+        ctx!.ellipse(ox - cx * k * 1.6 + wob, oy - cy * k * 1.6, rx, ry, 0, 0, 6.283);
+        ctx!.strokeStyle = i % 5 === 0 ? `rgba(255,214,0,${alpha * 0.9})` : `rgba(255,255,255,${alpha * 0.45})`;
+        ctx!.lineWidth = 0.6 + k * 1.2;
+        ctx!.stroke();
+      }
+      ctx!.strokeStyle = "rgba(255,255,255,0.09)";
+      ctx!.lineWidth = 1;
+      for (let j = 0; j < SPOKES; j++) {
+        const a = (j / SPOKES) * 6.283 + t * 0.6;
+        ctx!.beginPath();
+        ctx!.moveTo(ox + Math.cos(a) * 20, oy + Math.sin(a) * 12);
+        ctx!.lineTo(ox + Math.cos(a) * R, oy + Math.sin(a) * R * 0.62);
+        ctx!.stroke();
+      }
+      for (const p of pts) {
+        p.z = (p.z + 0.0025 + boost * 0.5) % 1;
+        const k = Math.pow(p.z, 2);
+        const x = ox + Math.cos(p.a + t) * R * p.r * k;
+        const y = oy + Math.sin(p.a + t) * R * p.r * k * 0.62;
+        ctx!.fillStyle = `rgba(255,255,255,${Math.sin(p.z * Math.PI) * 0.8})`;
+        ctx!.fillRect(x, y, 1 + k * 1.6, 1 + k * 1.6);
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    raf = requestAnimationFrame(draw);
+    return () => {
+      run = false;
+      if (raf) cancelAnimationFrame(raf);
+      io.disconnect();
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("resize", size);
+    };
+  }, []);
+  return <canvas ref={ref} aria-hidden className="hx-tun absolute inset-0 -z-10 h-full w-full" />;
+}
+
 function LazyVideo({ name, className = "" }: { name: string; className?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
@@ -565,7 +671,12 @@ function Index() {
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,transparent_0%,#000_88%)]" />
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
+        <HeroTunnel />
 
+        <div aria-hidden className="hx-meta hx-m1"><span>(01)</span> find / tailor / apply</div>
+        <div aria-hidden className="hx-meta hx-m2">global roles <b>/</b> free to start</div>
+        <div aria-hidden className="hx-meta hx-m3"><i /> scroll</div>
+        <div aria-hidden className="hx-meta hx-m4">gotaofferr&reg; 2026</div>
         <div className="site-container relative flex min-h-[calc(100svh-4rem)] flex-col justify-center py-10">
           <div className="hp-hero-body relative text-center">
             <div aria-hidden className="hp-fl hp-fl-a hidden lg:block">
@@ -1190,7 +1301,7 @@ html{scroll-behavior:smooth}
 .hx-word i{font-style:normal;display:inline-block;opacity:0;transform:translateY(.5em) rotate(6deg);filter:blur(8px);animation:hx-let .8s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--d)*70ms + 250ms)}
 .hx-outline{font-size:4.4rem;color:transparent;-webkit-text-stroke:2px #fff}
 .hx-giant{font-size:5.2rem;color:var(--highlight)}
-.hx-giant::before{content:attr(data-t);position:absolute;left:0;top:0;transform:translate(.045em,.045em);color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.55);z-index:-1;animation:hx-shift 5s ease-in-out infinite}
+
 .hx-outline::before{content:attr(data-t);position:absolute;left:0;top:0;transform:translate(-.04em,.04em);color:rgba(255,214,0,.16);z-index:-1}
 .hx-mid{font-size:2.2rem;font-weight:500;font-family:Georgia,"Times New Roman",serif;font-style:italic;text-transform:none;letter-spacing:0;opacity:0;animation:hx-in .8s .5s forwards}
 .hx-tiny{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;letter-spacing:.3em;color:rgba(255,255,255,.65);opacity:0;animation:hx-in .8s .8s forwards}
@@ -1291,4 +1402,27 @@ html{scroll-behavior:smooth}
 .hp-live .rl{--rp0:0}
 .hp-live .rl-t{--rp:clamp(0, calc(var(--p)*3.2 - var(--d)*.28), 1);opacity:calc(var(--rp)*(1 - clamp(0, calc((var(--p) - .78)*4), 1)*.7))}
 @media(prefers-reduced-motion:reduce){.rl-t{transform:none!important;opacity:1!important}}
+
+/* hero craft */
+.hp-hero{--rx:0;--ry:0;--gx:0px}
+.hx{transform:perspective(1300px) rotateY(calc(var(--ry)*1deg)) rotateX(calc(var(--rx)*1deg));transition:transform .25s ease-out;transform-style:preserve-3d}
+.hp-hero-body{filter:blur(calc(var(--hp)*9px));transform:translateY(calc(var(--hp)*-40px)) scale(calc(1 + var(--hp)*.1))}
+.hx-tun{mix-blend-mode:screen;opacity:.85}
+.hx-giant::before{content:attr(data-t);position:absolute;left:0;top:0;color:var(--highlight);-webkit-text-stroke:0;transform:translate(var(--gx),0);clip-path:inset(0 0 62% 0);z-index:1;opacity:0;animation:hx-gl 5.2s 2.2s infinite steps(1)}
+.hx-giant::after{content:attr(data-t);position:absolute;left:0;top:0;color:#fff;transform:translate(calc(var(--gx)*-1),0);clip-path:inset(58% 0 12% 0);z-index:1;opacity:0;animation:hx-gl2 5.2s 2.2s infinite steps(1)}
+.hx-outline::after{content:attr(data-t);position:absolute;left:0;top:0;color:var(--highlight);-webkit-text-stroke:0;clip-path:inset(40% 0 38% 0);transform:translateX(calc(var(--gx)*-.7));opacity:0;animation:hx-gl2 6.1s 3s infinite steps(1)}
+@keyframes hx-gl{0%,86%,100%{opacity:0;transform:translate(0,0)}87%{opacity:1;transform:translate(.06em,0)}89%{opacity:1;transform:translate(-.05em,0)}91%{opacity:1;transform:translate(.09em,0)}93%{opacity:0}}
+@keyframes hx-gl2{0%,87%,100%{opacity:0}88%{opacity:1;transform:translate(-.07em,0)}90%{opacity:1;transform:translate(.04em,0)}92%{opacity:0}}
+.hx-giant:hover::before,.hx-giant:hover::after{animation-duration:.6s;animation-delay:0s}
+.hx-meta{position:absolute;z-index:2;font-family:ui-monospace,Menlo,monospace;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.6);display:none}
+.hx-meta span,.hx-meta b{color:var(--highlight)}
+.hx-m3 i{display:inline-block;width:1.6rem;height:1px;background:var(--highlight);vertical-align:middle;margin-right:.5rem;animation:hx-sc 2s ease-in-out infinite;transform-origin:0 50%}
+@keyframes hx-sc{0%,100%{transform:scaleX(.3)}50%{transform:scaleX(1)}}
+@media(min-width:640px){.hx-meta{display:block}.hx-m1{left:1.5rem;top:5.5rem}.hx-m2{right:1.5rem;top:5.5rem}.hx-m3{left:1.5rem;bottom:1.5rem}.hx-m4{right:1.5rem;bottom:1.5rem}}
+@media(prefers-reduced-motion:reduce){.hx-giant::before,.hx-giant::after,.hx-outline::after{display:none}.hx-tun{display:none}.hx-m3 i{animation:none}}
+/* blur-in text + image-forward */
+.hp-live .hp-w{filter:blur(4px)}.hp-live .hp-w.on{filter:none}
+.hp-live .rl-t{filter:blur(calc((1 - var(--rp))*5px + clamp(0, calc((var(--p) - .62)*10), 1)*3px))}
+.hp-live .rl-core{transform:scale(calc(.9 + var(--p)*.14));z-index:3;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 40px 120px -20px rgba(0,0,0,.9),0 0 90px -30px var(--highlight)}
+.hp-live .about-x{}
 `;
