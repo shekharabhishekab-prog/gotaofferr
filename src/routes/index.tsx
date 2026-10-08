@@ -434,6 +434,18 @@ function HeroVideo() {
 
 const popTexts = ["92% match", "Cover letter ready", "Applied in 15 sec", "Resume tailored", "New match found", "ATS score 94"];
 function HeroPops() {
+  useEffect(() => {
+    const root = document.documentElement;
+    const upd = () => {
+      const h = document.querySelector("[data-hero]") as HTMLElement | null;
+      const end = h ? h.offsetTop + h.offsetHeight - 80 : 600;
+      root.style.setProperty("--hd", String(Math.max(0, Math.min(1, window.scrollY / Math.max(end, 1)))));
+    };
+    upd();
+    window.addEventListener("scroll", upd, { passive: true });
+    window.addEventListener("resize", upd);
+    return () => { window.removeEventListener("scroll", upd); window.removeEventListener("resize", upd); root.style.removeProperty("--hd"); };
+  }, []);
   const [items, setItems] = useState<{ id: number; t: string; l: number; tp: number }[]>([]);
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -506,12 +518,12 @@ const GI_CSS = `
 @media(prefers-reduced-motion:reduce){.hx-rp i,.hx-pop{animation:none!important}.hx-rp i{opacity:.35;transform:scale(.8)}}
 .hx-ring,.hx-chip,.hx-rp{display:none!important}
 .hp-hero{margin-top:-3.6rem;padding-top:3.6rem}
-.i3-pill{margin-bottom:.9rem}
+.i3-pill{margin-bottom:.9rem;font-size:.64rem!important;padding:.15rem .6rem!important}
 .i3-tag{margin:0 auto 1.1rem;max-width:34rem;font-family:ui-monospace,Menlo,monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.78);line-height:1.7}
 .i3-tag b{color:#ffd600;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
 header.sticky,header.sticky>div{border-bottom-width:0!important;border-color:transparent!important}
-header.sticky{background:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,0))!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
+header.sticky{background-color:rgba(0,0,0,calc(var(--hd,0)*.95))!important;background-image:linear-gradient(to bottom,rgba(0,0,0,.6),rgba(0,0,0,0))!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
 .hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
 @keyframes hx-ring{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(1.5)}}
