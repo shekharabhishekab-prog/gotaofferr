@@ -614,7 +614,6 @@ function Index() {
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,transparent_0%,#000_88%)]" />
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
-        <div aria-hidden className="hx-bgR">R</div>
 
         <div aria-hidden className="hx-meta hx-m1"><span>(01)</span> find / tailor / apply</div>
         <div aria-hidden className="hx-meta hx-m2">global roles <b>/</b> free to start</div>
@@ -1451,6 +1450,7 @@ html,body{background:#000}
 .hx-l2 .hx-giant{grid-column:2;grid-row:2;justify-self:start}
 .hx-l1 .hx-first,.hx-l1 .hx-outline,.hx-l1 .hx-jobs{grid-row:1}
 .hx-giant,.hx-outline{font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;letter-spacing:-.025em}
+@media(max-width:639px){.hx-giant{font-size:min(16vw,4.2rem)!important;white-space:nowrap}}
 .hx-outline::before,.hx-outline::after{display:none}
 @media(min-width:640px){.hx-m1{left:2rem;top:4.3rem}.hx-m2{right:2rem;top:4.3rem}.hx-m3{left:2rem;bottom:2.8rem}.hx-m4{right:2rem;bottom:2.8rem}}
 /* four tools */
@@ -1503,7 +1503,7 @@ html,body{background:#000}
 .hx-bgR{position:absolute;z-index:-5;right:-3vw;bottom:-14vh;font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;font-size:92vh;line-height:.8;letter-spacing:-.06em;color:rgba(255,214,0,.13);-webkit-text-stroke:2px rgba(255,214,0,.22);pointer-events:none;user-select:none;transform:translate(calc(var(--mx)*-18px),calc(var(--my)*-12px));transition:transform .3s ease-out;mix-blend-mode:screen}
 .hx-giant{text-transform:lowercase}
 .hx-first{font-size:1.9rem}
-@media(max-width:639px){.hx-bgR{font-size:62vh;right:-10vw;bottom:-6vh}.hx-giant{font-size:4.6rem}}
+@media(max-width:639px){.hx-giant{font-size:min(16vw,4.2rem);white-space:nowrap}}
 .hx-fj{grid-column:2;grid-row:1;justify-self:start;display:inline-flex;align-items:baseline;gap:.35em}
 .hx-l1 .hx-outline,.hx-l1 .hx-jobs{grid-column:auto;grid-row:auto}
 .hx{row-gap:.14em}
