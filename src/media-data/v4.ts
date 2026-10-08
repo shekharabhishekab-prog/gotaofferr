@@ -8,8 +8,13 @@ import d6 from "./d6";
 import d7 from "./d7";
 import d8 from "./d8";
 import d9 from "./d9";
+import d10 from "./d10";
 
 const B64: Record<string, string> = {
+  "h1.mp4": d10[0],
+  "h2.mp4": d10[1],
+  "h1.webp": d10[2],
+  "h2.webp": d10[3],
   "hero.mp4": d0[0],
   "i3760072.webp": d0[1],
   "cta.mp4": d1[0],
