@@ -381,7 +381,7 @@ function Index() {
               </div>
             </div>
 
-            <div className="relative mx-auto max-w-[17ch]">
+            <div className="relative mx-auto max-w-5xl">
               <span aria-hidden className="hp-echo hp-echo-1 hp-h1">Find the jobs. Tailor the resume. Apply.</span>
               <span aria-hidden className="hp-echo hp-echo-2 hp-h1">Find the jobs. Tailor the resume. Apply.</span>
               <h1 className="hp-h1 hp-rise relative">
@@ -720,7 +720,7 @@ const HP_CSS = `
 .hp-hand{font-family:"HPHand","Caveat Brush",cursive;font-weight:400;letter-spacing:.01em}
 .hp-h1{display:block;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.98;letter-spacing:-.01em;font-size:2.7rem;text-wrap:balance}
 @media(min-width:640px){.hp-h1{font-size:4.4rem}}
-@media(min-width:1024px){.hp-h1{font-size:5.8rem}}
+@media(min-width:1024px){.hp-h1{font-size:5.4rem}}
 .hp-hero{--hp:0;--mx:0;--my:0}
 .hp-hero-body{transform:translateY(calc(var(--hp)*-40px));opacity:calc(1 - var(--hp)*1.1)}
 .hp-vid{background:#000}
