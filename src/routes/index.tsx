@@ -534,8 +534,6 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 .hx-meta,.hx-m3{display:none!important}
 .hp-hero .i3-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05) brightness(.62)}
 .i3{margin:0;font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-.055em;line-height:.92;color:#fff;font-size:clamp(2.9rem,14.2vw,5rem);display:flex;flex-direction:column;align-items:center;text-shadow:0 2px 30px rgba(0,0,0,.35)}
-@media(min-width:900px) and (prefers-reduced-motion:no-preference){.i3{animation:i3-glitch 2.2s steps(1,end) 1.6s infinite}}
-@keyframes i3-glitch{0%,93%,100%{transform:none;text-shadow:0 2px 30px rgba(0,0,0,.35)}94%{transform:translateX(-3px) skewX(-1.5deg);text-shadow:3px 0 rgba(255,214,0,.75),-3px 0 rgba(255,255,255,.45)}96%{transform:translateX(3px);text-shadow:-3px 0 rgba(255,214,0,.7),3px 0 rgba(255,255,255,.4)}98%{transform:translateX(-1px) skewX(1deg);text-shadow:2px 0 rgba(255,214,0,.5),-2px 0 rgba(255,255,255,.3)}}
 .i3-l{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;column-gap:.14em;white-space:nowrap}
 .i3-y{background:var(--highlight,#ffd600);color:#000;padding:.0em .1em .02em;margin:.02em 0;text-shadow:none;display:inline-block;animation:i3-in .7s cubic-bezier(.2,.8,.2,1) both}
 .i3-y2{animation-delay:.15s}
