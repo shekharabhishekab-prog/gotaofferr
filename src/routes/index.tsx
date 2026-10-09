@@ -722,7 +722,7 @@ function HeroNedan() {
       raf = requestAnimationFrame(draw);
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       if (document.hidden || !vis || w < 2) return;
-      if (!burstDone && now - t0 > 2300 && !reduce) { burstDone = true; burst(); }
+      if (!burstDone && now - t0 > 600 && !reduce) { burstDone = true; burst(); }
       mx += (tmx - mx) * 0.05; my += (tmy - my) * 0.05;
       boost *= 0.985;
       const cx = w / 2, cy = h / 2, t = now / 1000;
@@ -773,7 +773,7 @@ function HeroNedan() {
 function NedanTitle() {
   const [g, setG] = useState(false);
   const [s1, setS1] = useState(false);
-  useEffect(() => { const to = window.setTimeout(() => setS1(true), 2300); return () => window.clearTimeout(to); }, []);
+  useEffect(() => { const to = window.setTimeout(() => setS1(true), 600); return () => window.clearTimeout(to); }, []);
   useEffect(() => {
     let to = 0;
     const loop = () => {
