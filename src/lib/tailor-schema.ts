@@ -67,6 +67,8 @@ export const tailoredResumeSchema = z.object({
   /** Honest verdict when the candidate is a genuinely poor fit for the role. */
   fitWarning: z.string().nullable().default(null),
   atsScore: z.number().min(0).max(100).default(95),
+  /** The single biggest ATS improvement, in plain words. Empty when nothing stands out. */
+  atsTopFix: z.string().default(""),
   tips: z.array(z.string()),
 });
 
