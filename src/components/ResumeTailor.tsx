@@ -733,6 +733,9 @@ export function ResumeTailor() {
                       </Badge>
                     ))}
                   </div>
+                  {result.atsTopFix ? (
+                    <p className="mt-3 text-sm text-muted-foreground">ATS: {result.atsTopFix}</p>
+                  ) : null}
                 </Card>
                 <Card className="p-6 shadow-soft md:col-span-2">
                   <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
