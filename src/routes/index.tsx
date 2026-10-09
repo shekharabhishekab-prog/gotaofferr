@@ -642,43 +642,79 @@ function HeroNedan() {
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const mobile = window.matchMedia("(max-width: 899px)").matches;
     let w = 0, h = 0, raf = 0, vis = true;
-    const mkPage = (v: number, blur: boolean) => {
-      const W = 200, H = 260, pad = blur ? 18 : 0;
-      const k = document.createElement("canvas");
-      k.width = W + pad * 2; k.height = H + pad * 2;
-      const x = k.getContext("2d")!;
-      if (blur) x.filter = "blur(6px)";
-      x.translate(pad, pad);
-      x.fillStyle = v % 3 === 1 ? "#efe6cf" : v % 3 === 2 ? "#f7f2e4" : "#f4f0e7"; x.fillRect(0, 0, W, H);
+    const W0 = 200, H0 = 260;
+    const body = (x: CanvasRenderingContext2D, v: number) => {
+      x.fillStyle = v % 3 === 1 ? "#efe6cf" : v % 3 === 2 ? "#f7f2e4" : "#f4f0e7"; x.fillRect(0, 0, W0, H0);
       if (v === 3 || v === 6) {
-        x.strokeStyle = "#a38b3a"; x.lineWidth = 3; x.strokeRect(8, 8, W - 16, H - 16);
+        x.strokeStyle = "#a38b3a"; x.lineWidth = 3; x.strokeRect(8, 8, W0 - 16, H0 - 16);
         x.fillStyle = "#222"; x.fillRect(40, 34, 120, 9);
-        for (let r = 0; r < 6; r++) { x.fillStyle = "rgba(30,30,30,0.4)"; x.fillRect(30, 70 + r * 14, 140 - (r % 3) * 20, 3); }
-        x.fillStyle = "#f5cc00"; x.beginPath(); x.arc(W / 2, H - 52, 24, 0, 6.283); x.fill();
-        x.fillStyle = "#b08d00"; x.beginPath(); x.arc(W / 2, H - 52, 15, 0, 6.283); x.fill();
-        return k;
+        x.fillStyle = "rgba(30,30,30,0.5)"; x.fillRect(24, 58, 44, 52);
+        for (let r = 0; r < 6; r++) { x.fillStyle = "rgba(30,30,30,0.4)"; x.fillRect(78, 62 + r * 9, 90 - (r % 3) * 14, 3); }
+        for (let r = 0; r < 4; r++) { x.fillStyle = "rgba(30,30,30,0.35)"; x.fillRect(24, 128 + r * 12, 150 - (r % 2) * 30, 3); }
+        x.fillStyle = "#f5cc00"; x.beginPath(); x.arc(W0 / 2, H0 - 46, 22, 0, 6.283); x.fill();
+        x.fillStyle = "#b08d00"; x.beginPath(); x.arc(W0 / 2, H0 - 46, 14, 0, 6.283); x.fill();
+        return;
       }
       x.fillStyle = v % 2 === 0 ? "#111" : "#f5cc00"; x.fillRect(14, 14, v % 2 === 0 ? 96 : 64, 10);
       x.fillStyle = "#222"; x.fillRect(14, 32, 118, 8);
       for (let r = 0; r < 14; r++) {
         if (r % 5 === 0) { x.fillStyle = "#111"; x.fillRect(14, 54 + r * 13, 40, 4); }
-        else { x.fillStyle = "rgba(30,30,30,0.45)"; x.fillRect(14, 54 + r * 13, 70 + Math.random() * 110, 3); }
+        else { x.fillStyle = "rgba(30,30,30,0.45)"; x.fillRect(14, 54 + r * 13, 70 + ((r * 37) % 110), 3); }
       }
-      if (v === 2 || v === 5) { x.fillStyle = "rgba(0,0,0,0.2)"; x.beginPath(); x.moveTo(W, H); x.lineTo(W - 70, H); x.lineTo(W, H - 70); x.closePath(); x.fill(); }
+    };
+    const mkPage = (v: number, blur: number, curl: number) => {
+      const pad = blur ? 22 : 6;
+      const base = document.createElement("canvas"); base.width = W0; base.height = H0;
+      body(base.getContext("2d")!, v);
+      const k = document.createElement("canvas"); k.width = W0 + pad * 2; k.height = H0 + pad * 2 + 40;
+      const x = k.getContext("2d")!;
+      if (blur) x.filter = "blur(" + blur + "px)";
+      const S = 10;
+      for (let i = 0; i < W0; i += S) {
+        const t = i / W0;
+        const dy = Math.sin(t * 3.4 + v) * curl + t * t * curl * 0.8;
+        x.drawImage(base, i, 0, S + 1, H0, pad + i, pad + 20 + dy, S + 1, H0 - Math.abs(Math.cos(t * 3.4 + v)) * curl * 0.35);
+        if (curl) { const sh = Math.cos(t * 3.4 + v); x.fillStyle = sh > 0 ? "rgba(0,0,0," + (sh * 0.22).toFixed(2) + ")" : "rgba(255,255,255," + (-sh * 0.2).toFixed(2) + ")"; x.fillRect(pad + i, pad + 20 + dy, S + 1, H0 - 8); }
+      }
+      return k;
+    };
+    const mkRibbon = (v: number, blur: number) => {
+      const k = document.createElement("canvas"); k.width = 120; k.height = 300;
+      const x = k.getContext("2d")!;
+      if (blur) x.filter = "blur(" + blur + "px)";
+      for (let y = 0; y < 280; y += 4) {
+        const t = y / 280, cx = 60 + Math.sin(t * 5 + v) * 28, wd = 6 + Math.sin(t * Math.PI) * (14 + v * 2);
+        x.fillStyle = "rgba(" + (236 - t * 30) + "," + (232 - t * 30) + "," + (216 - t * 40) + "," + (0.55 + 0.4 * Math.sin(t * Math.PI)).toFixed(2) + ")";
+        x.fillRect(cx - wd / 2, 10 + y, wd, 5);
+      }
       return k;
     };
     const NV = 7;
-    const sharp: HTMLCanvasElement[] = [], soft: HTMLCanvasElement[] = [];
-    for (let v = 0; v < NV; v++) { sharp.push(mkPage(v, false)); soft.push(mkPage(v, true)); }
-    type P = { x: number; y: number; z: number; vx: number; vy: number; vz: number; rot: number; rs: number; fl: number; fs: number; tl: number; v: number; k: number; life: number; max: number };
+    const flat: HTMLCanvasElement[] = [], curled: HTMLCanvasElement[] = [], soft: HTMLCanvasElement[] = [], rib: HTMLCanvasElement[] = [], ribSoft: HTMLCanvasElement[] = [];
+    for (let v = 0; v < NV; v++) { flat.push(mkPage(v, 0, 0)); curled.push(mkPage(v, 0, 16 + (v % 3) * 6)); soft.push(mkPage(v, 9, 18)); }
+    for (let v = 0; v < 4; v++) { rib.push(mkRibbon(v, 0)); ribSoft.push(mkRibbon(v, 5)); }
+    type P = { x: number; y: number; z: number; vx: number; vy: number; vz: number; rot: number; rs: number; fl: number; fs: number; tl: number; v: number; k: number; life: number; max: number; kind: number; sw: number };
     let ps: P[] = [];
     const F = 700;
-    const spawn = (burst: boolean): P => {
+    // kind 0 curled/flat page, 1 ribbon, 2 big soft foreground sheet, 3 sharp small certificate in center cluster
+    const spawn = (burst: boolean, kind?: number): P => {
+      const kd = kind !== undefined ? kind : Math.random() < 0.22 ? 1 : 0;
       const a = Math.random() * 6.283;
-      const r = burst ? 20 + Math.random() * 80 : (0.25 + Math.random() * 0.9) * Math.max(w, h) * 0.55;
-      const z = burst ? -150 + Math.random() * 500 : -250 + Math.random() * 1500;
+      const R = Math.max(w, h);
+      let r = burst ? 20 + Math.random() * 80 : (0.2 + Math.random() * 0.8) * R * 0.5;
+      let z = burst ? -150 + Math.random() * 500 : -250 + Math.random() * 1300;
+      let k = 0.7 + Math.random() * 0.8;
+      if (kd === 2) { z = -560 + Math.random() * 120; r = (0.2 + Math.random() * 0.5) * R * 0.5; k = 1.1 + Math.random() * 0.7; }
+      if (kd === 3) { z = 250 + Math.random() * 450; r = Math.random() * R * 0.13; k = 0.32 + Math.random() * 0.2; }
       const sp = burst ? 380 + Math.random() * 700 : 6 + Math.random() * 22;
-      return { x: Math.cos(a) * r, y: Math.sin(a) * r * 0.7, z, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.7, vz: burst ? (Math.random() - 0.2) * 500 : (Math.random() - 0.5) * 30, rot: Math.random() * 6.283, rs: (Math.random() - 0.5) * (burst ? 3 : 0.8), fl: Math.random() * 6.283, fs: 0.5 + Math.random() * (burst ? 3 : 1.4), tl: (Math.random() - 0.5) * 0.5, v: Math.floor(Math.random() * NV), k: 0.7 + Math.random() * 0.8, life: 0, max: burst ? 5 + Math.random() * 4 : 18 + Math.random() * 20 };
+      return { x: Math.cos(a) * r, y: Math.sin(a) * r * 0.7, z, vx: kd === 3 ? 0 : Math.cos(a) * sp * (kd === 2 ? 0.25 : 1), vy: kd === 3 ? 0 : Math.sin(a) * sp * 0.7 * (kd === 2 ? 0.25 : 1), vz: burst ? (Math.random() - 0.2) * 500 : (Math.random() - 0.5) * 30, rot: Math.random() * 6.283, rs: (Math.random() - 0.5) * (burst ? 3 : 0.8), fl: Math.random() * 6.283, fs: 0.4 + Math.random() * (burst ? 2.2 : 1.2), tl: (Math.random() - 0.5) * 0.5, v: Math.floor(Math.random() * (kd === 1 ? 4 : NV)), k, life: 0, max: burst ? 5 + Math.random() * 4 : 18 + Math.random() * 20, kind: kd, sw: (Math.random() < 0.5 ? -1 : 1) * (0.25 + Math.random() * 0.5) };
+    };
+    const NB = mobile ? 7 : 16, NS = mobile ? 1 : 3, NC = mobile ? 5 : 11;
+    const fill = () => {
+      const cnt = [0, 0, 0, 0]; for (const p of ps) if (p.max > 12) cnt[p.kind]++;
+      while (cnt[0] + cnt[1] < NB) { const p = spawn(false); ps.push(p); cnt[p.kind]++; }
+      while (cnt[2] < NS) { ps.push(spawn(false, 2)); cnt[2]++; }
+      while (cnt[3] < NC) { ps.push(spawn(false, 3)); cnt[3]++; }
     };
     const resize = () => {
       const r = c.getBoundingClientRect();
@@ -686,7 +722,7 @@ function HeroNedan() {
       w = r.width; h = r.height;
       c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (!ps.length) { const n = mobile ? 11 : 24; for (let i = 0; i < n; i++) ps.push(spawn(false)); }
+      if (!ps.length) fill();
     };
     resize();
     const ro = new ResizeObserver(resize);
@@ -717,7 +753,7 @@ function HeroNedan() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const t0 = performance.now();
     let burstDone = false, last = t0, boost = 0;
-    const burst = () => { const n = mobile ? 12 : 26; for (let i = 0; i < n; i++) ps.push(spawn(true)); boost = 1; };
+    const burst = () => { const n = mobile ? 12 : 26; for (let i = 0; i < n; i++) ps.push(spawn(true, i % 4 === 0 ? 1 : 0)); boost = 1; };
     const draw = (now: number) => {
       raf = requestAnimationFrame(draw);
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
@@ -727,23 +763,29 @@ function HeroNedan() {
       boost *= 0.985;
       const cx = w / 2, cy = h / 2, t = now / 1000;
       ctx.clearRect(0, 0, w, h);
-      const gl = ctx.createRadialGradient(cx + mx * 60, h * 0.1, 0, cx + mx * 60, h * 0.1, Math.max(w, h) * 0.7);
-      gl.addColorStop(0, "rgba(245,204,0," + (0.3 + 0.12 * boost).toFixed(3) + ")"); gl.addColorStop(0.5, "rgba(190,140,0,0.1)"); gl.addColorStop(1, "rgba(0,0,0,0)");
+      const gl = ctx.createRadialGradient(cx + mx * 60, h * 0.12, 0, cx + mx * 60, h * 0.12, Math.max(w, h) * 0.7);
+      gl.addColorStop(0, "rgba(245,204,0," + (0.3 + 0.14 * boost).toFixed(3) + ")"); gl.addColorStop(0.5, "rgba(190,140,0,0.1)"); gl.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = gl; ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = "rgba(255,246,200,0.55)";
       for (const d of dust) { ctx.globalAlpha = 0.25 + 0.5 * (0.5 + 0.5 * Math.sin(t * 0.8 + d[3])); ctx.fillRect(((d[0] * w + t * 6 * d[2] - mx * 12 * d[2]) % w + w) % w, ((d[1] * h - t * 4 * d[2]) % h + h) % h, d[2], d[2]); }
       ctx.globalAlpha = 1;
       ps = ps.filter((p) => p.life < p.max);
-      while (ps.length < (mobile ? 11 : 24)) ps.push(spawn(false));
+      fill();
       for (const p of ps) {
         p.life += dt;
         const s0 = F / (F + p.z);
         const sx0 = cx + p.x * s0 + mx * 40 * s0 * (1 - p.z / 1500), sy0 = cy + p.y * s0 + my * 30 * s0;
-        const dx = sx0 - (px + cx), dy = sy0 - (py + cy), d2 = dx * dx + dy * dy, R = 180;
+        const dx = sx0 - (px + cx), dy = sy0 - (py + cy), d2 = dx * dx + dy * dy, R = 200;
         if (d2 < R * R && d2 > 1) { const d = Math.sqrt(d2), f = (1 - d / R) * 900 * dt; p.vx += (dx / d) * f / s0; p.vy += (dy / d) * f / s0; p.rs += (dx > 0 ? 1 : -1) * (1 - d / R) * 2 * dt * 10; }
-        const drag = p.life < 4 && p.max < 12 ? 0.985 : 0.995;
-        p.vx *= drag; p.vy *= drag; p.vz *= drag;
-        p.x += p.vx * dt; p.y += p.vy * dt + Math.sin(t * 0.7 + p.fl) * 6 * dt; p.z += p.vz * dt;
+        if (p.kind === 3) {
+          const a = Math.atan2(p.y, p.x) + p.sw * dt * 0.5, r = Math.hypot(p.x, p.y);
+          p.x = Math.cos(a) * r + p.vx * dt; p.y = Math.sin(a) * r * 1 + p.vy * dt;
+          p.vx *= 0.95; p.vy *= 0.95;
+        } else {
+          const drag = p.life < 4 && p.max < 12 ? 0.985 : 0.995;
+          p.vx *= drag; p.vy *= drag; p.vz *= drag;
+          p.x += p.vx * dt; p.y += p.vy * dt + Math.sin(t * 0.7 + p.fl) * 6 * dt; p.z += p.vz * dt;
+        }
         p.rot += p.rs * dt; p.fl += p.fs * dt;
       }
       const order = ps.filter((p) => F + p.z > 60).sort((a, b) => b.z - a.z);
@@ -751,15 +793,19 @@ function HeroNedan() {
         const s = F / (F + p.z);
         const x = cx + p.x * s + mx * 40 * s * (1 - p.z / 1500), y = cy + p.y * s + my * 30 * s;
         const size = 260 * p.k * s * (mobile ? 0.6 : 1);
-        if (x < -size || x > w + size || y < -size || y > h + size) { if (p.max > 12) p.life += 0.5; continue; }
+        if (x < -size * 1.2 || x > w + size * 1.2 || y < -size * 1.2 || y > h + size * 1.2) { if (p.max > 12) p.life += 0.5; continue; }
         const fadeIn = Math.min(1, p.life / 0.6), fadeOut = Math.min(1, (p.max - p.life) / 1.2);
-        const fog = 0.25 + 0.75 * Math.max(0, Math.min(1, 1 - (p.z + 100) / 1700));
-        const near = s > 1.15;
-        const spr = (near ? soft : sharp)[p.v];
-        const sq = 0.3 + 0.7 * Math.abs(Math.cos(p.fl));
+        const fog = 0.3 + 0.7 * Math.max(0, Math.min(1, 1 - (p.z + 100) / 1700));
+        let spr: HTMLCanvasElement, al = 0.9;
+        if (p.kind === 1) spr = (s > 1.15 ? ribSoft : rib)[p.v % 4];
+        else if (p.kind === 2) { spr = soft[p.v]; al = 0.5; }
+        else if (p.kind === 3) { spr = flat[p.v % 2 === 0 ? 3 : 6]; al = 0.95; }
+        else spr = s > 1.15 ? soft[p.v] : curled[p.v];
+        const sq = p.kind === 3 ? 0.55 + 0.45 * Math.abs(Math.cos(p.fl * 0.6)) : 0.3 + 0.7 * Math.abs(Math.cos(p.fl));
         ctx.save(); ctx.translate(x, y); ctx.rotate(p.rot); ctx.transform(1, p.tl * Math.sin(p.fl), 0, 1, 0, 0); ctx.scale(sq, 1);
-        ctx.globalAlpha = (mobile ? 0.7 : 0.9) * fadeIn * fadeOut * fog;
-        const ww = size * 0.77 * (spr.width / 200), hh = size * (spr.height / 260);
+        ctx.globalAlpha = (mobile ? 0.75 : 1) * al * fadeIn * fadeOut * (p.kind === 3 ? 1 : fog);
+        const sc = size / 260;
+        const ww = spr.width * sc, hh = spr.height * sc;
         ctx.drawImage(spr, -ww / 2, -hh / 2, ww, hh);
         ctx.restore();
       }
