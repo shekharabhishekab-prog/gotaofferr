@@ -2,6 +2,7 @@
 // resume text; the number is counted here, so no plan scores lower just because
 // a smaller model happened to estimate it lower.
 import type { TailoredResume } from "@/lib/tailor-schema";
+import { cleanJobDescription } from "@/lib/jd-clean";
 
 const STOP = new Set(
   (
@@ -11,7 +12,9 @@ const STOP = new Set(
     "good great excellent best new use using used well skills skill knowledge understanding understand must should can may also other more most " +
     "such any all each both either not only own high level senior junior full time part day days month months salary benefits apply ideal " +
     "environment fast paced passion passionate drive driven results result based help support ensure manage managing develop developing build building " +
-    "across cross make making take taking get getting need needs one two three four five six seven eight nine ten"
+    "across cross make making take taking get getting need needs one two three four five six seven eight nine ten " +
+    "linkedin indeed naukri seek glassdoor easy applicants applicant applied promoted sponsored reposted ago week weeks remote hybrid onsite employment type seniority " +
+    "industries function show more less hiring urgently immediate joiner joiners vacancy vacancies openings opening location locations office"
   ).split(/\s+/),
 );
 
@@ -41,11 +44,19 @@ function coverage(terms: Set<string>, text: string): number {
 // posting's own terms counts as a full keyword score.
 const FULL_COVERAGE = 0.7;
 
+// A short or thin ad has few terms, so one missed word swings the score a lot. Pull the
+// coverage gently toward a neutral 0.75 when the ad has fewer than 40 usable terms.
+function shrinkShort(value: number, terms: number): number {
+  const FULL = 40;
+  if (terms >= FULL) return value;
+  return (value * terms + 0.75 * (FULL - terms)) / FULL;
+}
+
 export function computeMatchScore(
   input: { jobDescription: string; role?: string; resume: string },
   r: TailoredResume,
 ): { score: number; breakdown: NonNullable<TailoredResume["scoreBreakdown"]> } {
-  const jd = termSet(input.jobDescription);
+  const jd = termSet(cleanJobDescription(input.jobDescription));
   const bullets = (r.experience ?? []).flatMap((e) => e.bullets ?? []);
   const finalText = [
     r.headline,
@@ -57,7 +68,7 @@ export function computeMatchScore(
     (r.certifications ?? []).join(" "),
   ].join(" ");
 
-  const kw = Math.min(1, coverage(jd, finalText) / FULL_COVERAGE);
+  const kw = shrinkShort(Math.min(1, coverage(jd, finalText) / FULL_COVERAGE), jd.size);
   const keywordMatch = Math.round(40 * kw);
 
   // No role typed: the posting itself usually opens with the job title.
@@ -77,7 +88,7 @@ export function computeMatchScore(
   const tableLines = input.resume.split("\n").filter((l) => !/@|https?:|linkedin|github/i.test(l) && (l.match(/\||\t/g) ?? []).length >= 3).length;
   const formatting = Math.max(12, 20 - Math.min(8, tableLines * 2));
 
-  const rel = Math.min(1, coverage(jd, `${bullets.join(" ")} ${r.summary} ${(r.skills ?? []).join(" ")}`) / FULL_COVERAGE);
+  const rel = shrinkShort(Math.min(1, coverage(jd, `${bullets.join(" ")} ${r.summary} ${(r.skills ?? []).join(" ")}`) / FULL_COVERAGE), jd.size);
   const experienceRelevance = Math.round(15 * rel);
 
   const withNum = bullets.filter((b) => /\d/.test(b)).length;
