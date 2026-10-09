@@ -56,7 +56,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 function monthLabel(ym: string) {
-  return new Date(`${ym}-01T00:00:00Z`).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  return new Date(`${ym}-01T00:00:00Z`).toLocaleString("en-US", { month: "long", timeZone: "UTC" });
 }
 
 function fmt(value: string | null | undefined) {
@@ -117,7 +117,8 @@ function AdminPage() {
     queryKey: ["admin-month-cards", month],
     queryFn: () => monthFn({ data: { month: month || undefined } }),
     enabled: isAdmin && adminQuery.data?.mfaVerified === true,
-    refetchInterval: month === "" ? 60_000 : false,
+    // Near-live: the running month refreshes every 5 seconds; other months do not need it.
+    refetchInterval: month === "" || month === new Date(Date.now() + 330 * 60_000).toISOString().slice(0, 7) ? 5_000 : false,
   });
   const cards = cardsQuery.data;
 
@@ -180,24 +181,23 @@ function AdminPage() {
             <select
               id="month-select"
               value={cards?.month ?? ""}
-              onChange={(e) => setMonth(e.target.value)}
+              onChange={(e) => setMonth(e.target.value === cards?.current ? "" : e.target.value)}
               className="h-10 rounded-md border border-input bg-background px-3 text-sm"
             >
               {(cards?.months ?? []).map((m) => (
-                <option key={m} value={m}>{monthLabel(m)}{m === cards?.current ? " (this month, live)" : ""}</option>
+                <option key={m} value={m}>{monthLabel(m)}</option>
               ))}
             </select>
             <span className="text-sm text-muted-foreground">Year {cards?.month?.slice(0, 4) ?? ""}</span>
           </div>
           {cards?.record ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Stat label="New users" value={cards.record.cards.users} icon={<Users className="h-4 w-4" />} />
-              <Stat label="Recorded rewrites" value={cards.record.cards.rewrites} icon={<BarChart3 className="h-4 w-4" />} />
-              <Stat label="Recorded job searches" value={cards.record.cards.searches} icon={<BarChart3 className="h-4 w-4" />} />
-              <Stat label="Recorded builder download attempts" value={cards.record.cards.builderDownloads} icon={<BarChart3 className="h-4 w-4" />} />
-              <Stat label="Job alert records" value={cards.record.cards.alerts} icon={<BarChart3 className="h-4 w-4" />} />
-              <Stat label="Subscriptions started" value={cards.record.cards.subscriptionsStarted} icon={<CreditCard className="h-4 w-4" />} />
-              <Stat label={cards.month === cards.current ? "Non-QA entitled user share now" : "Non-QA entitled user share at month end"} value={`${cards.record.cards.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
+              <Stat label="Total tailored resumes" value={cards.record.cards.rewrites} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Total resume builder uses" value={cards.record.cards.builderDownloads} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Total job alerts" value={cards.record.cards.alerts} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Total job searches" value={cards.record.cards.searches} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Total users" value={cards.record.cards.users} icon={<Users className="h-4 w-4" />} />
+              <Stat label="Total active subscriptions" value={cards.record.cards.activeSubscriptions ?? 0} icon={<CreditCard className="h-4 w-4" />} />
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">{cardsQuery.isLoading ? "Loading month numbers..." : "No saved numbers for this month."}</p>
