@@ -12,6 +12,11 @@ export const MODEL_DAILY_CAP: Record<string, number> = {
   "gemini-3.6-flash": 20,
   "gemini-3-flash-preview": 20,
   "gemini-2.5-flash": 20,
+  "gemini-3.8-flash": 20,
+  "gemini-3.7-flash": 20,
+  "gemini-3.5-flash": 20,
+  // Only 20/day on the free tier (AI Studio 2026-10-09): a small buffer, not a main lite model.
+  "gemini-2.5-flash-lite": 20,
   // Adzuna free tier: 250/day, 2,500/month. Our own cap sits under both.
   "adzuna-search": 65,
   // Firecrawl searches are only counted for visibility (cap never reached).
@@ -19,14 +24,23 @@ export const MODEL_DAILY_CAP: Record<string, number> = {
 };
 
 const FREE_CHAIN = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
-// Paid, quality-critical: same-quality-class backups only, NEVER a Lite model.
+// Strong models (~20/day each on the free tier). Order set after the 2026-10-09 quality test: fast and reliable first, slow or often-overloaded last.
+// The 20/day lite buffer comes last in this list, then the two 500/day lite models from FREE_CHAIN.
 function proChain(): string[] {
-  return ["gemini-3.6-flash", "gemini-3-flash-preview", "gemini-2.5-flash"];
+  return [
+    "gemini-3.6-flash",
+    "gemini-3-flash-preview",
+    "gemini-3.5-flash",
+    "gemini-3.8-flash",
+    "gemini-3.7-flash",
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+  ];
 }
 
 export function chainForTier(tier: RoutingTier): string[] {
   // Career Pro only gets the full-quality models. Free, Starter and Job Hunt use the lower models.
-  // Career Pro tries the three strong models first; when their daily limits run out it switches to
+  // Career Pro tries the strong models first; when their daily limits run out it switches to
   // the lower models (never "come back tomorrow"). Output on those is tuned to match.
   return tier === "career_pro" ? [...proChain(), ...FREE_CHAIN] : FREE_CHAIN;
 }
@@ -37,7 +51,15 @@ export function isQuotaError(error: unknown): boolean {
   const text = (e instanceof Error ? e.message : String(e ?? "")).toLowerCase();
   return (
     status === 429 ||
+    // Overloaded or retired model: the next model in the chain should answer instead of failing the run.
+    status === 503 ||
+    status === 404 ||
     text.includes("429") ||
+    text.includes("503") ||
+    text.includes("high demand") ||
+    text.includes("overloaded") ||
+    text.includes("unavailable") ||
+    text.includes("no longer available") ||
     text.includes("busy right now") ||
     text.includes("resource_exhausted") ||
     text.includes("quota") ||

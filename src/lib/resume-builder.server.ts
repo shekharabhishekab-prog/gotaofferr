@@ -93,7 +93,10 @@ export function fallbackPolish(draft: ResumeDraft): PolishedResume {
  * Rewrites the user's rough notes into recruiter-grade resume copy without
  * inventing employers, dates, tools or metrics that were not supplied.
  */
-export async function polishDraft(draft: ResumeDraft): Promise<PolishedResume> {
+export async function polishDraft(
+  draft: ResumeDraft,
+  tier: import("./model-router.server").RoutingTier = "free",
+): Promise<PolishedResume> {
   const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
   if (!key) throw new Error("AI is not configured right now. Please try again later.");
   const gateway = createLovableAiGatewayProvider(key);
@@ -128,7 +131,7 @@ WRITING RULES (mandatory):
 ${draftToText(draft)}`;
 
   try {
-    const { output } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
+    const { output } = await (await import("./model-router.server")).runWithModelChain(tier, (modelId) => generateText({
       model: createLovableAiGatewayProvider(key, modelId)(modelId),
       output: Output.object({ schema: polishedResumeSchema }),
       prompt,
