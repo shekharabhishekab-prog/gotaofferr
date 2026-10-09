@@ -17,6 +17,7 @@ export type MonthCards = {
   subscriptionsStarted: number; // all subscription records (dashboard card)
   paidSubscriptionsStarted: number; // only records that are active/paid (year-end report)
   subscriberSharePercent: number;
+  activeSubscriptions: number; // real paid active subscribers (tests and owner excluded)
   // Uses split by whether the user is a paying subscriber at the time of counting.
   split?: { rewrites: UseSplit; searches: UseSplit; builderDownloads: UseSplit; alerts: UseSplit };
 };
@@ -98,7 +99,9 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
   ]);
   const regionOf = new Map<string, string>();
   for (const u of authUsers) regionOf.set(u.id, userRegion(u));
-  const qa = new Set(["mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com"]);
+  // Never counted in any admin number: owner access account and test accounts.
+  const qa = new Set(["itsabhi9646@gmail.com", "mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com", "mailboss+qafree@mail.instinct.com", "rrak2832@gmail.com"]);
+  const excludedIds = new Set(authUsers.filter((u) => qa.has(String(u.email ?? "").trim().toLowerCase())).map((u) => u.id));
   const firstSub = new Map<string, any>();
   for (const s of subs) if (!firstSub.has(s.user_id)) firstSub.set(s.user_id, s);
   const real = authUsers.filter((u) => !qa.has(String(u.email ?? "").trim().toLowerCase()));
@@ -118,15 +121,31 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
       const t = new Date(row.created_at ?? "").getTime();
       return Number.isFinite(t) && t >= start && t < end;
     };
+    // Real paid active subscribers: now for the running month, at month end for a finished month, 0 for a future month.
+    const activeSubsAt = (mStart: number, mEnd: number): number => {
+      const nowMs = Date.now();
+      if (mStart > nowMs) return 0;
+      const ids = new Set<string>();
+      for (const s of subs) {
+        if (excludedIds.has(s.user_id)) continue;
+        if (s.status !== "active" && s.status !== "canceled") continue;
+        const endMs = s.current_period_end ? new Date(s.current_period_end).getTime() : NaN;
+        const startedMs = new Date(s.created_at ?? "").getTime();
+        const ok = mEnd > nowMs ? isEntitled(s) : Number.isFinite(startedMs) && startedMs < mEnd && Number.isFinite(endMs) && endMs >= mEnd;
+        if (ok) ids.add(s.user_id);
+      }
+      return ids.size;
+    };
     const regions: RegionSplit = {};
     for (const r of REGIONS) regions[r] = { users: 0, subscriptions: 0 };
-    const joined = authUsers.filter((u) => inMonth({ created_at: u.created_at }));
+    const keep = (x: any) => !excludedIds.has(x.user_id);
+    const joined = real.filter((u) => inMonth({ created_at: u.created_at }));
     for (const u of joined) regions[regionOf.get(u.id) ?? "India"].users += 1;
-    const started = subs.filter(inMonth);
+    const started = subs.filter(inMonth).filter(keep);
     const paidStarted = started.filter((s) => isEntitled(s));
     for (const s of paidStarted) regions[regionOf.get(s.user_id) ?? "India"].subscriptions += 1;
     const split = (rows: any[]): UseSplit => {
-      const r = rows.filter(inMonth);
+      const r = rows.filter(inMonth).filter(keep);
       const paid = r.filter((x) => paidUsers.has(x.user_id)).length;
       return { paid, free: r.length - paid };
     };
@@ -135,19 +154,20 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
       lockedAt: null,
       cards: {
         users: joined.length,
-        rewrites: usage.filter(inMonth).length,
-        searches: searches.filter(inMonth).length,
-        builderDownloads: builders.filter(inMonth).length,
-        alerts: alerts.filter(inMonth).length,
+        rewrites: usage.filter(inMonth).filter(keep).length,
+        searches: searches.filter(inMonth).filter(keep).length,
+        builderDownloads: builders.filter(inMonth).filter(keep).length,
+        alerts: alerts.filter(inMonth).filter(keep).length,
         subscriptionsStarted: started.length,
         paidSubscriptionsStarted: paidStarted.length,
         // Share is a point-in-time number: it is the share at the moment of counting.
         split: { rewrites: split(usage), searches: split(searches), builderDownloads: split(builders), alerts: split(alerts) },
+        activeSubscriptions: activeSubsAt(start, end),
         subscriberSharePercent: real.length ? (entitledNow / real.length) * 100 : 0,
       },
       regions,
-      totalUsersAtEnd: authUsers.filter((u) => new Date(u.created_at ?? "").getTime() < end).length,
-      activeSubscribersAtEnd: activeNow,
+      totalUsersAtEnd: real.filter((u) => new Date(u.created_at ?? "").getTime() < end).length,
+      activeSubscribersAtEnd: activeSubsAt(start, end),
     };
   });
 }
