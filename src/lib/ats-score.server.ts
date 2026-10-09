@@ -3,7 +3,7 @@
 // 20 structure and headings, 20 parse hygiene, 15 title and content signals.
 // Hard cap 60 when there is no email or no experience section.
 import type { TailoredResume } from "@/lib/tailor-schema";
-import { cleanJobDescription } from "@/lib/jd-clean";
+import { cleanJobDescription } from "@/lib/match-score.server";
 
 const STOP = new Set(
   (
