@@ -211,8 +211,7 @@ function AtsDesignPreview() {
         <div data-ak className="ak-rv ak-headrow">
           <h2 data-px="26" className="ak-h2 ak-h2b">
             <span className="d1">Drop it.</span>
-            <span className="d2">Paste the job description</span>
-            <span className="d3"><span className="go2">Go.</span><button type="button" className={`ak-smp go ${phase === "done" ? "open" : ""}`} aria-pressed={phase === "done"} onClick={showSample}>{phase === "done" ? "hide sample" : "see a sample"} <ArrowRight className="size-4" /></button></span>
+            <span className="d3"><span className="d2">Paste the job description</span><span className="go2">Go.</span><button type="button" className={`ak-smp go ${phase === "done" ? "open" : ""}`} aria-pressed={phase === "done"} onClick={showSample}>{phase === "done" ? "hide sample" : "see a sample"} <ArrowRight className="size-4" /></button></span>
           </h2>
         </div>
         <div className="ak-stage">
@@ -345,6 +344,7 @@ function AtsDesignPreview() {
 }
 
 const AK_CSS = `
+@font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-display:swap}
 @font-face{font-family:"HPHand";src:url("/fonts/caveat-brush.woff2") format("woff2");font-display:swap}
 .ak{--y:#ffd600;--ink:#0a0a0a;--cream:#f6f1d6;background:#000;color:var(--cream);overflow:hidden}
 .ak *{box-sizing:border-box}
@@ -374,8 +374,8 @@ const AK_CSS = `
 @keyframes ak-ring{0%{box-shadow:0 0 0 0 rgba(255,214,0,.45)}70%,100%{box-shadow:0 0 0 18px rgba(255,214,0,0)}}
 
 .ak-paper-wrap{position:relative;min-height:380px;display:flex;align-items:center;justify-content:center}
-.ak-paper{position:relative;width:270px;aspect-ratio:.72;background:#f6f1d6;border-radius:6px;padding:26px 22px;transform:rotate(5deg);box-shadow:0 30px 80px rgba(255,214,0,.18),0 0 0 1px rgba(255,255,255,.2);animation:ak-flt 6s ease-in-out infinite;overflow:hidden}
-@keyframes ak-flt{50%{transform:rotate(2.5deg) translateY(-14px)}}
+.ak-paper{position:relative;width:270px;aspect-ratio:.72;background:#f6f1d6;border-radius:6px;padding:26px 22px;transform:rotate(5deg);box-shadow:0 30px 80px rgba(255,214,0,.18),0 0 0 1px rgba(255,255,255,.2);animation:ak-flt 7s ease-in-out infinite;overflow:hidden}
+@keyframes ak-flt{0%,100%{transform:rotate(5deg) translate(0,0)}33%{transform:rotate(0deg) translate(12px,-24px)}66%{transform:rotate(8deg) translate(-12px,-10px)}}
 .ak-pl{display:block;height:8px;border-radius:4px;background:#161616;margin:0 0 9px;opacity:.85}
 .ak-pl.thin{height:5px;opacity:.4}.ak-pl.head{height:11px;margin-top:14px;background:#000}
 .w35{width:35%}.w45{width:45%}.w50{width:50%}.w60{width:60%}.w70{width:70%}.w75{width:75%}.w80{width:80%}.w85{width:85%}.w90{width:90%}.w95{width:95%}
@@ -633,12 +633,12 @@ const AK_CSS = `
 .ak-gap{margin-top:120px}
 }
 
-.ak-cur{font-family:"HPHand","Caveat Brush",cursive;text-transform:none;color:var(--y);-webkit-text-stroke:0;font-weight:400;font-size:1.2em;letter-spacing:0;line-height:.95}
+.ak-cur{font-family:"HPInst",Georgia,serif;font-style:italic;text-transform:none;color:var(--y);-webkit-text-stroke:0;font-weight:400;font-size:1.15em;letter-spacing:-.01em;line-height:.95}
 .ak-h2b{line-height:1;margin:0}
 .ak-h2 span.d1{display:block;color:var(--cream);font-size:clamp(3rem,13vw,4.4rem);line-height:.95}
 .ak-h2 span.d2{display:block;color:var(--y);font-size:clamp(1.3rem,5.6vw,2.2rem);line-height:1.1;margin-top:6px}
-.ak-h2 span.d3{display:flex;align-items:center;flex-wrap:wrap;gap:14px 22px;margin-top:6px}
-.ak-h2 span.go2{font-family:"HPHand","Caveat Brush",cursive;text-transform:none;font-weight:400;color:var(--cream);font-size:clamp(4rem,19vw,5.4rem);line-height:.9}
+.ak-h2 span.d3{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px 22px;margin-top:8px}.ak-h2 span.d3 span.d2{display:inline;margin:0}.ak-h2 span.d3 .ak-smp{align-self:center}
+.ak-h2 span.go2{font-family:"HPInst",Georgia,serif;font-style:italic;text-transform:none;font-weight:400;color:var(--y);font-size:clamp(4rem,19vw,5.4rem);line-height:.9}
 .ak-smp.go{font-family:var(--font-display,inherit);font-size:1.05rem;padding:14px 22px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;font-weight:800;box-shadow:5px 5px 0 var(--cream);display:inline-flex;align-items:center;gap:8px;margin:0;vertical-align:middle;animation:ak-nudge 2.4s ease-in-out infinite;transition:box-shadow .2s}
 .ak-smp.go:hover{animation-play-state:paused;transform:none;box-shadow:8px 8px 0 var(--cream)}
 @keyframes ak-nudge{50%{transform:translateY(-5px)}}
@@ -684,8 +684,8 @@ const AK_CSS = `
 .ak-paper-wrap .ak-pin{display:none}
 .ak-h2 span.d1{font-size:clamp(3rem,14vw,4rem)}
 .ak-h2 span.d2{font-size:clamp(1.25rem,5.4vw,1.7rem);letter-spacing:.01em}
-.ak-h2 span.d3{flex-wrap:nowrap;gap:16px;margin-top:10px;justify-content:flex-start}
-.ak-h2 span.go2{font-size:4.6rem;flex:none}
+.ak-h2 span.d3{flex-wrap:wrap;gap:6px 14px;margin-top:10px;justify-content:flex-start}
+.ak-h2 span.go2{font-size:3.4rem;flex:none}
 .ak-smp.go{font-size:.95rem;padding:14px 18px;white-space:nowrap}
 }
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
