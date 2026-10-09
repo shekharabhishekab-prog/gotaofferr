@@ -422,7 +422,7 @@ const AK_CSS = `
 .ak-fields{min-height:0}.ak-two{grid-template-columns:1fr}
 .ak-res{margin-top:44px;padding:18px;border-radius:18px}
 .ak-res-grid{grid-template-columns:1fr;gap:18px}
-.ak-gauge svg{width:180px;height:180px}.ak-num{top:36px}.ak-num b{font-size:3.6rem}
+.ak-gauge svg{width:180px;height:180px;display:block;margin:0 auto}.ak-num{top:36px;left:50%;right:auto;width:180px;transform:translateX(-50%)}.ak-num b{font-size:3.6rem}
 .ak-bar{grid-template-columns:70px 1fr 48px;font-size:.88rem}
 .ak-fix{grid-template-columns:1fr;gap:6px}.ak-ft{justify-self:start;padding:5px 10px}
 .ak-fn{flex-direction:column;align-items:stretch;text-align:center}.ak-fn .ak-btn{width:100%}
