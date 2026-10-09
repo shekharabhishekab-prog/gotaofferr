@@ -803,7 +803,7 @@ function HeroNedan() {
         else spr = s > 1.15 ? soft[p.v] : curled[p.v];
         const sq = p.kind === 3 ? 0.55 + 0.45 * Math.abs(Math.cos(p.fl * 0.6)) : 0.3 + 0.7 * Math.abs(Math.cos(p.fl));
         ctx.save(); ctx.translate(x, y); ctx.rotate(p.rot); ctx.transform(1, p.tl * Math.sin(p.fl), 0, 1, 0, 0); ctx.scale(sq, 1);
-        ctx.globalAlpha = (mobile ? 0.55 : 0.6) * al * fadeIn * fadeOut * (p.kind === 3 ? 1 : fog);
+        ctx.globalAlpha = (mobile ? 0.4 : 0.42) * al * fadeIn * fadeOut * (p.kind === 3 ? 1 : fog);
         const sc = size / 260;
         const ww = spr.width * sc, hh = spr.height * sc;
         ctx.drawImage(spr, -ww / 2, -hh / 2, ww, hh);
