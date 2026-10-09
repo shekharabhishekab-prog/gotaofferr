@@ -563,42 +563,50 @@ export function totalExperienceMonths(experience: Array<{ dates?: string | null 
   return total;
 }
 
-/** Lowers an "N years" claim that is clearly higher than the dates add up to. */
-export function reconcileYears(text: string, totalMonths: number): string {
-  const years = Math.floor(totalMonths / 12);
-  if (!text || years < 1) return text;
-  return text.replace(/\b(\d{1,2})(\s*\+)?(\s*(?:years?|yrs?)\b)/gi, (m: string, n: string, plus: string | undefined, tail: string, offset: number) => {
-    const claimed = parseInt(n, 10);
-    if (claimed * 12 <= totalMonths + 6) return m;
-    const before = text.slice(Math.max(0, offset - 12), offset).toLowerCase();
-    if (/(nearly|almost|close to)\s*$/.test(before) && claimed * 12 <= totalMonths + 12) return m;
-    return String(years) + (plus ?? "") + tail;
-  });
+/** Highest "N years" claim in the text that the dates cannot support (more than 6 months over). Never edits text. */
+export function overclaimedYears(text: string, totalMonths: number): number {
+  let worst = 0;
+  if (!text) return worst;
+  const re = /\b(\d{1,2})(\s*\+)?\s*(?:years?|yrs?)\b/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const claimed = parseInt(m[1], 10);
+    if (claimed * 12 <= totalMonths + 6) continue;
+    const before = text.slice(Math.max(0, m.index - 12), m.index).toLowerCase();
+    if (/(nearly|almost|close to)\s*$/.test(before) && claimed * 12 <= totalMonths + 12) continue;
+    if (claimed > worst) worst = claimed;
+  }
+  return worst;
 }
 
+/**
+ * Adds a "Things to double-check" note when the years of experience stated in the output are higher than the
+ * listed roles add up to. The text is never changed: the candidate may have left a real job off on purpose.
+ */
 export function applyTruthFixes<T>(r: T): T {
   try {
-    const months = totalExperienceMonths((r as any)?.experience);
+    const any: any = r;
+    const months = totalExperienceMonths(any?.experience);
     if (months === null) {
       console.warn("[truth-fix] dates not readable, years check skipped");
       return r;
     }
-    let changed = false;
-    const out: any = mapAllStrings(r, (text, key) => {
-      if (key !== "summary" && key !== "coverLetter" && key !== "headline") return text;
-      const fixed = reconcileYears(text, months);
-      if (fixed !== text) changed = true;
-      return fixed;
-    });
-    if (changed) {
-      const years = Math.floor(months / 12);
-      const rem = months % 12;
-      const span = years + " year" + (years === 1 ? "" : "s") + (rem ? " " + rem + " month" + (rem === 1 ? "" : "s") : "");
-      const note = "The text claimed more years of experience than your dates support. Your listed dates add up to about " + span + ", so the figure was lowered to match.";
-      out.consistencyFlags = [...(Array.isArray(out.consistencyFlags) ? out.consistencyFlags : []), note];
-      console.log("[truth-fix] lowered a years-of-experience claim");
-    }
-    return out as T;
+    const claimed = Math.max(
+      overclaimedYears(String(any?.summary ?? ""), months),
+      overclaimedYears(String(any?.headline ?? ""), months),
+      overclaimedYears(String(any?.coverLetter ?? ""), months),
+    );
+    if (!claimed) return r;
+    const years = Math.floor(months / 12);
+    const rem = months % 12;
+    const span = years + " year" + (years === 1 ? "" : "s") + (rem ? " " + rem + " month" + (rem === 1 ? "" : "s") : "");
+    const flags: string[] = Array.isArray(any.consistencyFlags) ? any.consistencyFlags : [];
+    if (flags.some((f) => /years?/i.test(f) && /\d/.test(f))) return r;
+    const note =
+      "Your resume says about " + claimed + " years of experience, but the roles listed add up to about " + span +
+      ". If you worked a role you left off, add it to your default resume. If the number is a typo, fix it there.";
+    console.log("[truth-fix] years claim is above the dates, note added");
+    return { ...any, consistencyFlags: [...flags, note] } as T;
   } catch (e) {
     console.error("[truth-fix] failed", e);
     return r;
