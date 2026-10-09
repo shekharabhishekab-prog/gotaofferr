@@ -138,7 +138,7 @@ function AtsDesignPreview() {
       <section className="ak-hero">
         <div className="ak-wrap ak-hero-grid">
           <div>
-            <span className="ak-mono ak-rise" style={{ ["--d" as string]: "0s" }}>( free ats score, no ai, 20 seconds )</span>
+            <span className="ak-mono ak-rise" style={{ ["--d" as string]: "0s" }}>( ats score, no ai, 20 seconds )</span>
             <h1 className="ak-h1" aria-label="The robot reads your resume first.">
               <span className="ak-ln ak-rise" style={{ ["--d" as string]: ".08s" }}>The <mark>robot</mark></span>
               <span className="ak-ln ak-rise" style={{ ["--d" as string]: ".2s" }}>reads your</span>
@@ -149,7 +149,6 @@ function AtsDesignPreview() {
             </p>
             <div className="ak-cta ak-rise" style={{ ["--d" as string]: ".65s" }}>
               <a href="#check" className="ak-btn">Check my resume <ArrowRight className="size-4" /></a>
-              <span className="ak-hand">free for everyone</span>
             </div>
           </div>
 
@@ -168,7 +167,7 @@ function AtsDesignPreview() {
         </div>
       </section>
 
-      <div aria-hidden className="ak-mq"><div className="ak-mq-in">{[0, 1].map((n) => (<span key={n}>SCORE 0-100 <b>*</b> FIX IN ONE CLICK <b>*</b> NO AI, NO COST <b>*</b> NO FAKE SKILLS <b>*</b> SCORE 0-100 <b>*</b> FIX IN ONE CLICK <b>*</b> NO AI, NO COST <b>*</b> NO FAKE SKILLS <b>*</b> </span>))}</div></div>
+      <div aria-hidden className="ak-mq"><div className="ak-mq-in">{[0, 1].map((n) => (<span key={n}>SCORE 0-100 <b>*</b> FIX IN ONE CLICK <b>*</b> NO AI, NO GUESSING <b>*</b> NO FAKE SKILLS <b>*</b> SCORE 0-100 <b>*</b> FIX IN ONE CLICK <b>*</b> NO AI, NO GUESSING <b>*</b> NO FAKE SKILLS <b>*</b> </span>))}</div></div>
 
       {/* CHECKER */}
       <section id="check" className="ak-wrap ak-check">
@@ -464,6 +463,22 @@ const AK_CSS = `
 .ak-tabs button{padding:5px 14px;font-size:.85rem}
 .ak-row h3{font-size:clamp(2.4rem,4.6vw,4.4rem)}
 .ak-row{padding:38px 0}
+}
+
+@media(max-width:820px){
+.ak-res{padding:14px}
+.ak-res-top{gap:8px}
+.ak-meme{font-size:1.6rem;margin:12px 0 2px;text-shadow:2px 2px 0 var(--y)}
+.ak-res-grid{grid-template-columns:104px 1fr;gap:14px;margin-top:8px}
+.ak-gauge svg{width:104px;height:104px}
+.ak-num{top:16px;width:104px;height:72px;padding-top:10px}.ak-num b{font-size:2rem}.ak-num span{font-size:.7rem}
+.ak-gauge p{display:none}
+.ak-bars{gap:6px}.ak-bar{grid-template-columns:60px 1fr 38px;gap:8px;font-size:.76rem}.ak-bar .tr{height:8px}
+.ak-fixes{margin-top:12px;padding-top:10px}.ak-fixes h4{font-size:.95rem;margin-bottom:2px}
+.ak-fix{grid-template-columns:86px 1fr;gap:10px;padding:8px 0}
+.ak-fix b{font-size:.85rem}.ak-fix p{font-size:.76rem;margin-top:1px}
+.ak-ft{font-size:.58rem;padding:4px 6px;justify-self:stretch}
+.ak-fn{margin-top:12px;gap:8px}.ak-fn>span{display:none}
 }
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
