@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Download, FileText, TriangleAlert, Upload, Wrench } from "lucide-react";
+import { ArrowRight, Check, Download, FileText, Maximize2, TriangleAlert, Upload, Wrench } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/ats-design-preview")({
@@ -295,6 +295,11 @@ function AtsDesignPreview() {
                 <div><b>{f.bad}</b><p>{f.fix}</p></div>
               </div>
             ))}
+          </div>
+
+          <div className="ak-pvbar">
+            <button type="button" className="ak-pv"><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
+            <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /></button>
           </div>
 
           <div className="ak-fn">
@@ -688,5 +693,12 @@ const AK_CSS = `
 .ak-h2 span.go2{font-size:3.4rem;flex:none;-webkit-text-stroke:.025em var(--y)}
 .ak-smp.go{font-size:.95rem;padding:14px 18px;white-space:nowrap}
 }
+.ak-pvbar{display:flex;margin-top:22px;gap:0}
+.ak-pv{flex:1;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--y);color:#000;border:3px solid #000;border-radius:14px;padding:18px 20px;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:1.2rem;cursor:pointer;box-shadow:5px 5px 0 #000;animation:ak-pvp 2.2s ease-in-out infinite}
+.ak-pv:hover{background:#000;color:var(--y)}
+@keyframes ak-pvp{50%{box-shadow:5px 5px 0 #000,0 0 0 7px rgba(255,214,0,.55)}}
+.ak-dl2{display:none}
+@media(min-width:821px){.ak-res .ak-dl{position:absolute;top:18px;right:18px;width:46px;height:46px;border-radius:12px;background:var(--y);color:#000;border:3px solid #000;z-index:3}.ak-res .ak-dl svg{width:22px;height:22px}.ak-res .ak-dl:hover{background:#000;color:var(--y)}.ak-res-top{padding-right:62px}}
+@media(max-width:820px){.ak-res .ak-dl{display:none}.ak-pvbar{margin:16px 0 0;border:3px solid #000;border-radius:14px;overflow:hidden}.ak-pv{flex:1 1 auto;border:0;border-radius:0;box-shadow:none;animation:none;padding:18px 8px;font-size:1rem;gap:8px}.ak-dl2{display:grid;place-items:center;flex:0 0 10%;width:10%;min-width:46px;background:#000;color:var(--y);border:0;border-radius:0;cursor:pointer}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
