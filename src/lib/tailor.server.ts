@@ -74,7 +74,8 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   // known country the model reads the job's country from the ad itself (see the generic market).
   const market = resumeMarket(detectedJobCountry);
   const letterRules = coverLetterRules(detectedJobCountry);
-  const withLetterDate = <T extends { coverLetter: string }>(r: T): T => {
+  const withLetterDate = <T extends { coverLetter: string }>(r0: T): T => {
+    const r = applyTruthFixes(r0);
     const text = (r.coverLetter ?? "").trim();
     if (!text) return r;
     return { ...r, coverLetter: `${letterDateLine(jobCountry)}\n\n${text}` };
@@ -502,3 +503,112 @@ export function monthStartIso(): string {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
 
+
+// ---- Truth fixes: code checks behind two rules that used to live only in the prompt ----
+
+function mapAllStrings<T>(value: T, fn: (s: string, key: string) => string, key = ""): T {
+  if (typeof value === "string") return fn(value, key) as unknown as T;
+  if (Array.isArray(value)) return value.map((v) => mapAllStrings(v, fn, key)) as unknown as T;
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = mapAllStrings(v, fn, k);
+    return out as T;
+  }
+  return value;
+}
+
+const MONTH_NAMES = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+function parseMonthIndex(part: string, isEnd: boolean, now: Date): number | null {
+  const p = part.trim().toLowerCase();
+  if (/^(present|current|now|till date|to date|ongoing|today)$/.test(p)) return now.getFullYear() * 12 + now.getMonth();
+  const y = p.match(/(?:19|20)\d{2}/);
+  if (!y) return null;
+  const year = parseInt(y[0], 10);
+  let month = MONTH_NAMES.findIndex((m) => p.includes(m));
+  if (month < 0) {
+    const n = p.match(/\b(0?[1-9]|1[0-2])\s*[\/.-]\s*(?:19|20)\d{2}/);
+    month = n ? parseInt(n[1], 10) - 1 : isEnd ? 11 : 0;
+  }
+  return year * 12 + month;
+}
+
+/** Total months worked, with overlapping roles counted once. Null when any date range cannot be read. */
+export function totalExperienceMonths(experience: Array<{ dates?: string | null }> | undefined, now: Date = new Date()): number | null {
+  if (!experience || !experience.length) return null;
+  const nowIdx = now.getFullYear() * 12 + now.getMonth();
+  const spans: Array<[number, number]> = [];
+  for (const e of experience) {
+    const d = (e?.dates ?? "").trim();
+    if (!d) return null;
+    const parts = d.split(/\s*[–—]\s*|\s+-\s+|\s+to\s+|\s+until\s+|(?<=\d{4})\s*-\s*/i);
+    if (parts.length !== 2) return null;
+    const start = parseMonthIndex(parts[0], false, now);
+    const end = parseMonthIndex(parts[1], true, now);
+    if (start === null || end === null || end < start) return null;
+    spans.push([start, Math.min(end, nowIdx)]);
+  }
+  spans.sort((a, b) => a[0] - b[0]);
+  let total = 0;
+  let [curS, curE] = spans[0];
+  for (const [s, e] of spans.slice(1)) {
+    if (s <= curE + 1) curE = Math.max(curE, e);
+    else {
+      total += curE - curS + 1;
+      curS = s;
+      curE = e;
+    }
+  }
+  total += curE - curS + 1;
+  return total;
+}
+
+/** Highest "N years" claim in the text that the dates cannot support (more than 6 months over). Never edits text. */
+export function overclaimedYears(text: string, totalMonths: number): number {
+  let worst = 0;
+  if (!text) return worst;
+  const re = /\b(\d{1,2})(\s*\+)?\s*(?:years?|yrs?)\b/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const claimed = parseInt(m[1], 10);
+    if (claimed * 12 <= totalMonths + 6) continue;
+    const before = text.slice(Math.max(0, m.index - 12), m.index).toLowerCase();
+    if (/(nearly|almost|close to)\s*$/.test(before) && claimed * 12 <= totalMonths + 12) continue;
+    if (claimed > worst) worst = claimed;
+  }
+  return worst;
+}
+
+/**
+ * Adds a "Things to double-check" note when the years of experience stated in the output are higher than the
+ * listed roles add up to. The text is never changed: the candidate may have left a real job off on purpose.
+ */
+export function applyTruthFixes<T>(r: T): T {
+  try {
+    const any: any = r;
+    const months = totalExperienceMonths(any?.experience);
+    if (months === null) {
+      console.warn("[truth-fix] dates not readable, years check skipped");
+      return r;
+    }
+    const claimed = Math.max(
+      overclaimedYears(String(any?.summary ?? ""), months),
+      overclaimedYears(String(any?.headline ?? ""), months),
+      overclaimedYears(String(any?.coverLetter ?? ""), months),
+    );
+    if (!claimed) return r;
+    const years = Math.floor(months / 12);
+    const rem = months % 12;
+    const span = years + " year" + (years === 1 ? "" : "s") + (rem ? " " + rem + " month" + (rem === 1 ? "" : "s") : "");
+    const flags: string[] = Array.isArray(any.consistencyFlags) ? any.consistencyFlags : [];
+    if (flags.some((f) => /years?/i.test(f) && /\d/.test(f))) return r;
+    const note =
+      "Your resume says about " + claimed + " years of experience, but the roles listed add up to about " + span +
+      ". If you worked a role you left off, add it to your default resume. If the number is a typo, fix it there.";
+    console.log("[truth-fix] years claim is above the dates, note added");
+    return { ...any, consistencyFlags: [...flags, note] } as T;
+  } catch (e) {
+    console.error("[truth-fix] failed", e);
+    return r;
+  }
+}
