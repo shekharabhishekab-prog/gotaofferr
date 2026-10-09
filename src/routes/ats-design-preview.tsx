@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, FileText, TriangleAlert, Upload, Wrench } from "lucide-react";
+import { ArrowRight, Check, Download, FileText, TriangleAlert, Upload, Wrench } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/ats-design-preview")({
@@ -90,13 +90,27 @@ function AtsDesignPreview() {
   const root = useReveal();
   const [key, setKey] = useState("72");
   const [run, setRun] = useState(0);
-  const [phase, setPhase] = useState<"idle" | "scan" | "done">("done");
+  const [phase, setPhase] = useState<"idle" | "scan" | "done">("idle");
   const [step, setStep] = useState(0);
   const [shown, setShown] = useState(0);
   const [file, setFile] = useState("");
   const [over, setOver] = useState(false);
   const resRef = useRef<HTMLDivElement | null>(null);
   const s = SAMPLES[key];
+  const showSample = () => {
+    setPhase("done");
+    setRun((n) => n + 1);
+    window.setTimeout(() => resRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
+  };
+  const dl = () => {
+    const t = ["GotaOfferr ATS check (SAMPLE)", "Score: " + s.score + "/100", s.verdict, "", ...s.parts.map(([n, a, m]) => n + ": " + a + "/" + m), "", "Things to fix:", ...s.fixes.map((f) => "- [" + f.tag + "] " + f.bad + ". " + f.fix)].join("\n");
+    const u = URL.createObjectURL(new Blob([t], { type: "text/plain" }));
+    const a = document.createElement("a");
+    a.href = u;
+    a.download = "ats-sample-report.txt";
+    a.click();
+    URL.revokeObjectURL(u);
+  };
 
   useEffect(() => {
     if (phase !== "done") return;
@@ -119,7 +133,7 @@ function AtsDesignPreview() {
     const to = window.setTimeout(() => {
       setPhase("done");
       setRun((n) => n + 1);
-      resRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      resRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 1850);
     return () => {
       window.clearInterval(iv);
@@ -171,7 +185,10 @@ function AtsDesignPreview() {
 
       {/* CHECKER */}
       <section id="check" className="ak-wrap ak-check">
-        <h2 data-ak className="ak-rv ak-h2">Drop it. <span>Paste the job.</span> Go.</h2>
+        <div data-ak className="ak-rv ak-headrow">
+          <h2 className="ak-h2">Drop it. <span>Paste the job.</span> Go.</h2>
+          <button type="button" className="ak-smp" onClick={showSample}>/ sample</button>
+        </div>
         <div className="ak-stage">
         <div data-ak className="ak-rv ak-panel">
           <label
@@ -191,7 +208,7 @@ function AtsDesignPreview() {
           <div className="ak-fields">
             <div className="ak-two">
               <label><span>Company</span><input placeholder="Acme Corp" /></label>
-              <label><span>Job position</span><input placeholder="Product Marketing Manager" /></label>
+              <label><span>Job position</span><input placeholder="Marketing Manager" /></label>
             </div>
             <label className="ak-grow"><span>Job description</span><textarea placeholder="Paste the full job description. The robot matches keywords against it." /></label>
           </div>
@@ -202,9 +219,15 @@ function AtsDesignPreview() {
         </div>
 
         {/* RESULT */}
-        <div ref={resRef} className={`ak-res ${phase === "scan" ? "wait" : ""}`}>
+        <div ref={resRef} className={`ak-res ${phase === "scan" ? "wait" : ""} ${phase === "idle" ? "idle" : ""}`}>
+          <div className="ak-idle">
+            <b>Your report</b>
+            <p>Drop your resume, paste the job, hit Check. The report lands right here.</p>
+            <button type="button" className="ak-smp" onClick={showSample}>/ see a sample</button>
+          </div>
           <div className="ak-res-top">
             <span className="ak-tag">SAMPLE RESULT</span>
+            <button type="button" className="ak-dl" onClick={dl} aria-label="Download sample report" title="Download sample"><Download className="size-4" /></button>
             <div className="ak-tabs" role="tablist" aria-label="Try a sample score">
               {Object.keys(SAMPLES).map((k) => (
                 <button key={k} type="button" role="tab" aria-selected={k === key} className={k === key ? "on" : ""} onClick={() => { setKey(k); setRun((n) => n + 1); }}>{k}</button>
@@ -490,6 +513,38 @@ const AK_CSS = `
 .ak-num{top:14px;left:0;right:0;width:auto;height:80px;padding-top:12px}.ak-num b{font-size:2.4rem}
 .ak-gauge p{display:none}
 .ak-fn>span{display:none}
+}
+
+.ak-headrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:34px}
+.ak-headrow .ak-h2{margin:0}
+.ak-smp{background:var(--y);color:#000;border:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;font-size:1rem;padding:12px 18px;border-radius:6px;cursor:pointer;transform:rotate(-2deg);transition:transform .2s;letter-spacing:.02em}
+.ak-smp:hover{transform:rotate(1deg) scale(1.06)}
+.ak-dl{width:34px;height:34px;border-radius:50%;border:2px solid #000;background:transparent;color:#000;display:grid;place-items:center;cursor:pointer;transition:background .2s,color .2s}
+.ak-dl:hover{background:#000;color:var(--y)}
+.ak-res-top{justify-content:flex-start}.ak-tabs{margin-left:auto}
+.ak-idle{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;min-height:240px;padding:16px}
+.ak-idle b{font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;font-size:2.2rem;line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--cream)}
+.ak-idle p{margin:0;color:rgba(246,241,214,.7);max-width:22rem}
+.ak-res.idle{background:transparent;color:var(--cream);border:2px dashed rgba(255,214,0,.45)}
+.ak-res.idle>*:not(.ak-idle){display:none}
+.ak-res.idle .ak-idle{display:flex}
+.ak-check{scroll-margin-top:60px}
+@media(min-width:821px){
+.ak-check{padding-top:140px}
+.ak-stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}
+.ak-panel{grid-template-columns:1fr;gap:18px;padding:30px}
+.ak-drop{min-height:240px}
+.ak-fields{min-height:0}
+.ak-grow textarea{min-height:190px}
+.ak-go{font-size:1.3rem;padding:22px}
+.ak-res{padding:28px}
+.ak-res.idle{min-height:640px;align-items:center;display:flex}
+.ak-idle b{font-size:3.4rem}
+.ak-meme{font-size:clamp(1.8rem,2.4vw,2.8rem)}
+.ak-res-grid{grid-template-columns:150px 1fr;gap:22px}
+.ak-gauge svg{width:150px;height:150px}.ak-num{top:20px;height:100px;padding-top:16px}.ak-num b{font-size:3rem}
+.ak-bar{font-size:.95rem;grid-template-columns:78px 1fr 50px}
+.ak-fix b{font-size:1rem}.ak-fix p{font-size:.9rem}
 }
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
