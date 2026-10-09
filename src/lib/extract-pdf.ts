@@ -60,6 +60,18 @@ export async function assertValidResumeFile(file: File): Promise<void> {
 
 
 function installLegacyRuntimePolyfills() {
+  if (typeof (Promise as any).withResolvers !== "function") {
+    Object.defineProperty(Promise, "withResolvers", {
+      configurable: true, writable: true,
+      value(this: PromiseConstructor) {
+        let resolve!: (value: unknown) => void;
+        let reject!: (reason?: unknown) => void;
+        const promise = new this((yes, no) => { resolve = yes; reject = no; });
+        return { promise, resolve, reject };
+      },
+    });
+  }
+
   if (typeof String.prototype.replaceAll !== "function") {
     Object.defineProperty(String.prototype, "replaceAll", {
       configurable: true,
@@ -113,12 +125,11 @@ function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
 }
 
 async function loadPdfjs() {
-  // PDF.js 3.x's legacy build supports older iOS Safari directly. Newer PDF.js
-  // builds require Promise.withResolvers in both the page and worker realms,
-  // so patching only window.Promise still fails on real older iPhones.
+  // Use the legacy 6.x build and worker. Both include compatibility support;
+  // withResolvers also needs a fallback in the page realm before loading.
   installLegacyRuntimePolyfills();
-  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.js");
-  const workerUrl = (await import("pdfjs-dist/legacy/build/pdf.worker.min.js?url")).default;
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const workerUrl = (await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url")).default;
   pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
   return pdfjs;
 }
