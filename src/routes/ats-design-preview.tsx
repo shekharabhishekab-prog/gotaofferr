@@ -496,7 +496,6 @@ function AtsDesignPreview() {
             <span>Facts never change. No skill or job is ever added for you.</span>
             <Link to="/tailor" className="ak-btn sm">Fix it in 15 seconds <ArrowRight className="size-4" /></Link>
           </div>
-          {real?.missing?.length ? <div className="ak-kw">{real.missing.map((w) => (<em key={w}>{w}</em>))}</div> : null}
           </div>
           <div className="ak-pvbar">
             <button type="button" className={`ak-pv ${hl ? "hl" : ""}`} onClick={openPv}><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
@@ -957,7 +956,7 @@ const AK_CSS = `
 .ak-pmb .tr{height:12px;background:rgba(0,0,0,.12);border-radius:99px;overflow:hidden}.ak-pmb i{display:block;height:100%;border-radius:99px}.ak-pmb i.g{background:#0a7a2f}.ak-pmb i.m{background:#e0a800}.ak-pmb i.b{background:#c4230f}.ak-pmb em{font-style:normal;text-align:right}
 .ak-pmf{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:11px 0;border-bottom:1px dashed rgba(0,0,0,.25)}.ak-pmf b{display:block}.ak-pmf p{margin:3px 0 0;font-size:.92rem;color:rgba(0,0,0,.75)}
 .ak-pmn2{font-size:.8rem;opacity:.7;margin:18px 0 0}
-@media(max-width:820px){.ak-scroll{padding-right:0}.ak-bar{grid-template-columns:52px 1fr 46px!important}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;margin:8px 8px -46px 0}}
+@media(max-width:820px){.ak-scroll{padding-right:0}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;margin:8px 8px -46px 0}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
 
