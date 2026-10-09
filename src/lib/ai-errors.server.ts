@@ -14,7 +14,7 @@ export function aiGatewayErrorMessage(error: unknown): string {
   if (status === 402 || text.includes("402") || text.includes("payment required")) {
     return "We're finishing a quick upgrade on our writing engine. Please try again in a few minutes — your details are safe.";
   }
-  if (status === 429 || text.includes("429") || text.includes("too many requests") || text.includes("rate limit")) {
+  if (status === 429 || text.includes("429") || text.includes("too many requests") || text.includes("rate limit") || text.includes("quota") || text.includes("resource_exhausted")) {
     return "The AI service is busy right now. Please wait a moment and try again.";
   }
   if (status === 401 || status === 403 || text.includes("unauthorized")) {
