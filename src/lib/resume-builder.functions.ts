@@ -53,5 +53,33 @@ export const polishResumeDraft = createServerFn({ method: "POST" })
     await enforcePolicy("resume_builder", ip);
 
     const { turnstileToken: _token, ...draft } = data;
-    return await polishDraft(draft);
+
+    // First run per person (builder, guest tailor or account tailor) uses the strong models once, within a daily budget.
+    let tier: "free" | "career_pro" = "free";
+    let firstRunIdentity: { cookieId: string; ipHash: string } | null = null;
+    try {
+      const { getCookie, setCookie } = await import("@tanstack/react-start/server");
+      const { ANON_COOKIE, hashValue, hasUsedFreeRun, firstRunChoice } = await import("./anon-tailor.server");
+      let cookieId = getCookie(ANON_COOKIE);
+      if (!cookieId) {
+        cookieId = crypto.randomUUID();
+        setCookie(ANON_COOKIE, cookieId, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
+      }
+      const ipHash = hashValue(ip);
+      // A guest who already did a tailor run counts as having had their first run.
+      const guestUsed = await hasUsedFreeRun({ deviceHash: hashValue(cookieId), ipHash, cookieId });
+      if (await firstRunChoice({ cookieId, ipHash }, guestUsed)) {
+        tier = "career_pro";
+        firstRunIdentity = { cookieId, ipHash };
+      }
+    } catch (e) {
+      console.error("[first-run] builder check failed, using lower models", e);
+    }
+
+    const polished = await polishDraft(draft, tier);
+    if (firstRunIdentity) {
+      const { recordFirstRun } = await import("./anon-tailor.server");
+      await recordFirstRun(firstRunIdentity);
+    }
+    return polished;
   });
