@@ -118,6 +118,41 @@ function dropClaimSentences(text: string, src: Src): string {
   return sentences.filter((s) => !claimUnsupported(s, src)).join(" ");
 }
 
+// Tool or skill names that only the job ad asks for (the model lists them in missingKeywords).
+// A sentence that names one of them in the summary or cover letter reads as a claim the resume
+// cannot back up, so it is dropped. In the cover letter, an honest bridge sentence
+// ("my CRM work is in HubSpot, ready to learn Zoho") is kept.
+const JD_ONLY_GENERIC = new Set([
+  "marketing", "digital", "email", "management", "sales", "lead", "leads", "data", "content", "social", "media", "business",
+  "customer", "support", "analytics", "reporting", "strategy", "campaign", "campaigns", "search", "paid", "team", "communication",
+  "experience", "skills", "tools", "platform", "software", "system", "systems", "service", "services", "english", "hindi",
+]);
+const BRIDGE_WORDS = /\b(quickly|adapt|learn|transfer|transferable|rather than|not yet|while my|although|though|haven't|have not|built on|based on|primarily|mainly)\b/i;
+
+function jdOnlyTerms(missing: string[] | undefined, src: Src): string[] {
+  const out = new Set<string>();
+  for (const k of missing ?? []) {
+    const phrase = norm(k);
+    if (!phrase || skillSupported(k, src)) continue;
+    out.add(phrase);
+    const head = phrase.split(" ")[0];
+    if (head && head.length >= 4 && !JD_ONLY_GENERIC.has(head) && !src.text.includes(head)) out.add(head);
+  }
+  return [...out];
+}
+
+function dropJdOnlySentences(text: string, terms: string[], letter: boolean): string {
+  if (!terms.length || !text) return text;
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const kept = sentences.filter((sent) => {
+    const n = " " + norm(sent) + " ";
+    const hit = terms.some((t) => n.includes(" " + t + " ") || n.includes(" " + t));
+    if (!hit) return true;
+    return letter && BRIDGE_WORDS.test(sent);
+  });
+  return kept.join(" ");
+}
+
 export function guardResume(result: TailoredResume, source: string): { result: TailoredResume; removed: string[] } {
   const src = buildSource(source);
   const removed: string[] = [];
@@ -131,9 +166,10 @@ export function guardResume(result: TailoredResume, source: string): { result: T
     })
     .filter((c) => c.trim().length > 0);
 
-  const summary = dropClaimSentences(result.summary, src);
+  const jdOnly = jdOnlyTerms((result as any).missingKeywords, src);
+  const summary = dropJdOnlySentences(dropClaimSentences(result.summary, src), jdOnly, false);
   if (summary !== result.summary) note("claim", "summary sentence");
-  const coverLetter = dropClaimSentences(result.coverLetter, src);
+  const coverLetter = dropJdOnlySentences(dropClaimSentences(result.coverLetter, src), jdOnly, true);
   if (coverLetter !== result.coverLetter) note("claim", "cover letter sentence");
 
   const skills = result.skills.filter((s) => skillSupported(s, src) || (note("skill", s), false));
