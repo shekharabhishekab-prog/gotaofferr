@@ -595,7 +595,7 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 @keyframes ndbar{from{background-size:0% 100%}to{background-size:100% 100%}}
 @keyframes ndsky{from{opacity:0}to{opacity:1}}
 .nd-w{display:inline-block;animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards}
-.nd-t b{background-repeat:no-repeat}.nd-t b{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:.9em;text-transform:uppercase}.nd-h:not(.nd-go) .nd-w{opacity:0!important;animation:none!important}.nd-h:not(.nd-go){animation:none!important}@media(min-width:640px){.hp-hero .hp-sub.hp-sub{font-size:.5rem;letter-spacing:.12em;white-space:nowrap}}.nd-go .nd-l1 .nd-w{animation-delay:calc(var(--i,0)*.08s),calc(.35s + var(--i,0)*.08s)!important}
+.nd-t b{background-repeat:no-repeat}.nd-t b{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:.9em;text-transform:uppercase}.nd-h:not(.nd-go) .nd-w{opacity:0!important;animation:none!important}.nd-h:not(.nd-go){animation:none!important}@media(min-width:640px){.hp-hero .hp-sub.hp-sub{font-size:.5rem;letter-spacing:.12em;white-space:nowrap;margin-top:.9rem}}.nd-go .nd-l1 .nd-w{animation-delay:calc(var(--i,0)*.08s),calc(.35s + var(--i,0)*.08s)!important}
 .nd-t b.nd-w{animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards,ndbar .8s cubic-bezier(.7,0,.2,1) calc(1.5s + var(--i,0)*.11s) backwards}
 @keyframes ndword{from{translate:0 .8em;opacity:0;filter:blur(12px);scale:1.15}to{translate:0 0;opacity:1;filter:blur(0);scale:1}}
 .nd-h{animation:ndpush 2.4s cubic-bezier(.2,.7,.2,1) backwards}
