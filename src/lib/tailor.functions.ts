@@ -155,7 +155,8 @@ export const tailorResume = createServerFn({ method: "POST" })
     const { consumeTopupCredit, topupBalance } = await import("@/lib/topups.server");
     let usedTopup = false;
     if (used >= limit) {
-      usedTopup = await consumeTopupCredit(context.userId, "tailor");
+      // Only check the balance here. The credit is taken after a successful run, so a failed run costs nothing.
+      usedTopup = (await topupBalance(context.userId, "tailor")) > 0;
       if (!usedTopup) {
         throw new Error(
           `${limitExceededMessage(limit)} You can also top up instantly from the pricing page.`,
@@ -188,6 +189,10 @@ export const tailorResume = createServerFn({ method: "POST" })
     }
 
     const result = await runTailor(data, detectCountry(), effectiveTier);
+    if (usedTopup) {
+      const taken = await consumeTopupCredit(context.userId, "tailor");
+      if (!taken) console.error("[tailor] top-up credit could not be taken after a successful run");
+    }
     if (firstRunIdentity) {
       const { recordFirstRun } = await import("./anon-tailor.server");
       await recordFirstRun(firstRunIdentity);
