@@ -51,7 +51,15 @@ export function isQuotaError(error: unknown): boolean {
   const text = (e instanceof Error ? e.message : String(e ?? "")).toLowerCase();
   return (
     status === 429 ||
+    // Overloaded or retired model: the next model in the chain should answer instead of failing the run.
+    status === 503 ||
+    status === 404 ||
     text.includes("429") ||
+    text.includes("503") ||
+    text.includes("high demand") ||
+    text.includes("overloaded") ||
+    text.includes("unavailable") ||
+    text.includes("no longer available") ||
     text.includes("busy right now") ||
     text.includes("resource_exhausted") ||
     text.includes("quota") ||
