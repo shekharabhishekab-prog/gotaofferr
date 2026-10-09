@@ -94,21 +94,26 @@ function AtsDesignPreview() {
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const px = Array.from(el.querySelectorAll<HTMLElement>("[data-px]"));
     let raf = 0;
+    const vis = new Set<HTMLElement>();
     const tick = () => {
       raf = 0;
       const h = window.innerHeight || 800;
-      px.forEach((e) => {
-        const r = e.getBoundingClientRect();
+      const items = Array.from(vis);
+      const rs = items.map((e) => e.getBoundingClientRect());
+      items.forEach((e, n) => {
+        const r = rs[n];
         const c = (r.top + r.height / 2 - h / 2) / h;
         const k = parseFloat(e.dataset.px || "0");
         e.style.translate = e.dataset.pm === "x" ? (c * k).toFixed(1) + "px 0" : "0 " + (c * k).toFixed(1) + "px";
       });
     };
     const on = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    const pio = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((es) => { es.forEach((x) => { if (x.isIntersecting) vis.add(x.target as HTMLElement); else vis.delete(x.target as HTMLElement); }); on(); }, { rootMargin: "150px" }) : null;
+    if (pio) px.forEach((e) => pio.observe(e)); else px.forEach((e) => vis.add(e));
     window.addEventListener("scroll", on, { passive: true });
     window.addEventListener("resize", on);
     tick();
-    return () => { window.removeEventListener("scroll", on); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
+    return () => { if (pio) pio.disconnect(); window.removeEventListener("scroll", on); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
   }, [root]);
   const [key, setKey] = useState("72");
   const [run, setRun] = useState(0);
@@ -225,7 +230,7 @@ function AtsDesignPreview() {
             <input type="file" accept=".pdf,.doc,.docx" className="sr-only" onChange={(e) => setFile(e.target.files?.[0]?.name ?? "")} />
             <i className="ak-c c1" /><i className="ak-c c2" /><i className="ak-c c3" /><i className="ak-c c4" />
             <i className="ak-dbeam" />
-            <button type="button" className="ak-smp in" onClick={(e) => { e.preventDefault(); e.stopPropagation(); showSample(); }}>{phase === "done" ? "/ hide sample" : "/ sample result"}</button>
+            
             <span className="ak-dic">{file ? <FileText className="size-8" /> : <Upload className="size-8" />}</span>
             <span className="ak-dt">{phase === "scan" ? STEPS[step] + "..." : file || "Drop your resume here"}</span>
             <span className="ak-dh">{file ? "Click to change" : "PDF or DOC. Or click to browse."}</span>
@@ -362,7 +367,7 @@ const AK_CSS = `
 .ak-rv.ak-in{opacity:1;transform:none}
 
 .ak-hero{position:relative;padding:56px 0 40px;background:radial-gradient(60% 50% at 78% 30%,rgba(255,214,0,.16),transparent 70%)}
-.ak-hero:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(#000 30%,transparent);animation:ak-grid 12s linear infinite}
+.ak-hero:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(#000 30%,transparent)}
 @keyframes ak-grid{to{background-position:0 56px}}
 .ak-hero-grid{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center}
 .ak-h1{margin:18px 0 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.92;letter-spacing:-.015em;font-size:clamp(3rem,8.4vw,7rem)}
@@ -372,21 +377,24 @@ const AK_CSS = `
 .ak-out{color:transparent;-webkit-text-stroke:2px var(--cream)}
 .ak-sub{max-width:34rem;margin-top:22px;font-size:1.12rem;line-height:1.5;color:rgba(246,241,214,.72)}
 .ak-cta{display:flex;align-items:center;gap:18px;margin-top:28px;flex-wrap:wrap}
-.ak-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;font-weight:700;border-radius:999px;padding:15px 28px;font-size:1rem;border:0;cursor:pointer;text-decoration:none;box-shadow:0 0 0 0 rgba(255,214,0,.5);transition:transform .2s,box-shadow .3s;animation:ak-ring 2.6s ease-out infinite}
+.ak-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;font-weight:700;border-radius:999px;padding:15px 28px;font-size:1rem;border:0;cursor:pointer;text-decoration:none;box-shadow:0 0 0 0 rgba(255,214,0,.5);transition:transform .2s;position:relative;isolation:isolate}
+.ak-btn:after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--y);z-index:-1;pointer-events:none;will-change:transform,opacity;animation:ak-ringx 2.6s ease-out infinite}
+@keyframes ak-ringx{0%{transform:scale(1);opacity:.45}70%,100%{transform:scale(1.1,1.4);opacity:0}}
+.ak-btn.sm:after,.ak-btn:disabled:after{display:none}
 .ak-btn:hover{transform:translateY(-3px) scale(1.03)}
 .ak-btn:disabled{opacity:.7;cursor:wait;animation:none}
 .ak-btn.sm{padding:11px 20px;font-size:.92rem;animation:none}
 @keyframes ak-ring{0%{box-shadow:0 0 0 0 rgba(255,214,0,.45)}70%,100%{box-shadow:0 0 0 18px rgba(255,214,0,0)}}
 
 .ak-paper-wrap{position:relative;min-height:380px;display:flex;align-items:center;justify-content:center}
-.ak-paper{position:relative;width:270px;aspect-ratio:.72;background:#f6f1d6;border-radius:6px;padding:26px 22px;transform:rotate(5deg);box-shadow:0 30px 80px rgba(255,214,0,.18),0 0 0 1px rgba(255,255,255,.2);animation:ak-flt 7s ease-in-out infinite;overflow:hidden}
+.ak-paper{will-change:transform;position:relative;width:270px;aspect-ratio:.72;background:#f6f1d6;border-radius:6px;padding:26px 22px;transform:rotate(5deg);box-shadow:0 30px 80px rgba(255,214,0,.18),0 0 0 1px rgba(255,255,255,.2);animation:ak-flt 7s ease-in-out infinite;overflow:hidden}
 @keyframes ak-flt{0%,100%{transform:rotate(5deg) translate(0,0)}33%{transform:rotate(0deg) translate(12px,-24px)}66%{transform:rotate(8deg) translate(-12px,-10px)}}
 .ak-pl{display:block;height:8px;border-radius:4px;background:#161616;margin:0 0 9px;opacity:.85}
 .ak-pl.thin{height:5px;opacity:.4}.ak-pl.head{height:11px;margin-top:14px;background:#000}
 .w35{width:35%}.w45{width:45%}.w50{width:50%}.w60{width:60%}.w70{width:70%}.w75{width:75%}.w80{width:80%}.w85{width:85%}.w90{width:90%}.w95{width:95%}
 .ak-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
 .ak-beam{position:absolute;left:0;right:0;height:46px;top:-46px;background:linear-gradient(transparent,rgba(255,214,0,.55),transparent);border-bottom:2px solid var(--y);animation:ak-scan 3.2s ease-in-out infinite}
-@keyframes ak-scan{0%{top:-46px}100%{top:100%}}
+@keyframes ak-scan{0%{transform:translateY(0)}100%{transform:translateY(520px)}}
 .ak-pin{position:absolute;display:inline-flex;align-items:center;gap:6px;background:#000;border:1px solid rgba(255,255,255,.3);color:var(--cream);font-size:.74rem;font-weight:700;text-transform:uppercase;padding:7px 11px;border-radius:999px;white-space:nowrap;animation:ak-pop 6.4s ease-in-out infinite;opacity:0}
 .ak-pin.bad{background:var(--y);color:#000;border-color:var(--y)}
 .ak-pin.p1{left:0;top:16%;animation-delay:.6s}.ak-pin.p2{right:-2%;top:30%;animation-delay:1.6s}.ak-pin.p3{left:2%;bottom:30%;animation-delay:2.6s}.ak-pin.p4{right:2%;bottom:14%;animation-delay:3.6s}
@@ -616,7 +624,7 @@ const AK_CSS = `
 .ak-gauge p{display:none}
 .ak-idle b{font-size:2.6rem}
 }
-@media(max-width:820px){.ak-drop{padding-bottom:72px}.ak-smp.in{top:auto;bottom:14px;right:auto;left:50%;margin-left:-64px;font-size:.85rem;padding:10px 14px;white-space:nowrap}}
+@media(max-width:820px){.ak-drop{padding-bottom:30px}.ak-smp.in{top:auto;bottom:14px;right:auto;left:50%;margin-left:-64px;font-size:.85rem;padding:10px 14px;white-space:nowrap}}
 
 .ak-smp.go{font-size:.9rem;padding:9px 14px;vertical-align:middle;margin-left:8px;text-transform:none;white-space:nowrap;letter-spacing:.02em}
 .ak-gap{position:relative;margin:110px 0 40px;overflow:hidden;padding:30px 0}
@@ -627,7 +635,7 @@ const AK_CSS = `
 .ak-chips{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:26px 0;padding:0 20px}
 .ak-chip{font-family:ui-monospace,Menlo,monospace;font-weight:800;text-transform:uppercase;font-size:.85rem;padding:11px 16px;border:2px solid var(--cream);border-radius:999px;animation:ak-bob 3.4s ease-in-out infinite}
 .ak-chip.y{background:var(--y);color:#000;border-color:var(--y);animation-delay:-1.4s}
-@keyframes ak-bob{50%{margin-top:-8px}}
+@keyframes ak-bob{50%{transform:translateY(-8px)}}
 .ak-how{padding-top:80px}
 @media(min-width:821px){.ak-h2{font-size:clamp(2rem,3.7vw,3.7rem)}.ak-gap{margin-top:150px}.ak-how{padding-top:110px}.ak-chip{font-size:1rem}}
 @media(max-width:820px){
