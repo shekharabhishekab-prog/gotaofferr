@@ -282,6 +282,7 @@ function AtsDesignPreview() {
 }
 
 const AK_CSS = `
+@font-face{font-family:"HPHand";src:url("/fonts/caveat-brush.woff2") format("woff2");font-display:swap}
 .ak{--y:#ffd600;--ink:#0a0a0a;--cream:#f6f1d6;background:#000;color:var(--cream);overflow:hidden}
 .ak *{box-sizing:border-box}
 .ak-wrap{max-width:1180px;margin:0 auto;padding:0 20px}
@@ -361,7 +362,7 @@ const AK_CSS = `
 .ak-tabs{display:flex;gap:6px;background:rgba(0,0,0,.1);padding:4px;border-radius:999px}
 .ak-tabs button{border:0;background:transparent;font-weight:800;padding:7px 18px;border-radius:999px;cursor:pointer;font-size:.95rem;transition:background .2s,color .2s}
 .ak-tabs button.on{background:#000;color:var(--y)}
-.ak-meme{margin:22px 0 6px;font-family:Anton,Impact,"Arial Narrow",sans-serif;font-weight:400;text-transform:uppercase;line-height:.98;font-size:clamp(2.4rem,7vw,5.6rem);letter-spacing:.005em;text-shadow:3px 3px 0 var(--y)}
+.ak-meme{margin:22px 0 6px;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;line-height:.95;font-size:clamp(2.1rem,5.8vw,4.6rem);letter-spacing:-.02em;text-shadow:3px 3px 0 var(--y)}
 .ak-meme span{display:block;animation:ak-slam .6s cubic-bezier(.2,1.4,.4,1) both}
 .ak-meme span.y{background:#000;color:var(--y);display:inline-block;padding:0 .14em;text-shadow:none;transform:rotate(-1.2deg);animation-delay:.2s}
 @keyframes ak-slam{from{opacity:0;transform:scale(1.5) translateY(-20px)}}
