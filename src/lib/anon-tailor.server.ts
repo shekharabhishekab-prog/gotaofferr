@@ -59,6 +59,72 @@ export async function recordFreeRun(identity: AnonIdentity): Promise<void> {
   await supabaseAdmin.from("anonymous_tailor_uses").upsert(rows, { onConflict: "device_hash" });
 }
 
+/**
+ * First-run bonus: a person's very first tailor or builder run goes to the strong models, once.
+ * Markers live in the same table with an "fr:" prefix on the hashes, so they never count as a
+ * used free guest rewrite (hasUsedFreeRun compares the plain hashes only).
+ */
+const FIRST_RUN_PREFIX = "fr:";
+// Protects the shared strong-model pool from scripted fresh visitors: at most this many bonus runs per rolling 24 h.
+const FIRST_RUN_DAILY_CAP = 25;
+
+export type FirstRunIdentity = { cookieId: string; ipHash: string; deviceHash?: string };
+
+export async function hasUsedFirstRun(identity: FirstRunIdentity): Promise<boolean> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const hashes = [FIRST_RUN_PREFIX + hashValue(identity.cookieId)];
+  if (identity.deviceHash) hashes.push(FIRST_RUN_PREFIX + identity.deviceHash);
+  const { data: byDevice } = await supabaseAdmin
+    .from("anonymous_tailor_uses")
+    .select("id")
+    .in("device_hash", hashes)
+    .limit(1);
+  if (byDevice && byDevice.length > 0) return true;
+  const { data: byIp } = await supabaseAdmin
+    .from("anonymous_tailor_uses")
+    .select("id")
+    .eq("ip_hash", FIRST_RUN_PREFIX + identity.ipHash)
+    .limit(1);
+  return Boolean(byIp && byIp.length > 0);
+}
+
+/** True while today's bonus budget is not used up. Fails closed (lower model) if the check errors. */
+export async function firstRunBudgetLeft(): Promise<boolean> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const { count, error } = await supabaseAdmin
+      .from("anonymous_tailor_uses")
+      .select("id", { count: "exact", head: true })
+      .like("device_hash", FIRST_RUN_PREFIX + "%")
+      .gte("created_at", since);
+    if (error) throw error;
+    // Each person writes up to two marker rows (cookie + device), so halve the count.
+    return Math.ceil((count ?? 0) / 2) < FIRST_RUN_DAILY_CAP;
+  } catch (e) {
+    console.error("[first-run] budget check failed", e);
+    return false;
+  }
+}
+
+/** Decides the model tier for a run that may be the person's first: strong chain once, else the given tier. */
+export async function firstRunChoice(identity: FirstRunIdentity, plain: boolean): Promise<boolean> {
+  if (plain) return false;
+  if (await hasUsedFirstRun(identity)) return false;
+  return firstRunBudgetLeft();
+}
+
+export async function recordFirstRun(identity: FirstRunIdentity): Promise<void> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const devices = [hashValue(identity.cookieId), identity.deviceHash].filter(Boolean) as string[];
+    const rows = devices.map((d) => ({ device_hash: FIRST_RUN_PREFIX + d, ip_hash: FIRST_RUN_PREFIX + identity.ipHash }));
+    await supabaseAdmin.from("anonymous_tailor_uses").upsert(rows, { onConflict: "device_hash" });
+  } catch (e) {
+    console.error("[first-run] record failed", e);
+  }
+}
+
 export async function saveCapturedEmail(
   email: string,
   source: string,
