@@ -589,13 +589,13 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 .hp-hero:has(.nd-h) .hp-hero-body>div>*:not(h1){transform:translate3d(0,calc(var(--nd,0)*-5vh),0);opacity:calc(1 - var(--nd,0)*1.4)}
 .nd-t b{font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-style:normal;font-weight:900;letter-spacing:-.05em;font-size:.92em}
 @media(max-width:899px){.nd-h{font-size:11.4vw;letter-spacing:-.01em}.nd-t{padding:.1em .16em .14em}.nd-h{margin-top:1.25rem}}
-.hp-hero:has(.nd-h) .hp-grid{display:none!important}
+@media(min-width:640px){.hp-hero:has(.nd-h) .hp-grid{display:none!important}}.hp-t-d{display:none}@media(min-width:640px){.hp-hero .hp-t-m{display:none!important}.hp-t-d{display:block}}
 @keyframes ndbox{0%{clip-path:inset(0 50% 0 50%);filter:brightness(2.2)}60%{filter:brightness(1.3)}100%{clip-path:inset(0 0 0 0);filter:none}}
 @keyframes ndrise{from{translate:0 .7em;opacity:0}to{translate:0 0;opacity:1}}
 @keyframes ndbar{from{background-size:0% 100%}to{background-size:100% 100%}}
 @keyframes ndsky{from{opacity:0}to{opacity:1}}
 .nd-w{display:inline-block;animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards}
-.nd-t b{background-repeat:no-repeat}.nd-t b{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:.9em;text-transform:uppercase}.nd-h:not(.nd-go) .nd-w{opacity:0!important;animation:none!important}.nd-h:not(.nd-go){animation:none!important}@media(min-width:640px){.hp-hero .hp-sub.hp-sub{font-size:.5rem;letter-spacing:.12em;white-space:nowrap}}@media(max-width:639px){.hp-hero .hp-hero-body{text-align:left}.hp-hero .site-container.site-container{padding-bottom:5.5rem}.hp-hero .nd-t.nd-t{margin-left:0;margin-right:0;padding-left:0}.hp-hero .i3-pill{margin-left:0}.hp-hero .hp-rise.mx-auto{margin-left:0!important;margin-right:0!important;max-width:none!important;justify-content:flex-start;flex-direction:row!important;flex-wrap:nowrap;gap:.6rem}.hp-hero .hp-mag{flex:0 0 auto}.hp-hero .hp-btn.hp-btn{width:auto;padding-left:.95rem!important;padding-right:.95rem!important}.hp-hero .hp-sub.hp-sub{font-size:.46rem;letter-spacing:.1em;text-align:left;padding-left:.95rem;white-space:nowrap}}@media(max-width:639px){.hp-hero .i3-pill{border:0!important;background:none!important;box-shadow:none!important;backdrop-filter:none!important;padding:0!important;margin:0 0 .2rem!important;font-size:.56rem!important;letter-spacing:.16em!important;color:rgba(255,255,255,.6)!important;animation:none!important;display:flex!important;text-align:left}.hp-hero .nd-h.nd-h{font-size:10vw;line-height:1.04;margin-top:.9rem}.hp-hero .nd-h .nd-t b.nd-w{display:inline-block!important;font-size:1.4em;line-height:1;margin:0 0 0 .08em;background:none!important;padding:0!important;vertical-align:baseline}.hp-hero .nd-h .nd-t b.nd-w{margin-right:0!important}.hp-hero .nd-h .nd-t .nd-l1,.hp-hero .nd-h .nd-t .nd-l2{display:grid!important;grid-template-columns:auto auto;justify-content:start;align-items:baseline;white-space:normal!important;column-gap:.25em}.hp-hero .nd-h .nd-t .nd-l1,.hp-hero .nd-h .nd-t .nd-l2{margin-bottom:.3em}.hp-hero .hp-rise.mx-auto.flex{gap:.5rem!important;align-items:flex-start!important}.hp-hero .hp-mag.hp-mag{width:max-content!important;flex:none!important;min-width:0!important}.hp-hero .hp-btn.hp-btn{width:auto!important;height:1.7rem!important;font-size:.6rem!important;padding-left:.8rem!important;padding-right:.8rem!important}.hp-hero .hp-sub.hp-sub{padding-left:.8rem}}.nd-go .nd-l1 .nd-w{animation-delay:calc(var(--i,0)*.08s),calc(.35s + var(--i,0)*.08s)!important}@media(max-width:639px){.nd-h.nd-h{font-size:10.6vw;line-height:1.02;text-align:left}.nd-h .nd-t .nd-l1,.nd-h .nd-t .nd-l2{display:block;margin-bottom:.45em}.nd-h .nd-t br{display:none}.nd-h .nd-t span.nd-w{font-family:Georgia,serif;font-style:italic}.nd-h .nd-t b.nd-w{display:table;font-size:1.5em;line-height:1.05;margin:.02em 0 .04em -.04em}.nd-t::before,.nd-t::after,.nd-l1::before,.nd-l1::after,.nd-l2::before,.nd-l2::after,.nd-h::before,.nd-h::after{display:none!important}.hp-hero .i3-pill{font-family:ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.12em;font-size:.56rem}.hp-hero .hp-btn.hp-btn{height:1.85rem;font-size:.64rem;font-family:"Space Grotesk",ui-sans-serif,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em}}
+.nd-t b{background-repeat:no-repeat}.nd-t b{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:.9em;text-transform:uppercase}.nd-h:not(.nd-go) .nd-w{opacity:0!important;animation:none!important}.nd-h:not(.nd-go){animation:none!important}@media(min-width:640px){.hp-hero .hp-sub.hp-sub{font-size:.5rem;letter-spacing:.12em;white-space:nowrap}}.nd-go .nd-l1 .nd-w{animation-delay:calc(var(--i,0)*.08s),calc(.35s + var(--i,0)*.08s)!important}
 .nd-t b.nd-w{animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards,ndbar .8s cubic-bezier(.7,0,.2,1) calc(1.5s + var(--i,0)*.11s) backwards}
 @keyframes ndword{from{translate:0 .8em;opacity:0;filter:blur(12px);scale:1.15}to{translate:0 0;opacity:1;filter:blur(0);scale:1}}
 .nd-h{animation:ndpush 2.4s cubic-bezier(.2,.7,.2,1) backwards}
@@ -1052,7 +1052,7 @@ function Index() {
 
       {/* Hero */}
       <section data-hero className="hp-hero relative isolate overflow-hidden">
-        {wide ? <HeroNedan /> : <HeroVideo />}
+        {wide ? <HeroVideo /> : <HeroNedan />}
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,transparent_0%,#000_88%)]" />
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
@@ -1072,8 +1072,8 @@ function Index() {
               <span className="animate-pulse-ring i3-pill inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
                 <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · <span className="pill-d">Make resume from scratch · </span>Tailor resume · Apply — 5 free a month
               </span>
-              {wide ? <NedanTitle /> : (
-<h1 className="i3 mt-5" aria-label="The job you want. The resume it needs.">
+              <div className="hp-t-d"><NedanTitle /></div>{(
+<h1 className="i3 mt-5 hp-t-m" aria-label="The job you want. The resume it needs.">
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y">JOB</mark> <span className="i3-w">YOU WANT.</span></span>
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y i3-y2">RESUME</mark> <span className="i3-w">IT NEEDS.</span></span>
               </h1>
@@ -1875,7 +1875,7 @@ html,body{background:#000}
 .hp-hero-body .hp-rolebox{margin-top:.5rem}
 .hp-hero-body div.hp-rise.flex{margin-top:1rem;flex-direction:row!important;flex-wrap:nowrap!important;gap:.6rem!important;align-items:flex-start}
 .hp-hero-body div.hp-rise.flex .hp-mag{flex:1 1 0;min-width:0}
-.hp-hero-body div.hp-rise.flex .hp-btn{height:2.15rem;padding-left:.4rem!important;padding-right:.4rem!important;font-size:.72rem;white-space:nowrap}
+.hp-hero-body div.hp-rise.flex .hp-btn{height:2.6rem;padding-left:.5rem!important;padding-right:.5rem!important;font-size:.82rem;white-space:nowrap}
 .hp-sub{font-size:.44rem;letter-spacing:.06em;margin-top:.3rem;text-align:center;white-space:nowrap;max-width:100%;overflow:hidden}
 }
 .hx-bgR{position:absolute;z-index:-5;right:-3vw;bottom:-14vh;font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;font-size:92vh;line-height:.8;letter-spacing:-.06em;color:rgba(255,214,0,.13);-webkit-text-stroke:2px rgba(255,214,0,.22);pointer-events:none;user-select:none;transform:translate(calc(var(--mx)*-18px),calc(var(--my)*-12px));transition:transform .3s ease-out;mix-blend-mode:screen}
