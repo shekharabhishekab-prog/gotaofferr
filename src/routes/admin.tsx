@@ -9,6 +9,7 @@ function buildAdminCsv(headers: string[], rows: unknown[][]): string {
 }
 
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { BarChart3, CreditCard, Download, Loader2, ShieldAlert, Users } from "lucide-react";
@@ -29,7 +30,8 @@ import { AdminMfaGate } from "@/components/AdminMfaGate";
 import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
 import { useSession } from "@/hooks/useSession";
-import { checkIsAdmin, getAdminDashboard } from "@/lib/admin.functions";
+import { checkIsAdmin, getAdminDashboard, getMonthCards } from "@/lib/admin.functions";
+import { REGIONS } from "@/lib/region";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -52,6 +54,10 @@ export const Route = createFileRoute("/admin")({
   errorComponent: RouteError,
   notFoundComponent: RouteNotFound,
 });
+
+function monthLabel(ym: string) {
+  return new Date(`${ym}-01T00:00:00Z`).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
 
 function fmt(value: string | null | undefined) {
   if (!value) return "—";
@@ -87,6 +93,9 @@ function Stat({ label, value, monthly, icon }: { label: string; value: string | 
 
 function AdminPage() {
   const { user, loading: sessionLoading } = useSession();
+  const [region, setRegion] = useState<string>("All");
+  const [month, setMonth] = useState<string>("");
+  const monthFn = useServerFn(getMonthCards);
   const isAdminFn = useServerFn(checkIsAdmin);
   const dashboardFn = useServerFn(getAdminDashboard);
 
@@ -103,6 +112,14 @@ function AdminPage() {
     queryFn: () => dashboardFn({}),
     enabled: isAdmin && adminQuery.data?.mfaVerified === true,
   });
+
+  const cardsQuery = useQuery({
+    queryKey: ["admin-month-cards", month],
+    queryFn: () => monthFn({ data: { month: month || undefined } }),
+    enabled: isAdmin && adminQuery.data?.mfaVerified === true,
+    refetchInterval: month === "" ? 60_000 : false,
+  });
+  const cards = cardsQuery.data;
 
   if (sessionLoading || (user && adminQuery.isLoading)) {
     return (
@@ -136,6 +153,9 @@ function AdminPage() {
   }
 
   const d = dataQuery.data;
+  const shownUsers = (d?.users ?? []).filter((u) => region === "All" || u.region === region);
+  const shownSubs = (d?.subscriptions ?? []).filter((x) => region === "All" || x.region === region);
+  const regionCounts = Object.fromEntries(["All", ...REGIONS].map((r) => [r, r === "All" ? (d?.users.length ?? 0) : (d?.users ?? []).filter((u) => u.region === r).length]));
 
   return (
     <AdminMfaGate>
@@ -155,16 +175,34 @@ function AdminPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="Total users" value={d.totals.users} monthly={d.totals.usersThisMonth} icon={<Users className="h-4 w-4" />} />
-            <Stat label="Recorded rewrites" value={d.totals.runsTotal} monthly={d.totals.runsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Recorded job searches" value={d.totals.searchRecords} monthly={d.totals.searchesThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Recorded builder download attempts" value={d.totals.builderDownloadAttempts} monthly={d.totals.builderDownloadAttemptsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Job alert records" value={d.totals.alertRecords} monthly={d.totals.alertRecordsThisMonth} icon={<BarChart3 className="h-4 w-4" />} />
-            <Stat label="Subscriptions started" value={d.totals.subscriptionRecords} monthly={d.totals.subscriptionRecordsThisMonth} icon={<CreditCard className="h-4 w-4" />} />
-            <Stat label="Non-QA entitled user share now" value={`${d.totals.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <label htmlFor="month-select" className="text-sm font-medium">Month</label>
+            <select
+              id="month-select"
+              value={cards?.month ?? ""}
+              onChange={(e) => setMonth(e.target.value)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              {(cards?.months ?? []).map((m) => (
+                <option key={m} value={m}>{monthLabel(m)}{m === cards?.current ? " (this month, live)" : ""}</option>
+              ))}
+            </select>
+            <span className="text-sm text-muted-foreground">Year {cards?.month?.slice(0, 4) ?? ""}</span>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">This month uses India time (IST). Counts are recorded activity; builder counts are download attempts. Subscriptions started counts new records, not renewals. Share excludes the two known QA accounts from both users and entitled users; it measures current access, not receipt-confirmed payments or historical conversion.</p>
+          {cards?.record ? (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat label="New users" value={cards.record.cards.users} icon={<Users className="h-4 w-4" />} />
+              <Stat label="Recorded rewrites" value={cards.record.cards.rewrites} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Recorded job searches" value={cards.record.cards.searches} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Recorded builder download attempts" value={cards.record.cards.builderDownloads} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Job alert records" value={cards.record.cards.alerts} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Subscriptions started" value={cards.record.cards.subscriptionsStarted} icon={<CreditCard className="h-4 w-4" />} />
+              <Stat label={cards.month === cards.current ? "Non-QA entitled user share now" : "Non-QA entitled user share at month end"} value={`${cards.record.cards.subscriberSharePercent.toFixed(1)}%`} icon={<Users className="h-4 w-4" />} />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">{cardsQuery.isLoading ? "Loading month numbers..." : "No saved numbers for this month."}</p>
+          )}
+          <p className="mt-3 text-sm text-muted-foreground">Each number counts only the chosen month (India time). The current month grows live and starts again from 0 on the 1st. A finished month is locked at about 22:30 IST on its last day. Counts are recorded activity; builder counts are download attempts. Subscriptions started counts new records, not renewals. Share excludes the two known QA accounts.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
@@ -172,6 +210,24 @@ function AdminPage() {
                 {plan}: {count}
               </Badge>
             ))}
+          </div>
+
+          <div className="mt-8" role="group" aria-label="Region filter">
+            <p className="mb-2 text-sm font-medium">Region (users and subscriptions below)</p>
+            <label className="sr-only" htmlFor="region-select">Region</label>
+            <select
+              id="region-select"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="h-10 w-full max-w-xs rounded-md border border-input bg-background px-3 text-sm"
+            >
+              {["All", ...REGIONS].map((r) => (
+                <option key={r} value={r}>
+                  {r} ({regionCounts[r]})
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-muted-foreground">Region comes from the connection country at first sign-in, so someone on a VPN may show a different region than where they really are. Accounts made before this was tracked count as India.</p>
           </div>
 
           <Tabs defaultValue="users" className="mt-10">
@@ -183,7 +239,7 @@ function AdminPage() {
             <TabsContent value="users" className="mt-6">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground">
-                  All {d.users.length} accounts (free and paid).
+                  All {shownUsers.length} accounts (free and paid).
                 </p>
                 <Button
                   variant="outline"
@@ -205,7 +261,7 @@ function AdminPage() {
                         "joined",
                         "last_sign_in",
                       ],
-                      d.users.map((u) => [
+                      shownUsers.map((u) => [
                         u.id,
                         u.email,
                         u.cancelAtPeriodEnd,
@@ -242,7 +298,7 @@ function AdminPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {d.users.map((u) => (
+                    {shownUsers.map((u) => (
                       <TableRow key={u.id}>
                         <TableCell>{u.fullName ?? "—"}</TableCell>
                         <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
@@ -264,7 +320,7 @@ function AdminPage() {
             <TabsContent value="subs" className="mt-6">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <p className="text-sm text-muted-foreground">
-                  Subscription records ({d.subscriptions.length}).
+                  Subscription records ({shownSubs.length}).
                 </p>
                 <Button
                   variant="outline"
@@ -284,7 +340,7 @@ function AdminPage() {
                         "current_period_end",
                         "started",
                       ],
-                      d.subscriptions.map((s) => [
+                      shownSubs.map((s) => [
                         s.userId,
                         s.email,
                         s.fullName,
@@ -298,7 +354,7 @@ function AdminPage() {
                       ]),
                     )
                   }
-                  disabled={d.subscriptions.length === 0}
+                  disabled={shownSubs.length === 0}
                 >
                   <Download className="mr-2 h-4 w-4" />
                   Download CSV
@@ -319,14 +375,14 @@ function AdminPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {d.subscriptions.length === 0 ? (
+                    {shownSubs.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center text-muted-foreground">
                           No subscriptions yet.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      d.subscriptions.map((s, i) => (
+                      shownSubs.map((s, i) => (
                         <TableRow key={`${s.userId}-${i}`}>
                           <TableCell>{s.fullName ?? "-"}</TableCell>
                           <TableCell className="font-medium">{s.email ?? s.userId}</TableCell>
@@ -354,3 +410,4 @@ function AdminPage() {
     </AdminMfaGate>
   );
 }
+

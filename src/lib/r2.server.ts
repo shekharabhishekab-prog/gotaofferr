@@ -2,22 +2,22 @@
  * Cloudflare R2 storage (S3-compatible API, no extra dependency).
  *
  * Zero-spend guard: R2 is free up to 10 GB. We refuse every write that would
- * take the bucket past WRITE_STOP_BYTES (9.8 GB, the owner's number), so we
+ * take the bucket past WRITE_STOP_BYTES (9 GB decimal, set by the build plan), so we
  * never reach the paid range. Reads and deletes always work.
  *
  * Needs these server secrets (set in the Worker, never in code):
  *   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET
  */
 
-export const WRITE_STOP_BYTES = 9.8 * 1024 * 1024 * 1024;
+export const WRITE_STOP_BYTES = 9_800_000_000; // 9.8 GB decimal stop (owner decision), under the 10 GB free tier
 const USAGE_CACHE_MS = 60 * 1000;
 
 type Cfg = { account: string; key: string; secret: string; bucket: string };
 
 function cfg(): Cfg | null {
   const account = process.env["R2_ACCOUNT_ID"];
-  const key = process.env["R2_ACCESS_KEY_ID"];
-  const secret = process.env["R2_SECRET_ACCESS_KEY"];
+  const key = process.env["R2_ACCESS_KEY_ID"] || process.env["R2_KEY_ID_PV"];
+  const secret = process.env["R2_SECRET_ACCESS_KEY"] || process.env["R2_KEY_SECRET_PV"];
   const bucket = process.env["R2_BUCKET"];
   if (!account || !key || !secret || !bucket) return null;
   return { account, key, secret, bucket };
@@ -142,3 +142,5 @@ export async function r2Delete(key: string, fetchImpl: typeof fetch = fetch) {
   if (!res.ok && res.status !== 404) throw new Error(`r2-delete-failed-${res.status}`);
   usageCache = null;
 }
+
+

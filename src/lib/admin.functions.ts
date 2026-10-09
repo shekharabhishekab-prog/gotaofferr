@@ -49,6 +49,7 @@ export type AdminUserRow = {
   emailConfirmed: boolean;
   cancelAtPeriodEnd: boolean;
   fullName: string | null;
+  region: string;
   createdAt: string | null;
   lastSignInAt: string | null;
   runsTotal: number;
@@ -144,7 +145,9 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
         phone: u.phone || null,
         emailConfirmed: Boolean(u.email_confirmed_at),
         cancelAtPeriodEnd: Boolean(sub?.cancel_at_period_end),
-        fullName: profiles.get(u.id) ?? null,
+        // If the stored profile name cannot be read, fall back to the name the user typed at signup.
+        fullName: profiles.get(u.id) ?? ((u.user_metadata as Record<string, unknown> | undefined)?.full_name ? String((u.user_metadata as Record<string, unknown>).full_name) : null),
+        region: String((u.app_metadata as Record<string, unknown> | undefined)?.signup_region ?? "India"),
         createdAt: u.created_at ?? null,
         lastSignInAt: u.last_sign_in_at ?? null,
         runsTotal: runCounts.get(u.id) ?? 0,
@@ -209,14 +212,42 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       subscriptions: subs.map((s) => ({
         userId: s.user_id,
         email: users.find((u) => u.id === s.user_id)?.email ?? null,
-        fullName: profiles.get(s.user_id) ?? null,
+        fullName: users.find((u) => u.id === s.user_id)?.fullName ?? null,
         plan: planLabel(s.price_id),
         priceId: s.price_id,
         status: s.status,
         environment: s.environment,
         cancelAtPeriodEnd: s.cancel_at_period_end,
         currentPeriodEnd: s.current_period_end,
+        region: users.find((u) => u.id === s.user_id)?.region ?? "India",
         createdAt: s.created_at,
       })),
     };
+  });
+
+
+/** Cards for one month. The current month is counted live; older months come from the locked numbers. */
+export const getMonthCards = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => {
+    const m = (input as { month?: unknown } | null | undefined)?.month;
+    return { month: typeof m === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(m) ? m : undefined };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as AdminCtx);
+    const { currentMonthIST, computeMonth, readLocked, lockedMonthList } = await import("./monthly-stats.server");
+    const current = currentMonthIST();
+    const month = data.month ?? current;
+    let months: string[] = [current];
+    let record = null as Awaited<ReturnType<typeof computeMonth>> | null;
+    try {
+      months = [...(await lockedMonthList()), current].filter((m, i, all) => all.indexOf(m) === i).reverse();
+    } catch (e) {
+      console.error("[admin] locked month list failed", e);
+    }
+    if (month === current) record = await computeMonth(current);
+    else {
+      try { record = await readLocked(month); } catch (e) { console.error("[admin] locked month read failed", e); }
+    }
+    return { month, current, months, record };
   });
