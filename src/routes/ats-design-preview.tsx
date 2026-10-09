@@ -178,7 +178,7 @@ function AtsDesignPreview() {
             <h1 className="ak-h1" aria-label="The robot reads your resume first.">
               <span className="ak-ln ak-rise" style={{ ["--d" as string]: ".08s" }}>The <mark>robot</mark></span>
               <span className="ak-ln ak-rise" style={{ ["--d" as string]: ".2s" }}>reads your</span>
-              <span className="ak-ln ak-out ak-rise" style={{ ["--d" as string]: ".32s" }}>resume first.</span>
+              <span className="ak-ln ak-cur ak-rise" style={{ ["--d" as string]: ".32s" }}>resume first.</span>
             </h1>
             <p className="ak-sub ak-rise" style={{ ["--d" as string]: ".5s" }}>
               Most resumes die in software before a person sees them. Drop yours in, see what the robot sees, fix it before you apply.
@@ -208,7 +208,11 @@ function AtsDesignPreview() {
       {/* CHECKER */}
       <section id="check" className="ak-wrap ak-check">
         <div data-ak className="ak-rv ak-headrow">
-          <h2 data-px="26" className="ak-h2">Drop it. <span>Paste the job description.</span> Go. <button type="button" className="ak-smp go" onClick={showSample}>see a sample</button></h2>
+          <h2 data-px="26" className="ak-h2 ak-h2b">
+            <span className="d1">Drop it.</span>
+            <span className="d2">Paste the job description</span>
+            <span className="d3"><span className="go2">Go.</span><button type="button" className="ak-smp go" onClick={showSample}>see a sample <ArrowRight className="size-4" /></button></span>
+          </h2>
         </div>
         <div className="ak-stage">
         <div data-ak className="ak-rv ak-panel">
@@ -241,11 +245,11 @@ function AtsDesignPreview() {
         </div>
 
         {/* RESULT */}
-        <div ref={resRef} className={`ak-res ${phase === "scan" ? "wait" : ""} ${phase === "idle" ? "idle" : ""}`}>
+        <div ref={resRef} className={`ak-res ${phase !== "done" ? "idle" : ""}`}>
           <div className="ak-idle">
-            <b>Your report</b>
-            <p>Drop your resume, paste the job, hit Check. The report lands right here.</p>
-            <button type="button" className="ak-smp" onClick={showSample}>/ see a sample</button>
+            <div className="ak-sk"><i className="ring" /><div className="bars">{[0,1,2,3,4,5].map((n) => (<i key={n} style={{ ["--i" as string]: n, ["--w" as string]: (92 - n * 6) + "%" }} />))}</div></div>
+            <div className="ak-sl">{[0,1,2].map((n) => (<i key={n} style={{ ["--i" as string]: n }} />))}</div>
+            <p>{phase === "scan" ? STEPS[step] + "..." : "Waiting for your resume"}</p>
           </div>
           <div className="ak-res-top">
             <span className="ak-tag">SAMPLE RESULT</span>
@@ -626,6 +630,46 @@ const AK_CSS = `
 .ak-bars{gap:7px}.ak-bar{grid-template-columns:52px 1fr 34px;gap:6px;font-size:.68rem}.ak-bar .tr{height:7px}
 .ak-gauge p{display:block;font-size:.72rem;margin:2px 0 0}
 .ak-gap{margin-top:120px}
+}
+
+.ak-cur{font-family:"HPHand","Caveat Brush",cursive;text-transform:none;color:var(--y);-webkit-text-stroke:0;font-weight:400;font-size:1.2em;letter-spacing:0;line-height:.95}
+.ak-h2b{line-height:1;margin:0}
+.ak-h2 span.d1{display:block;color:var(--cream);font-size:clamp(3rem,13vw,4.4rem);line-height:.95}
+.ak-h2 span.d2{display:block;color:var(--y);font-size:clamp(1.3rem,5.6vw,2.2rem);line-height:1.1;margin-top:6px}
+.ak-h2 span.d3{display:flex;align-items:center;flex-wrap:wrap;gap:14px 22px;margin-top:6px}
+.ak-h2 span.go2{font-family:"HPHand","Caveat Brush",cursive;text-transform:none;font-weight:400;color:var(--cream);font-size:clamp(4rem,19vw,5.4rem);line-height:.9}
+.ak-smp.go{font-family:var(--font-display,inherit);font-size:1.05rem;padding:14px 22px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;font-weight:800;box-shadow:5px 5px 0 var(--cream);display:inline-flex;align-items:center;gap:8px;margin:0;vertical-align:middle;animation:ak-nudge 2.4s ease-in-out infinite;transition:box-shadow .2s}
+.ak-smp.go:hover{animation-play-state:paused;transform:none;box-shadow:8px 8px 0 var(--cream)}
+@keyframes ak-nudge{50%{transform:translateY(-5px)}}
+.ak-res.idle{background:transparent;color:var(--cream);border:2px dashed rgba(255,214,0,.45);padding:24px}
+.ak-idle{align-items:stretch;justify-content:flex-start;text-align:left;gap:18px;min-height:0}
+.ak-sk{display:grid;grid-template-columns:96px 1fr;gap:18px;align-items:center}
+.ak-sk .ring{display:block;width:96px;height:96px;border-radius:50%;border:10px solid rgba(255,255,255,.1);border-top-color:var(--y);animation:ak-rot 1.1s linear infinite}
+.ak-sk .bars{display:flex;flex-direction:column;gap:10px}
+.ak-sk .bars i,.ak-sl i{display:block;height:11px;border-radius:99px;width:var(--w,100%);background:linear-gradient(90deg,rgba(255,255,255,.08) 25%,rgba(255,214,0,.3) 50%,rgba(255,255,255,.08) 75%);background-size:200% 100%;animation:ak-shim 1.4s linear infinite;animation-delay:calc(var(--i)*.12s)}
+.ak-sl{display:flex;flex-direction:column;gap:12px}.ak-sl i{height:38px;border-radius:12px}
+.ak-idle p{font-family:ui-monospace,Menlo,monospace;color:var(--y);text-align:center;margin:4px 0 0;max-width:none}
+@keyframes ak-rot{to{transform:rotate(360deg)}}
+@keyframes ak-shim{to{background-position:-200% 0}}
+@media(min-width:821px){
+.ak-h2 span.d1{font-size:clamp(4.4rem,6.6vw,7rem)}
+.ak-h2 span.d2{font-size:clamp(2rem,3.2vw,3.4rem);margin-top:8px}
+.ak-h2 span.go2{font-size:clamp(5.6rem,8vw,9rem)}
+.ak-smp.go{font-size:1.35rem;padding:20px 34px;box-shadow:7px 7px 0 var(--cream)}
+.ak-headrow{margin-bottom:44px}
+.ak-stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:stretch}
+.ak-panel{grid-template-columns:1fr;padding:28px;gap:20px}
+.ak-drop{min-height:230px}.ak-fields{min-height:0}.ak-grow textarea{min-height:170px}
+.ak-res{position:relative;top:auto;margin-top:0;padding:26px}
+.ak-res.idle{min-height:0;padding:34px}
+.ak-sk{grid-template-columns:150px 1fr;gap:26px}.ak-sk .ring{width:150px;height:150px;border-width:13px}
+.ak-sl i{height:56px}.ak-sk .bars{gap:14px}.ak-sk .bars i{height:14px}
+.ak-idle{gap:28px;justify-content:center}
+.ak-res-grid{grid-template-columns:150px 1fr;gap:22px}
+.ak-gauge svg{width:150px;height:150px}.ak-num{top:20px;height:100px;padding-top:16px}.ak-num b{font-size:3rem}
+.ak-bar{font-size:.95rem;grid-template-columns:78px 1fr 50px}
+.ak-gauge p{display:block;font-size:.85rem}
+.ak-fix b{font-size:1rem}.ak-fix p{font-size:.9rem}
 }
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
