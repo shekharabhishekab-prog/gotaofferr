@@ -24,15 +24,15 @@ export const MODEL_DAILY_CAP: Record<string, number> = {
 };
 
 const FREE_CHAIN = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
-// Strong models (~20/day each on the free tier). Order is provisional until the quality comparison.
+// Strong models (~20/day each on the free tier). Order set after the 2026-10-09 quality test: fast and reliable first, slow or often-overloaded last.
 // The 20/day lite buffer comes last in this list, then the two 500/day lite models from FREE_CHAIN.
 function proChain(): string[] {
   return [
     "gemini-3.6-flash",
+    "gemini-3-flash-preview",
+    "gemini-3.5-flash",
     "gemini-3.8-flash",
     "gemini-3.7-flash",
-    "gemini-3.5-flash",
-    "gemini-3-flash-preview",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
   ];
