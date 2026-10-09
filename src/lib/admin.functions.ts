@@ -172,7 +172,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       if (active) activeSubs += 1;
     }
     // Known QA accounts remain in records and activity totals, but not this ratio.
-    const knownQaEmails = new Set(["mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com"]);
+    const knownQaEmails = new Set(["itsabhi9646@gmail.com", "mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com", "mailboss+qafree@mail.instinct.com", "rrak2832@gmail.com"]);
     const shareUsers = users.filter((u) => !knownQaEmails.has((u.email ?? "").trim().toLowerCase()));
     const shareEntitledUsers = shareUsers.filter((u) => {
       const sub = firstSub.get(u.id);
@@ -235,19 +235,14 @@ export const getMonthCards = createServerFn({ method: "GET" })
   })
   .handler(async ({ data, context }) => {
     await assertAdmin(context as AdminCtx);
-    const { currentMonthIST, computeMonth, readLocked, lockedMonthList } = await import("./monthly-stats.server");
+    const { currentMonthIST, computeMonth } = await import("./monthly-stats.server");
     const current = currentMonthIST();
     const month = data.month ?? current;
-    let months: string[] = [current];
+    // All 12 months of the chosen year, so the list never depends on saved months.
+    const yr = month.slice(0, 4);
+    const months: string[] = Array.from({ length: 12 }, (_, i) => `${yr}-${String(i + 1).padStart(2, "0")}`);
     let record = null as Awaited<ReturnType<typeof computeMonth>> | null;
-    try {
-      months = [...(await lockedMonthList()), current].filter((m, i, all) => all.indexOf(m) === i).reverse();
-    } catch (e) {
-      console.error("[admin] locked month list failed", e);
-    }
-    if (month === current) record = await computeMonth(current);
-    else {
-      try { record = await readLocked(month); } catch (e) { console.error("[admin] locked month read failed", e); }
-    }
+    // Counted live from the database for every month, so numbers stay accurate and months without data show zeros.
+    record = await computeMonth(month);
     return { month, current, months, record };
   });
