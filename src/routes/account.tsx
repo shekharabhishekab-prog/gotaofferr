@@ -443,7 +443,7 @@ function Account() {
               {
                 label: "Rewrites this month",
                 value:
-                  `${overview?.runsThisMonth ?? 0} / ${monthlyLimit}`,
+                  overview ? `${overview.runsThisMonth ?? 0} / ${monthlyLimit}` : "…",
               },
 
               { label: "Resumes tailored (all time)", value: `${overview?.runsTotal ?? 0}` },
