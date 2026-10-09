@@ -4,8 +4,9 @@
  * - Countdown date: set WIP_LAUNCH_AT to an ISO time, e.g. "2026-10-11T00:00:00+05:30".
  *   Leave it empty to show "launch date soon" instead of a timer.
  */
-export const WIP_ENABLED = true;
+export const WIP_ENABLED = false;
 export const WIP_LAUNCH_AT = "2026-10-16T00:00:00+05:30";
+
 
 /**
  * Runs before the page paints (so there is no flash). The splash shows only on "/",
