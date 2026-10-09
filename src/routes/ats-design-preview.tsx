@@ -677,7 +677,7 @@ const AK_CSS = `
 .ak-smp.go.open{background:var(--cream)}
 .ak-smp.go.open svg{transform:rotate(90deg)}
 @media(max-width:820px){
-.ak-res.idle{display:none}.ak-drop{padding-top:30px}.ak-gap{margin:34px 0 10px!important;padding:4px 0}.ak-gap .ak-chips{margin:12px 0;gap:10px}
+.ak-res.idle{display:none}.ak-drop{padding-top:30px}.ak-gap{margin:34px 0 10px!important;padding:4px 0}.ak-gap .ak-chips{margin:28px 0;gap:10px}
 .ak-hero-grid>div:first-child{position:relative;z-index:2}
 .ak-paper-wrap{position:absolute;left:0;right:0;top:36px;height:500px;min-height:0;margin:0;opacity:.13;z-index:1;pointer-events:none}
 .ak-paper-wrap .ak-paper{width:300px}
