@@ -173,6 +173,7 @@ function AtsDesignPreview() {
       {/* CHECKER */}
       <section id="check" className="ak-wrap ak-check">
         <h2 data-ak className="ak-rv ak-h2">Drop it. <span>Paste the job.</span> Go.</h2>
+        <div className="ak-stage">
         <div data-ak className="ak-rv ak-panel">
           <label
             className={`ak-drop ${over ? "over" : ""} ${phase === "scan" ? "scan" : ""}`}
@@ -252,6 +253,7 @@ function AtsDesignPreview() {
             <span>Facts never change. No skill or job is ever added for you.</span>
             <Link to="/tailor" className="ak-btn sm">Fix it in 15 seconds <ArrowRight className="size-4" /></Link>
           </div>
+        </div>
         </div>
       </section>
 
@@ -429,6 +431,39 @@ const AK_CSS = `
 .ak-how{padding-top:70px}
 .ak-row{grid-template-columns:44px 1fr;gap:6px 12px;padding:22px 0}.ak-row p{grid-column:2}
 .ak-end{padding:70px 0 90px}
+}
+
+@media(min-width:821px){
+.ak-wrap{max-width:1560px;padding:0 48px}
+.ak-hero{padding:72px 0 56px}
+.ak-hero-grid{grid-template-columns:1.1fr .9fr}
+.ak-h1{font-size:clamp(4rem,7.6vw,8.4rem)}
+.ak-sub{max-width:40rem;font-size:1.3rem}
+.ak-paper-wrap{min-height:540px}.ak-paper{width:370px}
+.ak-pin{font-size:.86rem;padding:9px 14px}
+.ak-mq-in span{font-size:1.5rem;padding:16px 0}
+.ak-h2{font-size:clamp(2.6rem,5vw,5rem)}
+.ak-panel{padding:36px;gap:32px;border-radius:30px;box-shadow:0 0 90px rgba(255,214,0,.12)}
+.ak-drop{min-height:500px;border-radius:20px}
+.ak-fields{min-height:500px;gap:18px}
+.ak-fields label span{font-size:.8rem}
+.ak-fields input,.ak-fields textarea{padding:18px 20px;font-size:1.1rem;border-radius:14px}
+.ak-grow textarea{min-height:250px}
+.ak-dic{width:96px;height:96px}.ak-dt{font-size:2rem}.ak-dh{font-size:1rem}
+.ak-go{font-size:1.45rem;padding:26px}
+.ak-stage{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:28px;align-items:start}
+.ak-res{margin-top:0;padding:22px;border-radius:20px;position:sticky;top:84px}
+.ak-meme{font-size:clamp(1.5rem,2vw,2.1rem);margin:14px 0 4px;text-shadow:2px 2px 0 var(--y)}
+.ak-res-grid{grid-template-columns:1fr;gap:12px;margin-top:10px}
+.ak-gauge svg{width:130px;height:130px}.ak-num{top:20px;height:90px;padding-top:14px}.ak-num b{font-size:2.8rem}.ak-gauge p{font-size:.85rem}
+.ak-bars{gap:8px}.ak-bar{grid-template-columns:70px 1fr 46px;font-size:.85rem;gap:10px}.ak-bar .tr{height:10px}
+.ak-fixes{margin-top:16px;padding-top:12px}.ak-fixes h4{font-size:1rem;margin-bottom:6px}
+.ak-fix{grid-template-columns:1fr;gap:4px;padding:8px 0}.ak-fix b{font-size:.9rem}.ak-fix p{font-size:.82rem}
+.ak-ft{justify-self:start;font-size:.62rem;padding:4px 8px}
+.ak-fn{flex-direction:column;align-items:stretch;text-align:center;gap:10px;font-size:.8rem;margin-top:14px}.ak-fn .ak-btn{width:100%}
+.ak-tabs button{padding:5px 14px;font-size:.85rem}
+.ak-row h3{font-size:clamp(2.4rem,4.6vw,4.4rem)}
+.ak-row{padding:38px 0}
 }
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
