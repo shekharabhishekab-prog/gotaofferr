@@ -1,0 +1,48 @@
+name: Scheduled jobs
+
+# Calls the site's job routes on a timer. Free GitHub Actions minutes.
+# Needs one repo secret: BACKUP_TRIGGER_TOKEN (same value as the worker variable).
+on:
+  schedule:
+    # 22:30 IST nightly: lock the finished month and back up
+    - cron: "0 17 * * *"
+    # 23:00 IST daily: the yearly report acts only on Dec 30
+    - cron: "30 17 * * *"
+    # 11:30 IST daily: keepalive
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "monthly-lock, yearly-report or keepalive"
+        required: true
+        default: "keepalive"
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Pick the job
+        id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "job=${{ github.event.inputs.job }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 17 * * *" ]; then
+            echo "job=monthly-lock" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "30 17 * * *" ]; then
+            echo "job=yearly-report" >> "$GITHUB_OUTPUT"
+          else
+            echo "job=keepalive" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Call the route
+        env:
+          TOKEN: ${{ secrets.BACKUP_TRIGGER_TOKEN }}
+          JOB: ${{ steps.pick.outputs.job }}
+        run: |
+          case "$JOB" in monthly-lock|yearly-report|keepalive) ;; *) echo "bad job"; exit 1;; esac
+          curl -sS --fail-with-body --retry 2 --retry-delay 20 --max-time 120 \
+            -X POST -H "Authorization: Bearer $TOKEN" \
+            "https://gotaofferr.com/api/public/jobs/$JOB"
