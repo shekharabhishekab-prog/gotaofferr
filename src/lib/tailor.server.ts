@@ -74,7 +74,8 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   // known country the model reads the job's country from the ad itself (see the generic market).
   const market = resumeMarket(detectedJobCountry);
   const letterRules = coverLetterRules(detectedJobCountry);
-  const withLetterDate = <T extends { coverLetter: string }>(r: T): T => {
+  const withLetterDate = <T extends { coverLetter: string }>(r0: T): T => {
+    const r = applyTruthFixes(r0, data.company);
     const text = (r.coverLetter ?? "").trim();
     if (!text) return r;
     return { ...r, coverLetter: `${letterDateLine(jobCountry)}\n\n${text}` };
@@ -502,3 +503,115 @@ export function monthStartIso(): string {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
 
+
+// ---- Truth fixes: code checks behind two rules that used to live only in the prompt ----
+
+const COMPANY_FILLER = new Set(["limited", "private", "pvt", "ltd", "llc", "inc", "group", "solutions", "services", "technologies", "global", "india", "company", "corporation"]);
+
+function mapAllStrings<T>(value: T, fn: (s: string, key: string) => string, key = ""): T {
+  if (typeof value === "string") return fn(value, key) as unknown as T;
+  if (Array.isArray(value)) return value.map((v) => mapAllStrings(v, fn, key)) as unknown as T;
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = mapAllStrings(v, fn, k);
+    return out as T;
+  }
+  return value;
+}
+
+/** Fixes one-letter slips in the employer name (for example ADSOCIAL written as AGSOCIAL). */
+export function fixCompanyName(text: string, company?: string | null): string {
+  const words = (company ?? "").split(/[^A-Za-z0-9]+/).filter((w) => w.length >= 6 && !COMPANY_FILLER.has(w.toLowerCase()));
+  if (!text || !words.length) return text;
+  let out = text;
+  for (const w of words) {
+    const upper = w === w.toUpperCase();
+    out = out.replace(new RegExp("\\b[A-Za-z0-9]{" + w.length + "}\\b", "g"), (tok) => {
+      if (tok.toLowerCase() === w.toLowerCase()) return tok;
+      let diff = 0;
+      for (let i = 0; i < w.length; i++) if (tok[i].toLowerCase() !== w[i].toLowerCase()) diff++;
+      if (diff !== 1) return tok;
+      const shapeOk = upper ? tok === tok.toUpperCase() : tok[0] === tok[0].toUpperCase();
+      return shapeOk ? w : tok;
+    });
+  }
+  return out;
+}
+
+const MONTH_NAMES = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+function parseMonthIndex(part: string, isEnd: boolean, now: Date): number | null {
+  const p = part.trim().toLowerCase();
+  if (/^(present|current|now|till date|to date|ongoing|today)$/.test(p)) return now.getFullYear() * 12 + now.getMonth();
+  const y = p.match(/(?:19|20)\d{2}/);
+  if (!y) return null;
+  const year = parseInt(y[0], 10);
+  let month = MONTH_NAMES.findIndex((m) => p.includes(m));
+  if (month < 0) {
+    const n = p.match(/\b(0?[1-9]|1[0-2])\s*[\/.-]\s*(?:19|20)\d{2}/);
+    month = n ? parseInt(n[1], 10) - 1 : isEnd ? 11 : 0;
+  }
+  return year * 12 + month;
+}
+
+/** Total months worked, with overlapping roles counted once. Null when any date range cannot be read. */
+export function totalExperienceMonths(experience: Array<{ dates?: string | null }> | undefined, now: Date = new Date()): number | null {
+  if (!experience || !experience.length) return null;
+  const nowIdx = now.getFullYear() * 12 + now.getMonth();
+  const spans: Array<[number, number]> = [];
+  for (const e of experience) {
+    const d = (e?.dates ?? "").trim();
+    if (!d) return null;
+    const parts = d.split(/\s*[–—]\s*|\s+-\s+|\s+to\s+|\s+until\s+|(?<=\d{4})\s*-\s*/i);
+    if (parts.length !== 2) return null;
+    const start = parseMonthIndex(parts[0], false, now);
+    const end = parseMonthIndex(parts[1], true, now);
+    if (start === null || end === null || end < start) return null;
+    spans.push([start, Math.min(end, nowIdx)]);
+  }
+  spans.sort((a, b) => a[0] - b[0]);
+  let total = 0;
+  let [curS, curE] = spans[0];
+  for (const [s, e] of spans.slice(1)) {
+    if (s <= curE + 1) curE = Math.max(curE, e);
+    else {
+      total += curE - curS + 1;
+      curS = s;
+      curE = e;
+    }
+  }
+  total += curE - curS + 1;
+  return total;
+}
+
+/** Lowers an "N years" claim that is clearly higher than the dates add up to. */
+export function reconcileYears(text: string, totalMonths: number): string {
+  const years = Math.floor(totalMonths / 12);
+  if (!text || years < 1) return text;
+  return text.replace(/\b(\d{1,2})(\s*\+)?(\s*(?:years?|yrs?)\b)/gi, (m: string, n: string, plus: string | undefined, tail: string, offset: number) => {
+    const claimed = parseInt(n, 10);
+    if (claimed * 12 <= totalMonths + 6) return m;
+    const before = text.slice(Math.max(0, offset - 12), offset).toLowerCase();
+    if (/(nearly|almost|close to)\s*$/.test(before) && claimed * 12 <= totalMonths + 12) return m;
+    return String(years) + (plus ?? "") + tail;
+  });
+}
+
+export function applyTruthFixes<T>(r: T, company?: string | null): T {
+  try {
+    const before = JSON.stringify(r);
+    let out = r;
+    if (company && company.trim()) out = mapAllStrings(out, (s) => fixCompanyName(s, company));
+    const months = totalExperienceMonths((out as any)?.experience);
+    if (months !== null) {
+      out = mapAllStrings(out, (s, k) => (k === "summary" || k === "coverLetter" || k === "headline" ? reconcileYears(s, months) : s));
+    } else {
+      console.warn("[truth-fix] dates not readable, years check skipped");
+    }
+    if (JSON.stringify(out) !== before) console.log("[truth-fix] corrected company name or years claim");
+    return out;
+  } catch (e) {
+    console.error("[truth-fix] failed", e);
+    return r;
+  }
+}
