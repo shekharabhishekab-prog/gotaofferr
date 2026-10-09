@@ -302,7 +302,7 @@ function AtsDesignPreview() {
     const t0 = Date.now();
     try {
       const text = await readResume(fileObj);
-      if (text.replace(/\s+/g, "").length < 80) throw new Error("No text found. This looks like a scan or picture. If the robot can't read it, ATS can't either. Export a text PDF or use DOCX.");
+      if (text.replace(/\s+/g, "").length < 80) throw new Error(/\.pdf$/i.test(fileObj.name) ? "No text found. This looks like a scan or picture. If the robot can't read it, ATS can't either. Export a text PDF or use DOCX." : "That file has almost no text. Add your full resume.");
       if (resumeSignalScore(text) < 3) throw new Error("This doesn't look like a resume. Upload your CV or resume file.");
       let jdt = jd.slice(0, MAX_JD);
       for (const w of (comp.toLowerCase().match(/[a-z]{3,}/g) ?? [])) jdt = jdt.replace(new RegExp("\\b" + w + "\\b", "gi"), " ");
