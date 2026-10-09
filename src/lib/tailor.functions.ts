@@ -163,7 +163,35 @@ export const tailorResume = createServerFn({ method: "POST" })
       }
     }
 
-    const result = await runTailor(data, detectCountry(), routingTier);
+    // First run per person goes to the strong models once (not for Career Pro, who already has them).
+    // Skipped when a guest run from this browser or IP already used it, so signing up after a guest run gives no second one.
+    let effectiveTier = routingTier;
+    let firstRunIdentity: { cookieId: string; ipHash: string } | null = null;
+    if (routingTier !== "career_pro" && !usedTopup) {
+      try {
+        const { getCookie, getRequest } = await import("@tanstack/react-start/server");
+        const { ANON_COOKIE, hashValue, hasUsedFreeRun, firstRunChoice } = await import("./anon-tailor.server");
+        const { clientIp } = await import("@/lib/rate-limit.server");
+        const lifetime = await countUsage(context.supabase, context.userId, "1970-01-01T00:00:00.000Z");
+        if (lifetime === 0) {
+          const ipHash = hashValue(clientIp(getRequest()));
+          const cookieId = getCookie(ANON_COOKIE) || crypto.randomUUID();
+          const guestUsed = await hasUsedFreeRun({ deviceHash: hashValue(cookieId), ipHash, cookieId });
+          if (await firstRunChoice({ cookieId, ipHash }, guestUsed)) {
+            effectiveTier = "career_pro";
+            firstRunIdentity = { cookieId, ipHash };
+          }
+        }
+      } catch (e) {
+        console.error("[first-run] check failed, using plan tier", e);
+      }
+    }
+
+    const result = await runTailor(data, detectCountry(), effectiveTier);
+    if (firstRunIdentity) {
+      const { recordFirstRun } = await import("./anon-tailor.server");
+      await recordFirstRun(firstRunIdentity);
+    }
 
     const { encryptResult } = await import("@/lib/resume-crypto.server");
 
