@@ -14,12 +14,34 @@ import {
   ATS_PARSE_RULES,
 } from "./resume-locale.server";
 
+// Time budgets (ms). One tailor is several AI calls in a row; when the first ones are slow we
+// stop stacking more so the request never runs into the platform time limit.
+const REPAIR_BUDGET_MS = 40_000;
+const RETRY_BUDGET_MS = 40_000;
+const SLOW_MSG = "This one is taking longer than usual \u23F3 Please try again in a moment.";
+
 export async function runTailor(
   data: TailorInput,
   country?: string | null,
   tier: import("./model-router.server").RoutingTier = "free",
 ): Promise<TailoredResume> {
+  const t0 = Date.now();
+  try {
+    return await runTailorInner(data, country, tier);
+  } catch (e) {
+    // Real cause goes to the server log; the customer only sees the friendly line.
+    console.error(`[tailor] run failed tier=${tier} after=${Math.round((Date.now() - t0) / 1000)}s ${(e as Error)?.name}: ${String((e as Error)?.message ?? e).slice(0, 300)}`);
+    throw e;
+  }
+}
+
+async function runTailorInner(
+  data: TailorInput,
+  country?: string | null,
+  tier: import("./model-router.server").RoutingTier = "free",
+): Promise<TailoredResume> {
   const { runWithModelChain } = await import("./model-router.server");
+  const startedAt = Date.now();
   return runWithModelChain(tier, async (modelId) => {
     // Pre-delivery validation: a flawed draft is regenerated once on the same model, never shipped as is.
     try {
@@ -28,6 +50,7 @@ export async function runTailor(
       const { QualityError } = await import("./truth-guard.server");
       if (!(error instanceof QualityError)) throw error;
       console.warn(`[quality] retry: ${error.issues.slice(0, 3).join("; ")}`);
+      if (Date.now() - startedAt > RETRY_BUDGET_MS) throw new Error(SLOW_MSG);
       return runTailorOnce(data, country, modelId, true);
     }
   });
@@ -176,6 +199,7 @@ ${data.jobDescription}
 ${data.resume}`;
 
   try {
+    const tOnce = Date.now();
     const { output } = await generateText({
       model: gateway("google/gemini-3.6-flash"),
       output: Output.object({ schema: tailoredResumeSchema }),
@@ -189,7 +213,7 @@ ${data.resume}`;
     let missing = findMissingFacts(data.resume, result);
     // The repair pass doubles the wait, so only pay for it when the draft is
     // genuinely thin or dropped several real facts, not for cosmetic gaps.
-    if (needsDepthRepair(result) || missing.length >= 3 || missing.some((f) => /\d/.test(f))) {
+    if (Date.now() - tOnce < REPAIR_BUDGET_MS && (needsDepthRepair(result) || missing.length >= 3 || missing.some((f) => /\d/.test(f)))) {
       const repaired = await repairDepth(gateway, result, data, prompt, missing);
       // Only accept the repair if it did not lose ground on preservation.
       if (findMissingFacts(data.resume, repaired).length <= missing.length) {
