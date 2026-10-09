@@ -24,7 +24,7 @@ export function UsageUpsell({
     <div className="w-fit max-w-xl rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
       <p>
         <strong>
-          {limit} {limit === 1 ? noun.replace(/s$/, "") : noun} in {PLAN_LABEL[tier]} plan, {used} used
+          {limit} {limit === 1 ? noun.replace(/(ch|sh|x|ss)es$/, "$1").replace(/s$/, "") : noun} in {PLAN_LABEL[tier]} plan, {used} used
         </strong>
         {left === 0 ? " - you have used all of them this month." : ` - ${left} left this month.`}
       </p>
