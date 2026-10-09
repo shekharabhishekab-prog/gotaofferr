@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Download, FileText, Maximize2, TriangleAlert, Upload, Wrench } from "lucide-react";
+import { ArrowRight, Check, Download, FileText, Maximize2, TriangleAlert, Upload, Wrench, X } from "lucide-react";
+import { checkAts, type AtsResult } from "@/lib/ats-check";
+import { assertValidResumeFile, extractPdfText, resumeSignalScore } from "@/lib/extract-pdf";
 import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/ats-design-preview")({
@@ -19,6 +21,7 @@ type Sample = {
   verdict: string;
   parts: [string, number, number][];
   fixes: Fix[];
+  missing?: string[];
 };
 
 const SAMPLES: Record<string, Sample> = {
@@ -86,6 +89,149 @@ function useReveal() {
   return ref;
 }
 
+// ---- Phase 1.8 wiring: all runs in the browser. No server call, no AI, no cost. ----
+const ATS_GUEST_MONTHLY = 3; // placeholder limit (decision pending). Set 0 to turn the soft limit off.
+const MAX_JD = 20000;
+const SHORT: Record<string, string> = { contact: "Contact", sections: "Headings", bullets: "Bullets", numbers: "Numbers", verbs: "Verbs", length: "Length", format: "Layout", dates: "Dates", keywords: "Keywords" };
+const MEME: Record<string, [string, string]> = { strong: ["The robot", "loves it."], good: ["The robot can read it.", "Mostly."], "needs work": ["The robot can read it.", "Barely."], weak: ["The robot", "fell asleep."] };
+const VERDICT: Record<string, string> = { strong: "Clean. The robot reads this without trouble.", good: "Good. A few things to tidy up.", "needs work": "Needs work. Fix the red bars first.", weak: "Weak. The robot will struggle with this." };
+
+function toSample(r: AtsResult, hasJd: boolean): Sample {
+  const parts: [string, number, number][] = r.checks.map((c) => [SHORT[c.id] ?? c.label, c.points, c.max]);
+  const fixes: Fix[] = [];
+  for (const c of r.checks) {
+    if (!c.hint) continue;
+    if (c.id === "keywords") {
+      fixes.push({ tag: "YOUR CALL", bad: "Missing: " + r.missingKeywords.join(", "), fix: "Add them only if they are true. We never add skills for you." });
+    } else if (c.id === "numbers") {
+      fixes.push({ tag: "YOUR CALL", bad: c.label, fix: c.hint });
+    } else {
+      fixes.push({ tag: "NEEDS YOU", bad: c.label, fix: c.hint });
+    }
+  }
+  if (!hasJd) fixes.push({ tag: "YOUR CALL", bad: "No job description pasted", fix: "Paste it to get the keyword match too." });
+  fixes.sort((a, b) => (a.tag === b.tag ? 0 : a.tag === "NEEDS YOU" ? -1 : 1));
+  return { score: r.score, meme: MEME[r.band], verdict: VERDICT[r.band], parts, fixes, missing: r.missingKeywords };
+}
+
+async function docxText(f: File): Promise<string> {
+  const buf = new Uint8Array(await f.arrayBuffer());
+  const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  let e = -1;
+  for (let i = buf.length - 22; i >= Math.max(0, buf.length - 70000); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+  if (e < 0) throw new Error("That DOCX looks damaged. Save it again or use a PDF.");
+  const count = dv.getUint16(e + 10, true);
+  let p = dv.getUint32(e + 16, true);
+  for (let k = 0; k < count; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+    const lho = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(buf.subarray(p + 46, p + 46 + nlen));
+    if (name === "word/document.xml") {
+      const start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true);
+      const data = buf.slice(start, start + csize);
+      let xml = "";
+      if (method === 0) xml = new TextDecoder().decode(data);
+      else if (method === 8) {
+        const DS = (globalThis as unknown as { DecompressionStream?: new (f: string) => unknown }).DecompressionStream;
+        if (!DS) throw new Error("This browser can't open DOCX. Please upload a PDF.");
+        const stream = new Blob([data]).stream().pipeThrough(new DS("deflate-raw") as unknown as ReadableWritablePair<Uint8Array, Uint8Array>);
+        xml = await new Response(stream).text();
+      } else throw new Error("That DOCX can't be read. Please upload a PDF.");
+      xml = xml
+        .replace(/<w:tab\/>/g, " ")
+        .replace(/<w:br\/>/g, "\n")
+        .replace(/<\/w:tc>/g, " | ")
+        .replace(/<w:p[ >][\s\S]*?<\/w:p>/g, (para) => (/<w:numPr>/.test(para) ? "\u2022 " : "") + para + "\n");
+      return xml.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n").trim();
+    }
+    p += 46 + nlen + xlen + clen;
+  }
+  throw new Error("Couldn't find any text in that DOCX.");
+}
+
+async function readResume(f: File): Promise<string> {
+  const n = f.name.toLowerCase();
+  if (f.size === 0) throw new Error("That file is empty.");
+  if (f.size > 8 * 1024 * 1024) throw new Error("That file is too big. Use one under 8 MB.");
+  if (n.endsWith(".pdf") || f.type === "application/pdf") { await assertValidResumeFile(f); return extractPdfText(f); }
+  if (n.endsWith(".docx")) return docxText(f);
+  if (n.endsWith(".txt") || n.endsWith(".md")) return f.text();
+  if (n.endsWith(".doc")) throw new Error("Old .doc files can't be read. Save it as PDF or DOCX and try again.");
+  throw new Error("Please upload a PDF, DOCX or TXT file.");
+}
+
+function guestLeft(): number {
+  if (!ATS_GUEST_MONTHLY || typeof window === "undefined") return 99;
+  try {
+    const k = "gf-ats-" + new Date().toISOString().slice(0, 7);
+    return ATS_GUEST_MONTHLY - (parseInt(window.localStorage.getItem(k) || "0", 10) || 0);
+  } catch { return 99; }
+}
+function guestUse() {
+  if (!ATS_GUEST_MONTHLY) return;
+  try {
+    const k = "gf-ats-" + new Date().toISOString().slice(0, 7);
+    window.localStorage.setItem(k, String((parseInt(window.localStorage.getItem(k) || "0", 10) || 0) + 1));
+  } catch { /* ignore */ }
+}
+
+async function makePdf(s: Sample, title: string, sample: boolean) {
+  const { jsPDF } = await import("jspdf");
+  const d = new jsPDF({ unit: "pt", format: "a4" });
+  const W = 595, M = 40;
+  let y = 0;
+  const clean = (t: string) => t.replace(/[^\x20-\x7E]/g, " ").replace(/\s+/g, " ").trim();
+  const head = () => {
+    d.setFillColor(0, 0, 0); d.rect(0, 0, W, 64, "F");
+    d.setTextColor(255, 214, 0); d.setFont("helvetica", "bold"); d.setFontSize(18);
+    d.text("GOTAOFFERR  ATS CHECK" + (sample ? "  (SAMPLE)" : ""), M, 40);
+    d.setTextColor(0, 0, 0); y = 96;
+  };
+  const need = (h: number) => { if (y + h > 800) { d.addPage(); head(); } };
+  head();
+  if (title) { d.setFont("helvetica", "bold"); d.setFontSize(12); d.text(clean(title), M, y); y += 22; }
+  d.setFillColor(255, 214, 0); d.rect(M, y - 6, 150, 70, "F");
+  d.setFont("helvetica", "bold"); d.setFontSize(44); d.text(String(s.score), M + 12, y + 44);
+  d.setFontSize(14); d.text("/ 100", M + 12 + d.getTextWidth(String(s.score)) + 14, y + 44);
+  d.setFont("helvetica", "normal"); d.setFontSize(12);
+  d.text(d.splitTextToSize(clean(s.verdict), W - 2 * M - 170), M + 170, y + 22);
+  d.setFontSize(9); d.setTextColor(90, 90, 90);
+  d.text(new Date().toLocaleDateString("en-GB"), M + 170, y + 56);
+  d.setTextColor(0, 0, 0); y += 104;
+  d.setFont("helvetica", "bold"); d.setFontSize(13); d.text("SCORE BY AREA", M, y); y += 18;
+  for (const [n, v, m] of s.parts) {
+    need(24);
+    const r = m ? v / m : 0;
+    d.setFont("helvetica", "bold"); d.setFontSize(10); d.text(clean(n), M, y + 9);
+    d.setFillColor(225, 225, 225); d.rect(M + 90, y, 300, 11, "F");
+    if (r >= 0.8) d.setFillColor(10, 122, 47); else if (r >= 0.55) d.setFillColor(224, 168, 0); else d.setFillColor(196, 35, 15);
+    d.rect(M + 90, y, Math.max(2, 300 * r), 11, "F");
+    d.setFont("helvetica", "normal"); d.text(v + " / " + m, M + 400, y + 9);
+    y += 22;
+  }
+  y += 14; need(40);
+  d.setFont("helvetica", "bold"); d.setFontSize(13); d.text(s.fixes.length ? "THINGS TO FIX (" + s.fixes.length + ")" : "NOTHING TO FIX", M, y); y += 20;
+  for (const f of s.fixes) {
+    const lines = d.splitTextToSize(clean(f.bad + ". " + f.fix), W - 2 * M - 100) as string[];
+    need(lines.length * 13 + 14);
+    if (f.tag === "NEEDS YOU") d.setFillColor(0, 0, 0); else d.setFillColor(255, 214, 0);
+    d.roundedRect(M, y - 9, 86, 15, 7, 7, "F");
+    d.setFont("helvetica", "bold"); d.setFontSize(8);
+    if (f.tag === "NEEDS YOU") d.setTextColor(255, 214, 0); else d.setTextColor(0, 0, 0);
+    d.text(f.tag, M + 43, y + 1.5, { align: "center" });
+    d.setTextColor(0, 0, 0); d.setFont("helvetica", "normal"); d.setFontSize(10);
+    d.text(lines, M + 100, y);
+    y += lines.length * 13 + 12;
+  }
+  y += 10; need(30);
+  d.setFont("helvetica", "italic"); d.setFontSize(9); d.setTextColor(90, 90, 90);
+  d.text("Heuristic check, not an ATS vendor score. Facts never change. No skill or job is ever added for you.", M, y);
+  d.save(sample ? "gotaofferr-ats-sample-report.pdf" : "gotaofferr-ats-report.pdf");
+}
+
 function AtsDesignPreview() {
   const root = useReveal();
   useEffect(() => {
@@ -122,23 +268,71 @@ function AtsDesignPreview() {
   const [shown, setShown] = useState(0);
   const [file, setFile] = useState("");
   const [over, setOver] = useState(false);
+  const [fileObj, setFileObj] = useState<File | null>(null);
+  const [jd, setJd] = useState("");
+  const [comp, setComp] = useState("");
+  const [pos, setPos] = useState("");
+  const [err, setErr] = useState("");
+  const [real, setReal] = useState<Sample | null>(null);
+  const [pm, setPm] = useState(false);
+  const [hl, setHl] = useState(false);
+  const stageRef = useRef<HTMLDivElement | null>(null);
   const resRef = useRef<HTMLDivElement | null>(null);
-  const s = SAMPLES[key];
+  const s = real ?? SAMPLES[key];
+  const title = real ? [pos.trim(), comp.trim()].filter(Boolean).join(" at ") : "";
+  const pick = (f: File) => { setFile(f.name); setFileObj(f); setErr(""); };
   const showSample = () => {
-    if (phase === "done") { setPhase("idle"); return; }
+    if (phase === "scan") return;
+    if (phase === "done" && !real) { setPhase("idle"); setHl(false); setPm(false); return; }
+    setReal(null);
+    setErr("");
     setPhase("done");
     setRun((n) => n + 1);
+    setHl(true);
     window.setTimeout(() => resRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
   };
-  const dl = () => {
-    const t = ["GotaOfferr ATS check (SAMPLE)", "Score: " + s.score + "/100", s.verdict, "", ...s.parts.map(([n, a, m]) => n + ": " + a + "/" + m), "", "Things to fix:", ...s.fixes.map((f) => "- [" + f.tag + "] " + f.bad + ". " + f.fix)].join("\n");
-    const u = URL.createObjectURL(new Blob([t], { type: "text/plain" }));
-    const a = document.createElement("a");
-    a.href = u;
-    a.download = "ats-sample-report.txt";
-    a.click();
-    URL.revokeObjectURL(u);
+  const go = async () => {
+    if (phase === "scan") return;
+    setErr("");
+    if (!fileObj) { setErr("Add your resume first (PDF, DOCX or TXT)."); return; }
+    if (guestLeft() <= 0) { setErr("You used your free checks for this month. Sign in for more."); return; }
+    setPhase("scan");
+    setHl(false);
+    const t0 = Date.now();
+    try {
+      const text = await readResume(fileObj);
+      if (text.replace(/\s+/g, "").length < 80) throw new Error("No text found. This looks like a scan or picture. If the robot can't read it, ATS can't either. Export a text PDF or use DOCX.");
+      if (resumeSignalScore(text) < 3) throw new Error("This doesn't look like a resume. Upload your CV or resume file.");
+      const jdt = jd.slice(0, MAX_JD);
+      const out = toSample(checkAts(text, jdt), jdt.trim().length > 40);
+      await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
+      guestUse();
+      setReal(out);
+      setPhase("done");
+      setRun((n) => n + 1);
+      setHl(true);
+      resRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch (e) {
+      setPhase("idle");
+      setErr(e instanceof Error ? e.message : "Could not read that file. Try a PDF.");
+    }
   };
+  const dl = async () => {
+    if (phase !== "done") { setErr("Run a check first, then download the report."); return; }
+    try { await makePdf(s, title, !real); } catch { setErr("Could not build the report. Try again."); }
+  };
+  const openPv = () => {
+    if (phase !== "done") { setErr("Run a check first, then open the full preview."); return; }
+    setHl(false);
+    stageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setPm(true);
+  };
+  useEffect(() => {
+    if (!pm) return;
+    const k = (e: KeyboardEvent) => { if (e.key === "Escape") setPm(false); };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [pm]);
 
   useEffect(() => {
     if (phase !== "done") return;
@@ -158,15 +352,7 @@ function AtsDesignPreview() {
     if (phase !== "scan") return;
     setStep(0);
     const iv = window.setInterval(() => setStep((n) => (n + 1) % STEPS.length), 340);
-    const to = window.setTimeout(() => {
-      setPhase("done");
-      setRun((n) => n + 1);
-      resRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }, 1850);
-    return () => {
-      window.clearInterval(iv);
-      window.clearTimeout(to);
-    };
+    return () => window.clearInterval(iv);
   }, [phase]);
 
   const C = 2 * Math.PI * 54;
@@ -219,32 +405,33 @@ function AtsDesignPreview() {
             <span className="d3"><span className="d2">Paste the job description</span><span className="go2">Go.</span><button type="button" className={`ak-smp go ${phase === "done" ? "open" : ""}`} aria-pressed={phase === "done"} onClick={showSample}>{phase === "done" ? "hide sample" : "see a sample"} <ArrowRight className="size-4" /></button></span>
           </h2>
         </div>
-        <div className="ak-stage">
+        <div ref={stageRef} className="ak-stage">
         <div data-ak className="ak-rv ak-panel">
           <label
             className={`ak-drop ${over ? "over" : ""} ${phase === "scan" ? "scan" : ""}`}
             onDragOver={(e) => { e.preventDefault(); setOver(true); }}
             onDragLeave={() => setOver(false)}
-            onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files?.[0]; if (f) setFile(f.name); }}
+            onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files?.[0]; if (f) pick(f); }}
           >
-            <input type="file" accept=".pdf,.doc,.docx" className="sr-only" onChange={(e) => setFile(e.target.files?.[0]?.name ?? "")} />
+            <input type="file" accept=".pdf,.docx,.txt,.md" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) pick(f); e.target.value = ""; }} />
             <i className="ak-c c1" /><i className="ak-c c2" /><i className="ak-c c3" /><i className="ak-c c4" />
             <i className="ak-dbeam" />
             
             <span className="ak-dic">{file ? <FileText className="size-8" /> : <Upload className="size-8" />}</span>
             <span className="ak-dt">{phase === "scan" ? STEPS[step] + "..." : file || "Drop your resume here"}</span>
-            <span className="ak-dh">{file ? "Click to change" : "PDF or DOC. Or click to browse."}</span>
+            <span className="ak-dh">{file ? "Click to change" : "PDF, DOCX or TXT. Or click to browse."}</span>
           </label>
 
           <div className="ak-fields">
             <div className="ak-two">
-              <label><span>Company</span><input placeholder="Acme Corp" /></label>
-              <label><span>Job position</span><input placeholder="Marketing Manager" /></label>
+              <label><span>Company</span><input placeholder="Acme Corp" value={comp} maxLength={80} onChange={(e) => setComp(e.target.value)} /></label>
+              <label><span>Job position</span><input placeholder="Marketing Manager" value={pos} maxLength={80} onChange={(e) => setPos(e.target.value)} /></label>
             </div>
-            <label className="ak-grow"><span>Job description</span><textarea placeholder="Paste the full job description. The robot matches keywords against it." /></label>
+            <label className="ak-grow"><span>Job description</span><textarea placeholder="Paste the full job description. The robot matches keywords against it." value={jd} onChange={(e) => setJd(e.target.value)} /></label>
+            {err ? <p className="ak-err" role="alert">{err}</p> : null}
           </div>
 
-          <button type="button" className="ak-btn ak-go" disabled={phase === "scan"} onClick={() => setPhase("scan")}>
+          <button type="button" className="ak-btn ak-go" disabled={phase === "scan"} onClick={go}>
             {phase === "scan" ? "Scanning..." : <>Check my resume <ArrowRight className="size-4" /></>}
           </button>
         </div>
@@ -256,10 +443,11 @@ function AtsDesignPreview() {
             <div className="ak-sl">{[0,1,2].map((n) => (<i key={n} style={{ ["--i" as string]: n }} />))}</div>
             <p>{phase === "scan" ? STEPS[step] + "..." : "Waiting for your resume"}</p>
           </div>
+          <div className="ak-scroll">
           <div className="ak-res-top">
-            <span className="ak-tag">SAMPLE RESULT</span>
+            <span className="ak-tag">{real ? "YOUR RESULT" : "SAMPLE RESULT"}</span>
             <button type="button" className="ak-dl" onClick={dl} aria-label="Download sample report" title="Download sample"><Download className="size-4" /></button>
-            <div className="ak-tabs" role="tablist" aria-label="Try a sample score">
+            <div className="ak-tabs" role="tablist" aria-label="Try a sample score" style={real ? { display: "none" } : undefined}>
               {Object.keys(SAMPLES).map((k) => (
                 <button key={k} type="button" role="tab" aria-selected={k === key} className={k === key ? "on" : ""} onClick={() => { setKey(k); setRun((n) => n + 1); }}>{k}</button>
               ))}
@@ -302,15 +490,17 @@ function AtsDesignPreview() {
             ))}
           </div>
 
-          <div className="ak-pvbar">
-            <button type="button" className="ak-pv"><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
-            <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /></button>
-          </div>
-
           <div className="ak-fn">
             <span>Facts never change. No skill or job is ever added for you.</span>
             <Link to="/tailor" className="ak-btn sm">Fix it in 15 seconds <ArrowRight className="size-4" /></Link>
           </div>
+          {real?.missing?.length ? <div className="ak-kw">{real.missing.map((w) => (<em key={w}>{w}</em>))}</div> : null}
+          </div>
+          <div className="ak-pvbar">
+            <button type="button" className={`ak-pv ${hl ? "hl" : ""}`} onClick={openPv}><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
+            <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /></button>
+          </div>
+
         </div>
         </div>
       </section>
@@ -349,6 +539,38 @@ function AtsDesignPreview() {
           <a href="#check" className="ak-btn">Check my resume <ArrowRight className="size-4" /></a>
         </div>
       </section>
+
+      {pm ? (
+        <div className="ak-pm" role="dialog" aria-modal="true" aria-label="Full ATS report" onClick={() => setPm(false)}>
+          <div className="ak-pmc" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="ak-pmx" onClick={() => setPm(false)} aria-label="Close preview"><X className="size-5" /></button>
+            <aside className="ak-pml">
+              <span className="ak-tag">{real ? "YOUR RESULT" : "SAMPLE RESULT"}</span>
+              {title ? <div className="ak-pmt">{title}</div> : null}
+              <div className={`ak-pmg ${tone}`}>
+                <svg viewBox="0 0 120 120" aria-hidden><circle cx="60" cy="60" r="54" className="bg" /><circle cx="60" cy="60" r="54" className="fg" strokeDasharray={C} strokeDashoffset={C * (1 - s.score / 100)} /></svg>
+                <div className="ak-pmn"><b>{s.score}</b><span>/100</span></div>
+              </div>
+              <p>{s.verdict}</p>
+              <button type="button" className="ak-pmd" onClick={dl}><Download className="size-5" /> Download report</button>
+            </aside>
+            <div className="ak-pmr">
+              <h4>Score by area</h4>
+              {s.parts.map(([n, v, m]) => (
+                <div key={n} className="ak-pmb"><span>{n}</span><div className="tr"><i style={{ width: `${(v / m) * 100}%` }} className={v / m >= 0.8 ? "g" : v / m >= 0.55 ? "m" : "b"} /></div><em>{v}/{m}</em></div>
+              ))}
+              <h4>{s.fixes.length ? s.fixes.length + " things to fix" : "Nothing to fix"}</h4>
+              {s.fixes.map((f, i) => (
+                <div key={f.bad + i} className="ak-pmf">
+                  <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" ? "c" : "n"}`}>{f.tag}</span>
+                  <div><b>{f.bad}</b><p>{f.fix}</p></div>
+                </div>
+              ))}
+              <p className="ak-pmn2">Heuristic check, not an ATS vendor score. Facts never change. No skill or job is ever added for you.</p>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
@@ -708,5 +930,32 @@ const AK_CSS = `
 .ak-dl2{display:none}
 @media(min-width:821px){.ak-go.ak-btn{align-self:end;height:64px;padding:0 20px;font-size:1.15rem;border-radius:14px}.ak-res .ak-dl{display:none}.ak-res{padding-bottom:108px}.ak-pvbar,.ak-res.idle>.ak-pvbar{display:flex!important;position:absolute;left:0;right:0;bottom:0;margin:0;gap:8px;background:#000;height:78px;z-index:3}.ak-res .ak-pv{border:0;border-radius:0;box-shadow:none;animation:none;height:100%;padding:0 20px;font-size:1.3rem}.ak-res .ak-dl2{display:grid;place-items:center;flex:0 0 100px;width:100px;background:var(--y);color:#000;border:0;border-radius:0;cursor:pointer}.ak-res .ak-dl2:hover{background:var(--cream)}}
 @media(max-width:820px){.ak-res .ak-dl{display:none}.ak-pvbar{margin:16px 0 0;gap:10px}.ak-pv{flex:1 1 auto;border:3px solid #000;border-radius:14px;box-shadow:none;animation:none;padding:18px 8px;font-size:1rem;gap:8px}.ak-dl2{display:grid;place-items:center;flex:0 0 10%;width:10%;min-width:46px;background:#000;color:var(--y);border:3px solid #000;border-radius:14px;cursor:pointer}}
+
+.ak-err{margin:0;color:#ff8a7a;font-weight:700;font-size:.9rem}
+.ak-kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.ak-kw em{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:.78rem;background:#000;color:var(--y);padding:4px 9px;border-radius:99px}
+.ak-scroll{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;max-height:640px;padding-right:6px}
+.ak-pv.hl{background:var(--cream);color:#000;animation:ak-hl 1.1s ease-in-out 3}
+@keyframes ak-hl{50%{transform:scale(1.04)}}
+@media(min-width:821px){.ak-res{grid-row:1;grid-column:2}.ak-res .ak-scroll{position:absolute;left:26px;right:20px;top:26px;bottom:90px;max-height:none}}
+.ak-pm{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:16px;animation:ak-fade .2s ease both}
+.ak-pmc{position:relative;background:var(--cream);color:#0a0a0a;border-radius:20px;border:3px solid var(--y);width:min(1080px,96vw);height:min(76vh,720px);display:grid;grid-template-columns:300px 1fr;overflow:hidden}
+.ak-pmx{position:absolute;top:10px;right:10px;z-index:2;width:38px;height:38px;border-radius:50%;border:0;background:#000;color:var(--y);display:grid;place-items:center;cursor:pointer}
+.ak-pml{background:#000;color:var(--cream);padding:26px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;overflow-y:auto}
+.ak-pml .ak-tag{background:var(--y);color:#000}
+.ak-pmt{font-weight:700;font-size:.95rem;color:var(--y)}
+.ak-pmg{position:relative;width:170px;height:170px}.ak-pmg svg{width:170px;height:170px;transform:rotate(-90deg)}
+.ak-pmg circle{fill:none;stroke-width:12}.ak-pmg .bg{stroke:rgba(255,255,255,.14)}.ak-pmg .fg{stroke:var(--y);stroke-linecap:round}
+.ak-pmg.good .fg{stroke:#2ecc71}.ak-pmg.bad .fg{stroke:#ff5a43}
+.ak-pmn{position:absolute;inset:0;display:flex;align-items:baseline;justify-content:center;padding-top:50px}.ak-pmn b{font-size:3.4rem;line-height:1;font-family:var(--font-display,inherit)}.ak-pmn span{opacity:.7;margin-left:2px}
+.ak-pml p{margin:0;font-weight:600}
+.ak-pmd{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;border:0;border-radius:12px;padding:16px 18px;width:100%;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+.ak-pmr{padding:28px 30px;overflow-y:auto;overscroll-behavior:contain}
+.ak-pmr h4{font-family:var(--font-display,inherit);text-transform:uppercase;font-size:1.15rem;margin:0 0 12px}.ak-pmr h4:not(:first-child){margin-top:26px;border-top:2px solid #000;padding-top:18px}
+.ak-pmb{display:grid;grid-template-columns:90px 1fr 54px;align-items:center;gap:12px;font-weight:700;font-size:.95rem;margin-bottom:10px}
+.ak-pmb .tr{height:12px;background:rgba(0,0,0,.12);border-radius:99px;overflow:hidden}.ak-pmb i{display:block;height:100%;border-radius:99px}.ak-pmb i.g{background:#0a7a2f}.ak-pmb i.m{background:#e0a800}.ak-pmb i.b{background:#c4230f}.ak-pmb em{font-style:normal;text-align:right}
+.ak-pmf{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:11px 0;border-bottom:1px dashed rgba(0,0,0,.25)}.ak-pmf b{display:block}.ak-pmf p{margin:3px 0 0;font-size:.92rem;color:rgba(0,0,0,.75)}
+.ak-pmn2{font-size:.8rem;opacity:.7;margin:18px 0 0}
+@media(max-width:820px){.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;margin:8px 8px -46px 0}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
+
