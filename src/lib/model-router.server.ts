@@ -26,7 +26,9 @@ function proChain(): string[] {
 
 export function chainForTier(tier: RoutingTier): string[] {
   // Career Pro only gets the full-quality models. Free, Starter and Job Hunt use the lower models.
-  return tier === "career_pro" ? proChain() : FREE_CHAIN;
+  // Career Pro tries the three strong models first; when their daily limits run out it switches to
+  // the lower models (never "come back tomorrow"). Output on those is tuned to match.
+  return tier === "career_pro" ? [...proChain(), ...FREE_CHAIN] : FREE_CHAIN;
 }
 
 export function isQuotaError(error: unknown): boolean {
