@@ -303,14 +303,14 @@ function AtsDesignPreview() {
 
       {/* GAP */}
       <section aria-hidden className="ak-gap">
-        <div className="ak-bw" data-px="-420" data-pm="x">One column <b>*</b> Real text <b>*</b> Real months <b>*</b> One column <b>*</b> Real text <b>*</b> Real months <b>*</b></div>
+        <div className="ak-bw" data-px="-420" data-pm="x">One column <b>+</b> Real text <b>+</b> Real months <b>+</b> One column <b>+</b> Real text <b>+</b> Real months <b>+</b></div>
         <div className="ak-chips">
           <span className="ak-chip" data-px="-70">&#10003; one column</span>
           <span className="ak-chip y" data-px="60">! date, no month</span>
           <span className="ak-chip" data-px="-40">&#10003; headings ok</span>
           <span className="ak-chip y" data-px="80">! two columns</span>
         </div>
-        <div className="ak-bw out" data-px="420" data-pm="x">No tables <b>*</b> No text boxes <b>*</b> No pictures <b>*</b> No tables <b>*</b> No text boxes <b>*</b> No pictures <b>*</b></div>
+        <div className="ak-bw out" data-px="420" data-pm="x">No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b> No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b></div>
       </section>
 
       {/* HOW */}
@@ -323,7 +323,7 @@ function AtsDesignPreview() {
         ].map(([t, b], k) => (
           <div key={t} data-ak className="ak-rv ak-row" style={{ ["--k" as string]: k }}>
             <span className="n">0{k + 1}</span>
-            <h3 data-px={k % 2 ? "-70" : "70"} data-pm="x" className={k === 1 ? "out" : k === 2 ? "yel" : ""}>{t}</h3>
+            <h3 data-px={k % 2 ? "-24" : "24"} data-pm="x" className={k === 1 ? "out" : k === 2 ? "yel" : ""}>{t}</h3>
             <p data-px="24">{b}</p>
           </div>
         ))}
