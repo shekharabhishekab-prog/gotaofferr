@@ -556,5 +556,21 @@ const AK_CSS = `
 .ak-gauge p{display:block;font-size:.8rem;margin:2px 0 0}
 .ak-bars{gap:5px}.ak-bar{grid-template-columns:70px 1fr 42px;font-size:.78rem}
 }
+
+.ak-meme span.y{transform:none}
+.ak-smp{transform:none}.ak-smp:hover{transform:scale(1.05)}
+@media(min-width:821px){
+.ak-stage{grid-template-columns:minmax(0,7fr) minmax(0,3fr);gap:28px}
+.ak-panel{grid-template-columns:1fr 1fr;padding:34px;gap:28px}
+.ak-drop{min-height:520px}.ak-fields{min-height:520px}.ak-grow textarea{min-height:280px}
+.ak-res{padding:22px}.ak-res.idle{min-height:520px}
+.ak-meme{font-size:clamp(1.5rem,2vw,2.1rem)}
+.ak-res-grid{grid-template-columns:120px 1fr;gap:16px}
+.ak-gauge svg{width:120px;height:120px}.ak-num{top:14px;height:80px;padding-top:12px}.ak-num b{font-size:2.4rem}
+.ak-bar{font-size:.85rem;grid-template-columns:70px 1fr 46px}
+.ak-fix b{font-size:.9rem}.ak-fix p{font-size:.82rem}
+.ak-gauge p{display:none}
+.ak-idle b{font-size:2.6rem}
+}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
