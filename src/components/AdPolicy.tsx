@@ -8,17 +8,16 @@ import type { PlanTier } from "@/lib/plans";
  * Ads by plan. No new ad slots and no layout change: the existing AdSense
  * script stays as is, this only pauses or resumes its requests.
  *   Free        ads everywhere, as today
- *   Starter     content pages only (guides, examples, blog, FAQ); never on tools
- *   Job Hunt    guides and examples only (very nominal)
+ *   Starter     none on the homepage or tools; only low-interaction reading pages (blog, FAQ, guides, examples)
+ *   Job Hunt    no ads
  *   Career Pro  no ads
  */
-const CONTENT = /^\/(blog|guides|examples|faq|how-it-works|about)(\/|$)/;
-const GUIDES = /^\/(guides|examples)(\/|$)/;
+const STARTER_OK = /^\/(blog|faq|guides|examples)(\/|$)/;
 
 export function adsAllowed(tier: PlanTier, path: string): boolean {
   if (tier === "career_pro") return false;
-  if (tier === "job_hunt") return GUIDES.test(path);
-  if (tier === "starter") return CONTENT.test(path);
+  if (tier === "job_hunt") return false;
+  if (tier === "starter") return STARTER_OK.test(path);
   return true;
 }
 
@@ -37,8 +36,23 @@ export function AdPolicy() {
     }
     const w = window as unknown as { adsbygoogle?: unknown[] & { pauseAdRequests?: number } };
     w.adsbygoogle = w.adsbygoogle || [];
-    w.adsbygoogle.pauseAdRequests = adsAllowed(tier, path) ? 0 : 1;
+    const allowed = adsAllowed(tier, path);
+    w.adsbygoogle.pauseAdRequests = allowed ? 0 : 1;
+    // A plan that just ended (or a page where ads are now allowed) may have skipped loading the AdSense
+    // script at page start because the old plan was remembered. Load it now so ads show at once,
+    // not on the next full page load.
+    const client =
+      (import.meta.env["VITE_ADSENSE_CLIENT"] as string | undefined) ||
+      (import.meta.env.PROD ? "ca-pub-9570238585409638" : undefined);
+    if (allowed && client && !document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]')) {
+      const el = document.createElement("script");
+      el.async = true;
+      el.crossOrigin = "anonymous";
+      el.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`;
+      document.head.appendChild(el);
+    }
   }, [tier, loading, path]);
 
   return null;
 }
+
