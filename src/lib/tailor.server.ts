@@ -3,6 +3,7 @@ import { formatLetterParagraphs } from "./letter-format";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
 
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { computeAtsReadiness } from "./ats-score.server";
 import { tailoredResumeSchema, type TailorInput, type TailoredResume } from "./tailor-schema";
 import {
   resumeMarket,
@@ -324,6 +325,12 @@ ${data.resume}`;
     const summed = b
       ? Math.round(b.keywordMatch + b.titleAlignment + b.formatting + b.experienceRelevance + b.quantifiedImpact)
       : null;
+    let ats: ReturnType<typeof computeAtsReadiness> | null = null;
+    try {
+      ats = computeAtsReadiness(result, data.jobDescription);
+    } catch (e) {
+      console.error("[ats-score] failed", e);
+    }
     return withLetterDate(humanize({
       ...result,
       scoreBreakdown: counted ? counted.breakdown : result.scoreBreakdown,
@@ -332,7 +339,8 @@ ${data.resume}`;
         : summed !== null
           ? Math.max(0, Math.min(100, summed))
           : result.matchScore,
-      atsScore: Math.max(95, Math.min(100, Math.round(result.atsScore ?? 95))),
+      atsScore: ats ? ats.score : Math.max(95, Math.min(100, Math.round(result.atsScore ?? 95))),
+      atsTopFix: ats?.topFix ?? "",
     }));
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
