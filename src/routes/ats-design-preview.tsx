@@ -572,6 +572,6 @@ const AK_CSS = `
 .ak-gauge p{display:none}
 .ak-idle b{font-size:2.6rem}
 }
-@media(max-width:820px){.ak-drop{margin-bottom:56px}.ak-smp.in{top:auto;bottom:-50px;right:auto;left:0;font-size:.85rem;padding:10px 14px}}
+@media(max-width:820px){.ak-drop{padding-bottom:72px}.ak-smp.in{top:auto;bottom:14px;right:auto;left:50%;margin-left:-64px;font-size:.85rem;padding:10px 14px;white-space:nowrap}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
