@@ -187,7 +187,6 @@ function AtsDesignPreview() {
       <section id="check" className="ak-wrap ak-check">
         <div data-ak className="ak-rv ak-headrow">
           <h2 className="ak-h2">Drop it. <span>Paste the job.</span> Go.</h2>
-          <button type="button" className="ak-smp" onClick={showSample}>/ sample</button>
         </div>
         <div className="ak-stage">
         <div data-ak className="ak-rv ak-panel">
@@ -200,6 +199,7 @@ function AtsDesignPreview() {
             <input type="file" accept=".pdf,.doc,.docx" className="sr-only" onChange={(e) => setFile(e.target.files?.[0]?.name ?? "")} />
             <i className="ak-c c1" /><i className="ak-c c2" /><i className="ak-c c3" /><i className="ak-c c4" />
             <i className="ak-dbeam" />
+            <button type="button" className="ak-smp in" onClick={(e) => { e.preventDefault(); e.stopPropagation(); showSample(); }}>/ sample result</button>
             <span className="ak-dic">{file ? <FileText className="size-8" /> : <Upload className="size-8" />}</span>
             <span className="ak-dt">{phase === "scan" ? STEPS[step] + "..." : file || "Drop your resume here"}</span>
             <span className="ak-dh">{file ? "Click to change" : "PDF or DOC. Or click to browse."}</span>
@@ -545,6 +545,16 @@ const AK_CSS = `
 .ak-gauge svg{width:150px;height:150px}.ak-num{top:20px;height:100px;padding-top:16px}.ak-num b{font-size:3rem}
 .ak-bar{font-size:.95rem;grid-template-columns:78px 1fr 50px}
 .ak-fix b{font-size:1rem}.ak-fix p{font-size:.9rem}
+}
+
+.ak-smp.in{position:absolute;top:16px;right:52px;z-index:3;font-size:.85rem;padding:9px 14px}
+@media(max-width:820px){
+.ak-smp.in{top:14px;right:46px;font-size:.78rem;padding:8px 11px}
+.ak-res-grid{grid-template-columns:1fr;gap:8px;margin-top:6px}
+.ak-gauge svg{width:120px;height:120px;display:block;margin:0 auto}
+.ak-num{top:14px;left:0;right:0;width:auto;transform:none;height:80px;padding-top:12px}.ak-num b{font-size:2.3rem}.ak-num span{font-size:.75rem}
+.ak-gauge p{display:block;font-size:.8rem;margin:2px 0 0}
+.ak-bars{gap:5px}.ak-bar{grid-template-columns:70px 1fr 42px;font-size:.78rem}
 }
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
