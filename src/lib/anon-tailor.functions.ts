@@ -21,7 +21,7 @@ const emailInputSchema = z
 export const tailorResumeAnonymous = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => anonInputSchema.parse(input))
   .handler(async ({ data }) => {
-    const { ANON_COOKIE, hashValue, hasUsedFreeRun, recordFreeRun } = await import("./anon-tailor.server");
+    const { ANON_COOKIE, hashValue, hasUsedFreeRun, recordFreeRun, firstRunChoice, recordFirstRun } = await import("./anon-tailor.server");
     const { clientIp, enforcePolicy } = await import("@/lib/rate-limit.server");
     const { runTailor } = await import("./tailor.server");
     const { detectCountry } = await import("./resume-locale.server");
@@ -58,8 +58,11 @@ export const tailorResumeAnonymous = createServerFn({ method: "POST" })
     }
 
     const { deviceId: _deviceId, turnstileToken: _token, ...tailorInput } = data;
-    const result = await runTailor(tailorInput, detectCountry());
+    // First run per person (guest tailor, builder or account) uses the strong models once; the pool has a daily budget and falls back to the lower models.
+    const bigFirst = await firstRunChoice(identity, false);
+    const result = await runTailor(tailorInput, detectCountry(), bigFirst ? "career_pro" : "free");
     await recordFreeRun(identity);
+    if (bigFirst) await recordFirstRun(identity);
 
     return { result };
   });
