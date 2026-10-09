@@ -39,7 +39,7 @@ function coverage(terms: Set<string>, text: string): number {
 
 // Full coverage is never expected: a normal posting has filler words. 70% of the
 // posting's own terms counts as a full keyword score.
-const FULL_COVERAGE = 1.0;
+const FULL_COVERAGE = 0.7;
 
 export function computeMatchScore(
   input: { jobDescription: string; role?: string; resume: string },
