@@ -195,7 +195,8 @@ async function makePdf(s: Sample, title: string, sample: boolean) {
   if (title) { d.setFont("helvetica", "bold"); d.setFontSize(12); d.text(clean(title), M, y); y += 22; }
   d.setFillColor(255, 214, 0); d.rect(M, y - 6, 150, 70, "F");
   d.setFont("helvetica", "bold"); d.setFontSize(44); d.text(String(s.score), M + 12, y + 44);
-  d.setFontSize(14); d.text("/ 100", M + 12 + d.getTextWidth(String(s.score)) + 14, y + 44);
+  const sw = d.getTextWidth(String(s.score));
+  d.setFontSize(14); d.text("/ 100", M + 12 + sw + 6, y + 44);
   d.setFont("helvetica", "normal"); d.setFontSize(12);
   d.text(d.splitTextToSize(clean(s.verdict), W - 2 * M - 170), M + 170, y + 22);
   d.setFontSize(9); d.setTextColor(90, 90, 90);
@@ -303,7 +304,8 @@ function AtsDesignPreview() {
       const text = await readResume(fileObj);
       if (text.replace(/\s+/g, "").length < 80) throw new Error("No text found. This looks like a scan or picture. If the robot can't read it, ATS can't either. Export a text PDF or use DOCX.");
       if (resumeSignalScore(text) < 3) throw new Error("This doesn't look like a resume. Upload your CV or resume file.");
-      const jdt = jd.slice(0, MAX_JD);
+      let jdt = jd.slice(0, MAX_JD);
+      for (const w of (comp.toLowerCase().match(/[a-z]{3,}/g) ?? [])) jdt = jdt.replace(new RegExp("\\b" + w + "\\b", "gi"), " ");
       const out = toSample(checkAts(text, jdt), jdt.trim().length > 40);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
       guestUse();
@@ -955,7 +957,7 @@ const AK_CSS = `
 .ak-pmb .tr{height:12px;background:rgba(0,0,0,.12);border-radius:99px;overflow:hidden}.ak-pmb i{display:block;height:100%;border-radius:99px}.ak-pmb i.g{background:#0a7a2f}.ak-pmb i.m{background:#e0a800}.ak-pmb i.b{background:#c4230f}.ak-pmb em{font-style:normal;text-align:right}
 .ak-pmf{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:11px 0;border-bottom:1px dashed rgba(0,0,0,.25)}.ak-pmf b{display:block}.ak-pmf p{margin:3px 0 0;font-size:.92rem;color:rgba(0,0,0,.75)}
 .ak-pmn2{font-size:.8rem;opacity:.7;margin:18px 0 0}
-@media(max-width:820px){.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;margin:8px 8px -46px 0}}
+@media(max-width:820px){.ak-scroll{padding-right:0}.ak-bar{grid-template-columns:52px 1fr 46px!important}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;margin:8px 8px -46px 0}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
 
