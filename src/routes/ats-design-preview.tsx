@@ -88,6 +88,28 @@ function useReveal() {
 
 function AtsDesignPreview() {
   const root = useReveal();
+  useEffect(() => {
+    const el = root.current;
+    if (!el || typeof window === "undefined") return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const px = Array.from(el.querySelectorAll<HTMLElement>("[data-px]"));
+    let raf = 0;
+    const tick = () => {
+      raf = 0;
+      const h = window.innerHeight || 800;
+      px.forEach((e) => {
+        const r = e.getBoundingClientRect();
+        const c = (r.top + r.height / 2 - h / 2) / h;
+        const k = parseFloat(e.dataset.px || "0");
+        e.style.translate = e.dataset.pm === "x" ? (c * k).toFixed(1) + "px 0" : "0 " + (c * k).toFixed(1) + "px";
+      });
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    tick();
+    return () => { window.removeEventListener("scroll", on); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
+  }, [root]);
   const [key, setKey] = useState("72");
   const [run, setRun] = useState(0);
   const [phase, setPhase] = useState<"idle" | "scan" | "done">("idle");
@@ -186,7 +208,7 @@ function AtsDesignPreview() {
       {/* CHECKER */}
       <section id="check" className="ak-wrap ak-check">
         <div data-ak className="ak-rv ak-headrow">
-          <h2 className="ak-h2">Drop it. <span>Paste the job.</span> Go.</h2>
+          <h2 data-px="26" className="ak-h2">Drop it. <span>Paste the job description.</span> Go. <button type="button" className="ak-smp go" onClick={showSample}>see a sample</button></h2>
         </div>
         <div className="ak-stage">
         <div data-ak className="ak-rv ak-panel">
@@ -279,6 +301,18 @@ function AtsDesignPreview() {
         </div>
       </section>
 
+      {/* GAP */}
+      <section aria-hidden className="ak-gap">
+        <div className="ak-bw" data-px="-420" data-pm="x">One column <b>*</b> Real text <b>*</b> Real months <b>*</b> One column <b>*</b> Real text <b>*</b> Real months <b>*</b></div>
+        <div className="ak-chips">
+          <span className="ak-chip" data-px="-70">&#10003; one column</span>
+          <span className="ak-chip y" data-px="60">! date, no month</span>
+          <span className="ak-chip" data-px="-40">&#10003; headings ok</span>
+          <span className="ak-chip y" data-px="80">! two columns</span>
+        </div>
+        <div className="ak-bw out" data-px="420" data-pm="x">No tables <b>*</b> No text boxes <b>*</b> No pictures <b>*</b> No tables <b>*</b> No text boxes <b>*</b> No pictures <b>*</b></div>
+      </section>
+
       {/* HOW */}
       <section className="ak-wrap ak-how">
         <h2 data-ak className="ak-rv ak-h2">What the robot <span>looks at</span></h2>
@@ -289,15 +323,15 @@ function AtsDesignPreview() {
         ].map(([t, b], k) => (
           <div key={t} data-ak className="ak-rv ak-row" style={{ ["--k" as string]: k }}>
             <span className="n">0{k + 1}</span>
-            <h3 className={k === 1 ? "out" : k === 2 ? "yel" : ""}>{t}</h3>
-            <p>{b}</p>
+            <h3 data-px={k % 2 ? "-70" : "70"} data-pm="x" className={k === 1 ? "out" : k === 2 ? "yel" : ""}>{t}</h3>
+            <p data-px="24">{b}</p>
           </div>
         ))}
       </section>
 
       <section data-ak className="ak-rv ak-end">
         <div className="ak-wrap">
-          <h2>Score first.<br /><span>Apply second.</span></h2>
+          <h2 data-px="30">Score first.<br /><span>Apply second.</span></h2>
           <a href="#check" className="ak-btn">Check my resume <ArrowRight className="size-4" /></a>
         </div>
       </section>
@@ -573,5 +607,25 @@ const AK_CSS = `
 .ak-idle b{font-size:2.6rem}
 }
 @media(max-width:820px){.ak-drop{padding-bottom:72px}.ak-smp.in{top:auto;bottom:14px;right:auto;left:50%;margin-left:-64px;font-size:.85rem;padding:10px 14px;white-space:nowrap}}
+
+.ak-smp.go{font-size:.9rem;padding:9px 14px;vertical-align:middle;margin-left:8px;text-transform:none;white-space:nowrap;letter-spacing:.02em}
+.ak-gap{position:relative;margin:110px 0 40px;overflow:hidden;padding:30px 0}
+.ak-bw{white-space:nowrap;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;font-size:clamp(2.6rem,9vw,7.4rem);line-height:1.05;color:var(--cream);margin-left:-8%}
+.ak-bw b{color:var(--y);display:inline-block;animation:ak-spin 6s linear infinite}
+.ak-bw.out{color:transparent;-webkit-text-stroke:2px var(--cream)}
+@keyframes ak-spin{to{transform:rotate(360deg)}}
+.ak-chips{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:26px 0;padding:0 20px}
+.ak-chip{font-family:ui-monospace,Menlo,monospace;font-weight:800;text-transform:uppercase;font-size:.85rem;padding:11px 16px;border:2px solid var(--cream);border-radius:999px;animation:ak-bob 3.4s ease-in-out infinite}
+.ak-chip.y{background:var(--y);color:#000;border-color:var(--y);animation-delay:-1.4s}
+@keyframes ak-bob{50%{margin-top:-8px}}
+.ak-how{padding-top:80px}
+@media(min-width:821px){.ak-h2{font-size:clamp(2rem,3.7vw,3.7rem)}.ak-gap{margin-top:150px}.ak-how{padding-top:110px}.ak-chip{font-size:1rem}}
+@media(max-width:820px){
+.ak-res-grid{grid-template-columns:1fr 1fr;gap:10px;align-items:center}
+.ak-gauge svg{width:116px;height:116px}.ak-num{top:14px;height:80px;padding-top:12px}.ak-num b{font-size:2.2rem}
+.ak-bars{gap:7px}.ak-bar{grid-template-columns:52px 1fr 34px;gap:6px;font-size:.68rem}.ak-bar .tr{height:7px}
+.ak-gauge p{display:block;font-size:.72rem;margin:2px 0 0}
+.ak-gap{margin-top:120px}
+}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
