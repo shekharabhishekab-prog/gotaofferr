@@ -294,7 +294,7 @@ function LazyVideo({ name, className = "" }: { name: string; className?: string 
       { rootMargin: "200px 0px" },
     );
     io.observe(v);
-    return () => io.disconnect();
+    return () => io.disconnect(); document.removeEventListener("scroll", onS, true);
   }, [name]);
   return (
     <video
@@ -545,7 +545,7 @@ const GI_CSS = `
 .hx-rp1{left:24%;top:42%}.hx-rp2{left:78%;top:68%;width:min(36vw,300px)}.hx-rp2 i{animation-duration:6.4s}
 @keyframes hx-wave{0%{opacity:0;transform:scale(.15)}12%{opacity:.95}100%{opacity:0;transform:scale(1.5)}}
 @media(max-width:639px){.hx-rp1{left:30%;top:36%;width:70vw}.hx-rp2{left:72%;top:74%;width:46vw}}
-.hx-pop{position:absolute;z-index:2;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);border-radius:999px;padding:.18rem .5rem;font-size:.58rem;font-weight:600;pointer-events:none;white-space:nowrap;opacity:0;animation:hx-pop 1.6s ease-out forwards}
+.hx-pop{position:absolute;z-index:2;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5);border-radius:999px;padding:.18rem .5rem;font-size:.58rem;font-weight:600;pointer-events:none;white-space:pre;opacity:0;animation:hx-pop 1.6s ease-out forwards}
 @media(max-width:639px){.hx-pop{display:none!important}}
 @keyframes hx-pop{0%{opacity:0;transform:scale(.4)}10%{opacity:1;transform:scale(1.08)}16%{transform:scale(1)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.85)}}
 @media(prefers-reduced-motion:reduce){.hx-rp i,.hx-pop{animation:none!important}.hx-rp i{opacity:.35;transform:scale(.8)}}
@@ -572,6 +572,42 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 .i3-l{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;column-gap:.14em;white-space:nowrap}
 .i3-y{background:var(--highlight,#ffd600);color:#000;padding:.0em .1em .02em;margin:.02em 0;text-shadow:none;display:inline-block;animation:i3-in .7s cubic-bezier(.2,.8,.2,1) both}
 .i3-y2{animation-delay:.15s}
+.nd-h{margin:0 auto;max-width:none;font-family:"HPInst",Georgia,serif;font-style:italic;font-weight:400;letter-spacing:-.01em;line-height:1;font-size:min(7.4vw,13.5vh);color:#fff;text-align:left;text-shadow:none}
+.nd-t{white-space:nowrap;position:relative;display:block;width:max-content;max-width:100%;margin:0 auto;padding:.1em .22em .16em;background:transparent;will-change:transform,opacity;animation:ndbox 1.1s cubic-bezier(.7,0,.2,1) .25s backwards}
+.nd-t b{font-weight:800;color:var(--highlight,#ffd600);background:linear-gradient(to bottom,transparent .12em,#000 .12em);padding:0 .12em .1em;margin:0 -.04em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.nd-l1::before,.nd-l1::after,.nd-l2::before,.nd-l2::after{content:attr(data-t);position:absolute;left:0;top:0;right:0;bottom:0;white-space:pre;opacity:0;pointer-events:none;background:transparent;color:#fff}
+.nd-l1::before,.nd-l2::before{text-shadow:-.035em 0 #ff2d55}
+.nd-l1::after,.nd-l2::after{text-shadow:.035em 0 #00d4ff}
+.nd-on .nd-l1::before,.nd-on .nd-l2::before{opacity:1;animation:ndg1 .42s steps(1,end) both}
+.nd-on .nd-l1::after,.nd-on .nd-l2::after{opacity:1;animation:ndg2 .42s steps(1,end) both}
+@keyframes ndg1{0%{clip-path:inset(8% 0 70% 0);transform:translateX(-.05em)}20%{clip-path:inset(40% 0 38% 0);transform:translateX(.07em)}40%{clip-path:inset(70% 0 8% 0);transform:translateX(-.04em)}60%{clip-path:inset(20% 0 55% 0);transform:translateX(.05em)}80%{clip-path:inset(55% 0 25% 0);transform:translateX(-.06em)}100%{clip-path:inset(0 0 100% 0)}}
+@keyframes ndg2{0%{clip-path:inset(60% 0 22% 0);transform:translateX(.06em)}25%{clip-path:inset(12% 0 66% 0);transform:translateX(-.07em)}50%{clip-path:inset(46% 0 34% 0);transform:translateX(.04em)}75%{clip-path:inset(78% 0 4% 0);transform:translateX(-.05em)}100%{clip-path:inset(0 0 100% 0)}}
+@keyframes ndin{0%{opacity:0;transform:scaleY(.2);filter:blur(8px)}100%{opacity:1;transform:none;filter:none}}
+.nd-cv{-webkit-mask-image:linear-gradient(#000 70%,transparent 100%);mask-image:linear-gradient(#000 70%,transparent 100%)}.nd-l1,.nd-l2{display:inline-block;position:relative;will-change:transform}.nd-l1{transform:translate3d(calc(var(--nd,0)*-10vw),0,0)}.nd-l2{transform:translate3d(calc(var(--nd,0)*10vw),0,0)}
+.nd-h{transform:translate3d(0,calc(var(--nd,0)*-11vh),0) scale(calc(1 - var(--nd,0)*.1));opacity:calc(1 - var(--nd,0)*1.15);will-change:transform,opacity}
+.nd-cv{transform:translate3d(0,calc(var(--nd,0)*14vh),0) scale(calc(1 + var(--nd,0)*.06));will-change:transform}
+.hp-hero:has(.nd-h) .hp-hero-body>div>*:not(h1){transform:translate3d(0,calc(var(--nd,0)*-5vh),0);opacity:calc(1 - var(--nd,0)*1.4)}
+.nd-t b{font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-style:normal;font-weight:900;letter-spacing:-.05em;font-size:.92em}
+@media(max-width:899px){.nd-h{font-size:8.6vw;letter-spacing:-.01em}.nd-t{padding:.1em .16em .14em}.nd-h{margin-top:1.25rem}}
+.hp-hero:has(.nd-h) .hp-grid{display:none!important}
+@keyframes ndbox{0%{clip-path:inset(0 50% 0 50%);filter:brightness(2.2)}60%{filter:brightness(1.3)}100%{clip-path:inset(0 0 0 0);filter:none}}
+@keyframes ndrise{from{translate:0 .7em;opacity:0}to{translate:0 0;opacity:1}}
+@keyframes ndbar{from{background-size:0% 100%}to{background-size:100% 100%}}
+@keyframes ndsky{from{opacity:0}to{opacity:1}}
+.nd-w{display:inline-block;animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards}
+.nd-t b{background-repeat:no-repeat}
+.nd-t b.nd-w{animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards,ndbar .8s cubic-bezier(.7,0,.2,1) calc(1.5s + var(--i,0)*.11s) backwards}
+@keyframes ndword{from{translate:0 .8em;opacity:0;filter:blur(12px);scale:1.15}to{translate:0 0;opacity:1;filter:blur(0);scale:1}}
+.nd-h{animation:ndpush 2.4s cubic-bezier(.2,.7,.2,1) backwards}
+@keyframes ndpush{from{scale:1.12}to{scale:1}}
+.nd-cv{background-image:radial-gradient(1.2px 1.2px at 23px 41px,#fff,transparent),radial-gradient(1px 1px at 97px 130px,#ddd,transparent),radial-gradient(1.4px 1.4px at 171px 77px,#fff,transparent),radial-gradient(1px 1px at 60px 180px,#bcd,transparent);background-size:210px 210px,170px 170px,250px 250px,190px 190px}
+.nd-l2 .nd-w{animation:none}
+.nd-h:not(.nd-s1) .nd-l2{opacity:0}
+.nd-s1 .nd-l2 .nd-w{animation:ndword .7s cubic-bezier(.2,.8,.2,1) calc((var(--i,0) - 4)*.09s) backwards}
+.nd-s1 .nd-l2 b.nd-w{animation:ndword .7s cubic-bezier(.2,.8,.2,1) calc((var(--i,0) - 4)*.09s) backwards,ndbar .6s cubic-bezier(.7,0,.2,1) .3s backwards}
+.nd-cv{background-image:none!important;background:#000}
+@media(prefers-reduced-motion:reduce){.nd-t{animation:none}.nd-on .nd-t::before,.nd-on .nd-l1::after,.nd-on .nd-l2::after{animation:none;opacity:0}}
+
 .i3-w{display:inline-block;animation:i3-up .8s cubic-bezier(.2,.8,.2,1) both}
 .i3-l:nth-child(2) .i3-w{animation-delay:.08s}.i3-l:nth-child(3) .i3-w{animation-delay:.16s}
 @keyframes i3-in{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
@@ -596,7 +632,167 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 @media(prefers-reduced-motion:reduce){.gi{display:none}.hx-ring,.hx-chip{animation:none;opacity:0}}
 `;
 
+function HeroNedan() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const mobile = window.matchMedia("(max-width: 899px)").matches;
+    let w = 0, h = 0, raf = 0, vis = true;
+    const mkPage = (v: number, blur: boolean) => {
+      const W = 200, H = 260, pad = blur ? 18 : 0;
+      const k = document.createElement("canvas");
+      k.width = W + pad * 2; k.height = H + pad * 2;
+      const x = k.getContext("2d")!;
+      if (blur) x.filter = "blur(6px)";
+      x.translate(pad, pad);
+      x.fillStyle = v % 3 === 1 ? "#efe6cf" : v % 3 === 2 ? "#f7f2e4" : "#f4f0e7"; x.fillRect(0, 0, W, H);
+      if (v === 3 || v === 6) {
+        x.strokeStyle = "#a38b3a"; x.lineWidth = 3; x.strokeRect(8, 8, W - 16, H - 16);
+        x.fillStyle = "#222"; x.fillRect(40, 34, 120, 9);
+        for (let r = 0; r < 6; r++) { x.fillStyle = "rgba(30,30,30,0.4)"; x.fillRect(30, 70 + r * 14, 140 - (r % 3) * 20, 3); }
+        x.fillStyle = "#f5cc00"; x.beginPath(); x.arc(W / 2, H - 52, 24, 0, 6.283); x.fill();
+        x.fillStyle = "#b08d00"; x.beginPath(); x.arc(W / 2, H - 52, 15, 0, 6.283); x.fill();
+        return k;
+      }
+      x.fillStyle = v % 2 === 0 ? "#111" : "#f5cc00"; x.fillRect(14, 14, v % 2 === 0 ? 96 : 64, 10);
+      x.fillStyle = "#222"; x.fillRect(14, 32, 118, 8);
+      for (let r = 0; r < 14; r++) {
+        if (r % 5 === 0) { x.fillStyle = "#111"; x.fillRect(14, 54 + r * 13, 40, 4); }
+        else { x.fillStyle = "rgba(30,30,30,0.45)"; x.fillRect(14, 54 + r * 13, 70 + Math.random() * 110, 3); }
+      }
+      if (v === 2 || v === 5) { x.fillStyle = "rgba(0,0,0,0.2)"; x.beginPath(); x.moveTo(W, H); x.lineTo(W - 70, H); x.lineTo(W, H - 70); x.closePath(); x.fill(); }
+      return k;
+    };
+    const NV = 7;
+    const sharp: HTMLCanvasElement[] = [], soft: HTMLCanvasElement[] = [];
+    for (let v = 0; v < NV; v++) { sharp.push(mkPage(v, false)); soft.push(mkPage(v, true)); }
+    type P = { x: number; y: number; z: number; vx: number; vy: number; vz: number; rot: number; rs: number; fl: number; fs: number; tl: number; v: number; k: number; life: number; max: number };
+    let ps: P[] = [];
+    const F = 700;
+    const spawn = (burst: boolean): P => {
+      const a = Math.random() * 6.283;
+      const r = burst ? 20 + Math.random() * 80 : (0.25 + Math.random() * 0.9) * Math.max(w, h) * 0.55;
+      const z = burst ? -150 + Math.random() * 500 : -250 + Math.random() * 1500;
+      const sp = burst ? 380 + Math.random() * 700 : 6 + Math.random() * 22;
+      return { x: Math.cos(a) * r, y: Math.sin(a) * r * 0.7, z, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.7, vz: burst ? (Math.random() - 0.2) * 500 : (Math.random() - 0.5) * 30, rot: Math.random() * 6.283, rs: (Math.random() - 0.5) * (burst ? 3 : 0.8), fl: Math.random() * 6.283, fs: 0.5 + Math.random() * (burst ? 3 : 1.4), tl: (Math.random() - 0.5) * 0.5, v: Math.floor(Math.random() * NV), k: 0.7 + Math.random() * 0.8, life: 0, max: burst ? 5 + Math.random() * 4 : 18 + Math.random() * 20 };
+    };
+    const resize = () => {
+      const r = c.getBoundingClientRect();
+      if (r.width < 2 || r.height < 2) return;
+      w = r.width; h = r.height;
+      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!ps.length) { const n = mobile ? 11 : 24; for (let i = 0; i < n; i++) ps.push(spawn(false)); }
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(c);
+    const dust: Array<[number, number, number, number]> = [];
+    for (let i = 0; i < (mobile ? 50 : 110); i++) dust.push([Math.random(), Math.random(), 0.4 + Math.random() * 1.2, Math.random() * 6.28]);
+    let mx = 0, my = 0, tmx = 0, tmy = 0, px = -9999, py = -9999;
+    const onM = (e: PointerEvent) => {
+      const r = c.getBoundingClientRect();
+      tmx = (e.clientX / window.innerWidth - 0.5) * 2; tmy = (e.clientY / window.innerHeight - 0.5) * 2;
+      px = e.clientX - r.left - r.width / 2; py = e.clientY - r.top - r.height / 2;
+    };
+    window.addEventListener("pointermove", onM, { passive: true });
+    const hero = c.closest("[data-hero]") as HTMLElement | null;
+    let tick = false;
+    const onS = () => {
+      if (tick) return; tick = true;
+      requestAnimationFrame(() => {
+        tick = false;
+        const y = (document.scrollingElement || document.documentElement).scrollTop;
+        const hh = hero ? hero.offsetHeight : window.innerHeight;
+        vis = y < hh * 1.05;
+        if (hero) hero.style.setProperty("--nd", Math.max(0, Math.min(1, y / (hh * 0.6))).toFixed(3));
+      });
+    };
+    document.addEventListener("scroll", onS, { passive: true, capture: true });
+    onS();
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t0 = performance.now();
+    let burstDone = false, last = t0, boost = 0;
+    const burst = () => { const n = mobile ? 12 : 26; for (let i = 0; i < n; i++) ps.push(spawn(true)); boost = 1; };
+    const draw = (now: number) => {
+      raf = requestAnimationFrame(draw);
+      const dt = Math.min(0.05, (now - last) / 1000); last = now;
+      if (document.hidden || !vis || w < 2) return;
+      if (!burstDone && now - t0 > 2300 && !reduce) { burstDone = true; burst(); }
+      mx += (tmx - mx) * 0.05; my += (tmy - my) * 0.05;
+      boost *= 0.985;
+      const cx = w / 2, cy = h / 2, t = now / 1000;
+      ctx.clearRect(0, 0, w, h);
+      const gl = ctx.createRadialGradient(cx + mx * 60, h * 0.1, 0, cx + mx * 60, h * 0.1, Math.max(w, h) * 0.7);
+      gl.addColorStop(0, "rgba(245,204,0," + (0.3 + 0.12 * boost).toFixed(3) + ")"); gl.addColorStop(0.5, "rgba(190,140,0,0.1)"); gl.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = gl; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "rgba(255,246,200,0.55)";
+      for (const d of dust) { ctx.globalAlpha = 0.25 + 0.5 * (0.5 + 0.5 * Math.sin(t * 0.8 + d[3])); ctx.fillRect(((d[0] * w + t * 6 * d[2] - mx * 12 * d[2]) % w + w) % w, ((d[1] * h - t * 4 * d[2]) % h + h) % h, d[2], d[2]); }
+      ctx.globalAlpha = 1;
+      ps = ps.filter((p) => p.life < p.max);
+      while (ps.length < (mobile ? 11 : 24)) ps.push(spawn(false));
+      for (const p of ps) {
+        p.life += dt;
+        const s0 = F / (F + p.z);
+        const sx0 = cx + p.x * s0 + mx * 40 * s0 * (1 - p.z / 1500), sy0 = cy + p.y * s0 + my * 30 * s0;
+        const dx = sx0 - (px + cx), dy = sy0 - (py + cy), d2 = dx * dx + dy * dy, R = 180;
+        if (d2 < R * R && d2 > 1) { const d = Math.sqrt(d2), f = (1 - d / R) * 900 * dt; p.vx += (dx / d) * f / s0; p.vy += (dy / d) * f / s0; p.rs += (dx > 0 ? 1 : -1) * (1 - d / R) * 2 * dt * 10; }
+        const drag = p.life < 4 && p.max < 12 ? 0.985 : 0.995;
+        p.vx *= drag; p.vy *= drag; p.vz *= drag;
+        p.x += p.vx * dt; p.y += p.vy * dt + Math.sin(t * 0.7 + p.fl) * 6 * dt; p.z += p.vz * dt;
+        p.rot += p.rs * dt; p.fl += p.fs * dt;
+      }
+      const order = ps.filter((p) => F + p.z > 60).sort((a, b) => b.z - a.z);
+      for (const p of order) {
+        const s = F / (F + p.z);
+        const x = cx + p.x * s + mx * 40 * s * (1 - p.z / 1500), y = cy + p.y * s + my * 30 * s;
+        const size = 260 * p.k * s * (mobile ? 0.6 : 1);
+        if (x < -size || x > w + size || y < -size || y > h + size) { if (p.max > 12) p.life += 0.5; continue; }
+        const fadeIn = Math.min(1, p.life / 0.6), fadeOut = Math.min(1, (p.max - p.life) / 1.2);
+        const fog = 0.25 + 0.75 * Math.max(0, Math.min(1, 1 - (p.z + 100) / 1700));
+        const near = s > 1.15;
+        const spr = (near ? soft : sharp)[p.v];
+        const sq = 0.3 + 0.7 * Math.abs(Math.cos(p.fl));
+        ctx.save(); ctx.translate(x, y); ctx.rotate(p.rot); ctx.transform(1, p.tl * Math.sin(p.fl), 0, 1, 0, 0); ctx.scale(sq, 1);
+        ctx.globalAlpha = (mobile ? 0.7 : 0.9) * fadeIn * fadeOut * fog;
+        const ww = size * 0.77 * (spr.width / 200), hh = size * (spr.height / 260);
+        ctx.drawImage(spr, -ww / 2, -hh / 2, ww, hh);
+        ctx.restore();
+      }
+    };
+    raf = requestAnimationFrame(draw);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); document.removeEventListener("scroll", onS, true); window.removeEventListener("pointermove", onM); };
+  }, []);
+  return <canvas ref={ref} aria-hidden className="nd-cv absolute inset-0 -z-20 h-full w-full" />;
+}
+
+function NedanTitle() {
+  const [g, setG] = useState(false);
+  const [s1, setS1] = useState(false);
+  useEffect(() => { const to = window.setTimeout(() => setS1(true), 2300); return () => window.clearTimeout(to); }, []);
+  useEffect(() => {
+    let to = 0;
+    const loop = () => {
+      setG(true);
+      to = window.setTimeout(() => { setG(false); to = window.setTimeout(loop, 1800 + Math.random() * 2200); }, 420);
+    };
+    to = window.setTimeout(loop, 1400);
+    return () => window.clearTimeout(to);
+  }, []);
+  const T = "The job you want. The resume it needs.";
+  return (
+    <h1 className={"nd-h mt-5" + (g ? " nd-on" : "") + (s1 ? " nd-s1" : "")} aria-label={T} onPointerEnter={() => setG(true)} onPointerLeave={() => setG(false)}>
+      <span aria-hidden className="nd-t" data-t={"The job you want.\nThe resume it needs."}><span className="nd-l1" data-t="The job you want."><span className="nd-w" style={{ "--i": 0 } as never}>The</span> <b className="nd-w" style={{ "--i": 1 } as never}>job</b> <span className="nd-w" style={{ "--i": 2 } as never}>you</span> <span className="nd-w" style={{ "--i": 3 } as never}>want.</span></span><br /><span className="nd-l2" data-t="The resume it needs."><span className="nd-w" style={{ "--i": 4 } as never}>The</span> <b className="nd-w" style={{ "--i": 5 } as never}>resume</b> <span className="nd-w" style={{ "--i": 6 } as never}>it</span> <span className="nd-w" style={{ "--i": 7 } as never}>needs.</span></span></span>
+    </h1>
+  );
+}
+
 function Index() {
+  const wide = true;
   const [rv, setRv] = useState(false);
   const [showBar, setShowBar] = useState(false);
   const [ri, setRi] = useState(0);
@@ -808,7 +1004,7 @@ function Index() {
 
       {/* Hero */}
       <section data-hero className="hp-hero relative isolate overflow-hidden">
-        <HeroVideo />
+        {wide ? <HeroNedan /> : <HeroVideo />}
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,transparent_0%,#000_88%)]" />
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
@@ -828,10 +1024,12 @@ function Index() {
               <span className="animate-pulse-ring i3-pill inline-flex items-center gap-1.5 rounded-full border border-foreground/25 bg-foreground/5 px-3 py-1 text-xs backdrop-blur">
                 <Sparkles className="size-3 animate-twinkle text-highlight" /> Find jobs · <span className="pill-d">Make resume from scratch · </span>Tailor resume · Apply — 5 free a month
               </span>
-              <h1 className="i3 mt-5" aria-label="The job you want. The resume it needs.">
+              {wide ? <NedanTitle /> : (
+<h1 className="i3 mt-5" aria-label="The job you want. The resume it needs.">
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y">JOB</mark> <span className="i3-w">YOU WANT.</span></span>
                 <span aria-hidden className="i3-l"><span className="i3-w">THE</span> <mark className="i3-y i3-y2">RESUME</mark> <span className="i3-w">IT NEEDS.</span></span>
               </h1>
+)}
             </div>
 
             <p className="hp-rise mx-auto mt-5 hidden max-w-md text-[0.68rem] uppercase leading-relaxed tracking-[0.16em] text-white/55 [animation-delay:140ms] sm:block sm:max-w-none">
