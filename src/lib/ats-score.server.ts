@@ -3,6 +3,7 @@
 // 20 structure and headings, 20 parse hygiene, 15 title and content signals.
 // Hard cap 60 when there is no email or no experience section.
 import type { TailoredResume } from "@/lib/tailor-schema";
+import { cleanJobDescription } from "@/lib/jd-clean";
 
 const STOP = new Set(
   (
@@ -37,7 +38,7 @@ export function computeAtsReadiness(r: TailoredResume, jobDescription: string): 
   const allText = `${skillsText} ${proseText}`;
 
   // Job terms: unique stems, weighted by how often the posting repeats them.
-  const jdTokens = tokens(jobDescription);
+  const jdTokens = tokens(cleanJobDescription(jobDescription));
   const freq = new Map<string, number>();
   for (const t of jdTokens) freq.set(t, (freq.get(t) ?? 0) + 1);
   const terms = [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 40).map(([t]) => t);
