@@ -595,7 +595,7 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 @keyframes ndbar{from{background-size:0% 100%}to{background-size:100% 100%}}
 @keyframes ndsky{from{opacity:0}to{opacity:1}}
 .nd-w{display:inline-block;animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards}
-.nd-t b{background-repeat:no-repeat}.nd-t b{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:.9em;text-transform:uppercase}
+.nd-t b{background-repeat:no-repeat}.nd-t b{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:.9em;text-transform:uppercase}.nd-h:not(.nd-go) .nd-w{opacity:0!important;animation:none!important}.nd-h:not(.nd-go){animation:none!important}@media(max-width:639px){.nd-h.nd-h{font-size:10.6vw;line-height:1.02;text-align:left}.nd-h .nd-t .nd-l1,.nd-h .nd-t .nd-l2{display:block;margin-bottom:.45em}.nd-h .nd-t br{display:none}.nd-h .nd-t span.nd-w{font-family:Georgia,serif;font-style:italic}.nd-h .nd-t b.nd-w{display:table;font-size:1.5em;line-height:1.05;margin:.02em 0 .04em -.04em}.nd-t::before,.nd-t::after,.nd-l1::before,.nd-l1::after,.nd-l2::before,.nd-l2::after,.nd-h::before,.nd-h::after{display:none!important}.hp-hero .i3-pill{font-family:ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.12em;font-size:.56rem}.hp-hero .hp-btn.hp-btn{height:1.85rem;font-size:.64rem;font-family:"Space Grotesk",ui-sans-serif,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em}}
 .nd-t b.nd-w{animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards,ndbar .8s cubic-bezier(.7,0,.2,1) calc(1.5s + var(--i,0)*.11s) backwards}
 @keyframes ndword{from{translate:0 .8em;opacity:0;filter:blur(12px);scale:1.15}to{translate:0 0;opacity:1;filter:blur(0);scale:1}}
 .nd-h{animation:ndpush 2.4s cubic-bezier(.2,.7,.2,1) backwards}
@@ -709,7 +709,7 @@ function HeroNedan() {
       const sp = burst ? 380 + Math.random() * 700 : 6 + Math.random() * 22;
       const o = { x: Math.cos(a) * r, y: Math.sin(a) * r * 0.7, z, vx: kd === 3 ? 0 : Math.cos(a) * sp * (kd === 2 ? 0.25 : 1), vy: kd === 3 ? 0 : Math.sin(a) * sp * 0.7 * (kd === 2 ? 0.25 : 1), vz: burst ? (Math.random() - 0.2) * 500 : (Math.random() - 0.5) * 30, rot: Math.random() * 6.283, rs: (Math.random() - 0.5) * (burst ? 3 : 0.8), fl: Math.random() * 6.283, fs: 0.4 + Math.random() * (burst ? 2.2 : 1.2), tl: (Math.random() - 0.5) * 0.5, v: Math.floor(Math.random() * (kd === 1 ? 4 : NV)), k, life: 0, max: burst ? 5 + Math.random() * 4 : 18 + Math.random() * 20, kind: kd, sw: (Math.random() < 0.5 ? -1 : 1) * (0.25 + Math.random() * 0.5) }; if (kd === 2) { const s0 = F / (F + z); o.x = (-w * 0.6 + Math.random() * w * 0.6) / s0; o.y = (-h * 0.7 + Math.random() * h * 0.9) / s0; o.vx = (320 + Math.random() * 300) / s0; o.vy = (130 + Math.random() * 200) / s0; o.vz = 0; o.max = 6 + Math.random() * 3; o.rs = (Math.random() - 0.5) * 0.6; } else if (!burst && kd < 2) { o.vx += 60; o.vy += 40; } return o;
     };
-    const NB = mobile ? 6 : 14, NS = mobile ? 1 : 3, NC = mobile ? 4 : 10;
+    const NB = mobile ? 8 : 14, NS = mobile ? 1 : 3, NC = mobile ? 6 : 10;
     const fill = () => {
       const cnt = [0, 0, 0, 0]; for (const p of ps) if (p.max > 12 || p.kind === 2) cnt[p.kind]++;
       while (cnt[0] + cnt[1] < NB) { const p = spawn(false); ps.push(p); cnt[p.kind]++; }
@@ -792,7 +792,7 @@ function HeroNedan() {
       for (const p of order) {
         const s = F / (F + p.z - cam);
         const x = cx + p.x * s + mx * 40 * s * (1 - p.z / 1500), y = cy + p.y * s + my * 30 * s;
-        const size = 260 * p.k * s * (mobile ? 0.42 : 0.9);
+        const size = 260 * p.k * s * (mobile ? 0.5 : 0.9);
         if (x < -size * 1.2 || x > w + size * 1.2 || y < -size * 1.2 || y > h + size * 1.2) { if (p.max > 12 && p.kind !== 2) p.life += 0.5; continue; }
         const fadeIn = Math.min(1, p.life / 0.6), fadeOut = Math.min(1, (p.max - p.life) / 1.2);
         const fog = 0.3 + 0.7 * Math.max(0, Math.min(1, 1 - (p.z + 100) / 1700));
@@ -803,7 +803,7 @@ function HeroNedan() {
         else spr = s > 1.15 ? soft[p.v] : curled[p.v];
         const sq = p.kind === 3 ? 0.55 + 0.45 * Math.abs(Math.cos(p.fl * 0.6)) : 0.3 + 0.7 * Math.abs(Math.cos(p.fl));
         ctx.save(); ctx.translate(x, y); ctx.rotate(p.rot); ctx.transform(1, p.tl * Math.sin(p.fl), 0, 1, 0, 0); ctx.scale(sq, 1);
-        ctx.globalAlpha = (mobile ? 0.4 : 0.5) * al * fadeIn * fadeOut * (p.kind === 3 ? 1 : fog);
+        ctx.globalAlpha = (mobile ? 0.55 : 0.6) * al * fadeIn * fadeOut * (p.kind === 3 ? 1 : fog);
         const sc = size / 260;
         const ww = spr.width * sc, hh = spr.height * sc;
         ctx.drawImage(spr, -ww / 2, -hh / 2, ww, hh);
@@ -819,6 +819,8 @@ function HeroNedan() {
 function NedanTitle() {
   const [g, setG] = useState(false);
   const [s1, setS1] = useState(false);
+  const [go, setGo] = useState(false);
+  useEffect(() => { let done = false; const f = () => { if (done) return; done = true; requestAnimationFrame(() => requestAnimationFrame(() => setGo(true))); }; const t = window.setTimeout(f, 1500); (document.fonts ? document.fonts.ready : Promise.resolve()).then(f); return () => window.clearTimeout(t); }, []);
   useEffect(() => { const to = window.setTimeout(() => setS1(true), 600); return () => window.clearTimeout(to); }, []);
   useEffect(() => {
     let to = 0;
@@ -831,7 +833,7 @@ function NedanTitle() {
   }, []);
   const T = "The job you want. The resume it needs.";
   return (
-    <h1 className={"nd-h mt-5" + (g ? " nd-on" : "") + (s1 ? " nd-s1" : "")} aria-label={T} onPointerEnter={() => setG(true)} onPointerLeave={() => setG(false)}>
+    <h1 className={"nd-h mt-5" + (go ? " nd-go" : "") + (g ? " nd-on" : "") + (s1 ? " nd-s1" : "")} aria-label={T} onPointerEnter={() => setG(true)} onPointerLeave={() => setG(false)}>
       <span aria-hidden className="nd-t" data-t={"The JOB you want.\nThe RESUME it needs."}><span className="nd-l1" data-t="The JOB you want."><span className="nd-w" style={{ "--i": 0 } as never}>The</span> <b className="nd-w" style={{ "--i": 1 } as never}>JOB</b> <span className="nd-w" style={{ "--i": 2 } as never}>you</span> <span className="nd-w" style={{ "--i": 3 } as never}>want.</span></span><br /><span className="nd-l2" data-t="The RESUME it needs."><span className="nd-w" style={{ "--i": 4 } as never}>The</span> <b className="nd-w" style={{ "--i": 5 } as never}>RESUME</b> <span className="nd-w" style={{ "--i": 6 } as never}>it</span> <span className="nd-w" style={{ "--i": 7 } as never}>needs.</span></span></span>
     </h1>
   );
