@@ -588,7 +588,7 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 .nd-cv{transform:translate3d(0,calc(var(--nd,0)*14vh),0) scale(calc(1 + var(--nd,0)*.06));will-change:transform}
 .hp-hero:has(.nd-h) .hp-hero-body>div>*:not(h1){transform:translate3d(0,calc(var(--nd,0)*-5vh),0);opacity:calc(1 - var(--nd,0)*1.4)}
 .nd-t b{font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-style:normal;font-weight:900;letter-spacing:-.05em;font-size:.92em}
-@media(max-width:899px){.nd-h{font-size:8.6vw;letter-spacing:-.01em}.nd-t{padding:.1em .16em .14em}.nd-h{margin-top:1.25rem}}
+@media(max-width:899px){.nd-h{font-size:11.4vw;letter-spacing:-.01em}.nd-t{padding:.1em .16em .14em}.nd-h{margin-top:1.25rem}}
 .hp-hero:has(.nd-h) .hp-grid{display:none!important}
 @keyframes ndbox{0%{clip-path:inset(0 50% 0 50%);filter:brightness(2.2)}60%{filter:brightness(1.3)}100%{clip-path:inset(0 0 0 0);filter:none}}
 @keyframes ndrise{from{translate:0 .7em;opacity:0}to{translate:0 0;opacity:1}}
@@ -669,7 +669,7 @@ function HeroNedan() {
       const k = document.createElement("canvas"); k.width = W0 + pad * 2; k.height = H0 + pad * 2 + 40;
       const x = k.getContext("2d")!;
       if (blur) x.filter = "blur(" + blur + "px)";
-      const S = 10;
+      const S = 3;
       for (let i = 0; i < W0; i += S) {
         const t = i / W0;
         const dy = Math.sin(t * 3.4 + v) * curl + t * t * curl * 0.8;
@@ -709,7 +709,7 @@ function HeroNedan() {
       const sp = burst ? 380 + Math.random() * 700 : 6 + Math.random() * 22;
       return { x: Math.cos(a) * r, y: Math.sin(a) * r * 0.7, z, vx: kd === 3 ? 0 : Math.cos(a) * sp * (kd === 2 ? 0.25 : 1), vy: kd === 3 ? 0 : Math.sin(a) * sp * 0.7 * (kd === 2 ? 0.25 : 1), vz: burst ? (Math.random() - 0.2) * 500 : (Math.random() - 0.5) * 30, rot: Math.random() * 6.283, rs: (Math.random() - 0.5) * (burst ? 3 : 0.8), fl: Math.random() * 6.283, fs: 0.4 + Math.random() * (burst ? 2.2 : 1.2), tl: (Math.random() - 0.5) * 0.5, v: Math.floor(Math.random() * (kd === 1 ? 4 : NV)), k, life: 0, max: burst ? 5 + Math.random() * 4 : 18 + Math.random() * 20, kind: kd, sw: (Math.random() < 0.5 ? -1 : 1) * (0.25 + Math.random() * 0.5) };
     };
-    const NB = mobile ? 7 : 16, NS = mobile ? 1 : 3, NC = mobile ? 5 : 11;
+    const NB = mobile ? 6 : 14, NS = mobile ? 0 : 3, NC = mobile ? 4 : 10;
     const fill = () => {
       const cnt = [0, 0, 0, 0]; for (const p of ps) if (p.max > 12) cnt[p.kind]++;
       while (cnt[0] + cnt[1] < NB) { const p = spawn(false); ps.push(p); cnt[p.kind]++; }
@@ -729,7 +729,7 @@ function HeroNedan() {
     ro.observe(c);
     const dust: Array<[number, number, number, number]> = [];
     for (let i = 0; i < (mobile ? 50 : 110); i++) dust.push([Math.random(), Math.random(), 0.4 + Math.random() * 1.2, Math.random() * 6.28]);
-    let mx = 0, my = 0, tmx = 0, tmy = 0, px = -9999, py = -9999;
+    let cam = -1000, scr = 0, mx = 0, my = 0, tmx = 0, tmy = 0, px = -9999, py = -9999;
     const onM = (e: PointerEvent) => {
       const r = c.getBoundingClientRect();
       tmx = (e.clientX / window.innerWidth - 0.5) * 2; tmy = (e.clientY / window.innerHeight - 0.5) * 2;
@@ -744,7 +744,7 @@ function HeroNedan() {
         tick = false;
         const y = (document.scrollingElement || document.documentElement).scrollTop;
         const hh = hero ? hero.offsetHeight : window.innerHeight;
-        vis = y < hh * 1.05;
+        vis = y < hh * 1.05; scr = Math.max(0, Math.min(1.2, y / hh));
         if (hero) hero.style.setProperty("--nd", Math.max(0, Math.min(1, y / (hh * 0.6))).toFixed(3));
       });
     };
@@ -759,7 +759,7 @@ function HeroNedan() {
       const dt = Math.min(0.05, (now - last) / 1000); last = now;
       if (document.hidden || !vis || w < 2) return;
       if (!burstDone && now - t0 > 600 && !reduce) { burstDone = true; burst(); }
-      mx += (tmx - mx) * 0.05; my += (tmy - my) * 0.05;
+      { const tt = Math.min(1, (now - t0) / 2600), e = 1 - Math.pow(1 - tt, 3); cam = -1000 * (1 - e) + scr * 520; } mx += (tmx - mx) * 0.05; my += (tmy - my) * 0.05;
       boost *= 0.985;
       const cx = w / 2, cy = h / 2, t = now / 1000;
       ctx.clearRect(0, 0, w, h);
@@ -773,7 +773,7 @@ function HeroNedan() {
       fill();
       for (const p of ps) {
         p.life += dt;
-        const s0 = F / (F + p.z);
+        const s0 = F / (F + p.z - cam);
         const sx0 = cx + p.x * s0 + mx * 40 * s0 * (1 - p.z / 1500), sy0 = cy + p.y * s0 + my * 30 * s0;
         const dx = sx0 - (px + cx), dy = sy0 - (py + cy), d2 = dx * dx + dy * dy, R = 200;
         if (d2 < R * R && d2 > 1) { const d = Math.sqrt(d2), f = (1 - d / R) * 900 * dt; p.vx += (dx / d) * f / s0; p.vy += (dy / d) * f / s0; p.rs += (dx > 0 ? 1 : -1) * (1 - d / R) * 2 * dt * 10; }
@@ -788,22 +788,22 @@ function HeroNedan() {
         }
         p.rot += p.rs * dt; p.fl += p.fs * dt;
       }
-      const order = ps.filter((p) => F + p.z > 60).sort((a, b) => b.z - a.z);
+      const order = ps.filter((p) => F + p.z - cam > 60).sort((a, b) => b.z - a.z);
       for (const p of order) {
-        const s = F / (F + p.z);
+        const s = F / (F + p.z - cam);
         const x = cx + p.x * s + mx * 40 * s * (1 - p.z / 1500), y = cy + p.y * s + my * 30 * s;
-        const size = 260 * p.k * s * (mobile ? 0.6 : 1);
+        const size = 260 * p.k * s * (mobile ? 0.42 : 0.9);
         if (x < -size * 1.2 || x > w + size * 1.2 || y < -size * 1.2 || y > h + size * 1.2) { if (p.max > 12) p.life += 0.5; continue; }
         const fadeIn = Math.min(1, p.life / 0.6), fadeOut = Math.min(1, (p.max - p.life) / 1.2);
         const fog = 0.3 + 0.7 * Math.max(0, Math.min(1, 1 - (p.z + 100) / 1700));
         let spr: HTMLCanvasElement, al = 0.9;
         if (p.kind === 1) spr = (s > 1.15 ? ribSoft : rib)[p.v % 4];
-        else if (p.kind === 2) { spr = soft[p.v]; al = 0.5; }
+        else if (p.kind === 2) { spr = soft[p.v]; al = 0.55; }
         else if (p.kind === 3) { spr = flat[p.v % 2 === 0 ? 3 : 6]; al = 0.95; }
         else spr = s > 1.15 ? soft[p.v] : curled[p.v];
         const sq = p.kind === 3 ? 0.55 + 0.45 * Math.abs(Math.cos(p.fl * 0.6)) : 0.3 + 0.7 * Math.abs(Math.cos(p.fl));
         ctx.save(); ctx.translate(x, y); ctx.rotate(p.rot); ctx.transform(1, p.tl * Math.sin(p.fl), 0, 1, 0, 0); ctx.scale(sq, 1);
-        ctx.globalAlpha = (mobile ? 0.75 : 1) * al * fadeIn * fadeOut * (p.kind === 3 ? 1 : fog);
+        ctx.globalAlpha = (mobile ? 0.4 : 0.5) * al * fadeIn * fadeOut * (p.kind === 3 ? 1 : fog);
         const sc = size / 260;
         const ww = spr.width * sc, hh = spr.height * sc;
         ctx.drawImage(spr, -ww / 2, -hh / 2, ww, hh);
@@ -1873,7 +1873,7 @@ html,body{background:#000}
 .hp-hero-body .hp-rolebox{margin-top:.5rem}
 .hp-hero-body div.hp-rise.flex{margin-top:1rem;flex-direction:row!important;flex-wrap:nowrap!important;gap:.6rem!important;align-items:flex-start}
 .hp-hero-body div.hp-rise.flex .hp-mag{flex:1 1 0;min-width:0}
-.hp-hero-body div.hp-rise.flex .hp-btn{height:2.6rem;padding-left:.5rem!important;padding-right:.5rem!important;font-size:.82rem;white-space:nowrap}
+.hp-hero-body div.hp-rise.flex .hp-btn{height:2.15rem;padding-left:.4rem!important;padding-right:.4rem!important;font-size:.72rem;white-space:nowrap}
 .hp-sub{font-size:.44rem;letter-spacing:.06em;margin-top:.3rem;text-align:center;white-space:nowrap;max-width:100%;overflow:hidden}
 }
 .hx-bgR{position:absolute;z-index:-5;right:-3vw;bottom:-14vh;font-family:"HPBric",var(--font-display,inherit),sans-serif;font-weight:800;font-size:92vh;line-height:.8;letter-spacing:-.06em;color:rgba(255,214,0,.13);-webkit-text-stroke:2px rgba(255,214,0,.22);pointer-events:none;user-select:none;transform:translate(calc(var(--mx)*-18px),calc(var(--my)*-12px));transition:transform .3s ease-out;mix-blend-mode:screen}
