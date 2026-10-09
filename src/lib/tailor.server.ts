@@ -75,7 +75,7 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   const market = resumeMarket(detectedJobCountry);
   const letterRules = coverLetterRules(detectedJobCountry);
   const withLetterDate = <T extends { coverLetter: string }>(r0: T): T => {
-    const r = applyTruthFixes(r0, data.company);
+    const r = applyTruthFixes(r0);
     const text = (r.coverLetter ?? "").trim();
     if (!text) return r;
     return { ...r, coverLetter: `${letterDateLine(jobCountry)}\n\n${text}` };
@@ -506,8 +506,6 @@ export function monthStartIso(): string {
 
 // ---- Truth fixes: code checks behind two rules that used to live only in the prompt ----
 
-const COMPANY_FILLER = new Set(["limited", "private", "pvt", "ltd", "llc", "inc", "group", "solutions", "services", "technologies", "global", "india", "company", "corporation"]);
-
 function mapAllStrings<T>(value: T, fn: (s: string, key: string) => string, key = ""): T {
   if (typeof value === "string") return fn(value, key) as unknown as T;
   if (Array.isArray(value)) return value.map((v) => mapAllStrings(v, fn, key)) as unknown as T;
@@ -517,25 +515,6 @@ function mapAllStrings<T>(value: T, fn: (s: string, key: string) => string, key 
     return out as T;
   }
   return value;
-}
-
-/** Fixes one-letter slips in the employer name (for example ADSOCIAL written as AGSOCIAL). */
-export function fixCompanyName(text: string, company?: string | null): string {
-  const words = (company ?? "").split(/[^A-Za-z0-9]+/).filter((w) => w.length >= 6 && !COMPANY_FILLER.has(w.toLowerCase()));
-  if (!text || !words.length) return text;
-  let out = text;
-  for (const w of words) {
-    const upper = w === w.toUpperCase();
-    out = out.replace(new RegExp("\\b[A-Za-z0-9]{" + w.length + "}\\b", "g"), (tok) => {
-      if (tok.toLowerCase() === w.toLowerCase()) return tok;
-      let diff = 0;
-      for (let i = 0; i < w.length; i++) if (tok[i].toLowerCase() !== w[i].toLowerCase()) diff++;
-      if (diff !== 1) return tok;
-      const shapeOk = upper ? tok === tok.toUpperCase() : tok[0] === tok[0].toUpperCase();
-      return shapeOk ? w : tok;
-    });
-  }
-  return out;
 }
 
 const MONTH_NAMES = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
@@ -597,19 +576,29 @@ export function reconcileYears(text: string, totalMonths: number): string {
   });
 }
 
-export function applyTruthFixes<T>(r: T, company?: string | null): T {
+export function applyTruthFixes<T>(r: T): T {
   try {
-    const before = JSON.stringify(r);
-    let out = r;
-    if (company && company.trim()) out = mapAllStrings(out, (s) => fixCompanyName(s, company));
-    const months = totalExperienceMonths((out as any)?.experience);
-    if (months !== null) {
-      out = mapAllStrings(out, (s, k) => (k === "summary" || k === "coverLetter" || k === "headline" ? reconcileYears(s, months) : s));
-    } else {
+    const months = totalExperienceMonths((r as any)?.experience);
+    if (months === null) {
       console.warn("[truth-fix] dates not readable, years check skipped");
+      return r;
     }
-    if (JSON.stringify(out) !== before) console.log("[truth-fix] corrected company name or years claim");
-    return out;
+    let changed = false;
+    const out: any = mapAllStrings(r, (text, key) => {
+      if (key !== "summary" && key !== "coverLetter" && key !== "headline") return text;
+      const fixed = reconcileYears(text, months);
+      if (fixed !== text) changed = true;
+      return fixed;
+    });
+    if (changed) {
+      const years = Math.floor(months / 12);
+      const rem = months % 12;
+      const span = years + " year" + (years === 1 ? "" : "s") + (rem ? " " + rem + " month" + (rem === 1 ? "" : "s") : "");
+      const note = "The text claimed more years of experience than your dates support. Your listed dates add up to about " + span + ", so the figure was lowered to match.";
+      out.consistencyFlags = [...(Array.isArray(out.consistencyFlags) ? out.consistencyFlags : []), note];
+      console.log("[truth-fix] lowered a years-of-experience claim");
+    }
+    return out as T;
   } catch (e) {
     console.error("[truth-fix] failed", e);
     return r;
