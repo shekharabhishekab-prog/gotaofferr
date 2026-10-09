@@ -401,7 +401,7 @@ const AK_CSS = `
 .ak-drop:hover,.ak-drop.over{background:rgba(255,214,0,.1);transform:scale(1.01)}
 .ak-c{position:absolute;width:22px;height:22px;border:3px solid var(--y)}
 .ak-c.c1{left:10px;top:10px;border-right:0;border-bottom:0}.ak-c.c2{right:10px;top:10px;border-left:0;border-bottom:0}.ak-c.c3{left:10px;bottom:10px;border-right:0;border-top:0}.ak-c.c4{right:10px;bottom:10px;border-left:0;border-top:0}
-.ak-dic{width:68px;height:68px;border-radius:50%;background:var(--y);color:#000;display:grid;place-items:center;animation:ak-bob 2.4s ease-in-out infinite}
+.ak-dic{width:68px;height:68px;border-radius:50%;background:var(--y);color:#000;display:grid;place-items:center}
 @keyframes ak-bob{50%{transform:translateY(-8px)}}
 .ak-dt{font-family:var(--font-display,inherit);font-weight:700;font-size:1.35rem;text-transform:uppercase;padding:0 16px;word-break:break-word}
 .ak-dh{font-size:.88rem;color:rgba(246,241,214,.6)}
@@ -654,8 +654,8 @@ const AK_CSS = `
 @keyframes ak-shim{to{background-position:-200% 0}}
 @media(min-width:821px){
 .ak-h2 span.d1{font-size:clamp(4.4rem,6.6vw,7rem)}
-.ak-h2 span.d2{font-size:clamp(2rem,3.2vw,3.4rem);margin-top:8px}
-.ak-h2 span.go2{font-size:clamp(5.6rem,8vw,9rem)}
+.ak-h2 span.d2{font-size:clamp(2.4rem,4vw,4.2rem);margin-top:8px;position:relative;top:-.14em}
+.ak-h2 span.go2{font-size:clamp(5.6rem,8vw,9rem);-webkit-text-stroke:.025em var(--y)}
 .ak-smp.go{font-size:1.35rem;padding:20px 34px;box-shadow:7px 7px 0 var(--cream)}
 .ak-headrow{margin-bottom:44px}
 .ak-stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:stretch}
@@ -685,7 +685,7 @@ const AK_CSS = `
 .ak-h2 span.d1{font-size:clamp(3rem,14vw,4rem)}
 .ak-h2 span.d2{font-size:clamp(1.25rem,5.4vw,1.7rem);letter-spacing:.01em}
 .ak-h2 span.d3{flex-wrap:wrap;gap:6px 14px;margin-top:10px;justify-content:flex-start}
-.ak-h2 span.go2{font-size:3.4rem;flex:none}
+.ak-h2 span.go2{font-size:3.4rem;flex:none;-webkit-text-stroke:.025em var(--y)}
 .ak-smp.go{font-size:.95rem;padding:14px 18px;white-space:nowrap}
 }
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
