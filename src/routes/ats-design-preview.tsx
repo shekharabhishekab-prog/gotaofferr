@@ -673,11 +673,11 @@ const AK_CSS = `
 .ak-fix b{font-size:1rem}.ak-fix p{font-size:.9rem}
 }
 
-.ak-idle>*{width:100%;align-self:stretch}
+.ak-res.idle .ak-idle{width:100%;max-width:none;box-sizing:border-box}.ak-idle>*{width:100%;align-self:stretch}
 .ak-smp.go.open{background:var(--cream)}
 .ak-smp.go.open svg{transform:rotate(90deg)}
 @media(max-width:820px){
-.ak-res.idle{display:none}
+.ak-res.idle{display:none}.ak-drop{padding-top:30px}
 .ak-hero-grid>div:first-child{position:relative;z-index:2}
 .ak-paper-wrap{position:absolute;left:0;right:0;top:36px;height:500px;min-height:0;margin:0;opacity:.13;z-index:1;pointer-events:none}
 .ak-paper-wrap .ak-paper{width:300px}
