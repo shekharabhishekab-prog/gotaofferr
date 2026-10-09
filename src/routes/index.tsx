@@ -595,7 +595,7 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 @keyframes ndbar{from{background-size:0% 100%}to{background-size:100% 100%}}
 @keyframes ndsky{from{opacity:0}to{opacity:1}}
 .nd-w{display:inline-block;animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards}
-.nd-t b{background-repeat:no-repeat}.nd-t b{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:.9em;text-transform:uppercase}.nd-h:not(.nd-go) .nd-w{opacity:0!important;animation:none!important}.nd-h:not(.nd-go){animation:none!important}@media(min-width:640px){.hp-hero .hp-sub.hp-sub{font-size:.5rem;letter-spacing:.12em;white-space:nowrap}}@media(max-width:639px){.hp-hero .hp-hero-body{text-align:left}.hp-hero .nd-t.nd-t{margin-left:0;margin-right:0;padding-left:0}.hp-hero .i3-pill{margin-left:0}.hp-hero .hp-rise.mx-auto{margin-left:0!important;margin-right:0!important;max-width:none!important;justify-content:flex-start;flex-direction:row!important;flex-wrap:nowrap;gap:.6rem}.hp-hero .hp-mag{flex:0 0 auto}.hp-hero .hp-btn.hp-btn{width:auto;padding-left:.95rem!important;padding-right:.95rem!important}.hp-hero .hp-sub.hp-sub{font-size:.46rem;letter-spacing:.1em;text-align:left;padding-left:.95rem;white-space:nowrap}}.nd-go .nd-l1 .nd-w{animation-delay:calc(var(--i,0)*.08s),calc(.35s + var(--i,0)*.08s)!important}@media(max-width:639px){.nd-h.nd-h{font-size:10.6vw;line-height:1.02;text-align:left}.nd-h .nd-t .nd-l1,.nd-h .nd-t .nd-l2{display:block;margin-bottom:.45em}.nd-h .nd-t br{display:none}.nd-h .nd-t span.nd-w{font-family:Georgia,serif;font-style:italic}.nd-h .nd-t b.nd-w{display:table;font-size:1.5em;line-height:1.05;margin:.02em 0 .04em -.04em}.nd-t::before,.nd-t::after,.nd-l1::before,.nd-l1::after,.nd-l2::before,.nd-l2::after,.nd-h::before,.nd-h::after{display:none!important}.hp-hero .i3-pill{font-family:ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.12em;font-size:.56rem}.hp-hero .hp-btn.hp-btn{height:1.85rem;font-size:.64rem;font-family:"Space Grotesk",ui-sans-serif,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em}}
+.nd-t b{background-repeat:no-repeat}.nd-t b{font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;letter-spacing:-.01em;font-size:.9em;text-transform:uppercase}.nd-h:not(.nd-go) .nd-w{opacity:0!important;animation:none!important}.nd-h:not(.nd-go){animation:none!important}@media(min-width:640px){.hp-hero .hp-sub.hp-sub{font-size:.5rem;letter-spacing:.12em;white-space:nowrap}}@media(max-width:639px){.hp-hero .hp-hero-body{text-align:left}.hp-hero .site-container.site-container{padding-bottom:5.5rem}.hp-hero .nd-t.nd-t{margin-left:0;margin-right:0;padding-left:0}.hp-hero .i3-pill{margin-left:0}.hp-hero .hp-rise.mx-auto{margin-left:0!important;margin-right:0!important;max-width:none!important;justify-content:flex-start;flex-direction:row!important;flex-wrap:nowrap;gap:.6rem}.hp-hero .hp-mag{flex:0 0 auto}.hp-hero .hp-btn.hp-btn{width:auto;padding-left:.95rem!important;padding-right:.95rem!important}.hp-hero .hp-sub.hp-sub{font-size:.46rem;letter-spacing:.1em;text-align:left;padding-left:.95rem;white-space:nowrap}}.nd-go .nd-l1 .nd-w{animation-delay:calc(var(--i,0)*.08s),calc(.35s + var(--i,0)*.08s)!important}@media(max-width:639px){.nd-h.nd-h{font-size:10.6vw;line-height:1.02;text-align:left}.nd-h .nd-t .nd-l1,.nd-h .nd-t .nd-l2{display:block;margin-bottom:.45em}.nd-h .nd-t br{display:none}.nd-h .nd-t span.nd-w{font-family:Georgia,serif;font-style:italic}.nd-h .nd-t b.nd-w{display:table;font-size:1.5em;line-height:1.05;margin:.02em 0 .04em -.04em}.nd-t::before,.nd-t::after,.nd-l1::before,.nd-l1::after,.nd-l2::before,.nd-l2::after,.nd-h::before,.nd-h::after{display:none!important}.hp-hero .i3-pill{font-family:ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.12em;font-size:.56rem}.hp-hero .hp-btn.hp-btn{height:1.85rem;font-size:.64rem;font-family:"Space Grotesk",ui-sans-serif,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em}}
 .nd-t b.nd-w{animation:ndword 1s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i,0)*.11s) backwards,ndbar .8s cubic-bezier(.7,0,.2,1) calc(1.5s + var(--i,0)*.11s) backwards}
 @keyframes ndword{from{translate:0 .8em;opacity:0;filter:blur(12px);scale:1.15}to{translate:0 0;opacity:1;filter:blur(0);scale:1}}
 .nd-h{animation:ndpush 2.4s cubic-bezier(.2,.7,.2,1) backwards}
@@ -639,7 +639,7 @@ function HeroNedan() {
     if (!c) return;
     const ctx = c.getContext("2d");
     if (!ctx) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const mobile = window.matchMedia("(max-width: 899px)").matches;
     let w = 0, h = 0, raf = 0, vis = true;
     const W0 = 200, H0 = 260;
@@ -669,7 +669,7 @@ function HeroNedan() {
       const k = document.createElement("canvas"); k.width = W0 + pad * 2; k.height = H0 + pad * 2 + 40;
       const x = k.getContext("2d")!;
       if (blur) x.filter = "blur(" + blur + "px)";
-      const S = 3;
+      const S = 2;
       for (let i = 0; i < W0; i += S) {
         const t = i / W0;
         const dy = Math.sin(t * 3.4 + v) * curl + t * t * curl * 0.8;
@@ -709,7 +709,7 @@ function HeroNedan() {
       const sp = burst ? 380 + Math.random() * 700 : 6 + Math.random() * 22;
       const o = { x: Math.cos(a) * r, y: Math.sin(a) * r * 0.7, z, vx: kd === 3 ? 0 : Math.cos(a) * sp * (kd === 2 ? 0.25 : 1), vy: kd === 3 ? 0 : Math.sin(a) * sp * 0.7 * (kd === 2 ? 0.25 : 1), vz: burst ? (Math.random() - 0.2) * 500 : (Math.random() - 0.5) * 30, rot: Math.random() * 6.283, rs: (Math.random() - 0.5) * (burst ? 3 : 0.8), fl: Math.random() * 6.283, fs: 0.4 + Math.random() * (burst ? 2.2 : 1.2), tl: (Math.random() - 0.5) * 0.5, v: Math.floor(Math.random() * (kd === 1 ? 4 : NV)), k, life: 0, max: burst ? 5 + Math.random() * 4 : 18 + Math.random() * 20, kind: kd, sw: (Math.random() < 0.5 ? -1 : 1) * (0.25 + Math.random() * 0.5) }; if (kd === 2) { const s0 = F / (F + z); o.x = (-w * 0.6 + Math.random() * w * 0.6) / s0; o.y = (-h * 0.7 + Math.random() * h * 0.9) / s0; o.vx = (320 + Math.random() * 300) / s0; o.vy = (130 + Math.random() * 200) / s0; o.vz = 0; o.max = 6 + Math.random() * 3; o.rs = (Math.random() - 0.5) * 0.6; } else if (!burst && kd < 2) { o.vx += 60; o.vy += 40; } return o;
     };
-    const NB = mobile ? 8 : 14, NS = mobile ? 1 : 3, NC = mobile ? 6 : 10;
+    const NB = mobile ? 10 : 14, NS = mobile ? 1 : 3, NC = mobile ? 6 : 10;
     const fill = () => {
       const cnt = [0, 0, 0, 0]; for (const p of ps) if (p.max > 12 || p.kind === 2) cnt[p.kind]++;
       while (cnt[0] + cnt[1] < NB) { const p = spawn(false); ps.push(p); cnt[p.kind]++; }
