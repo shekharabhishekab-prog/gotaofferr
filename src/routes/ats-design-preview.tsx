@@ -120,6 +120,7 @@ function AtsDesignPreview() {
   const resRef = useRef<HTMLDivElement | null>(null);
   const s = SAMPLES[key];
   const showSample = () => {
+    if (phase === "done") { setPhase("idle"); return; }
     setPhase("done");
     setRun((n) => n + 1);
     window.setTimeout(() => resRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
@@ -211,7 +212,7 @@ function AtsDesignPreview() {
           <h2 data-px="26" className="ak-h2 ak-h2b">
             <span className="d1">Drop it.</span>
             <span className="d2">Paste the job description</span>
-            <span className="d3"><span className="go2">Go.</span><button type="button" className="ak-smp go" onClick={showSample}>see a sample <ArrowRight className="size-4" /></button></span>
+            <span className="d3"><span className="go2">Go.</span><button type="button" className={`ak-smp go ${phase === "done" ? "open" : ""}`} aria-pressed={phase === "done"} onClick={showSample}>{phase === "done" ? "hide sample" : "see a sample"} <ArrowRight className="size-4" /></button></span>
           </h2>
         </div>
         <div className="ak-stage">
@@ -225,7 +226,7 @@ function AtsDesignPreview() {
             <input type="file" accept=".pdf,.doc,.docx" className="sr-only" onChange={(e) => setFile(e.target.files?.[0]?.name ?? "")} />
             <i className="ak-c c1" /><i className="ak-c c2" /><i className="ak-c c3" /><i className="ak-c c4" />
             <i className="ak-dbeam" />
-            <button type="button" className="ak-smp in" onClick={(e) => { e.preventDefault(); e.stopPropagation(); showSample(); }}>/ sample result</button>
+            <button type="button" className="ak-smp in" onClick={(e) => { e.preventDefault(); e.stopPropagation(); showSample(); }}>{phase === "done" ? "/ hide sample" : "/ sample result"}</button>
             <span className="ak-dic">{file ? <FileText className="size-8" /> : <Upload className="size-8" />}</span>
             <span className="ak-dt">{phase === "scan" ? STEPS[step] + "..." : file || "Drop your resume here"}</span>
             <span className="ak-dh">{file ? "Click to change" : "PDF or DOC. Or click to browse."}</span>
@@ -670,6 +671,22 @@ const AK_CSS = `
 .ak-bar{font-size:.95rem;grid-template-columns:78px 1fr 50px}
 .ak-gauge p{display:block;font-size:.85rem}
 .ak-fix b{font-size:1rem}.ak-fix p{font-size:.9rem}
+}
+
+.ak-idle>*{width:100%;align-self:stretch}
+.ak-smp.go.open{background:var(--cream)}
+.ak-smp.go.open svg{transform:rotate(90deg)}
+@media(max-width:820px){
+.ak-res.idle{display:none}
+.ak-hero-grid>div:first-child{position:relative;z-index:2}
+.ak-paper-wrap{position:absolute;left:0;right:0;top:36px;height:500px;min-height:0;margin:0;opacity:.13;z-index:1;pointer-events:none}
+.ak-paper-wrap .ak-paper{width:300px}
+.ak-paper-wrap .ak-pin{display:none}
+.ak-h2 span.d1{font-size:clamp(3rem,14vw,4rem)}
+.ak-h2 span.d2{font-size:clamp(1.25rem,5.4vw,1.7rem);letter-spacing:.01em}
+.ak-h2 span.d3{flex-wrap:nowrap;gap:16px;margin-top:10px;justify-content:flex-start}
+.ak-h2 span.go2{font-size:4.6rem;flex:none}
+.ak-smp.go{font-size:.95rem;padding:14px 18px;white-space:nowrap}
 }
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
