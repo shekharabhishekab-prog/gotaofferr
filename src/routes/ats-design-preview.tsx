@@ -480,5 +480,16 @@ const AK_CSS = `
 .ak-ft{font-size:.58rem;padding:4px 6px;justify-self:stretch}
 .ak-fn{margin-top:12px;gap:8px}.ak-fn>span{display:none}
 }
+
+@media(min-width:821px){
+.ak-wrap{max-width:1720px;padding:0 56px}
+.ak-drop{min-height:560px}.ak-fields{min-height:560px}.ak-grow textarea{min-height:300px}
+.ak-dt{font-size:1.7rem}
+.ak-res-grid{grid-template-columns:120px 1fr;gap:16px;align-items:center}
+.ak-gauge svg{width:120px;height:120px;display:block;margin:0 auto}
+.ak-num{top:14px;left:0;right:0;width:auto;height:80px;padding-top:12px}.ak-num b{font-size:2.4rem}
+.ak-gauge p{display:none}
+.ak-fn>span{display:none}
+}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
