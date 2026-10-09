@@ -274,7 +274,7 @@ export function ResumeTailor() {
   const base = `${slug(result?.name || "resume")}-${slug(company || role || "tailored")}`;
 
   return (
-    <div className="site-container w-full pb-24">
+    <div className="site-container w-full px-4 pb-24 sm:px-0">
       <div className="grid items-stretch gap-5 lg:grid-cols-2">
         <Card className="flex flex-col border-border/70 p-6 shadow-soft">
 
@@ -402,6 +402,18 @@ export function ResumeTailor() {
 
           <div className="mx-auto flex w-full max-w-md flex-col items-stretch">
             {usage ? <UsageMeter usage={usage} /> : null}
+            {(!subLoading && !isSubscribed && usage && usage.remaining === 0) ? (
+              <Button
+                variant="hero"
+                size="xl"
+                asChild
+                className="mt-3 w-full rounded-full shadow-[0_0_40px_-10px_color-mix(in_oklab,var(--primary)_45%,transparent)]"
+              >
+                <Link to="/pricing">
+                  <Sparkles /> Upgrade for more to continue
+                </Link>
+              </Button>
+            ) : (
             <Button
               variant="hero"
               size="xl"
@@ -412,6 +424,7 @@ export function ResumeTailor() {
               {loading ? <Loader2 className="animate-spin" /> : <Sparkles />}
               {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter"}
             </Button>
+            )}
             {!subLoading && !isSubscribed && usage && usage.remaining === 0 ? (
               <p className="mt-4 text-center text-xs text-muted-foreground">
                 You have tailored {usage.used} of {usage.limit} this month.{" "}

@@ -556,7 +556,7 @@ export function ResumeBuilder() {
               </div>
             ) : null}
             <p className="mt-3 text-xs text-muted-foreground">
-              Building is free. You'll need a free account to download the PDF.
+              {session ? "Building is free." : "Building is free. You'll need a free account to download the PDF."}
             </p>
 
             <div className="mt-6 max-h-[70vh] overflow-y-auto rounded-lg border border-border/50 bg-background p-5 text-sm">
