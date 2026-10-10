@@ -56,7 +56,7 @@ function TailorPage() {
         <ul className="list-disc space-y-2 pl-6">
           <li>A rewritten resume in a single-column, ATS-friendly layout, ready to download as a PDF.</li>
           <li>A cover letter written for that company and role.</li>
-          <li>A match score, an ATS score, the missing keywords and tips to improve both.</li>
+          <li>A match score, the missing keywords and tips to improve your fit for the job.</li>
         </ul>
         <p>
           Applying in another country? Tailoring follows the resume conventions of 11 job markets.
@@ -94,3 +94,4 @@ function TailorPage() {
     </main>
   );
 }
+
