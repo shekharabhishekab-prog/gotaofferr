@@ -57,8 +57,7 @@ const shuffled = (a: number[]) => { const b = a.slice(); for (let i = b.length -
 function CocoVideo({ talking }: { talking: boolean }) {
   const refs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)];
   const act = useRef(1);
-  const [show, setShow] = useState(1);
-  const q = useRef<number[]>([]);
+    const q = useRef<number[]>([]);
   const first = useRef(true);
   const last = useRef(0);
   const tk = useRef(talking);
@@ -83,9 +82,11 @@ function CocoVideo({ talking }: { talking: boolean }) {
     act.current = nx;
     last.current = p.n;
     prep.current = null;
-    setShow(nx);
+    v.style.opacity = "1";
+    if (old) old.style.opacity = "0";
     window.setTimeout(() => { if (old && act.current === nx) old.pause(); }, 900);
-    prepare(tk.current, false);
+    // Load the clip after next into the hidden video once the fade is done.
+    window.setTimeout(() => { if (act.current === nx && !prep.current) prepare(tk.current, false); }, 1000);
   };
   const prepare = (t: boolean, now: boolean) => {
     const v = refs[act.current ^ 1].current;
@@ -110,7 +111,7 @@ function CocoVideo({ talking }: { talking: boolean }) {
   return (
     <>
       {[0, 1].map((i) => (
-        <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: show === i ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) want(); }} />
+        <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: i === 1 ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) want(); }} />
       ))}
     </>
   );
