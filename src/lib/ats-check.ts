@@ -123,11 +123,18 @@ export function checkAts(resumeText: string, jobDescription?: string): AtsResult
   add("numbers", "Results with numbers", 15, Math.min(1, ratio / 0.4) * 15,
     ratio < 0.4 ? "Add real numbers to more bullets (percent, amount, team size, time saved). Only use figures that are true." : null);
 
+  // Step 5: bullet quality note (hint only, score unchanged)
+  const weakBullets = bullets.filter((x) => /^[•·▪●◦*\-–]\s+(?:responsible for|duties (?:included|include)|worked on|helped (?:with|to)|assisted with|tasked with|in charge of)\b/i.test(x)).length;
+
   // 5. Action verbs (10)
   const verbBullets = bullets.filter((b) => ACTION_VERBS.has(words(b.replace(/^[•·▪●◦*\-–]\s+/, ""))[0] ?? "")).length;
   const vr = bullets.length ? verbBullets / bullets.length : 0;
   add("verbs", "Bullets start with action verbs", 10, Math.min(1, vr / 0.6) * 10,
-    vr < 0.6 ? "Start bullets with action verbs such as Led, Built, Improved, Delivered." : null);
+    weakBullets > 0
+      ? "Some bullets use weak phrases like 'responsible for' or 'worked on'. Say what you did and what changed."
+      : vr < 0.6
+        ? "Start bullets with action verbs such as Led, Built, Improved, Delivered."
+        : null);
 
   // 6. Length (10)
   let lenPts = 10;
