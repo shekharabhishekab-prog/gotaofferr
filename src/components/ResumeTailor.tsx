@@ -109,6 +109,24 @@ export function ResumeTailor() {
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
+  // Carry-over from the ATS checker: prefill once, then clear it. Session only, never localStorage.
+  useEffect(() => {
+    try {
+      const raw = window.sessionStorage.getItem("gf-ats-carry");
+      if (!raw) return;
+      window.sessionStorage.removeItem("gf-ats-carry");
+      const c = JSON.parse(raw) as { resume?: string; jd?: string; company?: string; role?: string; file?: string; t?: number };
+      if (!c || typeof c.t !== "number" || Date.now() - c.t > 30 * 60 * 1000) return;
+      if (typeof c.resume === "string") setResume(c.resume.slice(0, 60000));
+      if (typeof c.file === "string") setFileName(c.file.slice(0, 120));
+      if (typeof c.jd === "string") setJobDescription(c.jd.slice(0, 30000));
+      if (typeof c.company === "string") setCompany(c.company.slice(0, 80));
+      if (typeof c.role === "string") setRole(c.role.slice(0, 80));
+    } catch {
+      /* storage unavailable or bad data */
+    }
+  }, []);
+
 
   async function onFile(file: File | undefined) {
     if (!file) return;
@@ -843,3 +861,4 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+
