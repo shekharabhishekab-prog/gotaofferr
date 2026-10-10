@@ -45,11 +45,24 @@ function headingKey(raw: string): string | null {
 const COMMON = new Set("and the for are you our not but all can has had its who how out new via per use led with that this from have were been your their they them will would could should about into over such also more most other than then when what which while where team work works worked working experience skills management business project projects company customer customers client clients using used years year".split(" "));
 /** Step 7: words repeated far too often (keyword stuffing). Warning only, no score change. */
 export function stuffedWords(text: string): string[] {
-  const ws = (text.toLowerCase().match(/[a-z][a-z+#.]{2,}/g) ?? []).map((w) => w.replace(/\.+$/, ""));
-  if (ws.length < 80) return [];
+  const tok = (s: string) => (s.toLowerCase().match(/[a-z][a-z+#.]{2,}/g) ?? []).map((w) => w.replace(/\.+$/, "")).filter((w) => w.length >= 3 && !COMMON.has(w));
+  const all = tok(text);
+  if (all.length < 80) return [];
   const freq = new Map<string, number>();
-  for (const w of ws) if (w.length >= 3 && !COMMON.has(w)) freq.set(w, (freq.get(w) ?? 0) + 1);
-  return [...freq.entries()].filter(([, n]) => n >= 10 && n / ws.length >= 0.03).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([w]) => w);
+  for (const w of all) freq.set(w, (freq.get(w) ?? 0) + 1);
+  // Cluster rule: a word crammed 3+ times into one line, in 2+ lines (a keyword list), or one word is 6%+ of the whole resume.
+  const clustered = new Map<string, number>();
+  for (const line of text.split("\n")) {
+    const lf = new Map<string, number>();
+    for (const w of tok(line)) lf.set(w, (lf.get(w) ?? 0) + 1);
+    for (const [w, n] of lf) if (n >= 3) clustered.set(w, (clustered.get(w) ?? 0) + 1);
+  }
+  const out = new Set<string>();
+  for (const [w, n] of freq) {
+    if (n >= 8 && (clustered.get(w) ?? 0) >= 2) out.add(w);
+    else if (n >= 15 && n / all.length >= 0.06) out.add(w);
+  }
+  return [...out].sort((a, b) => (freq.get(b) ?? 0) - (freq.get(a) ?? 0)).slice(0, 3);
 }
 
 export function robotView(resumeText: string): RobotView {
