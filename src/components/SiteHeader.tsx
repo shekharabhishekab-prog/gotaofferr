@@ -37,7 +37,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur">
-      <div className="site-container flex items-center justify-between py-3">
+      <div className="site-container flex items-center justify-between px-2 py-3 md:px-4 lg:px-8">
         <Link to="/" className="flex items-center" aria-label="gotaofferr home">
           <span className="text-xl font-bold tracking-tight text-foreground">gotaofferr</span>
         </Link>
@@ -129,4 +129,3 @@ export function SiteHeader() {
     </header>
   );
 }
-
