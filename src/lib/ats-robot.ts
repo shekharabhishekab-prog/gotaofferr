@@ -134,3 +134,25 @@ export function robotView(resumeText: string): RobotView {
     warnings, text: cleaned.slice(0, MAX), chars: cleaned.length, truncated: cleaned.length > MAX,
   };
 }
+
+/**
+ * Resume check for the ATS checker only. Soft rule: a file passes if it has contact details
+ * near the top plus two resume sections, or three sections, or two sections plus a date range.
+ * Essays, assignments and reports fail. Fresher resumes (Education + Skills + contact) pass.
+ */
+export function looksLikeResume(text: string): boolean {
+  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const EXTRA = ["core competencies", "competencies", "achievements", "awards", "volunteer experience", "volunteering", "publications", "interests", "professional experience", "technical proficiency", "tools", "strengths"];
+  const found = new Set<string>();
+  for (const l of lines) {
+    const k = headingKey(l);
+    if (k) { found.add(k); continue; }
+    const t = l.replace(/[:\-–—_*#]+$/g, "").replace(/^[#*\s]+/, "").toLowerCase();
+    if (t.length <= 40 && EXTRA.includes(t)) found.add(t);
+  }
+  const head = lines.slice(0, 20).join("\n");
+  const contact = /[\w.+-]+@[\w-]+\.[a-z]{2,}/i.test(head) || /linkedin\.com/i.test(head) || head.split("\n").some((l) => { const d = l.replace(/\D/g, ""); return d.length >= 10 && d.length <= 15 && !/\b(?:19|20)\d{2}\s*-\s*(?:19|20)\d{2}\b/.test(l); });
+  const dated = DATE_RANGE.test(text);
+  const h = found.size;
+  return (contact && h >= 2) || h >= 3 || (h >= 2 && dated);
+}
