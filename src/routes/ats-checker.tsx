@@ -308,6 +308,11 @@ function AtsDesignPreview() {
   const usageFn = useServerFn(getAtsUsage);
   const recordFn = useServerFn(recordAtsCheck);
   const [capped, setCapped] = useState(0);
+  const [quota, setQuota] = useState<{ used: number; limit: number } | null>(null);
+  useEffect(() => {
+    if (!user) { setQuota(null); return; }
+    usageFn().then((u) => setQuota({ used: u.used, limit: u.limit })).catch(() => {});
+  }, [user]);
   const [real, setReal] = useState<Sample | null>(null);
   const [pm, setPm] = useState(false);
   const [rawText, setRawText] = useState("");
@@ -355,7 +360,7 @@ function AtsDesignPreview() {
       setRawText(text);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
       if (!user) { guestUse(); if (guestLeft() <= 0) setWall(true); }
-      else { try { await recordFn(); } catch { /* ignore */ } }
+      else { try { await recordFn(); usageFn().then((u) => setQuota({ used: u.used, limit: u.limit })).catch(() => {}); } catch { /* ignore */ } }
       setReal(out);
       setPhase("done");
       setRun((n) => n + 1);
@@ -497,6 +502,7 @@ function AtsDesignPreview() {
               {phase === "scan" ? "Scanning..." : <>Check my resume <ArrowRight className="size-4" /></>}
             </button>
           )}
+          <p className="ak-quota">{!user ? "1 free check. Sign in for 10 a month." : quota ? (quota.limit < 0 ? "Unlimited checks on your plan." : `${Math.max(0, quota.limit - quota.used)} of ${quota.limit} checks left this month.`) : "\u00a0"}</p>
         </div>
 
         {/* RESULT */}
@@ -1072,6 +1078,7 @@ const AK_CSS = `
 .ak-gauge .ak-num b,.ak-pmg .ak-pmn b{position:relative;display:block;line-height:1!important;margin:0!important;padding:0!important}
 .ak-gauge .ak-num b span,.ak-pmg .ak-pmn b span{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin:4px 0 0!important;font-size:.85rem;font-weight:700;opacity:.55;line-height:1!important;white-space:nowrap}
 @media(min-width:821px){.ak-res.idle>.ak-pvbar{bottom:18px!important}}
+.ak-quota{grid-column:1/-1;margin:2px 0 0;text-align:center;font-size:.85rem;opacity:.75;font-weight:600}
 `;
 
 
