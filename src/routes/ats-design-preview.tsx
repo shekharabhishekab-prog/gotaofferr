@@ -492,11 +492,8 @@ function AtsDesignPreview() {
             ))}
           </div>
 
-          <div className="ak-fn">
-            <span>Facts never change. No skill or job is ever added for you.</span>
-            <Link to="/tailor" className="ak-btn sm">Fix it in 15 seconds <ArrowRight className="size-4" /></Link>
           </div>
-          </div>
+          <Link to="/tailor" className="ak-tail"><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 15 seconds. No fake skills.</span></Link>
           <div className="ak-pvbar">
             <button type="button" className={`ak-pv ${hl ? "hl" : ""}`} onClick={openPv}><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
             <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /></button>
@@ -957,6 +954,16 @@ const AK_CSS = `
 .ak-pmf{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:11px 0;border-bottom:1px dashed rgba(0,0,0,.25)}.ak-pmf b{display:block}.ak-pmf p{margin:3px 0 0;font-size:.92rem;color:rgba(0,0,0,.75)}
 .ak-pmn2{font-size:.8rem;opacity:.7;margin:18px 0 0}
 @media(max-width:820px){.ak-scroll{padding-right:0}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;width:34px;height:34px;margin:8px 8px -42px 0;box-shadow:0 0 0 4px var(--cream)}.ak-pmr{padding-right:18px}}
+
+.ak-tail{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#000;color:var(--y);border:4px solid var(--y);border-radius:16px;padding:18px 16px;text-decoration:none;text-align:center;position:relative;isolation:isolate;margin-top:16px;box-shadow:6px 6px 0 var(--y);transition:transform .15s}
+.ak-tail:hover{transform:translate(-2px,-2px)}
+.ak-tail:before{content:"";position:absolute;inset:-4px;border-radius:18px;border:4px solid var(--y);z-index:-1;pointer-events:none;will-change:transform,opacity;animation:ak-tpulse 2s ease-out infinite}
+@keyframes ak-tpulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.07,1.25);opacity:0}}
+.ak-tail-t{display:flex;align-items:center;gap:10px;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:1.65rem;line-height:1}
+.ak-tail-s{font-size:.82rem;font-weight:600;color:var(--cream);opacity:.85}
+.ak-res.idle .ak-tail{display:none}
+@media(min-width:821px){.ak-tail{position:absolute;left:18px;right:18px;bottom:96px;margin:0;height:84px;z-index:3;box-shadow:5px 5px 0 var(--y)}.ak-tail-t{font-size:1.9rem}.ak-res .ak-scroll{bottom:196px!important}}
+@media(max-width:820px){.ak-tail{padding:22px 12px}.ak-tail-t{font-size:1.75rem}.ak-tail-s{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
 
