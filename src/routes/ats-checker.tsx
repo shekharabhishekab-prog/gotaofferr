@@ -286,6 +286,7 @@ function AtsDesignPreview() {
   const [pos, setPos] = useState("");
   const [err, setErr] = useState("");
   const [wall, setWall] = useState(false);
+  const [dlGate, setDlGate] = useState(false);
   const { user } = useSession();
   const usageFn = useServerFn(getAtsUsage);
   const recordFn = useServerFn(recordAtsCheck);
@@ -313,11 +314,11 @@ function AtsDesignPreview() {
     if (phase === "scan") return;
     setErr("");
     if (!fileObj) { setErr("Add your resume first (PDF, DOCX or TXT)."); return; }
-    if (!user && guestLeft() <= 0) { setErr("You used your free check. Sign in to keep checking."); setWall(true); return; }
+    if (!user && guestLeft() <= 0) { setWall(true); return; }
     if (user) {
       try {
         const u = await usageFn();
-        if (!u.allowed) { setErr("You used all " + u.limit + " checks this month. Upgrade for more."); setCapped(u.limit); return; }
+        if (!u.allowed) { setCapped(u.limit); return; }
       } catch { /* counter down: allow the check */ }
     }
     setCapped(0);
@@ -335,7 +336,7 @@ function AtsDesignPreview() {
       const out = toSample(checkAts(text, jdt), jdt.trim().length > 40, { gap: hardGap(text, jdFull), region: regionNotes(jdFull, comp, wc) });
       setRawText(text);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
-      if (!user) guestUse();
+      if (!user) { guestUse(); if (guestLeft() <= 0) setWall(true); }
       else { try { await recordFn(); } catch { /* ignore */ } }
       setReal(out);
       setPhase("done");
@@ -349,6 +350,7 @@ function AtsDesignPreview() {
   };
   const dl = async () => {
     if (phase !== "done") { setErr("Run a check first, then download the report."); return; }
+    if (!user) { setDlGate(true); return; }
     try { await makePdf(s, title, !real); } catch { setErr("Could not build the report. Try again."); }
   };
   const carry = () => {
@@ -465,13 +467,17 @@ function AtsDesignPreview() {
             </div>
             <label className="ak-grow"><span>Job description</span><textarea placeholder="Paste the full job description. The robot matches keywords against it." value={jd} onChange={(e) => setJd(e.target.value)} /></label>
             {err ? <p className="ak-err" role="alert">{err}</p> : null}
-            {capped ? <p className="ak-err"><Link to="/pricing" className="underline">See plans</Link></p> : null}
-            {wall ? <p className="ak-err"><Link to="/auth" className="underline">Sign in to continue</Link></p> : null}
           </div>
 
-          <button type="button" className="ak-btn ak-go" disabled={phase === "scan"} onClick={go}>
-            {phase === "scan" ? "Scanning..." : <>Check my resume <ArrowRight className="size-4" /></>}
-          </button>
+          {capped && user ? (
+            <Link to="/pricing" className="ak-btn ak-go">See plans / upgrade <ArrowRight className="size-4" /></Link>
+          ) : wall && !user ? (
+            <Link to="/auth" search={{ redirect: "/ats-checker" }} className="ak-btn ak-go">Sign in to continue <ArrowRight className="size-4" /></Link>
+          ) : (
+            <button type="button" className="ak-btn ak-go" disabled={phase === "scan"} onClick={go}>
+              {phase === "scan" ? "Scanning..." : <>Check my resume <ArrowRight className="size-4" /></>}
+            </button>
+          )}
         </div>
 
         {/* RESULT */}
@@ -574,6 +580,17 @@ function AtsDesignPreview() {
         </div>
       </section>
 
+      {dlGate && !user ? (
+        <div className="ak-pm" role="dialog" aria-modal="true" aria-label="Sign in to download" onClick={() => setDlGate(false)}>
+          <div className="ak-gate" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="ak-pmx" onClick={() => setDlGate(false)} aria-label="Close"><X className="size-5" /></button>
+            <h3>Sign in to download your report</h3>
+            <p>It is free. Your resume stays in your browser, we do not store it.</p>
+            <Link to="/auth" search={{ redirect: "/ats-checker" }} className="ak-btn">Sign in <ArrowRight className="size-4" /></Link>
+            <Link to="/auth" search={{ redirect: "/ats-checker" }} className="ak-gate-s">Create a free account</Link>
+          </div>
+        </div>
+      ) : null}
       {pm ? (
         <div className="ak-pm" role="dialog" aria-modal="true" aria-label="Full ATS report" onClick={() => setPm(false)}>
           <div className="ak-pmc" onClick={(e) => e.stopPropagation()}>
@@ -962,7 +979,8 @@ const AK_CSS = `
 .ak-pv:hover{background:#000;color:var(--y)}
 @keyframes ak-pvp{50%{box-shadow:5px 5px 0 #000,0 0 0 7px rgba(255,214,0,.55)}}
 .ak-dl2{display:none}.ak-dl2-t{display:none}
-@media(min-width:821px){.ak-go.ak-btn{align-self:end;height:64px;padding:0 20px;font-size:1.15rem;border-radius:14px}.ak-res .ak-dl{display:none}.ak-res{padding-bottom:108px}.ak-pvbar,.ak-res.idle>.ak-pvbar{display:flex!important;position:absolute;left:0;right:0;bottom:0;margin:0;gap:8px;background:#000;height:78px;z-index:3}.ak-res .ak-pv{border:0;border-radius:0;box-shadow:none;animation:none;height:100%;padding:0 20px;font-size:1.3rem}.ak-res .ak-dl2{display:grid;place-items:center;flex:0 0 100px;width:100px;background:var(--y);color:#000;border:0;border-radius:0;cursor:pointer}.ak-res .ak-dl2:hover{background:var(--cream)}}
+.ak-gate{position:relative;background:var(--cream);color:#000;border:3px solid #000;border-radius:18px;padding:34px 26px 26px;width:min(92vw,420px);margin:auto;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;box-shadow:6px 6px 0 var(--y)}.ak-gate h3{margin:0;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;font-size:1.6rem;line-height:1.05}.ak-gate p{margin:0;font-size:.95rem}.ak-gate .ak-btn{width:100%;box-sizing:border-box;background:#000;color:var(--y)}.ak-gate .ak-btn:after{display:none}.ak-gate .ak-pmx{position:absolute;top:10px;right:10px}.ak-gate-s{color:#000;font-weight:700;text-decoration:underline;font-size:.95rem}
+@media(min-width:821px){.ak-go.ak-btn{align-self:end;height:64px;padding:0 20px;font-size:1.15rem;border-radius:14px}.ak-res .ak-dl{display:none}.ak-res{padding-bottom:108px}.ak-pvbar,.ak-res.idle>.ak-pvbar{display:flex!important;position:absolute;left:18px;right:18px;bottom:114px;margin:0;gap:8px;background:transparent;height:68px;z-index:3}.ak-res .ak-pv{border:3px solid #000;border-radius:14px;box-shadow:none;animation:none;height:100%;padding:0 20px;font-size:1.3rem}.ak-res .ak-dl2{display:grid;place-items:center;flex:0 0 100px;width:100px;background:var(--y);color:#000;border:3px solid #000;border-radius:14px;cursor:pointer}.ak-res .ak-dl2:hover{background:var(--cream)}}
 @media(max-width:820px){.ak-res .ak-dl{display:none}.ak-pvbar{margin:16px 0 0;gap:10px;flex-direction:column}.ak-pv{flex:none;width:100%;border:3px solid #000;border-radius:14px;box-shadow:none;animation:none;padding:18px 12px;font-size:1.1rem;gap:8px}.ak-dl2{display:flex;flex:none;width:100%;min-width:0;align-items:center;justify-content:center;gap:10px;padding:16px 12px;background:#000;color:var(--y);border:3px solid #000;border-radius:14px;cursor:pointer;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;font-size:1.1rem}.ak-dl2-t{display:inline}}
 
 .ak-err{margin:0;color:#ff8a7a;font-weight:700;font-size:.9rem}
@@ -998,7 +1016,7 @@ const AK_CSS = `
 .ak-tail-t{display:flex;align-items:center;gap:10px;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:1.65rem;line-height:1}
 .ak-tail-s{font-size:.82rem;font-weight:600;color:var(--cream);opacity:.85}
 .ak-res.idle .ak-tail{display:none}
-@media(min-width:821px){.ak-tail{position:absolute;left:18px;right:18px;bottom:96px;margin:0;height:84px;z-index:3;box-shadow:5px 5px 0 var(--y)}.ak-tail-t{font-size:1.9rem}.ak-res .ak-scroll{bottom:196px!important}}
+@media(min-width:821px){.ak-tail{position:absolute;left:18px;right:18px;bottom:18px;margin:0;height:84px;z-index:3;box-shadow:5px 5px 0 var(--y)}.ak-tail-t{font-size:1.9rem}.ak-res .ak-scroll{bottom:204px!important}}
 @media(max-width:820px){.ak-tail{padding:20px 12px;margin:10px 0 0;width:100%;box-sizing:border-box;border-width:3px;box-shadow:none}.ak-tail:before{display:none}.ak-tail-t{font-size:1.6rem}.ak-tail-s{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
