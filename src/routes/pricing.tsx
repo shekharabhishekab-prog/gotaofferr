@@ -98,6 +98,7 @@ const plans: Record<PlanKey, {
     bestFor: "Best for: testing whether tailoring actually gets you replies.",
     features: [
       "5 resume + cover letter tailorings per month",
+      "10 ATS resume checks per month",
       "3 resumes in the resume builder per month",
       "1 AI job finder search per month",
       "1 job alert per month (3 emails, every 3 days)",
@@ -118,6 +119,7 @@ const plans: Record<PlanKey, {
     bestFor: "Best for: applying to a handful of roles you really want.",
     features: [
       "20 resume + cover letter tailorings per month",
+      "30 ATS resume checks per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
       "12 resumes in the resume builder",
       "5 AI job finder searches per month",
@@ -140,6 +142,7 @@ const plans: Record<PlanKey, {
     bestFor: "Best for: applying to 10-50 roles a month from boards you browse yourself.",
     features: [
       "129 resume + cover letter tailorings per month",
+      "100 ATS resume checks per month",
       "Resume builder: build a resume from scratch and download it as a PDF",
       "20 resumes in the resume builder",
       "10 AI job finder searches per month",
@@ -167,6 +170,7 @@ const plans: Record<PlanKey, {
     bestFor: "Best for: a full-time search, or running two career tracks at once.",
     features: [
       "199 resume + cover letter tailorings per month",
+      "Unlimited ATS resume checks",
       "Resume builder: build a resume from scratch and download it as a PDF",
       "50 resumes in the resume builder",
       "30 AI job finder searches per month - one clean list across every board",
