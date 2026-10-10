@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useServerFn } from "@tanstack/react-start";
 import { getAtsUsage, recordAtsCheck } from "@/lib/ats-usage.functions";
+import { robotView } from "@/lib/ats-robot";
 import { hardGap, regionNotes, type HardGap, type RegionNote } from "@/lib/ats-region";
 
 export const Route = createFileRoute("/ats-checker")({
@@ -298,6 +299,7 @@ function AtsDesignPreview() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const resRef = useRef<HTMLDivElement | null>(null);
   const s = real ?? SAMPLES[key];
+  const rv = pm && real && rawText ? robotView(rawText) : null;
   const title = real ? [pos.trim(), comp.trim()].filter(Boolean).join(" at ") : "";
   const pick = (f: File) => { setFile(f.name); setFileObj(f); setErr(""); };
   const showSample = () => {
@@ -617,6 +619,24 @@ function AtsDesignPreview() {
                   <div><b>{f.bad}</b><p>{f.fix}</p></div>
                 </div>
               ))}
+              {rv ? (
+                <div className="ak-rb">
+                  <h4>What the robot read</h4>
+                  <p className="ak-rbs">This is the text a simple ATS pulls out of your file, and the fields it guesses from it. It stays in your browser.</p>
+                  <div className="ak-rbg">
+                    {([["Name", rv.name], ["Email", rv.email], ["Phone", rv.phone], ["Location", rv.location], ["Links", rv.links.length ? rv.links.join(", ") : null]] as [string, string | null][]).map(([k, v]) => (
+                      <div key={k} className={v ? "ok" : "no"}><span>{k}</span><b>{v ?? "Not found"}</b></div>
+                    ))}
+                    <div className={rv.roles.length ? "ok" : "no"}><span>Jobs with dates</span><b>{rv.roles.length ? rv.roles.length + " found" : "Not found"}</b></div>
+                    <div className={rv.education.length ? "ok" : "no"}><span>Education</span><b>{rv.education.length ? rv.education[0] : "Not found"}</b></div>
+                    <div className={rv.skillCount ? "ok" : "no"}><span>Skills list</span><b>{rv.skillCount ? rv.skillCount + " found: " + rv.skills.slice(0, 6).join(", ") : "Not found"}</b></div>
+                  </div>
+                  <div className="ak-rbc">{rv.sections.map((x) => <span key={x.label} className={x.found ? "ok" : "no"}>{x.found ? "✓" : "✗"} {x.label}</span>)}</div>
+                  {rv.roles.length ? <ul className="ak-rbl">{rv.roles.map((r, i) => <li key={i}>{r}</li>)}</ul> : null}
+                  {rv.warnings.map((w) => <p key={w} className="ak-rbw">! {w}</p>)}
+                  <details className="ak-rbt"><summary>Show the raw text the robot got ({rv.chars} characters)</summary><pre>{rv.text}{rv.truncated ? "\n... (cut here, the robot got the rest too)" : ""}</pre></details>
+                </div>
+              ) : null}
               <p className="ak-pmn2">Heuristic check, not an ATS vendor score. Facts never change. No skill or job is ever added for you.</p>
             </div>
           </div>
@@ -1007,6 +1027,11 @@ const AK_CSS = `
 .ak-pmb .tr{height:12px;background:rgba(0,0,0,.12);border-radius:99px;overflow:hidden}.ak-pmb i{display:block;height:100%;border-radius:99px}.ak-pmb i.g{background:#0a7a2f}.ak-pmb i.m{background:#e0a800}.ak-pmb i.b{background:#c4230f}.ak-pmb em{font-style:normal;text-align:right}
 .ak-pmf{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:11px 0;border-bottom:1px dashed rgba(0,0,0,.25)}.ak-pmf b{display:block}.ak-pmf p{margin:3px 0 0;font-size:.92rem;color:rgba(0,0,0,.75)}
 .ak-pmn2{font-size:.8rem;opacity:.7;margin:18px 0 0}
+.ak-rb{margin-top:22px}.ak-rbs{margin:0 0 10px;font-size:.85rem;opacity:.75}.ak-rbg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ak-rbg>div{border:2px solid #000;border-radius:10px;padding:8px 10px;min-width:0}.ak-rbg>div.no{border-style:dashed;background:rgba(214,60,40,.08)}.ak-rbg span{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;opacity:.65}.ak-rbg b{display:block;font-size:.88rem;overflow-wrap:anywhere}.ak-rbg .no b{color:#b3261e}
+.ak-rbc{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.ak-rbc span{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;border-radius:999px;padding:4px 10px;border:2px solid #000}.ak-rbc .ok{background:#000;color:var(--y)}.ak-rbc .no{border-style:dashed;opacity:.65}
+.ak-rbl{margin:10px 0 0;padding-left:18px;font-size:.85rem}.ak-rbw{margin:10px 0 0;font-size:.88rem;font-weight:700;color:#b3261e}
+.ak-rbt{margin-top:12px}.ak-rbt summary{cursor:pointer;font-weight:700;font-size:.9rem}.ak-rbt pre{margin:8px 0 0;max-height:240px;overflow:auto;background:#000;color:#f6f1d6;border-radius:10px;padding:12px;font-size:.75rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:820px){.ak-rbg{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:820px){.ak-scroll{padding-right:12px}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;width:34px;height:34px;margin:8px 8px -42px 0;box-shadow:0 0 0 4px var(--cream)}.ak-pmr{padding-right:18px}}
 
 .ak-tail{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#000;color:var(--y);border:4px solid var(--y);border-radius:16px;padding:18px 16px;text-decoration:none;text-align:center;position:relative;isolation:isolate;margin-top:16px;box-shadow:6px 6px 0 var(--y);transition:transform .15s}
