@@ -623,6 +623,8 @@ const AI_CSS = `
 .ai-mk{display:inline;color:#0b0a08!important;background:var(--y);padding:.04em .16em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .ai-d.ai-mk{font-size:1.12em;line-height:1.28;padding:.02em .14em;letter-spacing:-.02em}
 .ai-ln:has(.ai-cur){margin-top:.28em}
+.ai-y.ai-mk{white-space:nowrap}
+.ai-ln:has(.ai-d.ai-mk){margin-bottom:.12em}
 @media(max-width:600px){.ai-h1{font-size:clamp(2rem,9.6vw,2.7rem);line-height:1.02}.ai-ln{margin-top:.14em}.ai-sub{font-size:.95rem;line-height:1.5;margin-top:16px;color:rgba(246,241,214,.62)}}
 .ai-sub{max-width:38rem;margin-top:18px;font-size:1.08rem;line-height:1.5;color:rgba(246,241,214,.75)}
 .ai-sub2{font-size:1rem;line-height:1.5;color:rgba(246,241,214,.75);margin:8px 0}
@@ -767,9 +769,9 @@ const AI_CSS = `
 .ai-fl3{right:20%;top:58%;background:#f6f1d6!important;animation-delay:-2s!important}
 .ai-fl5{right:3%;top:80%;background:#0b0a08!important;color:#f6f1d6!important;border:2px dashed rgba(255,214,0,.6);animation-delay:-3s!important}
 .ai-fl4,.ai-fl6,.ai-fl7{background:none!important;box-shadow:none!important;padding:0!important;font-size:2.6rem!important}
-.ai-fl4{right:28%;top:30%;animation-duration:3.2s!important}
+.ai-fl4{right:62%;top:30%;animation-duration:3.2s!important}
 .ai-fl6{right:0;top:2%;animation:ai-spinz 6s linear infinite!important}
-.ai-fl7{right:30%;top:84%;animation-duration:2.6s!important}
+.ai-fl7{right:58%;top:80%;animation-duration:2.6s!important}
 @keyframes ai-flt{0%,100%{translate:0 0;rotate:-2deg}50%{translate:0 -16px;rotate:3deg}}
 @keyframes ai-spinz{to{transform:rotate(360deg)}}
 }
