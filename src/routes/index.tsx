@@ -107,6 +107,12 @@ const steps = [
     title: "Make resume from scratch",
     body: "Build an ATS-friendly resume with AI help on every field, then download the PDF.",
   },
+  {
+    n: "04",
+    tag: "Check",
+    title: "ATS score checker",
+    body: "Drop your resume and see what the robot reads: score, missing keywords and fixes. It runs in your browser, nothing is stored.",
+  },
 ];
 
 const scope = [
@@ -336,6 +342,7 @@ const flow = [
   { n: "01", tag: "Find", title: "Find the jobs", cta: "Open job finder", clip: "k1" },
   { n: "02", tag: "Tailor", title: "Tailor the application", cta: "Tailor a resume", clip: "k2" },
   { n: "03", tag: "Build", title: "Make resume from scratch", cta: "Open the builder", clip: "k3" },
+  { n: "04", tag: "Check", title: "ATS score checker", cta: "Check my resume", clip: "k2" },
 ] as const;
 
 /* Small connector between sections: a line that grows with scroll and a
@@ -381,6 +388,18 @@ function StepArt({ i }: { i: number }) {
           <i className="hp-sweep s" style={{ ["--k" as string]: 2 }} />
           <i className="hp-sweep" style={{ ["--k" as string]: 3 }} />
         </div>
+      </div>
+    );
+  if (i === 3)
+    return (
+      <div aria-hidden className="hp-art hp-art-3">
+        {["Keywords", "Layout"].map((f, k) => (
+          <div key={f} className="hp-file" style={{ ["--k" as string]: k }}>
+            <span>{f}</span>
+            <em>checked</em>
+          </div>
+        ))}
+        <ArrowRight className="hp-down size-6 rotate-90 text-highlight" />
       </div>
     );
   return (
@@ -1250,6 +1269,8 @@ function Index() {
                         <h3>
                           {i === 0 ? (
                             <Link to="/jobs" search={{ alert: undefined }} className={titleCls}>{titleIn}</Link>
+                          ) : i === 3 ? (
+                            <Link to="/ats-checker" className={titleCls}>{titleIn}</Link>
                           ) : (
                             <Link to={i === 1 ? "/tailor" : "/resume-builder"} className={titleCls}>{titleIn}</Link>
                           )}
@@ -1257,6 +1278,10 @@ function Index() {
                         <p className="mt-3 hidden max-w-lg text-sm text-white/70 sm:block sm:text-base">{body}</p>
                         {i === 0 ? (
                           <Link to="/jobs" search={{ alert: undefined }} className={ctaCls}>
+                            {s.cta} <ArrowRight className="size-3.5" />
+                          </Link>
+                        ) : i === 3 ? (
+                          <Link to="/ats-checker" className={ctaCls}>
                             {s.cta} <ArrowRight className="size-3.5" />
                           </Link>
                         ) : (
