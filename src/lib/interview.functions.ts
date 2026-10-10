@@ -61,7 +61,8 @@ const speakSchema = z.object({
   slow: z.boolean().default(false),
 });
 
-const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-2.5-flash-preview-tts"];
+// One model only, so the voice never changes mid interview. A second try on the same model covers a rambling reply; a quota error stops at once and the room uses the browser voice.
+const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.1-flash-tts-preview"];
 
 // Clean the raw TTS samples: drop a stray odd byte, remove DC offset, trim near-silence, fade the edges, and soft-limit peaks (avoids clicks and harsh clipping).
 function cleanPcm(raw: Uint8Array, rate: number): Uint8Array {
@@ -133,7 +134,7 @@ export const cocoSpeak = createServerFn({ method: "POST" })
           }),
         });
         lastStatus = r.status;
-        if (!r.ok) { console.warn("[coco-tts]", model, r.status); continue; }
+        if (!r.ok) { console.warn("[coco-tts]", model, r.status); if (r.status === 429 || r.status === 404) break; continue; }
         const j: any = await r.json();
         const b64: string | undefined = j?.candidates?.[0]?.content?.parts?.find((p: any) => p?.inlineData?.data)?.inlineData?.data;
         if (!b64) continue;
