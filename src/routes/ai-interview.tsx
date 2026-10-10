@@ -146,7 +146,7 @@ function AiInterview() {
     setListening(false);
   }, []);
 
-  const startMic = useCallback(() => {
+  const startRec = useCallback(() => {
     setMicBlocked(false);
     setErr("");
     const w = window as any;
@@ -197,6 +197,24 @@ function AiInterview() {
     recRef.current = rec;
     try { rec.start(); setErr(""); } catch (e: any) { setListening(false); setErr("Could not start the microphone (" + String(e?.name || "error") + "). Try again, or type."); }
   }, []);
+
+  // Check the microphone itself first, so we can tell "no mic / blocked" apart from "speech service failed".
+  const startMic = useCallback(() => {
+    setErr("");
+    setMicBlocked(false);
+    const md = navigator.mediaDevices;
+    if (!md || !md.getUserMedia) { startRec(); return; }
+    md.getUserMedia({ audio: true }).then((st) => {
+      st.getTracks().forEach((t) => t.stop());
+      startRec();
+    }).catch((e: any) => {
+      const n = String(e?.name || "error");
+      if (n === "NotAllowedError" || n === "SecurityError") setMicBlocked(true);
+      else if (n === "NotFoundError" || n === "OverconstrainedError") setErr("No microphone was found. Plug one in or pick one in your browser settings. Or just type. (code: " + n + ")");
+      else if (n === "NotReadableError" || n === "AbortError") setErr("The microphone is busy or not readable (another app may be using it). Close other apps using the mic, then try again. Or just type. (code: " + n + ")");
+      else setErr("Could not open the microphone. Or just type. (code: " + n + ")");
+    });
+  }, [startRec]);
 
   // Coco keeps moving: every so often she wanders around the tile while you are not talking.
   useEffect(() => {
