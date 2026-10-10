@@ -1921,7 +1921,7 @@ html,body{overflow-x:clip}
 .hx-l1 .hx-outline{font-size:3.6rem}
 }
 @media(min-width:640px){
-header .site-container{max-width:none!important;width:100%!important;margin-left:0!important;margin-right:0!important;padding-left:1rem!important;padding-right:1rem!important}
+header .site-container{max-width:none!important;width:100%!important;margin-left:0!important;margin-right:0!important;padding-left:clamp(1.25rem,4.4vw,3.5rem)!important;padding-right:clamp(1.25rem,4.4vw,3.5rem)!important}
 .hx-m1,.hx-m3{left:1rem}.hx-m2,.hx-m4{right:1rem}
 .hx-m1,.hx-m2{top:5rem;line-height:1}
 .hx-m1,.hx-m2{display:none!important}
