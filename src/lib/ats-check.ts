@@ -148,8 +148,22 @@ export function checkAts(resumeText: string, jobDescription?: string): AtsResult
   // 7. Formatting hazards (10)
   let fmt = 10;
   const issues: string[] = [];
-  const tableLines = nonEmpty.filter((line) => (line.match(/\|/g) ?? []).length >= 2 && !/@|https?:|\+?\d[\d ()-]{8,}/i.test(line));
-  const hasTable = tableLines.length >= 2 || nonEmpty.some((line) => /\t.*\t/.test(line));
+  // Pipes are common in plain skill and contact lines ("SEO | Ads | Sales"). Count them as a table only when
+  // 3+ lines share the same number of short cells (a grid), or when it is a markdown-style table.
+  const cellsOf = (line: string) => line.split("|").map((c) => c.trim()).filter(Boolean);
+  const pipeLines = nonEmpty.filter((line) => (line.match(/\|/g) ?? []).length >= 2 && !/@|https?:|\+?\d[\d ()-]{8,}/i.test(line));
+  const byCount = new Map<number, string[][]>();
+  for (const line of pipeLines) {
+    const cells = cellsOf(line);
+    if (cells.length >= 3) byCount.set(cells.length, [...(byCount.get(cells.length) ?? []), cells]);
+  }
+  const gridTable = [...byCount.values()].some((rows) => {
+    if (rows.length < 4) return false;
+    const all = rows.flat();
+    return all.reduce((n, c) => n + c.length, 0) / all.length <= 18;
+  });
+  const mdTable = pipeLines.some((line) => /^\s*\|.*\|\s*$/.test(line)) && pipeLines.length >= 2 || nonEmpty.some((line) => /\|\s*:?-{3,}:?\s*\|/.test(line));
+  const hasTable = gridTable || mdTable || nonEmpty.some((line) => /\t.*\t/.test(line));
   if (hasTable) { fmt -= 8; issues.push("tables or columns"); }
   if (/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/u.test(text)) { fmt -= 3; issues.push("emoji or icons"); }
   if (/\[(image|photo|logo|graphic)\]/i.test(text)) { fmt -= 3; issues.push("images"); }
