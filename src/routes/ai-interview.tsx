@@ -625,7 +625,7 @@ const AI_CSS = `
 .ai-ln:has(.ai-cur){margin-top:.28em}
 .ai-y.ai-mk{white-space:nowrap}
 .ai-ln:has(.ai-d.ai-mk){margin-bottom:.12em}
-@media(max-width:600px){.ai-h1{font-size:clamp(2rem,9.6vw,2.7rem);line-height:1.02}.ai-ln{margin-top:.14em}.ai-sub{font-size:.95rem;line-height:1.5;margin-top:16px;color:rgba(246,241,214,.62)}}
+@media(max-width:600px){.ai-h1{font-size:clamp(2rem,9.6vw,2.7rem);line-height:1.02}.ai-ln{margin-top:.14em}}
 .ai-sub{max-width:38rem;margin-top:18px;font-size:1.08rem;line-height:1.5;color:rgba(246,241,214,.75)}
 .ai-sub2{font-size:1rem;line-height:1.5;color:rgba(246,241,214,.75);margin:8px 0}
 .ai-stage{padding-top:22px;padding-bottom:80px;scroll-margin-top:80px}
@@ -754,6 +754,12 @@ const AI_CSS = `
 .ai-answer{padding:10px}
 }
 
+@media(max-width:600px){
+.ai-hero .ai-d.ai-mk{font-size:.9em;white-space:nowrap;line-height:1.25}
+.ai-hero .ai-cur,.ai-hero .ai-y{font-size:.9em}
+.ai-hero .ai-ln:has(.ai-cur){white-space:nowrap;margin-top:.3em}
+.ai-hero .ai-sub{font-size:.88rem;line-height:1.5;margin-top:14px;color:rgba(246,241,214,.55);font-weight:400}
+}
 .ai-fl{display:none}
 @media (min-width:900px){
 .ai-hero .ai-mk{background:linear-gradient(var(--y),var(--y)) 0 50%/0% 100% no-repeat;animation:ai-mark .9s .35s cubic-bezier(.2,.8,.2,1) forwards}
