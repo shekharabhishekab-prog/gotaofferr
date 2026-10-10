@@ -461,7 +461,7 @@ function AiInterview() {
       <section className="ai-hero">
         <div className="ai-wrap">
           <span className="ai-mono">( practice with coco, 10 short questions )</span>
-          <h1 className="ai-h1" aria-label="Scared of interviews? Practice with a cute cat."><span className="ai-ln"><span className="ai-d ai-mk ai-big">Scared of<br />interviews?</span></span><span className="ai-ln"><span className="ai-cur">Practice with a</span> <span className="ai-y ai-mk">cute cat.</span></span></h1>
+          <h1 className="ai-h1" aria-label="Scared of interviews? Practice with a cute cat."><span className="ai-ln"><span className="ai-d ai-mk ai-big">Scared of<br />interviews?</span></span><span className="ai-ln"><span className="ai-cur">Practice with a</span><br className="ai-brd" /> <span className="ai-y ai-mk">cute cat.</span></span></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
           <div className="ai-fl" aria-hidden="true">
             <span className="ai-chip c1">Meow! 🐾</span>
@@ -752,10 +752,12 @@ const AI_CSS = `
 .ai-answer{padding:10px}
 }
 
-@media(max-width:600px){
-.ai-hero .ai-d.ai-mk{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:.8em;white-space:normal;line-height:1.22;letter-spacing:-.04em}
+.ai-brd{display:none}
+.ai-mk{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .42 -.13'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/140px 140px,linear-gradient(var(--y),var(--y))}
+@media(max-width:899px){
+.ai-hero .ai-d.ai-mk{font-family:"DM Sans Variable","DM Sans",ui-sans-serif,system-ui,sans-serif;font-weight:800;font-size:.9em;white-space:normal;line-height:1.22;letter-spacing:-.025em}
 .ai-hero .ai-ln:has(.ai-d.ai-mk){margin-bottom:.22em}
-.ai-hero .ai-cur,.ai-hero .ai-y{font-size:.9em}
+.ai-hero .ai-cur,.ai-hero .ai-y{font-family:"DM Sans Variable","DM Sans",ui-sans-serif,system-ui,sans-serif;font-style:normal;font-weight:700;text-transform:none;font-size:.68em;letter-spacing:-.015em;line-height:1.3}
 .ai-hero .ai-ln:has(.ai-cur){white-space:nowrap;margin-top:.3em}
 .ai-hero .ai-sub{font-size:.88rem;line-height:1.5;margin-top:14px;color:rgba(246,241,214,.55);font-weight:400}
 }
@@ -778,6 +780,18 @@ const AI_CSS = `
 .ai-flem span:nth-child(2){animation-delay:-.9s}
 .ai-flem span:nth-child(3){animation-delay:-1.8s}
 @keyframes ai-flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+}
+@media (min-width:900px){
+.ai-hero .ai-cur,.ai-hero .ai-y{font-family:"HPSyne","HPBric",sans-serif;font-style:normal;font-weight:800;text-transform:uppercase;letter-spacing:-.04em;font-size:.5em;line-height:1.3}
+.ai-hero .ai-ln:has(.ai-cur){margin-left:2.2em;margin-top:.5em;line-height:1.35}
+.ai-brd{display:inline}
+.ai-hero .ai-y.ai-mk{padding:.04em .2em}
+.ai-fl{top:24px;height:auto;align-content:start;padding:22px;border:1.5px dashed rgba(255,214,0,.35);border-radius:22px;box-sizing:content-box;background:rgba(255,214,0,.04)}
+.ai-chip,.ai-flem span{animation:none!important}
+.ai-flem span{display:inline-block;animation:ai-wig 2.4s ease-in-out infinite!important}
+.ai-flem span:nth-child(2){animation-delay:-.8s!important}
+.ai-flem span:nth-child(3){animation-delay:-1.6s!important}
+@keyframes ai-wig{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
 }
 @media (min-width:900px) and (max-width:1279px){.ai-fl{display:none}}
 @media (min-width:900px) and (prefers-reduced-motion:reduce){.ai-hero .ai-mk{animation:none;background-size:140px 140px,100% 100%}.ai-chip,.ai-flem span,.ai-hero .ai-ln,.ai-hero .ai-sub{animation:none!important}}
