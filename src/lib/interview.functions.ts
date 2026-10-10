@@ -90,7 +90,7 @@ export const cocoSpeak = createServerFn({ method: "POST" })
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": key },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: "Say this warmly, in a friendly, bright, natural young woman's voice, like a kind interviewer: " + data.text }] }],
+            contents: [{ parts: [{ text: "Speak as a cute, warm, slightly playful young woman who is interviewing someone she likes. Sound like a real person talking, not a newsreader: natural, expressive, with pitch and speed that rise and fall, a gentle smile in the voice, a small thinking pause (a short beat) before the main part of the question, and a little emphasis on the key words. Not flat, not robotic, not rushed. Say exactly this text and nothing else: " + data.text }] }],
             generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Leda" } } } },
           }),
         });
