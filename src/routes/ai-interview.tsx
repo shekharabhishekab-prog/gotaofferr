@@ -753,7 +753,14 @@ const AI_CSS = `
 }
 
 .ai-brd{display:none}
-.ai-mk{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .42 -.13'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/140px 140px,linear-gradient(var(--y),var(--y))}
+.ai-mk{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .42 -.13'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/140px 140px,linear-gradient(var(--y),var(--y)) 0 50%/0% 100% no-repeat;animation:ai-mark .9s .35s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes ai-mark{to{background-size:140px 140px,100% 100%}}
+.ai-hero .ai-ln{animation:ai-rise .6s ease-out both}
+.ai-hero .ai-ln:nth-child(2){animation-delay:.12s}
+.ai-hero .ai-sub{animation:ai-rise .7s .25s ease-out both}
+.ai-btn:active,.ai-tile:active{transform:scale(.97)}
+.ai input,.ai textarea{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.12)}
+@media (prefers-reduced-motion:reduce){.ai-mk{animation:none;background-size:140px 140px,100% 100%}.ai-hero .ai-ln,.ai-hero .ai-sub{animation:none}}
 @media(max-width:899px){
 .ai-hero .ai-d.ai-mk{font-family:"DM Sans Variable","DM Sans",ui-sans-serif,system-ui,sans-serif;font-weight:800;font-size:.9em;white-space:normal;line-height:1.22;letter-spacing:-.025em}
 .ai-hero .ai-ln:has(.ai-d.ai-mk){margin-bottom:.22em}
@@ -782,8 +789,8 @@ const AI_CSS = `
 @keyframes ai-flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 }
 @media (min-width:900px){
-.ai-hero .ai-cur,.ai-hero .ai-y{font-family:"HPSyne","HPBric",sans-serif;font-style:normal;font-weight:800;text-transform:uppercase;letter-spacing:-.04em;font-size:.5em;line-height:1.3}
-.ai-hero .ai-ln:has(.ai-cur){margin-left:2.2em;margin-top:.5em;line-height:1.35}
+.ai-hero .ai-cur,.ai-hero .ai-y{font-family:"HPSyne","HPBric",sans-serif;font-style:normal;font-weight:800;text-transform:uppercase;letter-spacing:-.04em;font-size:1em;line-height:1.25}
+.ai-hero .ai-ln:has(.ai-cur){font-size:.5em;margin-left:4em;margin-top:.9em;line-height:1.25}
 .ai-brd{display:inline}
 .ai-hero .ai-y.ai-mk{padding:.04em .2em}
 .ai-fl{top:24px;height:auto;align-content:start;padding:22px;border:1.5px dashed rgba(255,214,0,.35);border-radius:22px;box-sizing:content-box;background:rgba(255,214,0,.04)}
