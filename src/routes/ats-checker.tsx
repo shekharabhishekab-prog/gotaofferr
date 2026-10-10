@@ -622,6 +622,7 @@ function AtsDesignPreview() {
               </div>
               <p>{s.verdict}</p>
               <button type="button" className="ak-pmd" onClick={dl}><Download className="size-5" /> Download report</button>
+              <Link to="/tailor" className="ak-pmd ak-pmt2" onClick={carry}>Tailor resume <ArrowRight className="size-5" /></Link>
             </aside>
             <div className="ak-pmr">
               <h4>Score by area</h4>
@@ -1037,6 +1038,7 @@ const AK_CSS = `
 .ak-pmn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:0}.ak-pmn b{font-size:3.4rem;line-height:1;font-family:var(--font-display,inherit)}.ak-pmn span{opacity:.7;margin-left:2px}
 .ak-pml p{margin:0;font-weight:600}
 .ak-pmd{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;border:0;border-radius:12px;padding:16px 18px;width:100%;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+.ak-pmt2{margin-top:10px;background:#000;color:var(--y);text-decoration:none}
 .ak-pmr{padding:28px 30px;overflow-y:auto;overscroll-behavior:contain}
 .ak-pmr h4{font-family:var(--font-display,inherit);text-transform:uppercase;font-size:1.15rem;margin:0 0 12px}.ak-pmr h4:not(:first-child){margin-top:26px;border-top:2px solid #000;padding-top:18px}
 .ak-pmb{display:grid;grid-template-columns:90px 1fr 54px;align-items:center;gap:12px;font-weight:700;font-size:.95rem;margin-bottom:10px}
@@ -1049,7 +1051,7 @@ const AK_CSS = `
 .ak-rbl{margin:10px 0 0;padding-left:18px;font-size:.85rem}.ak-rbw{margin:10px 0 0;font-size:.88rem;font-weight:700;color:#b3261e}
 .ak-rbt{margin-top:12px}.ak-rbt summary{cursor:pointer;font-weight:700;font-size:.9rem}.ak-rbt pre{margin:8px 0 0;max-height:240px;overflow:auto;background:#000;color:#f6f1d6;border-radius:10px;padding:12px;font-size:.75rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:820px){.ak-rbg{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:820px){.ak-scroll{padding-right:12px}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;width:34px;height:34px;margin:8px 8px -42px 0;box-shadow:0 0 0 4px var(--cream)}.ak-pmr{padding-right:18px}}
+@media(max-width:820px){.ak-scroll{padding-right:12px}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmt2{margin-top:10px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;width:34px;height:34px;margin:8px 8px -42px 0;box-shadow:0 0 0 4px var(--cream)}.ak-pmr{padding-right:18px}}
 
 .ak-tail{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#000;color:var(--y);border:4px solid var(--y);border-radius:16px;padding:18px 16px;text-decoration:none;text-align:center;position:relative;isolation:isolate;margin-top:16px;box-shadow:6px 6px 0 var(--y);transition:transform .15s}
 .ak-tail:hover{transform:translate(-2px,-2px)}
