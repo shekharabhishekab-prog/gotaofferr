@@ -455,7 +455,7 @@ function AiInterview() {
       <section className="ai-hero">
         <div className="ai-wrap">
           <span className="ai-mono">( practice with coco, 10 short questions )</span>
-          <h1 className="ai-h1">AI <mark>Interview.</mark></h1>
+          <h1 className="ai-h1">{"Everyone's scared of interviews."} <span className="ai-h1b">Smart ones practice with a <mark>cat.</mark></span></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
         </div>
       </section>
@@ -603,7 +603,8 @@ const AI_CSS = `
 
 .ai-hero{position:relative;padding:56px 0 18px;background:radial-gradient(ellipse 38% 45% at 70% 50%,rgba(255,214,0,.14),transparent 70%)}
 .ai-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;letter-spacing:.04em;color:var(--y)}
-.ai-h1{margin:14px 0 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.95;letter-spacing:-.015em;font-size:clamp(2.6rem,7vw,5.5rem)}
+.ai-h1{margin:14px 0 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.95;letter-spacing:-.015em;font-size:clamp(2rem,5.4vw,4.6rem);max-width:20ch}
+.ai-h1b{display:block;margin-top:.12em}
 .ai-h1 mark{background:var(--y);color:#000;padding:0 .14em;display:inline-block;transform:rotate(-1.5deg)}
 .ai-sub{max-width:38rem;margin-top:18px;font-size:1.08rem;line-height:1.5;color:rgba(246,241,214,.75)}
 .ai-sub2{font-size:1rem;line-height:1.5;color:rgba(246,241,214,.75);margin:8px 0}
