@@ -194,6 +194,7 @@ function AdminPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Stat label="Total tailored resumes" value={cards.record.cards.rewrites} icon={<BarChart3 className="h-4 w-4" />} />
               <Stat label="Total resume builder uses" value={cards.record.cards.builderDownloads} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Total ATS score checks (logged-in only, guests not counted)" value={cards.record.cards.atsChecks ?? 0} icon={<BarChart3 className="h-4 w-4" />} />
               <Stat label="Total job alerts" value={cards.record.cards.alerts} icon={<BarChart3 className="h-4 w-4" />} />
               <Stat label="Total job searches" value={cards.record.cards.searches} icon={<BarChart3 className="h-4 w-4" />} />
               <Stat label="Total users" value={cards.record.cards.users} icon={<Users className="h-4 w-4" />} />
