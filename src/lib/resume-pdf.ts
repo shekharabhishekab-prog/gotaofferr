@@ -70,13 +70,9 @@ class Doc {
     this.space(8);
     this.doc.setFont("helvetica", "bold");
     this.doc.setFontSize(10.5);
-    this.doc.setTextColor(17, 51, 92);
+    this.doc.setTextColor(0, 0, 0);
     this.doc.text(safe(label.toUpperCase()), M, this.y + 8);
-    this.y += 14;
-    this.doc.setDrawColor(17, 51, 92);
-    this.doc.setLineWidth(1);
-    this.doc.line(M, this.y, RIGHT, this.y);
-    this.y += 8;
+    this.y += 18;
   }
 
   rowed(left: string, right: string, bold = true) {
@@ -135,21 +131,22 @@ export async function buildResumePdf(r: TailoredResume) {
   const d = await createDoc();
   d.doc.setProperties({ title: `${r.name || "Resume"} - Resume`, subject: "Resume", creator: "GotaOfferr" });
 
-  d.text(r.name || "Resume", { size: 21, style: "bold", color: [17, 51, 92] });
+  d.text(r.name || "Resume", { size: 21, style: "bold", color: [0, 0, 0] });
   if (r.headline) d.text(r.headline, { size: 11, color: [80, 90, 105] });
   r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(4);
 
-  if (r.summary) {
+  if (r.summary || r.keyAchievements?.length) {
     d.heading("Professional Summary");
-    d.text(r.summary, { size: 9.8 });
+    if (r.summary) d.text(r.summary, { size: 9.8 });
+    if (r.keyAchievements?.length) d.bullets(r.keyAchievements);
   }
 
   const groups = (r.skillGroups ?? []).filter((g) => g.label && g.items?.length);
   if (r.skills?.length || groups.length) {
     d.heading("Skills");
     if (!groups.length) {
-      d.text((r.skills ?? []).join("  •  "), { size: 9.8 });
+      d.text((r.skills ?? []).join(", "), { size: 9.8 });
     } else {
       // One merged block: the groups carry the skills; flat skills they miss are added once.
       const inGroups = new Set(groups.flatMap((g) => g.items.map((i) => i.trim().toLowerCase())));
@@ -157,11 +154,6 @@ export async function buildResumePdf(r: TailoredResume) {
       groups.forEach((g) => d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 }));
       if (extra.length) d.text(`Other: ${extra.join(", ")}`, { size: 9.5 });
     }
-  }
-
-  if (r.keyAchievements?.length) {
-    d.heading("Key Achievements");
-    d.bullets(r.keyAchievements);
   }
 
   if (r.experience?.length) {
@@ -217,7 +209,7 @@ export async function buildResumePdf(r: TailoredResume) {
 
 export async function buildCoverLetterPdf(r: TailoredResume, company?: string, role?: string) {
   const d = await createDoc();
-  d.text(r.name || "Cover Letter", { size: 18, style: "bold", color: [17, 51, 92] });
+  d.text(r.name || "Cover Letter", { size: 18, style: "bold", color: [0, 0, 0] });
   r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(10);
   const target = [role, company].filter(Boolean).join(" — ");
@@ -239,7 +231,7 @@ export async function buildExampleResumePdf(example: {
 }) {
   const d = await createDoc();
 
-  d.text(`${example.role} — Resume Example`, { size: 19, style: "bold", color: [17, 51, 92] });
+  d.text(`${example.role} — Resume Example`, { size: 19, style: "bold", color: [0, 0, 0] });
   d.text(example.summaryLine, { size: 10, color: [80, 90, 105] });
   d.text("Sample template from GotaOfferr — replace every line with your own detail.", {
     size: 8.5,
@@ -281,4 +273,6 @@ export async function buildExampleResumePdf(example: {
 export function slug(s: string) {
   return (s || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+
+
 
