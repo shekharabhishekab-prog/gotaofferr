@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useServerFn } from "@tanstack/react-start";
 import { getAtsUsage, recordAtsCheck } from "@/lib/ats-usage.functions";
+import { hardGap, regionNotes, type HardGap, type RegionNote } from "@/lib/ats-region";
 
 export const Route = createFileRoute("/ats-checker")({
   head: () => ({
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/ats-checker")({
   component: AtsDesignPreview,
 });
 
-type Fix = { tag: "AUTO-FIXED" | "NEEDS YOU" | "YOUR CALL"; bad: string; fix: string };
+type Fix = { tag: "AUTO-FIXED" | "NEEDS YOU" | "YOUR CALL" | "HARD GAP" | "REGION"; bad: string; fix: string };
 type Sample = {
   score: number;
   meme: string[];
@@ -103,7 +104,7 @@ const SHORT: Record<string, string> = { contact: "Contact", sections: "Headings"
 const MEME: Record<string, [string, string]> = { strong: ["The robot", "loves it."], good: ["The robot can read it.", "Mostly."], "needs work": ["The robot can read it.", "Barely."], weak: ["The robot", "fell asleep."] };
 const VERDICT: Record<string, string> = { strong: "Clean. The robot reads this without trouble.", good: "Good. A few things to tidy up.", "needs work": "Needs work. Fix the red bars first.", weak: "Weak. The robot will struggle with this." };
 
-function toSample(r: AtsResult, hasJd: boolean): Sample {
+function toSample(r: AtsResult, hasJd: boolean, extra?: { gap?: HardGap | null; region?: RegionNote | null }): Sample {
   const parts: [string, number, number][] = r.checks.map((c) => [SHORT[c.id] ?? c.label, c.points, c.max]);
   const fixes: Fix[] = [];
   for (const c of r.checks) {
@@ -117,7 +118,10 @@ function toSample(r: AtsResult, hasJd: boolean): Sample {
     }
   }
   if (!hasJd) fixes.push({ tag: "YOUR CALL", bad: "No job description pasted", fix: "Paste it to get the keyword match too." });
-  fixes.sort((a, b) => (a.tag === b.tag ? 0 : a.tag === "NEEDS YOU" ? -1 : 1));
+  if (extra?.gap) fixes.push({ tag: "HARD GAP", bad: extra.gap.bad, fix: extra.gap.fix });
+  if (extra?.region) fixes.push({ tag: "REGION", bad: "Region read from your job post: " + extra.region.label, fix: extra.region.notes.join(" ") });
+  const rank = (t: Fix["tag"]) => (t === "HARD GAP" ? 0 : t === "NEEDS YOU" ? 1 : 2);
+  fixes.sort((a, b) => rank(a.tag) - rank(b.tag));
   return { score: r.score, meme: MEME[r.band], verdict: VERDICT[r.band], parts, fixes, missing: r.missingKeywords };
 }
 
@@ -326,7 +330,9 @@ function AtsDesignPreview() {
       if (resumeSignalScore(text) < 3) throw new Error("This doesn't look like a resume. Upload your CV or resume file.");
       let jdt = jd.slice(0, MAX_JD);
       for (const w of (comp.toLowerCase().match(/[a-z]{3,}/g) ?? [])) jdt = jdt.replace(new RegExp("\\b" + w + "\\b", "gi"), " ");
-      const out = toSample(checkAts(text, jdt), jdt.trim().length > 40);
+      const jdFull = jd.slice(0, MAX_JD);
+      const wc = (text.match(/\S+/g) ?? []).length;
+      const out = toSample(checkAts(text, jdt), jdt.trim().length > 40, { gap: hardGap(text, jdFull), region: regionNotes(jdFull, comp, wc) });
       setRawText(text);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
       if (!user) guestUse();
@@ -516,7 +522,7 @@ function AtsDesignPreview() {
             <h4>{s.fixes.length} things to fix</h4>
             {s.fixes.map((f, i) => (
               <div key={f.bad + key + run} className="ak-fix" style={{ ["--i" as string]: i }}>
-                <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" ? "c" : "n"}`}>{f.tag === "AUTO-FIXED" ? <Wrench className="size-3" /> : null}{f.tag}</span>
+                <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" || f.tag === "REGION" ? "c" : "n"}`}>{f.tag === "AUTO-FIXED" ? <Wrench className="size-3" /> : null}{f.tag}</span>
                 <div><b>{f.bad}</b><p>{f.fix}</p></div>
               </div>
             ))}
@@ -590,7 +596,7 @@ function AtsDesignPreview() {
               <h4>{s.fixes.length ? s.fixes.length + " things to fix" : "Nothing to fix"}</h4>
               {s.fixes.map((f, i) => (
                 <div key={f.bad + i} className="ak-pmf">
-                  <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" ? "c" : "n"}`}>{f.tag}</span>
+                  <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" || f.tag === "REGION" ? "c" : "n"}`}>{f.tag}</span>
                   <div><b>{f.bad}</b><p>{f.fix}</p></div>
                 </div>
               ))}
