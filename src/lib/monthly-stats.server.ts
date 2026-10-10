@@ -14,12 +14,13 @@ export type MonthCards = {
   searches: number;
   builderDownloads: number;
   alerts: number;
+  atsChecks?: number; // logged-in ATS score checks only; guest checks are never stored, so not counted. Missing in months locked before this existed.
   subscriptionsStarted: number; // all subscription records (dashboard card)
   paidSubscriptionsStarted: number; // only records that are active/paid (year-end report)
   subscriberSharePercent: number;
   activeSubscriptions: number; // real paid active subscribers (tests and owner excluded)
   // Uses split by whether the user is a paying subscriber at the time of counting.
-  split?: { rewrites: UseSplit; searches: UseSplit; builderDownloads: UseSplit; alerts: UseSplit };
+  split?: { rewrites: UseSplit; searches: UseSplit; builderDownloads: UseSplit; alerts: UseSplit; atsChecks?: UseSplit };
 };
 export type UseSplit = { paid: number; free: number };
 export type RegionSplit = Record<string, { users: number; subscriptions: number }>;
@@ -89,13 +90,14 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
   const to = new Date(monthRange(sorted[sorted.length - 1]).end).toISOString();
   const ranged = (table: string) =>
     allRows(() => supabaseAdmin.from(table).select("id,user_id,created_at").gte("created_at", from).lt("created_at", to).order("id"));
-  const [authUsers, subs, usage, searches, builders, alerts] = await Promise.all([
+  const [authUsers, subs, usage, searches, builders, alerts, atsLog] = await Promise.all([
     loadAuthUsers(supabaseAdmin),
     allRows(() => supabaseAdmin.from("subscriptions").select("id,user_id,price_id,status,current_period_end,cancel_at_period_end,created_at").eq("environment", getStripeEnvironment()).order("id")),
     ranged("tailor_usage_log"),
     ranged("job_search_runs"),
     ranged("builder_uses"),
     ranged("job_alerts"),
+    ranged("ats_check_log"),
   ]);
   const regionOf = new Map<string, string>();
   for (const u of authUsers) regionOf.set(u.id, userRegion(u));
@@ -158,10 +160,11 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
         searches: searches.filter(inMonth).filter(keep).length,
         builderDownloads: builders.filter(inMonth).filter(keep).length,
         alerts: alerts.filter(inMonth).filter(keep).length,
+        atsChecks: atsLog.filter(inMonth).filter(keep).length,
         subscriptionsStarted: started.length,
         paidSubscriptionsStarted: paidStarted.length,
         // Share is a point-in-time number: it is the share at the moment of counting.
-        split: { rewrites: split(usage), searches: split(searches), builderDownloads: split(builders), alerts: split(alerts) },
+        split: { rewrites: split(usage), searches: split(searches), builderDownloads: split(builders), alerts: split(alerts), atsChecks: split(atsLog) },
         activeSubscriptions: activeSubsAt(start, end),
         subscriberSharePercent: real.length ? (entitledNow / real.length) * 100 : 0,
       },
