@@ -18,6 +18,8 @@ export const MODEL_DAILY_CAP: Record<string, number> = {
   // Only 20/day on the free tier (AI Studio 2026-10-09): a small buffer, not a main lite model.
   "gemini-2.5-flash-lite": 20,
   // Adzuna free tier: 250/day, 2,500/month. Our own cap sits under both.
+  // Voice for the interview room. Google free tier shows 10 requests/day for this model (AI Studio 2026-10-11).
+  "gemini-3.1-flash-tts-preview": 10,
   "adzuna-search": 65,
   // Firecrawl searches are only counted for visibility (cap never reached).
   "firecrawl-search": 100000,
