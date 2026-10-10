@@ -205,7 +205,7 @@ function AiInterview() {
   const startFn = useServerFn(startInterview);
   const finishFn = useServerFn(finishInterview);
   const speakFn = useServerFn(cocoSpeak);
-  const [voiceKind, setVoiceKind] = useState<"A" | "B" | "C" | "D" | "E" | "F" | "browser">("A");
+  const [voiceKind, setVoiceKind] = useState<"A" | "B" | "C" | "D" | "E" | "F" | "browser">("E");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const voiceCache = useRef<Map<string, string>>(new Map());
   const lifts = useRef<Map<string, number>>(new Map());
@@ -539,7 +539,7 @@ function AiInterview() {
     if (voiceCache.current.has(ck)) return Promise.resolve(ck);
     const ex = inflight.current.get(ck);
     if (ex) return ex;
-    const pr = ({ A: { voice: "Zephyr", meow: true, slow: false, lift: 1 }, B: { voice: "Puck", meow: true, slow: false, lift: 1 }, C: { voice: "Zephyr", meow: true, slow: true, lift: 1.22 }, D: { voice: "Leda", meow: false, slow: true, lift: 1.22 }, E: { voice: "Leda", meow: true, slow: true, lift: 1.38 }, F: { voice: "Zephyr", meow: true, slow: true, lift: 1.55 } } as const)[kind];
+    const pr = ({ A: { voice: "Zephyr", meow: true, slow: false, lift: 1 }, B: { voice: "Puck", meow: true, slow: false, lift: 1 }, C: { voice: "Zephyr", meow: true, slow: true, lift: 1.22 }, D: { voice: "Leda", meow: false, slow: true, lift: 1.22 }, E: { voice: "Leda", meow: false, slow: false, lift: 1.38 }, F: { voice: "Zephyr", meow: false, slow: false, lift: 1.55 } } as const)[kind];
     const p = (async () => {
       try {
         const r: any = await speakFn({ data: { text, voice: pr.voice, meow: pr.meow, slow: pr.slow } });
@@ -726,7 +726,7 @@ function AiInterview() {
             <div className="ai-bubble" role="status">
               <p>{stage === "wrapping" ? bubble : bubble || questions[idx]}</p>
               {stage === "room" && questions[idx] ? <button type="button" className={`ai-ico ${voiceBusy ? "busy" : ""}`} onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
-              {stage === "room" && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "E", E: "F", F: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Zephyr + meow, kitten pitch", D: "D Leda, kitten pitch, no meow", E: "E Leda + meow, higher kitten", F: "F Zephyr + meow, highest kitten", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
+              {stage === "room" && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "E", E: "F", F: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Zephyr + meow, kitten pitch", D: "D Leda, kitten pitch, no meow", E: "E Leda, kitten pitch (default)", F: "F Zephyr, highest kitten", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
             </div>
             {stage === "room" ? (
               <div className="ai-answer">
