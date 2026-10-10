@@ -770,7 +770,6 @@ const AI_CSS = `
 .ai-brd{display:inline}
 .ai-hero .ai-sub{font-family:"DM Sans Variable","DM Sans",ui-sans-serif,system-ui,sans-serif;font-size:.88rem;line-height:1.5;margin-top:16px;color:rgba(246,241,214,.55);font-weight:400}
 }
-}
 .ai-fl{display:none}
 @media (min-width:900px){
 .ai-hero .ai-mk{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .42 -.13'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/140px 140px,linear-gradient(var(--y),var(--y)) 0 50%/0% 100% no-repeat;animation:ai-mark .9s .35s cubic-bezier(.2,.8,.2,1) forwards}
