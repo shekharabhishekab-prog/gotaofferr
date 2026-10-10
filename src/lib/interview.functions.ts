@@ -54,7 +54,11 @@ export const finishInterview = createServerFn({ method: "POST" })
 
 // Coco's voice. Turns one interview question into speech with Google Gemini text-to-speech
 // (same free-tier key the site already uses). Login required. Nothing is stored.
-const speakSchema = z.object({ text: z.string().trim().min(2).max(300) });
+const speakSchema = z.object({
+  text: z.string().trim().min(2).max(300),
+  voice: z.enum(["Leda", "Puck", "Zephyr", "Aoede", "Laomedeia", "Achird"]).default("Leda"),
+  meow: z.boolean().default(false),
+});
 
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-2.5-flash-preview-tts"];
 
@@ -90,8 +94,8 @@ export const cocoSpeak = createServerFn({ method: "POST" })
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": key },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: "Speak as a cute, warm, slightly playful young woman who is interviewing someone she likes. Sound like a real person talking, not a newsreader: natural, expressive, with pitch and speed that rise and fall, a gentle smile in the voice, a small thinking pause (a short beat) before the main part of the question, and a little emphasis on the key words. Not flat, not robotic, not rushed. Say exactly this text and nothing else: " + data.text }] }],
-            generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Leda" } } } },
+            contents: [{ parts: [{ text: (data.meow ? "Begin with one short, cute kitten meow sound, like 'Meow~!', then a tiny happy beat, then say the line. " : "") + "You are Coco, a small, cute, playful kitten-girl who is a friendly interviewer. Voice: light, bright, sweet and a little childlike, like a cheerful young kitten who can talk, but not squeaky and not fast. Natural human tempo: pitch and speed rise and fall, a smile in the voice, a small thinking pause before the main part of the question, gentle emphasis on key words. Say exactly this line and nothing else: " + data.text }] }],
+            generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.voice } } } },
           }),
         });
         lastStatus = r.status;
