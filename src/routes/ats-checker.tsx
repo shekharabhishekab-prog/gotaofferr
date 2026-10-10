@@ -1038,7 +1038,8 @@ const AK_CSS = `
 .ak-pmn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:0}.ak-pmn b{font-size:3.4rem;line-height:1;font-family:var(--font-display,inherit)}.ak-pmn span{opacity:.7;margin-left:2px}
 .ak-pml p{margin:0;font-weight:600}
 .ak-pmd{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;border:0;border-radius:12px;padding:16px 18px;width:100%;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
-.ak-pmt2{margin-top:10px;background:#000;color:var(--y);text-decoration:none}
+.ak-pmt2{margin-top:10px;background:#000;color:var(--y);text-decoration:none;border:2px solid var(--y)}
+.ak-gauge{display:grid;justify-items:center}.ak-gauge svg{grid-area:1/1;margin:0}.ak-gauge .ak-num{grid-area:1/1;align-self:center;position:static;top:auto;left:auto;right:auto;width:auto;height:auto;padding:0;transform:none;display:flex;flex-direction:column;align-items:center;justify-content:center}.ak-gauge .ak-num b{line-height:1}.ak-gauge .ak-num span{margin:2px 0 0}.ak-gauge p{grid-area:2/1}
 .ak-pmr{padding:28px 30px;overflow-y:auto;overscroll-behavior:contain}
 .ak-pmr h4{font-family:var(--font-display,inherit);text-transform:uppercase;font-size:1.15rem;margin:0 0 12px}.ak-pmr h4:not(:first-child){margin-top:26px;border-top:2px solid #000;padding-top:18px}
 .ak-pmb{display:grid;grid-template-columns:90px 1fr 54px;align-items:center;gap:12px;font-weight:700;font-size:.95rem;margin-bottom:10px}
