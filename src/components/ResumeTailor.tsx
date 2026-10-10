@@ -470,21 +470,6 @@ export function ResumeTailor() {
                 </span>
                 <span className="text-[9px] tracking-wide uppercase opacity-80">match</span>
               </div>
-              <div
-                className="flex h-14 w-16 flex-col items-center justify-center rounded-xl border border-highlight/40 bg-highlight/10 px-2 text-highlight"
-                title="ATS parseability score based on format, sections, and keyword alignment"
-              >
-                <span className="font-display text-lg leading-none font-bold">
-                  {Math.round(result.atsScore)}%
-                </span>
-                <span className="text-[9px] tracking-wide uppercase opacity-90">ATS</span>
-                <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-highlight/20">
-                  <div
-                    className="h-full rounded-full bg-highlight"
-                    style={{ width: `${Math.min(100, Math.max(0, result.atsScore))}%` }}
-                  />
-                </div>
-              </div>
               <div>
                 <h2 className="text-xl font-bold">Tailored for {company || "this role"}</h2>
                 <p className="text-sm text-muted-foreground">
@@ -843,3 +828,4 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+
