@@ -122,7 +122,7 @@ export function robotView(resumeText: string): RobotView {
   if (/[\uFFFD\uE000-\uF8FF]/.test(text)) warnings.push("Some symbols turned into odd marks. A robot may drop them.");
   if (/[\uFB00-\uFB06]/.test(text)) warnings.push("Some letters are joined (like fi). Some robots cannot match those words.");
   if (lines.length > 6 && avgLen > 110) warnings.push("Very long lines. Two columns may be read straight across and get mixed.");
-  { const st = stuffedWords(text); if (st.length) warnings.push("The word " + st.map((w) => '"' + w + '"').join(", ") + " is repeated a lot. Some robots mark that as keyword stuffing."); }
+  { const st = stuffedWords(text); if (st.length) warnings.push((st.length > 1 ? "These words show up too often: " : "This word shows up too often: ") + st.map((w) => '"' + w + '"').join(", ") + ". Some robots mark that as keyword stuffing."); }
   if (!name && text.trim().length >= 120) warnings.push("No name found at the top. Put it alone on the first line.");
 
   const MAX = 2400;
