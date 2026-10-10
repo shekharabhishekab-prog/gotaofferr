@@ -306,10 +306,13 @@ function AiInterview() {
       if (!ss) return;
       ss.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      const v = ss.getVoices().find((x) => /female|samantha|zira|google uk english female|aria/i.test(x.name)) || ss.getVoices().find((x) => x.lang.startsWith("en"));
+      const vs = ss.getVoices().filter((x) => x.lang.toLowerCase().startsWith("en"));
+      const male = /david|mark|alex|daniel|fred|george|james|guy|ryan|male(?!.*female)|rishi|oliver|arthur|aaron|thomas|eddy|reed|rocko|grandpa|ravi/i;
+      const pick = (re: RegExp) => vs.find((x) => re.test(x.name) && !male.test(x.name));
+      const v = pick(/google uk english female/i) || pick(/samantha|ava|allison|susan|zira|aria|jenny|hazel|karen|tessa|moira|victoria|fiona|serena|female|google us english/i) || vs.find((x) => !male.test(x.name)) || vs[0];
       if (v) u.voice = v;
-      u.rate = 1;
-      u.pitch = 1.1;
+      u.rate = 1.12;
+      u.pitch = 2;
       ss.speak(u);
     } catch { /* voice is optional */ }
   };
@@ -321,6 +324,7 @@ function AiInterview() {
       <style>{AI_CSS}</style>
       <section className="ai-hero">
         <div className="ai-wrap">
+          <div className="ai-hero-coco" aria-hidden="true"><Coco clip="idle" size={1.7} /></div>
           <span className="ai-mono">( ai interview, 10 short questions )</span>
           <h1 className="ai-h1">Practice with <mark>Coco.</mark></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
@@ -452,7 +456,14 @@ const AI_CSS = `
 .ai{--y:#ffd600;--cream:#f6f1d6;background:#000;color:var(--cream);overflow:hidden;min-height:70vh}
 .ai *{box-sizing:border-box}
 .ai-wrap{max-width:1100px;margin:0 auto;padding:0 20px}
-.ai-hero{padding:56px 0 18px;background:radial-gradient(60% 60% at 80% 20%,rgba(255,214,0,.14),transparent 70%)}
+@media (min-width:1200px){.ai-wrap{max-width:1360px;padding:0 32px}}
+.ai-hero .ai-wrap{position:relative}
+.ai-hero-coco{display:none}
+@media (min-width:1000px){.ai-hero-coco{display:block;position:absolute;right:40px;top:-10px;animation:ai-bob 3.2s ease-in-out infinite}}
+@keyframes ai-bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-14px) rotate(1.5deg)}}
+.ai-hero{animation:ai-glow 7s ease-in-out infinite alternate}
+@keyframes ai-glow{from{background-position:0 0}to{background-position:-40px 20px}}
+.ai-hero{position:relative;padding:56px 0 18px;background:radial-gradient(60% 60% at 80% 20%,rgba(255,214,0,.14),transparent 70%)}
 .ai-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;letter-spacing:.04em;color:var(--y)}
 .ai-h1{margin:14px 0 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.95;letter-spacing:-.015em;font-size:clamp(2.6rem,7vw,5.5rem)}
 .ai-h1 mark{background:var(--y);color:#000;padding:0 .14em;display:inline-block;transform:rotate(-1.5deg)}
@@ -545,5 +556,5 @@ const AI_CSS = `
 .ai-bubble{font-size:1.02rem;margin:0 10px}
 .ai-answer{padding:10px}
 }
-@media (prefers-reduced-motion:reduce){.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
+@media (prefers-reduced-motion:reduce){.ai-hero-coco,.ai-hero{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
 `;
