@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { useSession } from "@/hooks/useSession";
 import { readResumeFile } from "@/lib/interview-read";
-import { finishInterview, startInterview } from "@/lib/interview.functions";
+import { cocoSpeak, finishInterview, startInterview } from "@/lib/interview.functions";
 
 export const Route = createFileRoute("/ai-interview")({
   head: () => ({
@@ -97,6 +97,10 @@ function AiInterview() {
   useEffect(() => { const f = () => setCs(window.innerWidth < 720 ? 0.9 : window.innerWidth >= 1200 ? 1.9 : 1.5); f(); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
   const startFn = useServerFn(startInterview);
   const finishFn = useServerFn(finishInterview);
+  const speakFn = useServerFn(cocoSpeak);
+  const [voiceKind, setVoiceKind] = useState<"coco" | "browser">("coco");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const voiceCache = useRef<Map<string, string>>(new Map());
 
   const [stage, setStage] = useState<Stage>("setup");
   const [company, setCompany] = useState("");
@@ -384,7 +388,7 @@ function AiInterview() {
     setFx("");
   };
 
-  const speak = (text: string) => {
+  const speakBrowser = (text: string) => {
     try {
       const ss = window.speechSynthesis;
       if (!ss) return;
@@ -414,6 +418,33 @@ function AiInterview() {
         window.setTimeout(once, 1200);
       }
     } catch { /* voice is optional */ }
+  };
+
+  const speak = async (text: string) => {
+    try { audioRef.current?.pause(); window.speechSynthesis?.cancel(); } catch { /* ignore */ }
+    if (voiceKind === "browser") { speakBrowser(text); return; }
+    try {
+      let url = voiceCache.current.get(text);
+      if (!url) {
+        setClip("talk");
+        const r: any = await speakFn({ data: { text } });
+        if (!r?.ok || !r.wav) throw new Error("tts");
+        const bin = atob(r.wav);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        url = URL.createObjectURL(new Blob([bytes], { type: "audio/wav" }));
+        voiceCache.current.set(text, url);
+      }
+      const a = new Audio(url);
+      audioRef.current = a;
+      a.onplay = () => setClip("talk");
+      a.onended = () => setClip("idle");
+      a.onerror = () => setClip("idle");
+      await a.play();
+    } catch {
+      setClip("idle");
+      speakBrowser(text);
+    }
   };
 
   const low = running && left <= 20;
@@ -525,6 +556,7 @@ function AiInterview() {
             <div className="ai-bubble" role="status">
               <p>{stage === "wrapping" ? bubble : bubble || questions[idx]}</p>
               {stage === "room" && questions[idx] ? <button type="button" className="ai-ico" onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
+              {stage === "room" && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(voiceKind === "coco" ? "browser" : "coco")}>Voice: {voiceKind === "coco" ? "Coco (AI)" : "Browser"}</button> : null}
             </div>
             {stage === "room" ? (
               <div className="ai-answer">
