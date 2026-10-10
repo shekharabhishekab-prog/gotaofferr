@@ -148,6 +148,7 @@ function AiInterview() {
 
   const startMic = useCallback(() => {
     setMicBlocked(false);
+    setErr("");
     const w = window as any;
     const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
     if (!Ctor) { setVoiceOk(false); return; }
@@ -158,6 +159,7 @@ function AiInterview() {
     rec.continuous = true;
     rec.interimResults = false;
     let gotAny = false;
+    let errored = false;
     const t0 = Date.now();
     rec.onstart = () => { if (recRef.current === rec) { setListening(true); setRunning(true); } };
     rec.onresult = (e: any) => {
@@ -168,21 +170,29 @@ function AiInterview() {
     rec.onerror = (ev: any) => {
       if (recRef.current !== rec) return;
       const code = String(ev?.error || "unknown");
+      errored = true;
       setListening(false);
       if (code === "aborted") return;
-      if (code === "not-allowed" || code === "service-not-allowed") { setMicBlocked(true); return; }
+      if (code === "not-allowed" || code === "service-not-allowed") { setErr(""); setMicBlocked(true); return; }
       const why: Record<string, string> = {
         "network": "Voice could not reach the browser's speech service. Check your internet, or that the browser allows its speech service, then try again. Or just type.",
         "no-speech": "I did not hear anything. Check that the right microphone is selected, then try again. Or just type.",
         "audio-capture": "No microphone was found. Plug one in or pick one in your browser settings, then try again. Or just type.",
         "language-not-supported": "This browser does not support voice in your language. Please type your answer.",
       };
+      setMicBlocked(false);
       setErr((why[code] || "Voice stopped unexpectedly.") + " (code: " + code + ")");
     };
     rec.onend = () => {
       if (recRef.current !== rec) return;
       setListening(false);
-      if (!gotAny && Date.now() - t0 < 1500) setErr((e) => e || "Voice stopped right away. Try the mic again, or type your answer. (code: ended-early)");
+      if (!errored && !gotAny && Date.now() - t0 < 1500) {
+        const mac = /Mac/i.test(navigator.platform || "") || /Macintosh/i.test(navigator.userAgent || "");
+        setMicBlocked(false);
+        setErr(mac
+          ? "Voice stopped right away. On a Mac this is usually the system mic setting: open System Settings > Privacy & Security > Microphone, turn Chrome on, then quit Chrome fully (Cmd+Q) and open it again. Or just type. (code: ended-early)"
+          : "Voice stopped right away. Check that your microphone is on and allowed for this browser, then try again. Or just type. (code: ended-early)");
+      }
     };
     recRef.current = rec;
     try { rec.start(); setErr(""); } catch (e: any) { setListening(false); setErr("Could not start the microphone (" + String(e?.name || "error") + "). Try again, or type."); }
@@ -460,7 +470,7 @@ function AiInterview() {
                       {listening ? <><MicOff className="size-5" /> Stop</> : <><Mic className="size-5" /> Answer by voice</>}
                     </button>
                   ) : <span className="ai-note">Voice is not available in this browser. Type your answer.</span>}
-                  {voiceOk && micBlocked ? <span className="ai-note">Microphone is blocked. Click the lock icon in the address bar, allow Microphone, then press the mic again. Or just type.</span> : null}
+                  {voiceOk && micBlocked ? <span className="ai-note">Microphone is blocked. Click the lock icon in the address bar, allow Microphone, then press the mic again. On a Mac also check System Settings > Privacy & Security > Microphone > Chrome, and restart Chrome. Or just type.</span> : null}
                   <button type="button" className="ai-btn sm" onClick={onNext}>{idx + 1 >= TOTAL ? "Finish" : "Next question"} <ArrowRight className="size-4" /></button>
                 </div>
                 <p className="ai-note"><button type="button" className="ai-skip" onClick={() => { setErr(""); goNext(false); }}>Skip this question</button></p>
