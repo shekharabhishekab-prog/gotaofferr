@@ -19,6 +19,7 @@ const entries: SitemapEntry[] = [
   { path: "/tailor", lastmod: "2026-10-03", changefreq: "weekly", priority: "0.9" },
   { path: "/resume-builder", lastmod: "2026-10-03", changefreq: "weekly", priority: "0.9" },
   { path: "/ats-resume-checker", changefreq: "monthly", priority: "0.9" },
+  { path: "/ats-checker", lastmod: "2026-10-10", changefreq: "weekly", priority: "0.9" },
   { path: "/ai-cover-letter-generator", changefreq: "monthly", priority: "0.9" },
   { path: "/pricing", changefreq: "monthly", priority: "0.8" },
   { path: "/how-it-works", changefreq: "monthly", priority: "0.7" },
