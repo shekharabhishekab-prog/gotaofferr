@@ -468,6 +468,7 @@ function AtsDesignPreview() {
         </div>
         <div ref={stageRef} className="ak-stage">
         <div data-ak className="ak-rv ak-panel">
+          <span className="ak-pill" aria-live="polite">{!user ? "1 free check" : quota ? (quota.limit < 0 ? "Checks left: Unlimited" : `${Math.max(0, quota.limit - quota.used)} of ${quota.limit} left this month`) : "Checks left: ..."}</span>
           <label
             className={`ak-drop ${over ? "over" : ""} ${phase === "scan" ? "scan" : ""}`}
             onDragOver={(e) => { e.preventDefault(); setOver(true); }}
@@ -502,7 +503,7 @@ function AtsDesignPreview() {
               {phase === "scan" ? "Scanning..." : <>Check my resume <ArrowRight className="size-4" /></>}
             </button>
           )}
-          <p className="ak-quota">{!user ? "1 free check. Sign in for 10 a month." : quota ? (quota.limit < 0 ? "Unlimited checks on your plan." : `${Math.max(0, quota.limit - quota.used)} of ${quota.limit} checks left this month.`) : "\u00a0"}</p>
+          {!user ? <p className="ak-quota">Sign in for 10 free checks a month.</p> : null}
         </div>
 
         {/* RESULT */}
@@ -1079,6 +1080,9 @@ const AK_CSS = `
 .ak-gauge .ak-num b span,.ak-pmg .ak-pmn b span{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin:4px 0 0!important;font-size:.85rem;font-weight:700;opacity:.55;line-height:1!important;white-space:nowrap}
 @media(min-width:821px){.ak-res.idle>.ak-pvbar{bottom:18px!important}}
 .ak-quota{grid-column:1/-1;margin:2px 0 0;text-align:center;font-size:.85rem;opacity:.75;font-weight:600}
+.ak-panel{position:relative}
+.ak-pill{position:absolute;top:-14px;right:18px;z-index:3;background:#ffd600;color:#0a0a0a;font-weight:800;font-size:.78rem;letter-spacing:.02em;padding:6px 12px;border-radius:999px;box-shadow:0 4px 18px rgba(255,214,0,.25);white-space:nowrap}
+@media(max-width:820px){.ak-pill{right:14px;font-size:.74rem;padding:5px 10px}}
 `;
 
 
