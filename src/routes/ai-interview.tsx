@@ -118,7 +118,7 @@ function AiInterview() {
   const [voiceOk, setVoiceOk] = useState(true);
   const [bubble, setBubble] = useState("");
   const [clip, setClip] = useState<ClipName>("idle");
-  const [fx, setFx] = useState<"jump" | "spin" | "">("");
+  const [fx, setFx] = useState<"jump" | "spin" | "wander" | "">("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const recRef = useRef<SR | null>(null);
   const answersRef = useRef<string[]>([]);
@@ -254,11 +254,12 @@ function AiInterview() {
       setRunning(false);
       hintedRef.current = false;
       setStage("room");
-      setClip("wave");
-      setFx("jump");
-      setBubble("Hi! I'm Coco. Let's practice. Take your time.");
-      window.setTimeout(() => { setFx(""); setClip("talk"); setBubble(r.questions[0]); }, 2600);
-      window.setTimeout(() => setClip("idle"), 5000);
+      setClip("idle");
+      setFx("wander");
+      setBubble("Coco is looking around...");
+      window.setTimeout(() => { setClip("wave"); setFx("jump"); setBubble("Hi! I'm Coco. Let's practice. Take your time."); }, 4600);
+      window.setTimeout(() => { setFx(""); setClip("talk"); setBubble(r.questions[0]); }, 7000);
+      window.setTimeout(() => setClip("idle"), 9400);
       window.setTimeout(() => stageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } catch (e) {
       setStage("setup");
@@ -514,6 +515,8 @@ const AI_CSS = `
 .ai-coco.fx-spin{animation:ai-spin 1.2s ease-in-out 1}
 @keyframes ai-jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-34px)}60%{transform:translateY(-34px)}}
 @keyframes ai-spin{to{transform:rotateY(360deg)}}
+.ai-coco.fx-wander{--w:90px;animation:ai-wander 4.5s ease-in-out 1}
+@keyframes ai-wander{0%{transform:translate(0,0) scaleX(1)}8%{transform:translate(calc(var(--w)*-.5),-22px) scaleX(1)}16%{transform:translate(calc(var(--w)*-1),0) scaleX(1)}30%{transform:translate(calc(var(--w)*-1),0) scaleX(1)}38%{transform:translate(calc(var(--w)*-.2),-26px) scaleX(-1)}50%{transform:translate(calc(var(--w)*.6),0) scaleX(-1)}58%{transform:translate(var(--w),-22px) scaleX(-1)}66%{transform:translate(var(--w),0) scaleX(-1)}80%{transform:translate(calc(var(--w)*.5),-22px) scaleX(1)}92%{transform:translate(calc(var(--w)*.1),0) scaleX(1)}100%{transform:translate(0,0) scaleX(1)}}
 
 .ai-fb-top{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .ai-score{display:flex;align-items:baseline;gap:4px}
@@ -531,6 +534,7 @@ const AI_CSS = `
 .ai-pq span{color:var(--y);font-size:.95rem}
 
 @media (max-width:720px){
+.ai-coco.fx-wander{--w:34px}
 .ai-grid,.ai-two,.ai-parts{grid-template-columns:1fr}
 .ai-tiles{grid-template-columns:1fr 1fr;gap:8px;padding:10px}
 .ai-tile{min-height:190px}
