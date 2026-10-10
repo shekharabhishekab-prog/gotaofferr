@@ -153,21 +153,39 @@ function AiInterview() {
     if (!Ctor) { setVoiceOk(false); return; }
     try { recRef.current?.abort(); } catch { /* ignore */ }
     const rec: SR = new Ctor();
-    rec.lang = navigator.language || "en-US";
+    const nl = navigator.language || "en-US";
+    rec.lang = /^en/i.test(nl) ? nl : "en-US";
     rec.continuous = true;
     rec.interimResults = false;
+    let gotAny = false;
+    const t0 = Date.now();
+    rec.onstart = () => { if (recRef.current === rec) { setListening(true); setRunning(true); } };
     rec.onresult = (e: any) => {
       let add = "";
       for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) add += e.results[i][0].transcript + " ";
-      if (add) setAnswer((a) => (a ? a.replace(/\s*$/, " ") : "") + add.trim());
+      if (add) { gotAny = true; setAnswer((a) => (a ? a.replace(/\s*$/, " ") : "") + add.trim()); }
     };
     rec.onerror = (ev: any) => {
+      if (recRef.current !== rec) return;
+      const code = String(ev?.error || "unknown");
       setListening(false);
-      if (ev?.error === "not-allowed" || ev?.error === "service-not-allowed") setMicBlocked(true);
+      if (code === "aborted") return;
+      if (code === "not-allowed" || code === "service-not-allowed") { setMicBlocked(true); return; }
+      const why: Record<string, string> = {
+        "network": "Voice could not reach the browser's speech service. Check your internet, or that the browser allows its speech service, then try again. Or just type.",
+        "no-speech": "I did not hear anything. Check that the right microphone is selected, then try again. Or just type.",
+        "audio-capture": "No microphone was found. Plug one in or pick one in your browser settings, then try again. Or just type.",
+        "language-not-supported": "This browser does not support voice in your language. Please type your answer.",
+      };
+      setErr((why[code] || "Voice stopped unexpectedly.") + " (code: " + code + ")");
     };
-    rec.onend = () => setListening(false);
+    rec.onend = () => {
+      if (recRef.current !== rec) return;
+      setListening(false);
+      if (!gotAny && Date.now() - t0 < 1500) setErr((e) => e || "Voice stopped right away. Try the mic again, or type your answer. (code: ended-early)");
+    };
     recRef.current = rec;
-    try { rec.start(); setListening(true); setRunning(true); setErr(""); } catch { setListening(false); }
+    try { rec.start(); setErr(""); } catch (e: any) { setListening(false); setErr("Could not start the microphone (" + String(e?.name || "error") + "). Try again, or type."); }
   }, []);
 
   // 2 minute answer timer. It starts when you start talking or typing.
@@ -209,6 +227,11 @@ function AiInterview() {
     }
     if (left <= 0 && running) goNext(true);
   }, [left, running, stage, goNext]);
+  const onNext = () => {
+    if (!answerRef.current.trim()) { setErr("Write or say an answer first, or tap Skip this question."); return; }
+    setErr("");
+    goNext(false);
+  };
 
   // A little life: Coco licks a paw now and then while you think.
   useEffect(() => {
@@ -438,8 +461,9 @@ function AiInterview() {
                     </button>
                   ) : <span className="ai-note">Voice is not available in this browser. Type your answer.</span>}
                   {voiceOk && micBlocked ? <span className="ai-note">Microphone is blocked. Click the lock icon in the address bar, allow Microphone, then press the mic again. Or just type.</span> : null}
-                  <button type="button" className="ai-btn sm" onClick={() => goNext(false)}>{idx + 1 >= TOTAL ? "Finish" : "Next question"} <ArrowRight className="size-4" /></button>
+                  <button type="button" className="ai-btn sm" onClick={onNext}>{idx + 1 >= TOTAL ? "Finish" : "Next question"} <ArrowRight className="size-4" /></button>
                 </div>
+                <p className="ai-note"><button type="button" className="ai-skip" onClick={() => { setErr(""); goNext(false); }}>Skip this question</button></p>
                 <p className="ai-note">You have 2 minutes per answer. The timer starts when you start talking or typing.</p>
               </div>
             ) : (
@@ -524,6 +548,8 @@ const AI_CSS = `
 .ai-mic.on{background:#c62828;border-color:#c62828;color:#fff}
 .ai-answer .ai-note{margin:10px 0 0}
 .ai-coco{will-change:transform}
+.ai-skip{background:none;border:0;padding:0;color:rgba(246,241,214,.6);text-decoration:underline;cursor:pointer;font-size:.85rem}
+.ai-skip:hover{color:var(--y)}
 .ai-coco.fx-jump{animation:ai-jump .9s ease-in-out 2}
 .ai-coco.fx-spin{animation:ai-spin 1.2s ease-in-out 1}
 @keyframes ai-jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-34px)}60%{transform:translateY(-34px)}}
