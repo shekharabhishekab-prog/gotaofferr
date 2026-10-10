@@ -45,7 +45,6 @@ export async function readResumeFile(f: File): Promise<string> {
   if (f.size > 8 * 1024 * 1024) throw new Error("That file is too big. Use one under 8 MB.");
   if (n.endsWith(".pdf") || f.type === "application/pdf") { await assertValidResumeFile(f); return extractPdfText(f); }
   if (n.endsWith(".docx")) return docxText(f);
-  if (n.endsWith(".txt") || n.endsWith(".md")) return f.text();
-  if (n.endsWith(".doc")) throw new Error("Old .doc files can't be read. Save it as PDF or DOCX and try again.");
-  throw new Error("Please upload a PDF, DOCX or TXT file.");
+  if (n.endsWith(".doc")) throw new Error("Old .doc files can't be read. In Word, use Save As and pick DOCX, or download a PDF.");
+  throw new Error("Please upload a PDF or Word (DOCX) file.");
 }
