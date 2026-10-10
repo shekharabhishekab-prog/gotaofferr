@@ -127,8 +127,9 @@ export const cocoSpeak = createServerFn({ method: "POST" })
         const { countCall } = await import("@/lib/model-router.server");
         if (!(await countCall("cf-melotts"))) return { ok: false as const, reason: "daily-cap" };
         let aiEnv: any = (globalThis as any).__env__;
-        if (!aiEnv?.AI) { try { aiEnv = (await import(/* @vite-ignore */ "cloudflare:workers" as string) as any).env; } catch { /* no binding */ } }
-        if (!aiEnv?.AI) { console.warn("[coco-tts] no AI binding"); return { ok: false as const, reason: "no-ai" }; }
+        let dbg = "g:" + (aiEnv ? "y" : "n");
+        if (!aiEnv?.AI) { try { aiEnv = (await import(/* @vite-ignore */ "cloudflare:workers" as string) as any).env; dbg += " imp:" + (aiEnv ? "y" : "n"); } catch (e) { dbg += " imp-err:" + String((e as Error)?.message || e).slice(0, 80); } }
+        if (!aiEnv?.AI) { console.warn("[coco-tts] no AI binding", dbg); return { ok: false as const, reason: "no-ai " + dbg + " bind:" + Object.keys(aiEnv || {}).filter((k) => /^(AI|ASSETS|DB)$/i.test(k)).join(",") }; }
         const out: any = await aiEnv.AI.run("@cf/myshell-ai/melotts", { prompt: data.text, lang: "en" });
         const audio: string | undefined = typeof out === "string" ? out : out?.audio;
         if (!audio || audio.length < 200) return { ok: false as const, reason: "empty" };
