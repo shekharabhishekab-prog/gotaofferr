@@ -762,11 +762,13 @@ const AI_CSS = `
 .ai input,.ai textarea{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.12)}
 @media (prefers-reduced-motion:reduce){.ai-mk{animation:none;background-size:140px 140px,100% 100%}.ai-hero .ai-ln,.ai-hero .ai-sub{animation:none}}
 @media(max-width:899px){
-.ai-hero .ai-d.ai-mk{font-family:"DM Sans Variable","DM Sans",ui-sans-serif,system-ui,sans-serif;font-weight:800;font-size:.9em;white-space:normal;line-height:1.22;letter-spacing:-.025em}
+.ai-hero .ai-d.ai-mk{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:.85em;white-space:normal;line-height:1.22;letter-spacing:-.04em}
 .ai-hero .ai-ln:has(.ai-d.ai-mk){margin-bottom:.22em}
-.ai-hero .ai-cur,.ai-hero .ai-y{font-family:"DM Sans Variable","DM Sans",ui-sans-serif,system-ui,sans-serif;font-style:normal;font-weight:700;text-transform:none;font-size:.68em;letter-spacing:-.015em;line-height:1.3}
-.ai-hero .ai-ln:has(.ai-cur){white-space:nowrap;margin-top:.3em}
-.ai-hero .ai-sub{font-size:.88rem;line-height:1.5;margin-top:14px;color:rgba(246,241,214,.55);font-weight:400}
+.ai-hero .ai-ln:has(.ai-cur){font-size:.6em;margin-left:1.1em;margin-top:.55em;line-height:1.3;white-space:nowrap}
+.ai-hero .ai-cur,.ai-hero .ai-y{font-family:"HPSyne","HPBric",sans-serif;font-style:normal;font-weight:800;text-transform:uppercase;font-size:1em;letter-spacing:-.04em;line-height:1.3}
+.ai-brd{display:inline}
+.ai-hero .ai-sub{font-family:"DM Sans Variable","DM Sans",ui-sans-serif,system-ui,sans-serif;font-size:.88rem;line-height:1.5;margin-top:16px;color:rgba(246,241,214,.55);font-weight:400}
+}
 }
 .ai-fl{display:none}
 @media (min-width:900px){
