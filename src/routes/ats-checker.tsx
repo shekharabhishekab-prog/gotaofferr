@@ -1071,6 +1071,7 @@ const AK_CSS = `
 .ak-gauge{position:relative}
 .ak-gauge .ak-num b,.ak-pmg .ak-pmn b{position:relative;display:block;line-height:1!important;margin:0!important;padding:0!important}
 .ak-gauge .ak-num b span,.ak-pmg .ak-pmn b span{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin:4px 0 0!important;font-size:.85rem;font-weight:700;opacity:.55;line-height:1!important;white-space:nowrap}
+@media(min-width:821px){.ak-res.idle>.ak-pvbar{bottom:18px!important}}
 `;
 
 
