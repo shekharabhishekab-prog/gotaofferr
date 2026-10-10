@@ -87,6 +87,8 @@ export function robotView(resumeText: string): RobotView {
     if (/[@\d|]/.test(l) || headingKey(l)) continue;
     const w = l.split(/\s+/);
     if (w.length >= 2 && w.length <= 4 && w.every((x) => /^[A-Za-z][A-Za-z.'’-]*$/.test(x))) { name = l; break; }
+    // One-word name (e.g. "ABHISHEK") counts only when it is the very first line.
+    if (l === head[0] && w.length === 1 && !/^(resume|cv|curriculum|profile|summary|contact|name|untitled)$/i.test(l) && /^[A-Za-z][A-Za-z'’-]{2,29}$/.test(l)) { name = l; break; }
   }
   let location: string | null = null;
   for (const l of head) {
