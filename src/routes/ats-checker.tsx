@@ -105,22 +105,37 @@ const SHORT: Record<string, string> = { contact: "Contact", sections: "Headings"
 const MEME: Record<string, [string, string]> = { strong: ["The robot", "loves it."], good: ["The robot can read it.", "Mostly."], "needs work": ["The robot can read it.", "Barely."], weak: ["The robot", "fell asleep."] };
 const VERDICT: Record<string, string> = { strong: "Clean. The robot reads this without trouble.", good: "Good. A few things to tidy up.", "needs work": "Needs work. Fix the red bars first.", weak: "Weak. The robot will struggle with this." };
 
+function plain(c: { id: string; label: string; hint: string | null }): [string, string] {
+  const h = c.hint ?? "";
+  switch (c.id) {
+    case "contact": return ["Contact details", "Put your email and phone at the top."];
+    case "sections": return h.includes("Summary") ? ["Summary", "Add a 2-line summary at the top."] : ["Section headings", "Use plain headings: Experience, Education, Skills."];
+    case "bullets": return h.includes("Shorten") ? ["Long bullets", "Keep each bullet to 1 or 2 lines."] : ["Bullet points", "Write each job as 3 to 5 short bullets."];
+    case "numbers": return ["Numbers", "Add real numbers where true: %, money, team size."];
+    case "verbs": return ["How bullets start", "Start bullets with Led, Built, Grew and similar."];
+    case "length": return /very short|a bit short/.test(h) ? ["Length", "A little short. Add more about your roles and results."] : ["Length", "Too long. Keep the most useful 1 to 2 pages."];
+    case "format": return ["Layout", "Use one plain column. No tables, icons or pictures."];
+    case "dates": return ["Job dates", "Add start and end dates, like Jan 2022 - Present."];
+    default: return [c.label, h];
+  }
+}
+
 function toSample(r: AtsResult, hasJd: boolean, extra?: { gap?: HardGap | null; region?: RegionNote | null }): Sample {
   const parts: [string, number, number][] = r.checks.map((c) => [SHORT[c.id] ?? c.label, c.points, c.max]);
   const fixes: Fix[] = [];
   for (const c of r.checks) {
     if (!c.hint) continue;
     if (c.id === "keywords") {
-      fixes.push({ tag: "YOUR CALL", bad: "Missing: " + r.missingKeywords.join(", "), fix: "Add them only if they are true. We never add skills for you." });
+      fixes.push({ tag: "YOUR CALL", bad: "Job words you do not use: " + r.missingKeywords.join(", "), fix: "Add only the ones that are true for you." });
     } else if (c.id === "numbers") {
-      fixes.push({ tag: "YOUR CALL", bad: c.label, fix: c.hint });
+      { const [b, f] = plain(c); fixes.push({ tag: "YOUR CALL", bad: b, fix: f }); }
     } else {
-      fixes.push({ tag: "NEEDS YOU", bad: c.label, fix: c.hint });
+      { const [b, f] = plain(c); fixes.push({ tag: "NEEDS YOU", bad: b, fix: f }); }
     }
   }
-  if (!hasJd) fixes.push({ tag: "YOUR CALL", bad: "No job description pasted", fix: "Paste it to get the keyword match too." });
+  if (!hasJd) fixes.push({ tag: "YOUR CALL", bad: "No job post pasted", fix: "Paste it to see which job words you miss." });
   if (extra?.gap) fixes.push({ tag: "HARD GAP", bad: extra.gap.bad, fix: extra.gap.fix });
-  if (extra?.region) fixes.push({ tag: "REGION", bad: "Region read from your job post: " + extra.region.label, fix: extra.region.notes.join(" ") });
+  if (extra?.region) fixes.push({ tag: "REGION", bad: "Job location: " + extra.region.label, fix: extra.region.notes.slice(0, 2).join(" ") });
   const rank = (t: Fix["tag"]) => (t === "HARD GAP" ? 0 : t === "NEEDS YOU" ? 1 : 2);
   fixes.sort((a, b) => rank(a.tag) - rank(b.tag));
   return { score: r.score, meme: MEME[r.band], verdict: VERDICT[r.band], parts, fixes, missing: r.missingKeywords };
@@ -241,7 +256,7 @@ async function makePdf(s: Sample, title: string, sample: boolean) {
   }
   y += 10; need(30);
   d.setFont("helvetica", "italic"); d.setFontSize(9); d.setTextColor(90, 90, 90);
-  d.text("Heuristic check, not an ATS vendor score. Facts never change. No skill or job is ever added for you.", M, y);
+  d.text("A guide, not an official score. We never add skills or jobs for you.", M, y);
   d.save(sample ? "gotaofferr-ats-sample-report.pdf" : "gotaofferr-ats-report.pdf");
 }
 
@@ -622,7 +637,7 @@ function AtsDesignPreview() {
               {rv ? (
                 <div className="ak-rb">
                   <h4>What the robot read</h4>
-                  <p className="ak-rbs">This is the text a simple ATS pulls out of your file, and the fields it guesses from it. It stays in your browser.</p>
+                  <p className="ak-rbs">What a simple ATS reads from your file. It stays in your browser.</p>
                   <div className="ak-rbg">
                     {([["Name", rv.name], ["Email", rv.email], ["Phone", rv.phone], ["Location", rv.location], ["Links", rv.links.length ? rv.links.join(", ") : null]] as [string, string | null][]).map(([k, v]) => (
                       <div key={k} className={v ? "ok" : "no"}><span>{k}</span><b>{v ?? "Not found"}</b></div>
@@ -637,7 +652,7 @@ function AtsDesignPreview() {
                   <details className="ak-rbt"><summary>Show the raw text the robot got ({rv.chars} characters)</summary><pre>{rv.text}{rv.truncated ? "\n... (cut here, the robot got the rest too)" : ""}</pre></details>
                 </div>
               ) : null}
-              <p className="ak-pmn2">Heuristic check, not an ATS vendor score. Facts never change. No skill or job is ever added for you.</p>
+              <p className="ak-pmn2">A guide, not an official score. We never add skills or jobs for you.</p>
             </div>
           </div>
         </div>
