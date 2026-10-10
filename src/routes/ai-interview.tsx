@@ -122,6 +122,7 @@ function AiInterview() {
   const [fx, setFx] = useState<"jump" | "spin" | "wander" | "">("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const recRef = useRef<SR | null>(null);
+  const wantMicRef = useRef(false);
   const answersRef = useRef<string[]>([]);
   const answerRef = useRef("");
   answerRef.current = answer;
@@ -142,6 +143,7 @@ function AiInterview() {
   }, [stage]);
 
   const stopMic = useCallback(() => {
+    wantMicRef.current = false;
     try { recRef.current?.stop(); } catch { /* ignore */ }
     setListening(false);
   }, []);
@@ -185,6 +187,10 @@ function AiInterview() {
     };
     rec.onend = () => {
       if (recRef.current !== rec) return;
+      if (wantMicRef.current && !errored && Date.now() - t0 > 1500) {
+        // Chrome ends a session after a pause. Keep listening until the user taps Stop.
+        try { rec.start(); return; } catch { /* fall through */ }
+      }
       setListening(false);
       if (!errored && !gotAny && Date.now() - t0 < 1500) {
         const mac = /Mac/i.test(navigator.platform || "") || /Macintosh/i.test(navigator.userAgent || "");
@@ -195,6 +201,7 @@ function AiInterview() {
       }
     };
     recRef.current = rec;
+    wantMicRef.current = true;
     try { rec.start(); setErr(""); } catch (e: any) { setListening(false); setErr("Could not start the microphone (" + String(e?.name || "error") + "). Try again, or type."); }
   }, []);
 
