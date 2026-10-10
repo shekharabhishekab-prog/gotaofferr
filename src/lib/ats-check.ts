@@ -29,6 +29,35 @@ const STOP = new Set(
     "ability skills knowledge using use etc including such other more than into across within about").split(" "),
 );
 
+// Step 4: smarter job keywords. Extra filler, location, pay and perk words are ignored.
+const STOP2 = new Set(
+  ("after before during while where when what which who whom how all any each every some many most both over under between through around per via " +
+    "may might should would could shall does did been being was were very just only own apply applying applied include includes included offer offers offered " +
+    "roles candidates candidate successful ideal full part time hours hour week weekly month monthly day daily days new best well great high level based related " +
+    "similar need needs needed want wanted seek seeking help helps benefits benefit salary compensation competitive bonus insurance vacation equal opportunity " +
+    "employer diversity inclusive location remote hybrid onsite office today now asap immediately reporting report reports contact send email resume cv " +
+    "preferred desired requirement qualifications qualification responsibilities responsible duties duty main key core overall general various several " +
+    "etc versus cent percent annual annually pay paid rate rates range then there here these those them they").split(" "),
+);
+const SHORT_OK = new Set("seo crm sql aws api css php ppc kpi erp sap ui ux qa hr ci cd ml ai etl bi sem smm cms gtm".split(" "));
+const CURRENCY = /\b(?:aud|usd|gbp|eur|inr|cad|nzd|sgd|aed|zar|chf|jpy|cny)\b/gi;
+function cleanJd(jd: string): string {
+  return jd
+    .replace(/https?:\/\/\S+|www\.\S+|[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi, " ")
+    .replace(/\b(?:401\(?k\)?|health|dental|vision|medical|life)\s+(?:and\s+\w+\s+)?(?:benefits|insurance|coverage)\b/gi, " ")
+    .replace(/\b(?:based\s+in|located\s+in|in|at|near|across)\s+[A-Z][a-zA-Z]+(?:[ -][A-Z][a-zA-Z]+)*(?:,\s*(?:[A-Z]{2}\b|[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)?))?(?:\s*\d{4,6})?/g, " ")
+    .replace(/\b[A-Z][a-zA-Z]+(?:\s[A-Z][a-zA-Z]+)*,\s*[A-Z]{2}\b(?:\s*\d{4,6})?/g, " ")
+    .replace(CURRENCY, " ")
+    .replace(/\$?\d[\d,.]*\s*(?:k|m|lakh|lakhs|crore)?\b/gi, " ");
+}
+function stem(w: string): string {
+  return w.length > 4 ? w.replace(/(?:ing|ed|es|s)$/, "") : w;
+}
+function keepKeyword(w: string): boolean {
+  if (STOP.has(w) || STOP2.has(w)) return false;
+  return w.length > 3 || SHORT_OK.has(w);
+}
+
 const SECTION_ALIASES: Record<string, string[]> = {
   experience: ["experience", "work experience", "professional experience", "employment", "work history", "internships"],
   education: ["education", "academic background", "qualifications", "academics"],
@@ -128,12 +157,13 @@ export function checkAts(resumeText: string, jobDescription?: string): AtsResult
   // 9. Keyword overlap with the job post (optional, 15 points). Not semantic fit.
   let missingKeywords: string[] = [];
     if (jobDescription && jobDescription.trim().length > 40) {
-    const resumeSet = new Set(words(text));
+    const resumeSet = new Set(words(text).map(stem));
     const freq = new Map<string, number>();
-    for (const w of words(jobDescription)) if (w.length > 2 && !STOP.has(w)) freq.set(w, (freq.get(w) ?? 0) + 1);
+    for (const w of words(cleanJd(jobDescription))) if (keepKeyword(w)) freq.set(w, (freq.get(w) ?? 0) + 1);
     const top = [...freq.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 20).map((e) => e[0]);
-    missingKeywords = top.filter((w) => !resumeSet.has(w)).slice(0, 8);
-    const hit = top.length ? (top.length - top.filter((w) => !resumeSet.has(w)).length) / top.length : 1;
+    const absent = top.filter((w) => !resumeSet.has(stem(w)));
+    missingKeywords = absent.slice(0, 8);
+    const hit = top.length ? (top.length - absent.length) / top.length : 1;
     const kwMax = 15;
     add("keywords", "Matches the job description", kwMax, hit * kwMax,
       missingKeywords.length ? `Words from the job post that your resume does not use: ${missingKeywords.join(", ")}. Add only the ones that are true for you.` : null);
