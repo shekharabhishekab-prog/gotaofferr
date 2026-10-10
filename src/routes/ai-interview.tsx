@@ -457,7 +457,7 @@ function AiInterview() {
       <section className="ai-hero">
         <div className="ai-wrap">
           <span className="ai-mono">( practice with coco, 10 short questions )</span>
-          <h1 className="ai-h1">{"Everyone's scared of interviews."} <span className="ai-h1b">Smart ones practice with a <mark>cat.</mark></span></h1>
+          <h1 className="ai-h1" aria-label="Everyone's scared of interviews. Smart ones practice with a cat."><span className="ai-cur">{"Everyone's "}<mark>scared of interviews.</mark></span> <span className="ai-cur">Smart ones practice with a</span> <mark className="ai-disp">cat.</mark></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
         </div>
       </section>
@@ -594,6 +594,7 @@ function AiInterview() {
 }
 
 const AI_CSS = `
+@font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-display:swap}
 .ai{--y:#ffd600;--cream:#f6f1d6;background:#000;color:var(--cream);overflow:hidden;min-height:70vh}
 .ai *{box-sizing:border-box}
 .ai-wrap{max-width:1100px;margin:0 auto;padding:0 20px}
@@ -605,9 +606,11 @@ const AI_CSS = `
 
 .ai-hero{position:relative;padding:56px 0 18px;background:radial-gradient(ellipse 38% 45% at 70% 50%,rgba(255,214,0,.14),transparent 70%)}
 .ai-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;letter-spacing:.04em;color:var(--y)}
-.ai-h1{margin:14px 0 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.95;letter-spacing:-.015em;font-size:clamp(2rem,5.4vw,4.6rem);max-width:20ch}
-.ai-h1b{display:block;margin-top:.12em}
+.ai-h1{margin:14px 0 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:1.08;letter-spacing:-.015em;font-size:clamp(2.2rem,6.6vw,6rem);max-width:none}
 .ai-h1 mark{background:var(--y);color:#000;padding:0 .14em;display:inline-block;transform:rotate(-1.5deg)}
+.ai-cur{font-family:"HPInst",Georgia,serif;font-style:italic;text-transform:none;font-weight:400;letter-spacing:-.01em;font-size:1.12em;color:var(--cream,#f6f1d6)}
+.ai-cur mark{font-family:"HPInst",Georgia,serif;font-style:italic;padding:0 .12em .04em}
+.ai-disp{font-family:var(--font-display,inherit);font-style:normal;font-weight:800;text-transform:uppercase}
 .ai-sub{max-width:38rem;margin-top:18px;font-size:1.08rem;line-height:1.5;color:rgba(246,241,214,.75)}
 .ai-sub2{font-size:1rem;line-height:1.5;color:rgba(246,241,214,.75);margin:8px 0}
 .ai-stage{padding-top:22px;padding-bottom:80px;scroll-margin-top:80px}
