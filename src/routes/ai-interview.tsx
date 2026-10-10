@@ -94,7 +94,7 @@ type SR = { start: () => void; stop: () => void; abort: () => void; onresult: ((
 function AiInterview() {
   const { user, loading } = useSession();
   const [cs, setCs] = useState(1.5);
-  useEffect(() => { const f = () => setCs(window.innerWidth < 720 ? 0.9 : 1.5); f(); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
+  useEffect(() => { const f = () => setCs(window.innerWidth < 720 ? 0.9 : window.innerWidth >= 1200 ? 1.9 : 1.5); f(); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
   const startFn = useServerFn(startInterview);
   const finishFn = useServerFn(finishInterview);
 
@@ -456,7 +456,7 @@ const AI_CSS = `
 .ai{--y:#ffd600;--cream:#f6f1d6;background:#000;color:var(--cream);overflow:hidden;min-height:70vh}
 .ai *{box-sizing:border-box}
 .ai-wrap{max-width:1100px;margin:0 auto;padding:0 20px}
-@media (min-width:1200px){.ai-wrap{max-width:1360px;padding:0 32px}}
+@media (min-width:1200px){.ai-wrap{max-width:1360px;padding:0 32px}.ai-tile{min-height:340px}.ai-coco.fx-wander{--w:150px}}
 .ai-hero .ai-wrap{position:relative}
 .ai-hero-coco{display:none}
 @media (min-width:1000px){.ai-hero-coco{display:block;position:absolute;right:40px;top:-10px;animation:ai-bob 3.2s ease-in-out infinite}}
