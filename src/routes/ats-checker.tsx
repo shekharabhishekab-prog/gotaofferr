@@ -4,6 +4,8 @@ import { checkAts, type AtsResult } from "@/lib/ats-check";
 import { assertValidResumeFile, extractPdfText, resumeSignalScore } from "@/lib/extract-pdf";
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/hooks/useSession";
+import { useServerFn } from "@tanstack/react-start";
+import { getAtsUsage, recordAtsCheck } from "@/lib/ats-usage.functions";
 
 export const Route = createFileRoute("/ats-checker")({
   head: () => ({
@@ -277,6 +279,9 @@ function AtsDesignPreview() {
   const [err, setErr] = useState("");
   const [wall, setWall] = useState(false);
   const { user } = useSession();
+  const usageFn = useServerFn(getAtsUsage);
+  const recordFn = useServerFn(recordAtsCheck);
+  const [capped, setCapped] = useState(0);
   const [real, setReal] = useState<Sample | null>(null);
   const [pm, setPm] = useState(false);
   const [rawText, setRawText] = useState("");
@@ -301,6 +306,13 @@ function AtsDesignPreview() {
     setErr("");
     if (!fileObj) { setErr("Add your resume first (PDF, DOCX or TXT)."); return; }
     if (!user && guestLeft() <= 0) { setErr("You used your free check. Sign in to keep checking."); setWall(true); return; }
+    if (user) {
+      try {
+        const u = await usageFn();
+        if (!u.allowed) { setErr("You used all " + u.limit + " checks this month. Upgrade for more."); setCapped(u.limit); return; }
+      } catch { /* counter down: allow the check */ }
+    }
+    setCapped(0);
     setPhase("scan");
     setHl(false);
     const t0 = Date.now();
@@ -314,6 +326,7 @@ function AtsDesignPreview() {
       setRawText(text);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
       if (!user) guestUse();
+      else { try { await recordFn(); } catch { /* ignore */ } }
       setReal(out);
       setPhase("done");
       setRun((n) => n + 1);
@@ -442,6 +455,7 @@ function AtsDesignPreview() {
             </div>
             <label className="ak-grow"><span>Job description</span><textarea placeholder="Paste the full job description. The robot matches keywords against it." value={jd} onChange={(e) => setJd(e.target.value)} /></label>
             {err ? <p className="ak-err" role="alert">{err}</p> : null}
+            {capped ? <p className="ak-err"><Link to="/pricing" className="underline">See plans</Link></p> : null}
             {wall ? <p className="ak-err"><Link to="/auth" className="underline">Sign in to continue</Link></p> : null}
           </div>
 
@@ -978,5 +992,6 @@ const AK_CSS = `
 @media(max-width:820px){.ak-tail{padding:22px 12px}.ak-tail-t{font-size:1.75rem}.ak-tail-s{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
+
 
 
