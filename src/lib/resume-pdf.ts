@@ -209,7 +209,7 @@ export async function buildResumePdf(r: TailoredResume) {
 
 export async function buildCoverLetterPdf(r: TailoredResume, company?: string, role?: string) {
   const d = await createDoc();
-  d.text(r.name || "Cover Letter", { size: 18, style: "bold", color: [17, 51, 92] });
+  d.text(r.name || "Cover Letter", { size: 18, style: "bold", color: [0, 0, 0] });
   r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(10);
   const target = [role, company].filter(Boolean).join(" — ");
@@ -231,7 +231,7 @@ export async function buildExampleResumePdf(example: {
 }) {
   const d = await createDoc();
 
-  d.text(`${example.role} — Resume Example`, { size: 19, style: "bold", color: [17, 51, 92] });
+  d.text(`${example.role} — Resume Example`, { size: 19, style: "bold", color: [0, 0, 0] });
   d.text(example.summaryLine, { size: 10, color: [80, 90, 105] });
   d.text("Sample template from GotaOfferr — replace every line with your own detail.", {
     size: 8.5,
@@ -273,5 +273,6 @@ export async function buildExampleResumePdf(example: {
 export function slug(s: string) {
   return (s || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+
 
 
