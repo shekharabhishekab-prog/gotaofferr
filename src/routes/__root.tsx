@@ -131,7 +131,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { name: "twitter:image", content: "https://gotaofferr.com/og-image.png" },
-      { name: "google-site-verification", content: "41Ry-ZTjIfh9ImkOS4JDlAMbPkesAhx8Cmt_UthxAPU" },
       ...(ADSENSE_CLIENT ? [{ name: "google-adsense-account", content: ADSENSE_CLIENT }] : []),
     ],
     links: [
