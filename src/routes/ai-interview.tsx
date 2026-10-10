@@ -376,14 +376,15 @@ function AiInterview() {
       const go = () => {
         const vs = ss.getVoices().filter((x) => /^en/i.test(x.lang));
         const male = /\b(david|mark|alex|daniel|fred|george|james|guy|ryan|male|rishi|oliver|arthur|aaron|thomas|eddy|reed|rocko|grandpa|ravi|albert|bruce|junior|ralph|jacques)\b/i;
-        const prefer = ["Google UK English Female", "Samantha", "Victoria", "Karen", "Moira", "Tessa", "Microsoft Zira", "Microsoft Aria", "Microsoft Jenny", "Ava", "Allison", "Susan", "Fiona", "Serena", "Kate", "Nicky", "Google US English"];
+        const prefer = ["Samantha", "Victoria", "Karen", "Moira", "Tessa", "Fiona", "Serena", "Kate", "Ava", "Allison", "Susan", "Microsoft Zira", "Microsoft Aria", "Microsoft Jenny", "Google UK English Female", "Google US English"];
         let v: SpeechSynthesisVoice | undefined;
-        for (const n of prefer) { v = vs.find((x) => x.name.toLowerCase().includes(n.toLowerCase())); if (v) break; }
+        for (const n of prefer) { const m = vs.filter((x) => x.name.toLowerCase().includes(n.toLowerCase())); v = m.find((x) => x.localService) || m[0]; if (v) break; }
         if (!v) v = vs.find((x) => /female|woman|girl/i.test(x.name)) || vs.find((x) => !male.test(x.name)) || vs[0];
         const u = new SpeechSynthesisUtterance(text);
         if (v) { u.voice = v; u.lang = v.lang; }
-        u.rate = 1.1;
-        u.pitch = 2;
+        u.rate = 0.85;
+        u.pitch = 1.3;
+        try { console.info("Coco voice:", v ? v.name + " (" + v.lang + ", " + (v.localService ? "local" : "online") + ")" : "default"); } catch { /* ignore */ }
         u.onstart = () => setClip("talk");
         u.onend = () => setClip("idle");
         u.onerror = () => setClip("idle");
