@@ -753,6 +753,7 @@ const AI_CSS = `
 }
 
 .ai-brd{display:none}
+.ai-fl{display:none}
 .ai-mk{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .42 -.13'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/140px 140px,linear-gradient(var(--y),var(--y)) 0 50%/0% 100% no-repeat;animation:ai-mark .9s .35s cubic-bezier(.2,.8,.2,1) forwards}
 @keyframes ai-mark{to{background-size:140px 140px,100% 100%}}
 .ai-hero .ai-ln{animation:ai-rise .6s ease-out both}
@@ -762,7 +763,7 @@ const AI_CSS = `
 .ai input,.ai textarea{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.12)}
 @media (prefers-reduced-motion:reduce){.ai-mk{animation:none;background-size:140px 140px,100% 100%}.ai-hero .ai-ln,.ai-hero .ai-sub{animation:none}}
 @media(max-width:899px){
-.ai-hero .ai-d.ai-mk{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:.85em;white-space:normal;line-height:1.22;letter-spacing:-.04em}
+.ai-hero .ai-d.ai-mk{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:.8em;white-space:normal;line-height:1.22;letter-spacing:-.04em}
 .ai-hero .ai-ln:has(.ai-d.ai-mk){margin-bottom:.22em}
 .ai-hero .ai-ln:has(.ai-cur){font-size:.6em;margin-left:1.1em;margin-top:.55em;line-height:1.3;white-space:nowrap}
 .ai-hero .ai-cur,.ai-hero .ai-y{font-family:"HPSyne","HPBric",sans-serif;font-style:normal;font-weight:800;text-transform:uppercase;font-size:1em;letter-spacing:-.04em;line-height:1.3}
@@ -802,7 +803,7 @@ const AI_CSS = `
 .ai-flem span:nth-child(3){animation-delay:-1.6s!important}
 @keyframes ai-wig{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
 }
-@media (min-width:900px) and (max-width:1279px){.ai-fl{display:none}}
+@media (min-width:900px) and (max-width:1359px){.ai-fl{display:none}}
 @media (min-width:900px) and (prefers-reduced-motion:reduce){.ai-hero .ai-mk{animation:none;background-size:140px 140px,100% 100%}.ai-chip,.ai-flem span,.ai-hero .ai-ln,.ai-hero .ai-sub{animation:none!important}}
 @media (prefers-reduced-motion:reduce){.ai-hopper,.ai-roam,.ai-timer.on,.ai-card,.ai-tiles,.ai-bubble,.ai::before,.ai::after,.ai-h1 mark{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
 `;
