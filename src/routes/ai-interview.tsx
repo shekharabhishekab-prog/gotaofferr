@@ -656,10 +656,10 @@ function AiInterview() {
                   <textarea className="ai-paste" value={resume} onChange={(e) => { setResume(e.target.value); setFileName(""); }} placeholder="Paste your resume text here" maxLength={12000} />
                 ) : (
                   <label className="ai-drop">
-                    <input type="file" accept=".pdf,.docx,.txt" hidden onChange={(e) => void pickFile(e.target.files?.[0] ?? null)} />
+                    <input type="file" accept=".pdf,.docx" hidden onChange={(e) => void pickFile(e.target.files?.[0] ?? null)} />
                     <span className="ai-dic"><Upload className="size-6" /></span>
                     <span className="ai-dt">{fileName || "Drop your resume"}</span>
-                    <span className="ai-dh">{fileName ? "Click to change" : "PDF, DOCX or TXT. Read in your browser, never uploaded."}</span>
+                    <span className="ai-dh">{fileName ? "Click to change" : "PDF or Word (DOCX) only. Read in your browser, never uploaded."}</span>
                   </label>
                 )}
                 <button type="button" className="ai-link" onClick={() => { setPasteMode((m) => !m); setErr(""); }}>{pasteMode ? "Upload a file instead" : "Paste text instead"}</button>
