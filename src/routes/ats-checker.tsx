@@ -467,7 +467,7 @@ function AtsDesignPreview() {
           </h2>
         </div>
         <div ref={stageRef} className="ak-stage">
-        <div data-ak className="ak-rv ak-panel">
+        <div data-ak data-ph-no-capture="true" className="ak-rv ak-panel ph-no-capture">
           <span className="ak-pill" aria-live="polite">{!user ? "1 free check" : quota ? (quota.limit < 0 ? "Checks left: Unlimited" : `${Math.max(0, quota.limit - quota.used)} of ${quota.limit} left this month`) : "Checks left: ..."}</span>
           <label
             className={`ak-drop ${over ? "over" : ""} ${phase === "scan" ? "scan" : ""}`}
@@ -507,7 +507,7 @@ function AtsDesignPreview() {
         </div>
 
         {/* RESULT */}
-        <div ref={resRef} className={`ak-res ${phase !== "done" ? "idle" : ""}`}>
+        <div ref={resRef} data-ph-no-capture="true" className={`ak-res ph-no-capture ${phase !== "done" ? "idle" : ""}`}>
           <div className="ak-idle">
             <div className="ak-sk"><i className="ring" /><div className="bars">{[0,1,2,3,4,5].map((n) => (<i key={n} style={{ ["--i" as string]: n, ["--w" as string]: (92 - n * 6) + "%" }} />))}</div></div>
             <div className="ak-sl">{[0,1,2].map((n) => (<i key={n} style={{ ["--i" as string]: n }} />))}</div>
