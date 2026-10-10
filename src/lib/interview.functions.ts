@@ -63,7 +63,40 @@ const speakSchema = z.object({
 
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-2.5-flash-preview-tts"];
 
+// Clean the raw TTS samples: drop a stray odd byte, remove DC offset, trim near-silence, fade the edges, and soft-limit peaks (avoids clicks and harsh clipping).
+function cleanPcm(raw: Uint8Array, rate: number): Uint8Array {
+  const n = raw.length >> 1;
+  if (n < 64) return raw.subarray(0, n * 2);
+  const dv = new DataView(raw.buffer, raw.byteOffset, n * 2);
+  const f = new Float32Array(n);
+  let sum = 0;
+  for (let i = 0; i < n; i++) { f[i] = dv.getInt16(i * 2, true) / 32768; sum += f[i]; }
+  const dc = sum / n;
+  for (let i = 0; i < n; i++) f[i] -= dc;
+  const th = 0.004;
+  let a = 0, b = n - 1;
+  while (a < n - 1 && Math.abs(f[a]) < th) a++;
+  while (b > a && Math.abs(f[b]) < th) b--;
+  a = Math.max(0, a - Math.floor(rate * 0.02)); b = Math.min(n - 1, b + Math.floor(rate * 0.12));
+  const m = b - a + 1;
+  const out = new Uint8Array(m * 2);
+  const o = new DataView(out.buffer);
+  const fi = Math.floor(rate * 0.02), fo = Math.floor(rate * 0.06);
+  let peak = 0;
+  for (let i = a; i <= b; i++) peak = Math.max(peak, Math.abs(f[i]));
+  const g = peak > 0 ? Math.min(1.6, 0.85 / peak) : 1;
+  for (let k = 0; k < m; k++) {
+    let x = f[a + k] * g;
+    if (k < fi) x *= k / fi;
+    if (m - 1 - k < fo) x *= (m - 1 - k) / fo;
+    x = Math.tanh(x * 1.1) / Math.tanh(1.1);
+    o.setInt16(k * 2, Math.max(-32768, Math.min(32767, Math.round(x * 32767))), true);
+  }
+  return out;
+}
+
 function pcmToWavBase64(pcm: Uint8Array, rate = 24000): string {
+  pcm = cleanPcm(pcm, rate);
   const h = new ArrayBuffer(44);
   const v = new DataView(h);
   const w = (o: number, t: string) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
