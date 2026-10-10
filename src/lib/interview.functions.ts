@@ -51,3 +51,61 @@ export const finishInterview = createServerFn({ method: "POST" })
     const { qa, ...setup } = data;
     return { feedback: await makeFeedback(setup, qa) };
   });
+
+// Coco's voice. Turns one interview question into speech with Google Gemini text-to-speech
+// (same free-tier key the site already uses). Login required. Nothing is stored.
+const speakSchema = z.object({ text: z.string().trim().min(2).max(300) });
+
+const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-2.5-flash-preview-tts"];
+
+function pcmToWavBase64(pcm: Uint8Array, rate = 24000): string {
+  const h = new ArrayBuffer(44);
+  const v = new DataView(h);
+  const w = (o: number, t: string) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + pcm.length, true); w(8, "WAVE"); w(12, "fmt ");
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, "data"); v.setUint32(40, pcm.length, true);
+  const out = new Uint8Array(44 + pcm.length);
+  out.set(new Uint8Array(h), 0); out.set(pcm, 44);
+  let bin = "";
+  for (let i = 0; i < out.length; i += 0x8000) bin += String.fromCharCode(...out.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+export const cocoSpeak = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => speakSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { enforcePolicy } = await import("@/lib/rate-limit.server");
+    const ctx = context as { userId: string };
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) return { ok: false as const, reason: "no-key" };
+    await enforcePolicy("interview_tts_global", "site");
+    await enforcePolicy("interview_tts", ctx.userId);
+    let lastStatus = 0;
+    for (const model of TTS_MODELS) {
+      try {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: "Say this warmly, in a friendly, bright, natural young woman's voice, like a kind interviewer: " + data.text }] }],
+            generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Leda" } } } },
+          }),
+        });
+        lastStatus = r.status;
+        if (!r.ok) { console.warn("[coco-tts]", model, r.status); continue; }
+        const j: any = await r.json();
+        const b64: string | undefined = j?.candidates?.[0]?.content?.parts?.find((p: any) => p?.inlineData?.data)?.inlineData?.data;
+        if (!b64) continue;
+        const bin = atob(b64);
+        const pcm = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) pcm[i] = bin.charCodeAt(i);
+        return { ok: true as const, wav: pcmToWavBase64(pcm), model };
+      } catch (e) {
+        console.warn("[coco-tts] error", model, e);
+      }
+    }
+    return { ok: false as const, reason: "status-" + lastStatus };
+  });
