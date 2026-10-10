@@ -461,7 +461,7 @@ function AiInterview() {
       <section className="ai-hero">
         <div className="ai-wrap">
           <span className="ai-mono">( practice with coco, 10 short questions )</span>
-          <h1 className="ai-h1" aria-label="Everyone's scared of interviews. Smart ones practice with a cute cat."><span className="ai-ln"><span className="ai-d">{"Everyone's"}</span> <span className="ai-y">scared of interviews.</span></span><span className="ai-ln"><span className="ai-d">Smart ones practice with a</span> <span className="ai-y">cute cat.</span></span></h1>
+          <h1 className="ai-h1" aria-label="Scared of interviews? Practice with a cute cat."><span className="ai-ln"><span className="ai-y">Scared of interviews?</span></span><span className="ai-ln"><span className="ai-d">Practice with a</span> <span className="ai-y">cute cat.</span></span></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
         </div>
       </section>
