@@ -528,7 +528,7 @@ function AtsDesignPreview() {
                 <circle cx="60" cy="60" r="54" className="bg" />
                 <circle key={key + run} cx="60" cy="60" r="54" className="fg" style={{ strokeDasharray: C, ["--to" as string]: C * (1 - s.score / 100) }} />
               </svg>
-              <div className="ak-num"><b>{shown}</b><span>/100</span></div>
+              <div className="ak-num"><b>{shown}<span>/100</span></b></div>
               <p>{s.verdict}</p>
             </div>
 
@@ -619,7 +619,7 @@ function AtsDesignPreview() {
               {title ? <div className="ak-pmt">{title}</div> : null}
               <div className={`ak-pmg ${tone}`}>
                 <svg viewBox="0 0 120 120" aria-hidden><circle cx="60" cy="60" r="54" className="bg" /><circle cx="60" cy="60" r="54" className="fg" strokeDasharray={C} strokeDashoffset={C * (1 - s.score / 100)} /></svg>
-                <div className="ak-pmn"><b>{s.score}</b><span>/100</span></div>
+                <div className="ak-pmn"><b>{s.score}<span>/100</span></b></div>
               </div>
               <p>{s.verdict}</p>
               <button type="button" className="ak-pmd" onClick={dl}><Download className="size-5" /> Download report</button>
@@ -1066,6 +1066,11 @@ const AK_CSS = `
 @media(min-width:821px){.ak-tail{position:absolute;left:18px;right:18px;bottom:18px;margin:0;height:84px;z-index:3;box-shadow:5px 5px 0 var(--y)}.ak-tail-t{font-size:1.9rem}.ak-res .ak-scroll{bottom:204px!important}}
 @media(max-width:820px){.ak-tail{padding:20px 12px;margin:10px 0 0;width:100%;box-sizing:border-box;border-width:3px;box-shadow:none}.ak-tail:before{display:none}.ak-tail-t{font-size:1.6rem}.ak-tail-s{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
+.ak-gauge .ak-num{position:static!important;grid-area:1/1!important;align-self:center!important;justify-self:center!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;width:auto!important;height:auto!important;top:auto!important;transform:none!important}
+.ak-pmg .ak-pmn{position:absolute!important;inset:0!important;top:0!important;bottom:0!important;left:0!important;right:0!important;width:auto!important;height:auto!important;padding:0!important;transform:none!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:row!important}
+.ak-gauge{position:relative}
+.ak-gauge .ak-num b,.ak-pmg .ak-pmn b{position:relative;display:block;line-height:1!important;margin:0!important;padding:0!important}
+.ak-gauge .ak-num b span,.ak-pmg .ak-pmn b span{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin:4px 0 0!important;font-size:.85rem;font-weight:700;opacity:.55;line-height:1!important;white-space:nowrap}
 `;
 
 
