@@ -459,10 +459,9 @@ const AI_CSS = `
 @media (min-width:1200px){.ai-wrap{max-width:1360px;padding:0 32px}.ai-tile{min-height:340px}.ai-coco.fx-wander{--w:150px}}
 .ai-hero .ai-wrap{position:relative}
 .ai-hero-coco{display:none}
-@media (min-width:1000px){.ai-hero-coco{display:block;position:absolute;right:40px;top:-10px;animation:ai-bob 3.2s ease-in-out infinite}}
+@media (min-width:1340px){.ai-hero-coco{display:block;position:absolute;right:20px;top:-20px;animation:ai-bob 3.2s ease-in-out infinite}}
 @keyframes ai-bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-14px) rotate(1.5deg)}}
-.ai-hero{animation:ai-glow 7s ease-in-out infinite alternate}
-@keyframes ai-glow{from{background-position:0 0}to{background-position:-40px 20px}}
+
 .ai-hero{position:relative;padding:56px 0 18px;background:radial-gradient(60% 60% at 80% 20%,rgba(255,214,0,.14),transparent 70%)}
 .ai-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;letter-spacing:.04em;color:var(--y)}
 .ai-h1{margin:14px 0 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.95;letter-spacing:-.015em;font-size:clamp(2.6rem,7vw,5.5rem)}
@@ -556,5 +555,5 @@ const AI_CSS = `
 .ai-bubble{font-size:1.02rem;margin:0 10px}
 .ai-answer{padding:10px}
 }
-@media (prefers-reduced-motion:reduce){.ai-hero-coco,.ai-hero{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
+@media (prefers-reduced-motion:reduce){.ai-hero-coco{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
 `;
