@@ -10,7 +10,7 @@ import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 
 const nav = [
-  { to: "/how-it-works", label: "How it works" },
+  { to: "/ats-checker", label: "ATS score checker" },
   { to: "/resume-builder", label: "Resume builder" },
   { to: "/examples/resumes", label: "Examples" },
   { to: "/jobs", label: "Job finder" },
@@ -129,3 +129,4 @@ export function SiteHeader() {
     </header>
   );
 }
+
