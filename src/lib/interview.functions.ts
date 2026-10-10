@@ -128,8 +128,8 @@ export const cocoSpeak = createServerFn({ method: "POST" })
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": key },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: "Say this line in a sweet, bright, soft, young girl voice, warm and smiling, at a calm steady pace, the same way every time. Say only the line: " + data.text }] }],
-            generationConfig: { temperature: 0, responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.voice } } } },
+            contents: [{ parts: [{ text: "Voice: a sweet, bright, soft little girl, warm and smiling, calm steady pace. Say exactly this line and nothing else: " + data.text }] }],
+            generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.voice } } } },
           }),
         });
         lastStatus = r.status;
@@ -138,6 +138,8 @@ export const cocoSpeak = createServerFn({ method: "POST" })
         const b64: string | undefined = j?.candidates?.[0]?.content?.parts?.find((p: any) => p?.inlineData?.data)?.inlineData?.data;
         if (!b64) continue;
         const bin = atob(b64);
+        // A question is a few seconds long. Anything much longer means the model rambled, so skip it.
+        if (bin.length > 24000 * 2 * Math.max(12, data.text.length * 0.25)) { console.warn("[coco-tts] too long", model, bin.length); continue; }
         const pcm = new Uint8Array(bin.length);
         for (let i = 0; i < bin.length; i++) pcm[i] = bin.charCodeAt(i);
         console.info("[coco-tts] ok", model, data.voice);
