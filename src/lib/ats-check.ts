@@ -19,7 +19,8 @@ const ACTION_VERBS = new Set(
     "implemented analysed analyzed optimised optimized automated coordinated negotiated mentored trained wrote " +
     "organised organized streamlined migrated resolved shipped scaled saved generated planned executed supported " +
     "established maintained achieved won closed handled produced introduced rebuilt redesigned cut boosted " +
-    "formulated presented reviewed tested deployed configured monitored collaborated initiated spearheaded").split(" "),
+    "formulated presented reviewed tested deployed configured monitored collaborated initiated spearheaded " +
+    "lead manage build create design develop deliver improve increase reduce launch own drive grow implement optimise optimize automate coordinate negotiate mentor train write organise organize streamline migrate resolve ship scale save generate plan execute support establish maintain achieve win close handle produce introduce rebuild redesign boost formulate present review test deploy configure monitor collaborate initiate run send report draft clean conduct prepare track serve ran sent drafted cleaned conducted prepared tracked served manages leads builds creates runs plans handles supports reports").split(" "),
 );
 const STOP = new Set(
   ("the a an and or of to in for with on at by from as is are be will you your we our this that it their they " +
@@ -152,3 +153,4 @@ export function checkAts(resumeText: string, jobDescription?: string): AtsResult
   const band = score >= 85 ? "strong" : score >= 70 ? "good" : score >= 50 ? "needs work" : "weak";
   return { score, band, checks, missingKeywords, hints: checks.map((c) => c.hint).filter((h): h is string => !!h) };
 }
+
