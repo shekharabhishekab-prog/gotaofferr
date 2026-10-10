@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useServerFn } from "@tanstack/react-start";
 import { getAtsUsage, recordAtsCheck } from "@/lib/ats-usage.functions";
-import { robotView, stuffedWords } from "@/lib/ats-robot";
+import { looksLikeResume, robotView, stuffedWords } from "@/lib/ats-robot";
 import { hardGap, regionNotes, type HardGap, type RegionNote } from "@/lib/ats-region";
 
 export const Route = createFileRoute("/ats-checker")({
@@ -346,7 +346,7 @@ function AtsDesignPreview() {
     try {
       const text = await readResume(fileObj);
       if (text.replace(/\s+/g, "").length < 80) throw new Error(/\.pdf$/i.test(fileObj.name) ? "No text found. This looks like a scan or picture. If the robot can't read it, ATS can't either. Export a text PDF or use DOCX." : "That file has almost no text. Add your full resume.");
-      if (resumeSignalScore(text) < 3) throw new Error("This doesn't look like a resume. Upload your CV or resume file.");
+      if (resumeSignalScore(text) < 3 || !looksLikeResume(text)) throw new Error("This doesn't look like a resume. Upload your own resume as a PDF, DOCX or TXT.");
       let jdt = jd.slice(0, MAX_JD);
       for (const w of (comp.toLowerCase().match(/[a-z]{3,}/g) ?? [])) jdt = jdt.replace(new RegExp("\\b" + w + "\\b", "gi"), " ");
       const jdFull = jd.slice(0, MAX_JD);
@@ -477,6 +477,7 @@ function AtsDesignPreview() {
             <span className="ak-dt">{phase === "scan" ? STEPS[step] + "..." : file || "Drop your resume here"}</span>
             <span className="ak-dh">{file ? "Click to change" : "PDF, DOCX or TXT. Or click to browse."}</span>
           </label>
+          <p className="ak-hint">Upload only your own resume. No essays or reports.</p>
 
           <div className="ak-fields">
             <div className="ak-two">
@@ -1038,6 +1039,7 @@ const AK_CSS = `
 .ak-pmn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:0}.ak-pmn b{font-size:3.4rem;line-height:1;font-family:var(--font-display,inherit)}.ak-pmn span{opacity:.7;margin-left:2px}
 .ak-pml p{margin:0;font-weight:600}
 .ak-pmd{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;border:0;border-radius:12px;padding:16px 18px;width:100%;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+.ak-hint{margin:8px 2px 0;font-size:.82rem;opacity:.65;text-align:center}
 .ak-pmt2{margin-top:10px;background:#000;color:var(--y);text-decoration:none;border:2px solid var(--y)}
 .ak-gauge{display:grid;justify-items:center}.ak-gauge svg{grid-area:1/1;margin:0}.ak-gauge .ak-num{grid-area:1/1;align-self:center;position:static;top:auto;left:auto;right:auto;width:auto;height:auto;padding:0;transform:none;display:flex;flex-direction:column;align-items:center;justify-content:center}.ak-gauge .ak-num b{line-height:1}.ak-gauge .ak-num span{margin:2px 0 0}.ak-gauge p{grid-area:2/1}
 .ak-pmr{padding:28px 30px;overflow-y:auto;overscroll-behavior:contain}
