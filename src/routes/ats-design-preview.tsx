@@ -276,6 +276,7 @@ function AtsDesignPreview() {
   const [err, setErr] = useState("");
   const [real, setReal] = useState<Sample | null>(null);
   const [pm, setPm] = useState(false);
+  const [rawText, setRawText] = useState("");
   const [hl, setHl] = useState(false);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const resRef = useRef<HTMLDivElement | null>(null);
@@ -307,6 +308,7 @@ function AtsDesignPreview() {
       let jdt = jd.slice(0, MAX_JD);
       for (const w of (comp.toLowerCase().match(/[a-z]{3,}/g) ?? [])) jdt = jdt.replace(new RegExp("\\b" + w + "\\b", "gi"), " ");
       const out = toSample(checkAts(text, jdt), jdt.trim().length > 40);
+      setRawText(text);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
       guestUse();
       setReal(out);
@@ -322,6 +324,12 @@ function AtsDesignPreview() {
   const dl = async () => {
     if (phase !== "done") { setErr("Run a check first, then download the report."); return; }
     try { await makePdf(s, title, !real); } catch { setErr("Could not build the report. Try again."); }
+  };
+  const carry = () => {
+    if (!real || !rawText) return;
+    try {
+      window.sessionStorage.setItem("gf-ats-carry", JSON.stringify({ resume: rawText, jd: jd.slice(0, MAX_JD), company: comp.trim(), role: pos.trim(), file: file, t: Date.now() }));
+    } catch { /* storage unavailable: tailor opens empty */ }
   };
   const openPv = () => {
     if (phase !== "done") { setErr("Run a check first, then open the full preview."); return; }
@@ -493,7 +501,7 @@ function AtsDesignPreview() {
           </div>
 
           </div>
-          <Link to="/tailor" className="ak-tail"><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 15 seconds. No fake skills.</span></Link>
+          <Link to="/tailor" className="ak-tail" onClick={carry}><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 15 seconds. No fake skills.</span></Link>
           <div className="ak-pvbar">
             <button type="button" className={`ak-pv ${hl ? "hl" : ""}`} onClick={openPv}><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
             <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /></button>
