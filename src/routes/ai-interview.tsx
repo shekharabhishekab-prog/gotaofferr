@@ -628,6 +628,7 @@ const AI_CSS = `
 .ai-answer{padding:14px}
 .ai-answer textarea{min-height:110px;resize:vertical}
 .ai-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+@media(max-width:899px){.ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ai-actions .ai-mic,.ai-actions .ai-btn.sm{width:100%;justify-content:center;padding:13px 10px;font-size:.9rem;white-space:nowrap;box-sizing:border-box}}
 .ai-mic{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--y);background:transparent;color:var(--y);font-weight:700;border-radius:999px;padding:11px 20px;cursor:pointer;font-size:.95rem}
 .ai-mic.on{background:#c62828;border-color:#c62828;color:#fff}
 .ai-answer .ai-note{margin:10px 0 0}
