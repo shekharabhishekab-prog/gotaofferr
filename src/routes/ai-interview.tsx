@@ -56,6 +56,7 @@ const shuffled = (a: number[]) => { const b = a.slice(); for (let i = b.length -
 // Two stacked videos crossfade. The next clip is loaded in the hidden video ahead of time, so there is no wait between clips.
 function CocoVideo({ talking, levelRef }: { talking: boolean; levelRef: { current: number } }) {
   const [catOk, setCatOk] = useState(false);
+  const [catFail, setCatFail] = useState(false);
   const catRef = useRef<HTMLDivElement | null>(null);
   const refs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)];
   const act = useRef(1);
@@ -152,7 +153,7 @@ function CocoVideo({ talking, levelRef }: { talking: boolean; levelRef: { curren
     }, 80);
     return () => window.clearInterval(iv);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [talking, catOk]);
+  }, [talking, catOk, catFail]);
   return (
     <>
       {[0, 1].map((i) => (
@@ -160,7 +161,7 @@ function CocoVideo({ talking, levelRef }: { talking: boolean; levelRef: { curren
       ))}
       <div ref={catRef} className={`ai-cat ${talking && catOk ? "on" : ""}`} data-m="0" aria-hidden="true">
         <div className="ai-cat-in">
-          <img src="/coco-cat.webp" alt="" width={460} height={535} decoding="async" draggable={false} onLoad={() => setCatOk(true)} onError={() => setCatOk(false)} />
+          <img src="/coco-cat.webp" alt="" width={460} height={535} decoding="async" draggable={false} onLoad={() => setCatOk(true)} onError={() => { setCatOk(false); setCatFail(true); }} />
           <svg viewBox="0 0 460 535" preserveAspectRatio="none">
             <g className="m1"><path d="M112 195Q127 192 142 195Q140 211 127 212Q114 211 112 195Z" /></g>
             <g className="m2"><path d="M107 194Q127 190 147 194Q145 219 127 220Q109 219 107 194Z" /><ellipse className="tg" cx="127" cy="212" rx="9" ry="5" /></g>
@@ -168,7 +169,7 @@ function CocoVideo({ talking, levelRef }: { talking: boolean; levelRef: { curren
           </svg>
         </div>
       </div>
-      {[4, 2].map((n, i) => (
+      {(catFail ? [4, 2] : []).map((n, i) => (
         <video key={"t" + n} ref={tvs[i]} className="ai-cvid ai-cvid-t" style={{ opacity: 0 }} src={"/coco-clip/" + n} muted playsInline preload="auto" aria-hidden="true" />
       ))}
     </>
