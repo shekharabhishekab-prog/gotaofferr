@@ -70,13 +70,9 @@ class Doc {
     this.space(8);
     this.doc.setFont("helvetica", "bold");
     this.doc.setFontSize(10.5);
-    this.doc.setTextColor(17, 51, 92);
+    this.doc.setTextColor(0, 0, 0);
     this.doc.text(safe(label.toUpperCase()), M, this.y + 8);
-    this.y += 14;
-    this.doc.setDrawColor(17, 51, 92);
-    this.doc.setLineWidth(1);
-    this.doc.line(M, this.y, RIGHT, this.y);
-    this.y += 8;
+    this.y += 18;
   }
 
   rowed(left: string, right: string, bold = true) {
@@ -140,16 +136,17 @@ export async function buildResumePdf(r: TailoredResume) {
   r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(4);
 
-  if (r.summary) {
+  if (r.summary || r.keyAchievements?.length) {
     d.heading("Professional Summary");
-    d.text(r.summary, { size: 9.8 });
+    if (r.summary) d.text(r.summary, { size: 9.8 });
+    if (r.keyAchievements?.length) d.bullets(r.keyAchievements);
   }
 
   const groups = (r.skillGroups ?? []).filter((g) => g.label && g.items?.length);
   if (r.skills?.length || groups.length) {
     d.heading("Skills");
     if (!groups.length) {
-      d.text((r.skills ?? []).join("  •  "), { size: 9.8 });
+      d.text((r.skills ?? []).join(", "), { size: 9.8 });
     } else {
       // One merged block: the groups carry the skills; flat skills they miss are added once.
       const inGroups = new Set(groups.flatMap((g) => g.items.map((i) => i.trim().toLowerCase())));
@@ -157,11 +154,6 @@ export async function buildResumePdf(r: TailoredResume) {
       groups.forEach((g) => d.text(`${g.label}: ${g.items.join(", ")}`, { size: 9.5 }));
       if (extra.length) d.text(`Other: ${extra.join(", ")}`, { size: 9.5 });
     }
-  }
-
-  if (r.keyAchievements?.length) {
-    d.heading("Key Achievements");
-    d.bullets(r.keyAchievements);
   }
 
   if (r.experience?.length) {
@@ -281,4 +273,5 @@ export async function buildExampleResumePdf(example: {
 export function slug(s: string) {
   return (s || "resume").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+
 
