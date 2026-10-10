@@ -42,6 +42,16 @@ function headingKey(raw: string): string | null {
   return null;
 }
 
+const COMMON = new Set("and the for are you our not but all can has had its who how out new via per use led with that this from have were been your their they them will would could should about into over such also more most other than then when what which while where team work works worked working experience skills management business project projects company customer customers client clients using used years year".split(" "));
+/** Step 7: words repeated far too often (keyword stuffing). Warning only, no score change. */
+export function stuffedWords(text: string): string[] {
+  const ws = (text.toLowerCase().match(/[a-z][a-z+#.]{2,}/g) ?? []).map((w) => w.replace(/\.+$/, ""));
+  if (ws.length < 80) return [];
+  const freq = new Map<string, number>();
+  for (const w of ws) if (w.length >= 3 && !COMMON.has(w)) freq.set(w, (freq.get(w) ?? 0) + 1);
+  return [...freq.entries()].filter(([, n]) => n >= 10 && n / ws.length >= 0.03).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([w]) => w);
+}
+
 export function robotView(resumeText: string): RobotView {
   const text = (resumeText ?? "").replace(/\r/g, "");
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -99,6 +109,7 @@ export function robotView(resumeText: string): RobotView {
   if (/[\uFFFD\uE000-\uF8FF]/.test(text)) warnings.push("Some symbols turned into odd marks. A robot may drop them.");
   if (/[\uFB00-\uFB06]/.test(text)) warnings.push("Some letters are joined (like fi). Some robots cannot match those words.");
   if (lines.length > 6 && avgLen > 110) warnings.push("Very long lines. Two columns may be read straight across and get mixed.");
+  { const st = stuffedWords(text); if (st.length) warnings.push("The word " + st.map((w) => '"' + w + '"').join(", ") + " is repeated a lot. Some robots mark that as keyword stuffing."); }
   if (!name && text.trim().length >= 120) warnings.push("No name found at the top. Put it alone on the first line.");
 
   const MAX = 2400;
