@@ -461,7 +461,7 @@ function AiInterview() {
       <section className="ai-hero">
         <div className="ai-wrap">
           <span className="ai-mono">( practice with coco, 10 short questions )</span>
-          <h1 className="ai-h1" aria-label="Scared of interviews? Practice with a cute cat."><span className="ai-ln"><span className="ai-d ai-mk ai-big">Scared of interviews?</span></span><span className="ai-ln"><span className="ai-cur">Practice with a</span> <span className="ai-y ai-mk">cute cat.</span></span></h1>
+          <h1 className="ai-h1" aria-label="Scared of interviews? Practice with a cute cat."><span className="ai-ln"><span className="ai-d ai-mk ai-big">Scared of<br />interviews?</span></span><span className="ai-ln"><span className="ai-cur">Practice with a</span> <span className="ai-y ai-mk">cute cat.</span></span></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
           <div className="ai-fl" aria-hidden="true">
             <span className="ai-chip c1">Meow! 🐾</span>
@@ -753,7 +753,7 @@ const AI_CSS = `
 }
 
 @media(max-width:600px){
-.ai-hero .ai-d.ai-mk{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:.9em;white-space:normal;line-height:1.22;letter-spacing:-.04em}
+.ai-hero .ai-d.ai-mk{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:.8em;white-space:normal;line-height:1.22;letter-spacing:-.04em}
 .ai-hero .ai-ln:has(.ai-d.ai-mk){margin-bottom:.22em}
 .ai-hero .ai-cur,.ai-hero .ai-y{font-size:.9em}
 .ai-hero .ai-ln:has(.ai-cur){white-space:nowrap;margin-top:.3em}
@@ -779,6 +779,7 @@ const AI_CSS = `
 .ai-flem span:nth-child(3){animation-delay:-1.8s}
 @keyframes ai-flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 }
+@media (min-width:900px) and (max-width:1279px){.ai-fl{display:none}}
 @media (min-width:900px) and (prefers-reduced-motion:reduce){.ai-hero .ai-mk{animation:none;background-size:140px 140px,100% 100%}.ai-chip,.ai-flem span,.ai-hero .ai-ln,.ai-hero .ai-sub{animation:none!important}}
 @media (prefers-reduced-motion:reduce){.ai-hopper,.ai-roam,.ai-timer.on,.ai-card,.ai-tiles,.ai-bubble,.ai::before,.ai::after,.ai-h1 mark{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
 `;
