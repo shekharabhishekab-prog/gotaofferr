@@ -464,13 +464,11 @@ function AiInterview() {
           <h1 className="ai-h1" aria-label="Scared of interviews? Practice with a cute cat."><span className="ai-ln"><span className="ai-d ai-mk ai-big">Scared of interviews?</span></span><span className="ai-ln"><span className="ai-cur">Practice with a</span> <span className="ai-y ai-mk">cute cat.</span></span></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
           <div className="ai-fl" aria-hidden="true">
-            <span className="ai-fl1">Meow! 🐾</span>
-            <span className="ai-fl2">10 questions</span>
-            <span className="ai-fl3">2:00 per answer</span>
-            <span className="ai-fl4">🎤</span>
-            <span className="ai-fl5">you got this</span>
-            <span className="ai-fl6">✨</span>
-            <span className="ai-fl7">🐱</span>
+            <span className="ai-chip c1">Meow! 🐾</span>
+            <span className="ai-chip c2">10 questions</span>
+            <span className="ai-chip c3">2:00 per answer</span>
+            <span className="ai-chip c4">you got this</span>
+            <div className="ai-flem"><span>🎤</span><span>🐱</span><span>✨</span></div>
           </div>
         </div>
       </section>
@@ -755,7 +753,7 @@ const AI_CSS = `
 }
 
 @media(max-width:600px){
-.ai-hero .ai-d.ai-mk{font-size:.9em;white-space:nowrap;line-height:1.25}
+.ai-hero .ai-d.ai-mk{font-size:.8em;white-space:nowrap;line-height:1.25;letter-spacing:-.03em}
 .ai-hero .ai-cur,.ai-hero .ai-y{font-size:.9em}
 .ai-hero .ai-ln:has(.ai-cur){white-space:nowrap;margin-top:.3em}
 .ai-hero .ai-sub{font-size:.88rem;line-height:1.5;margin-top:14px;color:rgba(246,241,214,.55);font-weight:400}
@@ -768,19 +766,17 @@ const AI_CSS = `
 .ai-hero .ai-ln:nth-child(2){animation-delay:.12s}
 .ai-hero .ai-sub{max-width:54rem;animation:ai-rise .7s .25s ease-out both}
 .ai-hero .ai-d.ai-mk{font-size:.9em}
-.ai-fl{display:block;position:absolute;right:0;top:0;width:27%;height:100%;pointer-events:none}
-.ai-fl span{position:absolute;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:.9rem;white-space:nowrap;padding:9px 16px;border-radius:999px;background:var(--y);color:#0b0a08;box-shadow:0 8px 24px rgba(255,214,0,.22);animation:ai-flt 4s ease-in-out infinite}
-.ai-fl1{right:14%;top:8%;font-size:1.25rem!important;transform:rotate(-6deg);animation-delay:0s!important}
-.ai-fl2{right:2%;top:34%;background:#0b0a08!important;color:var(--y)!important;border:2px solid var(--y);animation-delay:-1s!important}
-.ai-fl3{right:20%;top:58%;background:#f6f1d6!important;animation-delay:-2s!important}
-.ai-fl5{right:3%;top:80%;background:#0b0a08!important;color:#f6f1d6!important;border:2px dashed rgba(255,214,0,.6);animation-delay:-3s!important}
-.ai-fl4,.ai-fl6,.ai-fl7{background:none!important;box-shadow:none!important;padding:0!important;font-size:2.6rem!important}
-.ai-fl4{right:62%;top:30%;animation-duration:3.2s!important}
-.ai-fl6{right:0;top:2%;animation:ai-spinz 6s linear infinite!important}
-.ai-fl7{right:58%;top:80%;animation-duration:2.6s!important}
-@keyframes ai-flt{0%,100%{translate:0 0;rotate:-2deg}50%{translate:0 -16px;rotate:3deg}}
-@keyframes ai-spinz{to{transform:rotate(360deg)}}
+.ai-fl{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:16px;position:absolute;right:0;top:0;height:100%;pointer-events:none}
+.ai-chip{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:1rem;white-space:nowrap;padding:11px 22px;border-radius:999px;background:var(--y);color:#0b0a08;box-shadow:0 8px 24px rgba(255,214,0,.22);animation:ai-flt 3.6s ease-in-out infinite}
+.ai-chip.c2{background:#0b0a08;color:var(--y);border:2px solid var(--y);animation-delay:-.9s}
+.ai-chip.c3{background:#f6f1d6;animation-delay:-1.8s}
+.ai-chip.c4{background:#0b0a08;color:#f6f1d6;border:2px dashed rgba(255,214,0,.6);animation-delay:-2.7s}
+.ai-flem{display:flex;gap:18px;font-size:2.2rem;line-height:1}
+.ai-flem span{animation:ai-flt 2.8s ease-in-out infinite}
+.ai-flem span:nth-child(2){animation-delay:-.9s}
+.ai-flem span:nth-child(3){animation-delay:-1.8s}
+@keyframes ai-flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 }
-@media (min-width:900px) and (prefers-reduced-motion:reduce){.ai-hero .ai-mk{animation:none;background-size:100% 100%}.ai-fl span,.ai-hero .ai-ln,.ai-hero .ai-sub{animation:none!important}}
+@media (min-width:900px) and (prefers-reduced-motion:reduce){.ai-hero .ai-mk{animation:none;background-size:100% 100%}.ai-chip,.ai-flem span,.ai-hero .ai-ln,.ai-hero .ai-sub{animation:none!important}}
 @media (prefers-reduced-motion:reduce){.ai-hopper,.ai-roam,.ai-timer.on,.ai-card,.ai-tiles,.ai-bubble,.ai::before,.ai::after,.ai-h1 mark{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
 `;
