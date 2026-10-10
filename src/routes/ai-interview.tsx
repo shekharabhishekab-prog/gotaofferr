@@ -79,7 +79,7 @@ function Coco({ clip, fx, size = 1.5 }: { clip: ClipName; fx?: "jump" | "spin" |
   const row = Math.floor(frame / COLS);
   return (
     <div ref={ref} className={`ai-coco ${fx ? "fx-" + fx : ""}`} style={{ width: FW * size, height: FH * size }} role="img" aria-label="Coco, a yellow cat who is your interviewer">
-      <div style={{ width: FW, height: FH, transform: `scale(${size})`, transformOrigin: "top left", backgroundImage: "url(/coco/coco-sprite.webp)", backgroundSize: `${FW * COLS}px ${FH * 4}px`, backgroundPosition: `-${col * FW}px -${row * FH}px` }} />
+      <div style={{ width: FW, height: FH, transform: `scale(${size})`, transformOrigin: "top left", backgroundImage: "url(/coco-sprite.webp)", backgroundSize: `${FW * COLS}px ${FH * 4}px`, backgroundPosition: `-${col * FW}px -${row * FH}px` }} />
     </div>
   );
 }
