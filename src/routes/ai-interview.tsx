@@ -60,7 +60,7 @@ function CocoVideo({ talking }: { talking: boolean }) {
     const q = useRef<number[]>([]);
   const first = useRef(true);
   const last = useRef(0);
-  const tk = useRef(talking);
+  const tk = useRef(false); // idle clips only; talking has its own layer below
   const prep = useRef<{ n: number; talk: boolean; ready: boolean; now: boolean } | null>(null);
   const pick = (t: boolean) => {
     if (t) { const c = TALK_CLIPS.filter((x) => x !== last.current); return c[Math.floor(Math.random() * c.length)]; }
@@ -107,11 +107,48 @@ function CocoVideo({ talking }: { talking: boolean }) {
     if (p.ready) swap();
   };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { tk.current = talking; want(); }, [talking]);
+  useEffect(() => { want(); }, []);
+  // Talking layer: short front-facing talking segments, crossfaded one into the next, shown only while Coco speaks.
+  const tvs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)];
+  useEffect(() => {
+    const SEG = [{ a: 1.5, b: 6.5 }, { a: 1.5, b: 4.5 }];
+    const [v0, v1] = [tvs[0].current, tvs[1].current];
+    if (!v0 || !v1) return;
+    const vs = [v0, v1];
+    if (!talking) {
+      vs.forEach((v) => { v.style.opacity = "0"; });
+      const t = window.setTimeout(() => vs.forEach((v) => v.pause()), 400);
+      return () => window.clearTimeout(t);
+    }
+    let cur = Math.random() < 0.5 ? 0 : 1;
+    const show = (i: number) => {
+      const v = vs[i];
+      v.currentTime = SEG[i].a;
+      v.play().catch(() => { /* autoplay blocked */ });
+      v.style.opacity = "1";
+    };
+    show(cur);
+    vs[cur ^ 1].style.opacity = "0";
+    const iv = window.setInterval(() => {
+      const v = vs[cur];
+      if (v.currentTime >= SEG[cur].b - 0.4) {
+        const old = vs[cur];
+        cur ^= 1;
+        show(cur);
+        old.style.opacity = "0";
+        window.setTimeout(() => { if (vs[cur] !== old) old.pause(); }, 500);
+      }
+    }, 80);
+    return () => window.clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [talking]);
   return (
     <>
       {[0, 1].map((i) => (
         <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: i === 1 ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) want(); }} onTimeUpdate={(e) => { const v = e.currentTarget; const p = prep.current; if (act.current === i && v.duration && v.duration - v.currentTime < 2.4 && p && p.ready && p.talk === tk.current) want(); }} />
+      ))}
+      {[4, 2].map((n, i) => (
+        <video key={"t" + n} ref={tvs[i]} className="ai-cvid ai-cvid-t" style={{ opacity: 0 }} src={"/coco-clip/" + n} muted playsInline preload="auto" aria-hidden="true" />
       ))}
     </>
   );
@@ -168,7 +205,7 @@ function AiInterview() {
   const startFn = useServerFn(startInterview);
   const finishFn = useServerFn(finishInterview);
   const speakFn = useServerFn(cocoSpeak);
-  const [voiceKind, setVoiceKind] = useState<"A" | "B" | "C" | "D" | "browser">("A");
+  const [voiceKind, setVoiceKind] = useState<"A" | "B" | "C" | "D" | "E" | "F" | "browser">("A");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const voiceCache = useRef<Map<string, string>>(new Map());
   const lifts = useRef<Map<string, number>>(new Map());
@@ -347,8 +384,6 @@ function AiInterview() {
       hintedRef.current = false;
       setBubble(auto ? "Time. No worries, next one." : questions[idx + 1]);
       if (auto) window.setTimeout(() => setBubble(questions[idx + 1]), 1400);
-      setClip("talk");
-      window.setTimeout(() => setClip("idle"), 2200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, questions, stopMic]);
@@ -419,8 +454,7 @@ function AiInterview() {
       setFx("wander");
       setBubble("Coco is looking around...");
       window.setTimeout(() => { setClip("wave"); setFx("jump"); setBubble("Hi! I'm Coco. Let's practice. Take your time."); }, 4600);
-      window.setTimeout(() => { setFx(""); setClip("talk"); setBubble(r.questions[0]); }, 7000);
-      window.setTimeout(() => setClip("idle"), 9400);
+      window.setTimeout(() => { setFx(""); setBubble(r.questions[0]); }, 7000);
       window.setTimeout(() => stageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } catch (e) {
       setStage("setup");
@@ -492,12 +526,20 @@ function AiInterview() {
   };
 
   const inflight = useRef<Map<string, Promise<string | null>>>(new Map());
-  const fetchVoice = (text: string, kind: "A" | "B" | "C" | "D"): Promise<string | null> => {
+  const decoded = useRef<Map<string, AudioBuffer>>(new Map());
+  const ctxRef = useRef<AudioContext | null>(null);
+  const srcRef = useRef<AudioBufferSourceNode | null>(null);
+  const [voiceBusy, setVoiceBusy] = useState(false);
+  const getCtx = (): AudioContext => {
+    if (!ctxRef.current) { const AC = (window as any).AudioContext || (window as any).webkitAudioContext; ctxRef.current = new AC(); }
+    return ctxRef.current as AudioContext;
+  };
+  const fetchVoice = (text: string, kind: "A" | "B" | "C" | "D" | "E" | "F"): Promise<string | null> => {
     const ck = kind + "|" + text;
     if (voiceCache.current.has(ck)) return Promise.resolve(ck);
     const ex = inflight.current.get(ck);
     if (ex) return ex;
-    const pr = ({ A: { voice: "Zephyr", meow: true, slow: false, lift: 1 }, B: { voice: "Puck", meow: true, slow: false, lift: 1 }, C: { voice: "Zephyr", meow: true, slow: true, lift: 1.22 }, D: { voice: "Leda", meow: false, slow: true, lift: 1.22 } } as const)[kind];
+    const pr = ({ A: { voice: "Zephyr", meow: true, slow: false, lift: 1 }, B: { voice: "Puck", meow: true, slow: false, lift: 1 }, C: { voice: "Zephyr", meow: true, slow: true, lift: 1.22 }, D: { voice: "Leda", meow: false, slow: true, lift: 1.22 }, E: { voice: "Leda", meow: true, slow: true, lift: 1.38 }, F: { voice: "Zephyr", meow: true, slow: true, lift: 1.55 } } as const)[kind];
     const p = (async () => {
       try {
         const r: any = await speakFn({ data: { text, voice: pr.voice, meow: pr.meow, slow: pr.slow } });
@@ -507,6 +549,7 @@ function AiInterview() {
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         voiceCache.current.set(ck, URL.createObjectURL(new Blob([bytes], { type: "audio/wav" })));
         lifts.current.set(ck, pr.lift);
+        try { decoded.current.set(ck, await getCtx().decodeAudioData(bytes.buffer.slice(0) as ArrayBuffer)); } catch { /* falls back to the audio tag */ }
         return ck;
       } catch { return null; } finally { inflight.current.delete(ck); }
     })();
@@ -522,14 +565,42 @@ function AiInterview() {
   }, [stage, idx, questions, voiceKind]);
 
   const speak = async (text: string) => {
-    try { audioRef.current?.pause(); window.speechSynthesis?.cancel(); } catch { /* ignore */ }
+    try { audioRef.current?.pause(); window.speechSynthesis?.cancel(); const o = srcRef.current; srcRef.current = null; if (o) { o.onended = null; o.stop(); } } catch { /* ignore */ }
     if (voiceKind === "browser") { speakBrowser(text); return; }
+    // Wake the audio engine inside the tap so the first sound is not delayed or clipped.
+    let ctx: AudioContext | null = null;
+    try { ctx = getCtx(); void ctx.resume(); } catch { ctx = null; }
     try {
+      setVoiceBusy(true);
       const ck = await fetchVoice(text, voiceKind);
+      setVoiceBusy(false);
       const url = ck ? voiceCache.current.get(ck) : undefined;
       if (!ck || !url) throw new Error("tts");
-      const a = new Audio(url);
       const lf = lifts.current.get(ck) || 1;
+      const buf = decoded.current.get(ck);
+      if (ctx && buf) {
+        await ctx.resume();
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.playbackRate.value = lf;
+        const g = ctx.createGain();
+        let node: AudioNode = src;
+        if (lf > 1.1) { const hs = ctx.createBiquadFilter(); hs.type = "highshelf"; hs.frequency.value = 3200; hs.gain.value = 3; src.connect(hs); node = hs; }
+        node.connect(g);
+        g.connect(ctx.destination);
+        const t = ctx.currentTime + 0.03;
+        const len = buf.duration / lf;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(1, t + 0.08);
+        g.gain.setValueAtTime(1, t + Math.max(0.1, len - 0.12));
+        g.gain.linearRampToValueAtTime(0, t + len);
+        srcRef.current = src;
+        src.onended = () => { if (srcRef.current === src) { srcRef.current = null; setClip("idle"); } };
+        setClip("talk");
+        src.start(t);
+        return;
+      }
+      const a = new Audio(url);
       if (lf !== 1) { a.preservesPitch = false; (a as any).mozPreservesPitch = false; (a as any).webkitPreservesPitch = false; a.playbackRate = lf; }
       audioRef.current = a;
       a.onplay = () => setClip("talk");
@@ -537,6 +608,7 @@ function AiInterview() {
       a.onerror = () => setClip("idle");
       await a.play();
     } catch {
+      setVoiceBusy(false);
       setClip("idle");
       speakBrowser(text);
     }
@@ -653,8 +725,8 @@ function AiInterview() {
             <div className="ai-right">
             <div className="ai-bubble" role="status">
               <p>{stage === "wrapping" ? bubble : bubble || questions[idx]}</p>
-              {stage === "room" && questions[idx] ? <button type="button" className="ai-ico" onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
-              {stage === "room" && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Zephyr + meow, kitten pitch", D: "D Leda, kitten pitch, no meow", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
+              {stage === "room" && questions[idx] ? <button type="button" className={`ai-ico ${voiceBusy ? "busy" : ""}`} onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
+              {stage === "room" && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "E", E: "F", F: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Zephyr + meow, kitten pitch", D: "D Leda, kitten pitch, no meow", E: "E Leda + meow, higher kitten", F: "F Zephyr + meow, highest kitten", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
             </div>
             {stage === "room" ? (
               <div className="ai-answer">
@@ -754,6 +826,9 @@ const AI_CSS = `
 .ai-tiles{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;padding:14px}
 .ai-tile{position:relative;border-radius:16px;background:radial-gradient(70% 70% at 50% 40%,#1c1a10,#0e0e0e);min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
 .ai-coco-tile{border-color:rgba(255,214,0,.4);background:#000}
+.ai-ico.busy{animation:ai-busy .7s ease-in-out infinite}
+@keyframes ai-busy{50%{opacity:.45;transform:scale(.92)}}
+.ai-cvid-t{transition:opacity .3s ease!important}
 .ai-cvid{transition:opacity .7s ease;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%;pointer-events:none;transform:scale(1.1);-webkit-mask-image:radial-gradient(ellipse 60% 64% at 50% 52%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 60% 64% at 50% 52%,#000 62%,transparent 100%)}
 .ai-name{position:absolute;left:12px;bottom:10px;font-size:.78rem;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:999px;color:var(--cream)}
 .ai-me.live{border-color:#4caf50;box-shadow:0 0 0 2px rgba(76,175,80,.35)}
