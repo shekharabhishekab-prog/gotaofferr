@@ -58,6 +58,7 @@ const speakSchema = z.object({
   text: z.string().trim().min(2).max(300),
   voice: z.enum(["Leda", "Puck", "Zephyr", "Aoede", "Laomedeia", "Achird"]).default("Leda"),
   meow: z.boolean().default(false),
+  slow: z.boolean().default(false),
 });
 
 const TTS_MODELS = ["gemini-3.1-flash-tts-preview", "gemini-3.8-flash-lite-tts", "gemini-2.5-flash-preview-tts"];
@@ -94,7 +95,7 @@ export const cocoSpeak = createServerFn({ method: "POST" })
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": key },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: (data.meow ? "Begin with one short, cute kitten meow sound, like 'Meow~!', then a tiny happy beat, then say the line. " : "") + "You are Coco, a small, cute, playful kitten-girl who is a friendly interviewer. Voice: light, bright, sweet and a little childlike, like a cheerful young kitten who can talk, but not squeaky and not fast. Natural human tempo: pitch and speed rise and fall, a smile in the voice, a small thinking pause before the main part of the question, gentle emphasis on key words. Say exactly this line and nothing else: " + data.text }] }],
+            contents: [{ parts: [{ text: (data.meow ? "Begin with one short, cute kitten meow sound, like 'Meow~!', then a tiny happy beat, then say the line. " : "") + "You are Coco, a tiny, sweet, playful kitten-girl who is a friendly interviewer. Voice: very high-pitched, bright, soft, cute and childlike, like a cheerful little kitten who can talk, with a big smile in the voice. " + (data.slow ? "Speak a little slowly and softly. " : "Not squeaky and not fast. ") + "Natural human tempo: pitch and speed rise and fall, a small thinking pause before the main part of the question, gentle emphasis on key words. Say exactly this line and nothing else: " + data.text }] }],
             generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.voice } } } },
           }),
         });
