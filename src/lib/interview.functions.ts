@@ -125,6 +125,9 @@ export const cocoSpeak = createServerFn({ method: "POST" })
     let lastStatus = 0;
     for (const model of TTS_MODELS) {
       try {
+        // Count every voice request so the daily total is visible; past the cap the room uses the browser voice.
+        const { countCall } = await import("@/lib/model-router.server");
+        if (!(await countCall(model))) return { ok: false as const, reason: "daily-cap" };
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": key },
