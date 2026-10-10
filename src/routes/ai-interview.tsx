@@ -611,6 +611,7 @@ const AI_CSS = `
 .ai-cur{font-family:"HPInst",Georgia,serif;font-style:italic;text-transform:none;font-weight:400;letter-spacing:-.01em;font-size:1.12em;color:var(--cream,#f6f1d6)}
 .ai-cur mark{font-family:"HPInst",Georgia,serif;font-style:italic;padding:0 .12em .04em}
 .ai-disp{font-family:var(--font-display,inherit);font-style:normal;font-weight:800;text-transform:uppercase}
+@media(max-width:600px){.ai-h1{font-size:clamp(1.5rem,7vw,2rem);line-height:1.12}.ai-cur{font-size:1.1em}}
 .ai-sub{max-width:38rem;margin-top:18px;font-size:1.08rem;line-height:1.5;color:rgba(246,241,214,.75)}
 .ai-sub2{font-size:1rem;line-height:1.5;color:rgba(246,241,214,.75);margin:8px 0}
 .ai-stage{padding-top:22px;padding-bottom:80px;scroll-margin-top:80px}
