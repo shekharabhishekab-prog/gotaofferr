@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 const nav = [
   { to: "/ats-checker", label: "ATS score checker" },
   { to: "/resume-builder", label: "Resume builder" },
-  { to: "/examples/resumes", label: "Examples" },
+  { to: "/ai-interview", label: "AI Interview" },
   { to: "/jobs", label: "Job finder" },
   { to: "/pricing", label: "Pricing" },
   { to: "/about", label: "About" },
