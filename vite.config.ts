@@ -19,7 +19,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Workers AI binding for the interview voice (preview test). Free allocation only; the app enforces its own daily cap.
+  // Workers AI binding for the interview voice (preview test). Plan not yet verified, so the app enforces its own hard daily cap (490).
   nitro: { cloudflare: { wrangler: { ai: { binding: "AI" } } } },
   vite: {
     plugins: [],
