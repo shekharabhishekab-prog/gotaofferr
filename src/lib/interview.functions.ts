@@ -128,8 +128,8 @@ export const cocoSpeak = createServerFn({ method: "POST" })
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": key },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: (data.meow ? "Begin with one short, cute kitten meow sound, like 'Meow~!', then a tiny happy beat, then say the line. " : "") + "You are Coco, a tiny, sweet, playful kitten-girl who is a friendly interviewer. Voice: very high-pitched, bright, soft, cute and childlike, like a cheerful little kitten who can talk, with a big smile in the voice. " + (data.slow ? "Speak a little slowly and softly. " : "Not squeaky and not fast. ") + "Natural human tempo: pitch and speed rise and fall, a small thinking pause before the main part of the question, gentle emphasis on key words. Say exactly this line and nothing else: " + data.text }] }],
-            generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.voice } } } },
+            contents: [{ parts: [{ text: "Say this line in a sweet, bright, soft, young girl voice, warm and smiling, at a calm steady pace, the same way every time. Say only the line: " + data.text }] }],
+            generationConfig: { temperature: 0, responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.voice } } } },
           }),
         });
         lastStatus = r.status;
@@ -140,6 +140,7 @@ export const cocoSpeak = createServerFn({ method: "POST" })
         const bin = atob(b64);
         const pcm = new Uint8Array(bin.length);
         for (let i = 0; i < bin.length; i++) pcm[i] = bin.charCodeAt(i);
+        console.info("[coco-tts] ok", model, data.voice);
         return { ok: true as const, wav: pcmToWavBase64(pcm), model };
       } catch (e) {
         console.warn("[coco-tts] error", model, e);
