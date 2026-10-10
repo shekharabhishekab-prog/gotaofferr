@@ -28,11 +28,12 @@ const SECTIONS: [string, string[]][] = [
   ["Skills", ["skills", "core skills", "technical skills", "key skills", "skills and tools"]],
   ["Projects", ["projects", "key projects", "personal projects"]],
   ["Certifications", ["certifications", "certificates", "licenses"]],
+  ["Languages", ["languages"]],
 ];
 
 const DATE_RANGE =
   /\b(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+)?(?:19|20)\d{2}\s*(?:-|–|—|to)\s*(?:(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\s+)?(?:19|20)\d{2}|present|current|now)\b/i;
-const DEGREE = /\b(bachelor|master|b\.?\s?tech|m\.?\s?tech|b\.?\s?sc|m\.?\s?sc|b\.?\s?a\b|m\.?\s?a\b|b\.?\s?e\b|mba|ph\.?d|diploma|degree|b\.?\s?com|m\.?\s?com|bca|mca|associate)\b/i;
+const DEGREE = /\b(bba|bbm|bms|bachelor|master|b\.?\s?tech|m\.?\s?tech|b\.?\s?sc|m\.?\s?sc|b\.?\s?a\b|m\.?\s?a\b|b\.?\s?e\b|mba|ph\.?d|diploma|degree|b\.?\s?com|m\.?\s?com|bca|mca|associate)\b/i;
 
 function headingKey(raw: string): string | null {
   const l = raw.trim().replace(/[:\-–—_*#]+$/g, "").replace(/^[#*\s]+/, "").toLowerCase();
@@ -82,9 +83,11 @@ export function robotView(resumeText: string): RobotView {
 
   const roleSrc = (secLines["Experience"] ?? []).length ? secLines["Experience"] : lines;
   const roles = roleSrc.filter((l) => DATE_RANGE.test(l) && l.length < 160).map((l) => l.slice(0, 90)).slice(0, 6);
-  const education = (secLines["Education"] ?? []).filter((l) => DEGREE.test(l)).map((l) => l.slice(0, 90)).slice(0, 3);
+  const eduAll = secLines["Education"] ?? [];
+  const eduDeg = eduAll.filter((l) => DEGREE.test(l));
+  const education = (eduDeg.length ? eduDeg : eduAll.slice(0, 2)).map((l) => l.slice(0, 90)).slice(0, 3);
   const skillAll = (secLines["Skills"] ?? [])
-    .flatMap((l) => l.replace(/^[•·▪●◦*\-–]\s*/, "").replace(/^[A-Za-z ]{2,24}:\s*/, "").split(/[,;|•·]/))
+    .flatMap((l) => l.replace(/^[•·▪●◦*\-–]\s*/, "").replace(/^[^:,;|]{2,40}:\s*/, "").split(/[,;|•·]/))
     .map((s) => s.trim())
     .filter((s) => s.length > 1 && s.length < 40);
   const skills = skillAll.slice(0, 14);
@@ -98,7 +101,7 @@ export function robotView(resumeText: string): RobotView {
   if (!name && text.trim().length >= 120) warnings.push("The robot could not find your name at the top. Put it alone on the first line.");
 
   const MAX = 2400;
-  const cleaned = text.replace(/\n{3,}/g, "\n\n").trim();
+  const cleaned = text.split("\n").map((l) => l.trim()).join("\n").replace(/\n{3,}/g, "\n\n").trim();
   return {
     name, email, phone, location, links, sections, roles, education, skills, skillCount: skillAll.length,
     warnings, text: cleaned.slice(0, MAX), chars: cleaned.length, truncated: cleaned.length > MAX,
