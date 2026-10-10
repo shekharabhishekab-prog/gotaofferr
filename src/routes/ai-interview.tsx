@@ -101,6 +101,7 @@ function AiInterview() {
   const [voiceKind, setVoiceKind] = useState<"A" | "B" | "C" | "D" | "browser">("A");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const voiceCache = useRef<Map<string, string>>(new Map());
+  const lifts = useRef<Map<string, number>>(new Map());
 
   const [stage, setStage] = useState<Stage>("setup");
   const [company, setCompany] = useState("");
@@ -428,16 +429,19 @@ function AiInterview() {
       let url = voiceCache.current.get(ck);
       if (!url) {
         setClip("talk");
-        const pr = ({ A: { voice: "Zephyr", meow: true }, B: { voice: "Puck", meow: true }, C: { voice: "Aoede", meow: true }, D: { voice: "Leda", meow: false } } as const)[voiceKind];
-        const r: any = await speakFn({ data: { text, voice: pr.voice, meow: pr.meow } });
+        const pr = ({ A: { voice: "Zephyr", meow: true, slow: false, lift: 1 }, B: { voice: "Puck", meow: true, slow: false, lift: 1 }, C: { voice: "Zephyr", meow: true, slow: true, lift: 1.22 }, D: { voice: "Leda", meow: false, slow: true, lift: 1.22 } } as const)[voiceKind];
+        const r: any = await speakFn({ data: { text, voice: pr.voice, meow: pr.meow, slow: pr.slow } });
         if (!r?.ok || !r.wav) throw new Error("tts");
         const bin = atob(r.wav);
         const bytes = new Uint8Array(bin.length);
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         url = URL.createObjectURL(new Blob([bytes], { type: "audio/wav" }));
         voiceCache.current.set(ck, url);
+        lifts.current.set(ck, pr.lift);
       }
       const a = new Audio(url);
+      const lf = lifts.current.get(ck) || 1;
+      if (lf !== 1) { a.preservesPitch = false; (a as any).mozPreservesPitch = false; (a as any).webkitPreservesPitch = false; a.playbackRate = lf; }
       audioRef.current = a;
       a.onplay = () => setClip("talk");
       a.onended = () => setClip("idle");
@@ -457,7 +461,7 @@ function AiInterview() {
       <section className="ai-hero">
         <div className="ai-wrap">
           <span className="ai-mono">( practice with coco, 10 short questions )</span>
-          <h1 className="ai-h1" aria-label="Everyone's scared of interviews. Smart ones practice with a cat."><span className="ai-cur">{"Everyone's "}<mark>scared of interviews.</mark></span> <span className="ai-cur">Smart ones practice with a</span> <mark className="ai-disp">cat.</mark></h1>
+          <h1 className="ai-h1" aria-label="Everyone's scared of interviews. Smart ones practice with a cute cat."><span className="ai-ln"><span className="ai-d">{"Everyone's"}</span> <span className="ai-y">scared of interviews.</span></span><span className="ai-ln"><span className="ai-d">Smart ones practice with a</span> <span className="ai-y">cute cat.</span></span></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
         </div>
       </section>
@@ -541,11 +545,7 @@ function AiInterview() {
             <div className="ai-body">
             <div className="ai-tiles">
               <div className="ai-tile ai-coco-tile" ref={tileRef}>
-                <div className="ai-roam" style={{ transform: `translate(${roam.x}px, ${roam.y}px)` }}>
-                  <div className={roam.moving ? "ai-hopper" : ""} style={{ transform: `scaleX(${roam.dir})` }}>
-                    <Coco clip={clip} fx={fx} size={cs} />
-                  </div>
-                </div>
+                <video className="ai-cvid" src="/coco-room.mp4" autoPlay loop muted playsInline preload="auto" aria-hidden="true" />
                 <span className="ai-name">Coco, interviewer</span>
               </div>
               <div className={`ai-tile ai-me ${listening ? "live" : ""}`}>
@@ -558,7 +558,7 @@ function AiInterview() {
             <div className="ai-bubble" role="status">
               <p>{stage === "wrapping" ? bubble : bubble || questions[idx]}</p>
               {stage === "room" && questions[idx] ? <button type="button" className="ai-ico" onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
-              {stage === "room" && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Aoede + meow", D: "D Leda, no meow", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
+              {stage === "room" && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Zephyr + meow, kitten pitch", D: "D Leda, kitten pitch, no meow", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
             </div>
             {stage === "room" ? (
               <div className="ai-answer">
@@ -606,12 +606,11 @@ const AI_CSS = `
 
 .ai-hero{position:relative;padding:56px 0 18px;background:radial-gradient(ellipse 38% 45% at 70% 50%,rgba(255,214,0,.14),transparent 70%)}
 .ai-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;letter-spacing:.04em;color:var(--y)}
-.ai-h1{margin:14px 0 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:1.08;letter-spacing:-.015em;font-size:clamp(2.2rem,6.6vw,6rem);max-width:none}
-.ai-h1 mark{background:var(--y);color:#000;padding:0 .14em;display:inline-block;transform:rotate(-1.5deg)}
-.ai-cur{font-family:"HPInst",Georgia,serif;font-style:italic;text-transform:none;font-weight:400;letter-spacing:-.01em;font-size:1.12em;color:var(--cream,#f6f1d6)}
-.ai-cur mark{font-family:"HPInst",Georgia,serif;font-style:italic;padding:0 .12em .04em}
-.ai-disp{font-family:var(--font-display,inherit);font-style:normal;font-weight:800;text-transform:uppercase}
-@media(max-width:600px){.ai-h1{font-size:clamp(1.5rem,7vw,2rem);line-height:1.12}.ai-cur{font-size:1.1em}}
+.ai-h1{margin:14px 0 0;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;line-height:1.02;letter-spacing:-.015em;font-size:clamp(2.4rem,6.2vw,5.8rem);max-width:none}
+.ai-ln{display:block;margin-top:.1em}
+.ai-d{color:var(--cream,#f6f1d6)}
+.ai-y{font-family:"HPInst",Georgia,serif;font-style:italic;text-transform:none;font-weight:400;color:var(--y);font-size:1.18em;letter-spacing:-.01em;line-height:.95}
+@media(max-width:600px){.ai-h1{font-size:clamp(2rem,9.6vw,2.7rem);line-height:1.02}.ai-ln{margin-top:.14em}.ai-sub{font-size:.95rem;line-height:1.5;margin-top:16px;color:rgba(246,241,214,.62)}}
 .ai-sub{max-width:38rem;margin-top:18px;font-size:1.08rem;line-height:1.5;color:rgba(246,241,214,.75)}
 .ai-sub2{font-size:1rem;line-height:1.5;color:rgba(246,241,214,.75);margin:8px 0}
 .ai-stage{padding-top:22px;padding-bottom:80px;scroll-margin-top:80px}
@@ -652,7 +651,8 @@ const AI_CSS = `
 @keyframes ai-pulse{50%{opacity:.45}}
 .ai-tiles{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;padding:14px}
 .ai-tile{position:relative;border-radius:16px;background:radial-gradient(70% 70% at 50% 40%,#1c1a10,#0e0e0e);min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
-.ai-coco-tile{border-color:rgba(255,214,0,.4)}
+.ai-coco-tile{border-color:rgba(255,214,0,.4);background:#0b0a08}
+.ai-cvid{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%;pointer-events:none}
 .ai-name{position:absolute;left:12px;bottom:10px;font-size:.78rem;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:999px;color:var(--cream)}
 .ai-me.live{border-color:#4caf50;box-shadow:0 0 0 2px rgba(76,175,80,.35)}
 .ai-av{width:84px;height:84px;border-radius:50%;background:#333;color:var(--y);display:grid;place-items:center;font-size:2.2rem;font-weight:700}
