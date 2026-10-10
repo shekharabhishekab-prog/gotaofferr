@@ -198,6 +198,16 @@ function AiInterview() {
     try { rec.start(); setErr(""); } catch (e: any) { setListening(false); setErr("Could not start the microphone (" + String(e?.name || "error") + "). Try again, or type."); }
   }, []);
 
+  // Coco keeps moving: every so often she wanders around the tile while you are not talking.
+  useEffect(() => {
+    if (stage !== "room" || listening) return;
+    const id = window.setInterval(() => {
+      setFx((f) => (f === "" ? "wander" : f));
+      window.setTimeout(() => setFx((f) => (f === "wander" ? "" : f)), 4700);
+    }, 13000);
+    return () => window.clearInterval(id);
+  }, [stage, listening]);
+
   // 2 minute answer timer. It starts when you start talking or typing.
   useEffect(() => {
     if (!running || stage !== "room") return;
@@ -357,7 +367,6 @@ function AiInterview() {
       <style>{AI_CSS}</style>
       <section className="ai-hero">
         <div className="ai-wrap">
-          <div className="ai-hero-coco" aria-hidden="true"><Coco clip="idle" size={1.7} /></div>
           <span className="ai-mono">( ai interview, 10 short questions )</span>
           <h1 className="ai-h1">Practice with <mark>Coco.</mark></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
@@ -490,7 +499,7 @@ const AI_CSS = `
 .ai{--y:#ffd600;--cream:#f6f1d6;background:#000;color:var(--cream);overflow:hidden;min-height:70vh}
 .ai *{box-sizing:border-box}
 .ai-wrap{max-width:1100px;margin:0 auto;padding:0 20px}
-@media (min-width:1200px){.ai-wrap{max-width:1360px;padding:0 32px}.ai-tile{min-height:340px}.ai-coco.fx-wander{--w:150px}}
+@media (min-width:1200px){.ai-wrap{max-width:min(1680px,94vw);padding:0 24px}.ai-tile{min-height:340px}.ai-coco.fx-wander{--w:150px}}
 .ai-hero .ai-wrap{position:relative}
 .ai-hero-coco{display:none}
 @media (min-width:1340px){.ai-hero-coco{display:block;position:absolute;right:20px;top:-20px;animation:ai-bob 3.2s ease-in-out infinite}}
@@ -558,8 +567,23 @@ const AI_CSS = `
 .ai-mic.on{background:#c62828;border-color:#c62828;color:#fff}
 .ai-answer .ai-note{margin:10px 0 0}
 .ai-coco{will-change:transform}
-.ai-skip{background:none;border:0;padding:0;color:rgba(246,241,214,.6);text-decoration:underline;cursor:pointer;font-size:.85rem}
+.ai-skip{background:none;border:0;padding:0;color:rgba(246,241,214,.6);text-decoration:underline;cursor:pointer;font-size:.72rem}
 .ai-skip:hover{color:var(--y)}
+.ai-coco-tile .ai-coco:not([class*="fx-"]){animation:ai-sway 7s ease-in-out infinite}
+@keyframes ai-sway{0%,100%{transform:translate(-16px,0)}25%{transform:translate(0,-6px)}50%{transform:translate(16px,0)}75%{transform:translate(0,-6px)}}
+.ai-card,.ai-tiles,.ai-bubble{animation:ai-rise .6s ease-out both}
+@keyframes ai-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.ai::before,.ai::after{content:"";position:absolute;border-radius:50%;pointer-events:none;filter:blur(60px);opacity:.16;background:#ffd600}
+.ai{position:relative}
+.ai::before{width:320px;height:320px;left:-80px;top:120px;animation:ai-drift 14s ease-in-out infinite alternate}
+.ai::after{width:260px;height:260px;right:-60px;top:420px;animation:ai-drift 11s ease-in-out infinite alternate-reverse}
+@keyframes ai-drift{from{transform:translate(0,0)}to{transform:translate(60px,70px)}}
+.ai-h1 mark{animation:ai-tilt 5s ease-in-out infinite}
+@keyframes ai-tilt{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1deg)}}
+.ai-btn{transition:transform .15s,box-shadow .15s}
+.ai-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,214,0,.25)}
+.ai-skip{font-size:.72rem;opacity:.7}
+
 .ai-coco.fx-jump{animation:ai-jump .9s ease-in-out 2}
 .ai-coco.fx-spin{animation:ai-spin 1.2s ease-in-out 1}
 @keyframes ai-jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-34px)}60%{transform:translateY(-34px)}}
@@ -591,5 +615,5 @@ const AI_CSS = `
 .ai-bubble{font-size:1.02rem;margin:0 10px}
 .ai-answer{padding:10px}
 }
-@media (prefers-reduced-motion:reduce){.ai-hero-coco{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
+@media (prefers-reduced-motion:reduce){.ai-coco-tile .ai-coco,.ai-card,.ai-tiles,.ai-bubble,.ai::before,.ai::after,.ai-h1 mark{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
 `;
