@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useServerFn } from "@tanstack/react-start";
 import { getAtsUsage, recordAtsCheck } from "@/lib/ats-usage.functions";
+import { robotView, stuffedWords } from "@/lib/ats-robot";
+import { hardGap, regionNotes, type HardGap, type RegionNote } from "@/lib/ats-region";
 
 export const Route = createFileRoute("/ats-checker")({
   head: () => ({
@@ -21,7 +23,7 @@ export const Route = createFileRoute("/ats-checker")({
   component: AtsDesignPreview,
 });
 
-type Fix = { tag: "AUTO-FIXED" | "NEEDS YOU" | "YOUR CALL"; bad: string; fix: string };
+type Fix = { tag: "AUTO-FIXED" | "NEEDS YOU" | "YOUR CALL" | "HARD GAP" | "REGION"; bad: string; fix: string };
 type Sample = {
   score: number;
   meme: string[];
@@ -103,21 +105,40 @@ const SHORT: Record<string, string> = { contact: "Contact", sections: "Headings"
 const MEME: Record<string, [string, string]> = { strong: ["The robot", "loves it."], good: ["The robot can read it.", "Mostly."], "needs work": ["The robot can read it.", "Barely."], weak: ["The robot", "fell asleep."] };
 const VERDICT: Record<string, string> = { strong: "Clean. The robot reads this without trouble.", good: "Good. A few things to tidy up.", "needs work": "Needs work. Fix the red bars first.", weak: "Weak. The robot will struggle with this." };
 
-function toSample(r: AtsResult, hasJd: boolean): Sample {
+function plain(c: { id: string; label: string; hint: string | null }): [string, string] {
+  const h = c.hint ?? "";
+  switch (c.id) {
+    case "contact": return ["Contact details", "Put your email and phone at the top."];
+    case "sections": return h.includes("Summary") ? ["Summary", "Add a 2-line summary at the top."] : ["Section headings", "Use plain headings: Experience, Education, Skills."];
+    case "bullets": return h.includes("Shorten") ? ["Long bullets", "Keep each bullet to 1 or 2 lines."] : ["Bullet points", "Write each job as 3 to 5 short bullets."];
+    case "numbers": return ["Numbers", "Add real numbers where true: %, money, team size."];
+    case "verbs": if (h.includes("weak phrases")) return ["Weak phrases", "Say what you did and what changed, not 'responsible for' or 'worked on'."]; return ["How bullets start", "Start bullets with Led, Built, Grew and similar."];
+    case "length": return /very short|a bit short/.test(h) ? ["Length", "A little short. Add more about your roles and results."] : ["Length", "Too long. Keep the most useful 1 to 2 pages."];
+    case "format": return ["Layout", "Use one plain column. No tables, icons or pictures."];
+    case "dates": return ["Job dates", "Add start and end dates, like Jan 2022 - Present."];
+    default: return [c.label, h];
+  }
+}
+
+function toSample(r: AtsResult, hasJd: boolean, extra?: { gap?: HardGap | null; region?: RegionNote | null; stuffed?: string[] }): Sample {
   const parts: [string, number, number][] = r.checks.map((c) => [SHORT[c.id] ?? c.label, c.points, c.max]);
   const fixes: Fix[] = [];
   for (const c of r.checks) {
     if (!c.hint) continue;
     if (c.id === "keywords") {
-      fixes.push({ tag: "YOUR CALL", bad: "Missing: " + r.missingKeywords.join(", "), fix: "Add them only if they are true. We never add skills for you." });
+      fixes.push({ tag: "YOUR CALL", bad: "Job words you do not use: " + r.missingKeywords.join(", "), fix: "Add only the ones that are true for you." });
     } else if (c.id === "numbers") {
-      fixes.push({ tag: "YOUR CALL", bad: c.label, fix: c.hint });
+      { const [b, f] = plain(c); fixes.push({ tag: "YOUR CALL", bad: b, fix: f }); }
     } else {
-      fixes.push({ tag: "NEEDS YOU", bad: c.label, fix: c.hint });
+      { const [b, f] = plain(c); fixes.push({ tag: "NEEDS YOU", bad: b, fix: f }); }
     }
   }
-  if (!hasJd) fixes.push({ tag: "YOUR CALL", bad: "No job description pasted", fix: "Paste it to get the keyword match too." });
-  fixes.sort((a, b) => (a.tag === b.tag ? 0 : a.tag === "NEEDS YOU" ? -1 : 1));
+  if (!hasJd) fixes.push({ tag: "YOUR CALL", bad: "No job post pasted", fix: "Paste it to see which job words you miss." });
+  if (extra?.stuffed?.length) fixes.push({ tag: "NEEDS YOU", bad: "Repeated words", fix: "You repeat " + extra.stuffed.map((w) => '"' + w + '"').join(", ") + " a lot. Say it once or twice. Robots flag stuffing." });
+  if (extra?.gap) fixes.push({ tag: "HARD GAP", bad: extra.gap.bad, fix: extra.gap.fix });
+  if (extra?.region) fixes.push({ tag: "REGION", bad: "Job location: " + extra.region.label, fix: extra.region.notes.slice(0, 2).join(" ") });
+  const rank = (t: Fix["tag"]) => (t === "HARD GAP" ? 0 : t === "NEEDS YOU" ? 1 : 2);
+  fixes.sort((a, b) => rank(a.tag) - rank(b.tag));
   return { score: r.score, meme: MEME[r.band], verdict: VERDICT[r.band], parts, fixes, missing: r.missingKeywords };
 }
 
@@ -236,7 +257,7 @@ async function makePdf(s: Sample, title: string, sample: boolean) {
   }
   y += 10; need(30);
   d.setFont("helvetica", "italic"); d.setFontSize(9); d.setTextColor(90, 90, 90);
-  d.text("Heuristic check, not an ATS vendor score. Facts never change. No skill or job is ever added for you.", M, y);
+  d.text("A guide, not an official score. We never add skills or jobs for you.", M, y);
   d.save(sample ? "gotaofferr-ats-sample-report.pdf" : "gotaofferr-ats-report.pdf");
 }
 
@@ -282,6 +303,7 @@ function AtsDesignPreview() {
   const [pos, setPos] = useState("");
   const [err, setErr] = useState("");
   const [wall, setWall] = useState(false);
+  const [dlGate, setDlGate] = useState(false);
   const { user } = useSession();
   const usageFn = useServerFn(getAtsUsage);
   const recordFn = useServerFn(recordAtsCheck);
@@ -293,6 +315,7 @@ function AtsDesignPreview() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const resRef = useRef<HTMLDivElement | null>(null);
   const s = real ?? SAMPLES[key];
+  const rv = pm && real && rawText ? robotView(rawText) : null;
   const title = real ? [pos.trim(), comp.trim()].filter(Boolean).join(" at ") : "";
   const pick = (f: File) => { setFile(f.name); setFileObj(f); setErr(""); };
   const showSample = () => {
@@ -309,11 +332,11 @@ function AtsDesignPreview() {
     if (phase === "scan") return;
     setErr("");
     if (!fileObj) { setErr("Add your resume first (PDF, DOCX or TXT)."); return; }
-    if (!user && guestLeft() <= 0) { setErr("You used your free check. Sign in to keep checking."); setWall(true); return; }
+    if (!user && guestLeft() <= 0) { setWall(true); return; }
     if (user) {
       try {
         const u = await usageFn();
-        if (!u.allowed) { setErr("You used all " + u.limit + " checks this month. Upgrade for more."); setCapped(u.limit); return; }
+        if (!u.allowed) { setCapped(u.limit); return; }
       } catch { /* counter down: allow the check */ }
     }
     setCapped(0);
@@ -326,10 +349,12 @@ function AtsDesignPreview() {
       if (resumeSignalScore(text) < 3) throw new Error("This doesn't look like a resume. Upload your CV or resume file.");
       let jdt = jd.slice(0, MAX_JD);
       for (const w of (comp.toLowerCase().match(/[a-z]{3,}/g) ?? [])) jdt = jdt.replace(new RegExp("\\b" + w + "\\b", "gi"), " ");
-      const out = toSample(checkAts(text, jdt), jdt.trim().length > 40);
+      const jdFull = jd.slice(0, MAX_JD);
+      const wc = (text.match(/\S+/g) ?? []).length;
+      const out = toSample(checkAts(text, jdt), jdt.trim().length > 40, { gap: hardGap(text, jdFull), region: regionNotes(jdFull, comp, wc), stuffed: stuffedWords(text) });
       setRawText(text);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
-      if (!user) guestUse();
+      if (!user) { guestUse(); if (guestLeft() <= 0) setWall(true); }
       else { try { await recordFn(); } catch { /* ignore */ } }
       setReal(out);
       setPhase("done");
@@ -343,6 +368,7 @@ function AtsDesignPreview() {
   };
   const dl = async () => {
     if (phase !== "done") { setErr("Run a check first, then download the report."); return; }
+    if (!user) { setDlGate(true); return; }
     try { await makePdf(s, title, !real); } catch { setErr("Could not build the report. Try again."); }
   };
   const carry = () => {
@@ -459,13 +485,17 @@ function AtsDesignPreview() {
             </div>
             <label className="ak-grow"><span>Job description</span><textarea placeholder="Paste the full job description. The robot matches keywords against it." value={jd} onChange={(e) => setJd(e.target.value)} /></label>
             {err ? <p className="ak-err" role="alert">{err}</p> : null}
-            {capped ? <p className="ak-err"><Link to="/pricing" className="underline">See plans</Link></p> : null}
-            {wall ? <p className="ak-err"><Link to="/auth" className="underline">Sign in to continue</Link></p> : null}
           </div>
 
-          <button type="button" className="ak-btn ak-go" disabled={phase === "scan"} onClick={go}>
-            {phase === "scan" ? "Scanning..." : <>Check my resume <ArrowRight className="size-4" /></>}
-          </button>
+          {capped && user ? (
+            <Link to="/pricing" className="ak-btn ak-go">See plans / upgrade <ArrowRight className="size-4" /></Link>
+          ) : wall && !user ? (
+            <Link to="/auth" search={{ redirect: "/ats-checker" }} className="ak-btn ak-go">Sign in to continue <ArrowRight className="size-4" /></Link>
+          ) : (
+            <button type="button" className="ak-btn ak-go" disabled={phase === "scan"} onClick={go}>
+              {phase === "scan" ? "Scanning..." : <>Check my resume <ArrowRight className="size-4" /></>}
+            </button>
+          )}
         </div>
 
         {/* RESULT */}
@@ -516,18 +546,18 @@ function AtsDesignPreview() {
             <h4>{s.fixes.length} things to fix</h4>
             {s.fixes.map((f, i) => (
               <div key={f.bad + key + run} className="ak-fix" style={{ ["--i" as string]: i }}>
-                <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" ? "c" : "n"}`}>{f.tag === "AUTO-FIXED" ? <Wrench className="size-3" /> : null}{f.tag}</span>
+                <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" || f.tag === "REGION" ? "c" : "n"}`}>{f.tag === "AUTO-FIXED" ? <Wrench className="size-3" /> : null}{f.tag}</span>
                 <div><b>{f.bad}</b><p>{f.fix}</p></div>
               </div>
             ))}
           </div>
 
           </div>
-          <Link to="/tailor" className="ak-tail" onClick={carry}><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 15 seconds. No fake skills.</span></Link>
           <div className="ak-pvbar">
             <button type="button" className={`ak-pv ${hl ? "hl" : ""}`} onClick={openPv}><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
-            <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /></button>
+            <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /><span className="ak-dl2-t">Download report</span></button>
           </div>
+          <Link to="/tailor" className="ak-tail" onClick={carry}><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 15 seconds. No fake skills.</span></Link>
 
         </div>
         </div>
@@ -568,6 +598,17 @@ function AtsDesignPreview() {
         </div>
       </section>
 
+      {dlGate && !user ? (
+        <div className="ak-pm" role="dialog" aria-modal="true" aria-label="Sign in to download" onClick={() => setDlGate(false)}>
+          <div className="ak-gate" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="ak-pmx" onClick={() => setDlGate(false)} aria-label="Close"><X className="size-5" /></button>
+            <h3>Sign in to download your report</h3>
+            <p>It is free. Your resume stays in your browser, we do not store it.</p>
+            <Link to="/auth" search={{ redirect: "/ats-checker" }} className="ak-btn">Sign in <ArrowRight className="size-4" /></Link>
+            <Link to="/auth" search={{ redirect: "/ats-checker" }} className="ak-gate-s">Create a free account</Link>
+          </div>
+        </div>
+      ) : null}
       {pm ? (
         <div className="ak-pm" role="dialog" aria-modal="true" aria-label="Full ATS report" onClick={() => setPm(false)}>
           <div className="ak-pmc" onClick={(e) => e.stopPropagation()}>
@@ -590,11 +631,29 @@ function AtsDesignPreview() {
               <h4>{s.fixes.length ? s.fixes.length + " things to fix" : "Nothing to fix"}</h4>
               {s.fixes.map((f, i) => (
                 <div key={f.bad + i} className="ak-pmf">
-                  <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" ? "c" : "n"}`}>{f.tag}</span>
+                  <span className={`ak-ft ${f.tag === "AUTO-FIXED" ? "a" : f.tag === "YOUR CALL" || f.tag === "REGION" ? "c" : "n"}`}>{f.tag}</span>
                   <div><b>{f.bad}</b><p>{f.fix}</p></div>
                 </div>
               ))}
-              <p className="ak-pmn2">Heuristic check, not an ATS vendor score. Facts never change. No skill or job is ever added for you.</p>
+              {rv ? (
+                <div className="ak-rb">
+                  <h4>What the robot read</h4>
+                  <p className="ak-rbs">What a simple ATS reads from your file. It stays in your browser.</p>
+                  <div className="ak-rbg">
+                    {([["Name", rv.name], ["Email", rv.email], ["Phone", rv.phone], ["Location", rv.location], ["Links", rv.links.length ? rv.links.join(", ") : null]] as [string, string | null][]).map(([k, v]) => (
+                      <div key={k} className={v ? "ok" : "no"}><span>{k}</span><b>{v ?? "Not found"}</b></div>
+                    ))}
+                    <div className={rv.roles.length ? "ok" : "no"}><span>Jobs with dates</span><b>{rv.roles.length ? rv.roles.length + " found" : "Not found"}</b></div>
+                    <div className={rv.education.length ? "ok" : "no"}><span>Education</span><b>{rv.education.length ? rv.education[0] : "Not found"}</b></div>
+                    <div className={rv.skillCount ? "ok" : "no"}><span>Skills list</span><b>{rv.skillCount ? rv.skillCount + " found: " + rv.skills.slice(0, 6).join(", ") : "Not found"}</b></div>
+                  </div>
+                  <div className="ak-rbc">{rv.sections.map((x) => <span key={x.label} className={x.found ? "ok" : "no"}>{x.found ? "✓" : "✗"} {x.label}</span>)}</div>
+                  {rv.roles.length ? <ul className="ak-rbl">{rv.roles.map((r, i) => <li key={i}>{r}</li>)}</ul> : null}
+                  {rv.warnings.map((w) => <p key={w} className="ak-rbw">! {w}</p>)}
+                  <details className="ak-rbt"><summary>Show the raw text the robot got ({rv.chars} characters)</summary><pre>{rv.text}{rv.truncated ? "\n... (cut here, the robot got the rest too)" : ""}</pre></details>
+                </div>
+              ) : null}
+              <p className="ak-pmn2">A guide, not an official score. We never add skills or jobs for you.</p>
             </div>
           </div>
         </div>
@@ -955,9 +1014,10 @@ const AK_CSS = `
 .ak-pv{flex:1;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--y);color:#000;border:3px solid #000;border-radius:14px;padding:18px 20px;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:1.2rem;cursor:pointer;box-shadow:5px 5px 0 #000;animation:ak-pvp 2.2s ease-in-out infinite}
 .ak-pv:hover{background:#000;color:var(--y)}
 @keyframes ak-pvp{50%{box-shadow:5px 5px 0 #000,0 0 0 7px rgba(255,214,0,.55)}}
-.ak-dl2{display:none}
-@media(min-width:821px){.ak-go.ak-btn{align-self:end;height:64px;padding:0 20px;font-size:1.15rem;border-radius:14px}.ak-res .ak-dl{display:none}.ak-res{padding-bottom:108px}.ak-pvbar,.ak-res.idle>.ak-pvbar{display:flex!important;position:absolute;left:0;right:0;bottom:0;margin:0;gap:8px;background:#000;height:78px;z-index:3}.ak-res .ak-pv{border:0;border-radius:0;box-shadow:none;animation:none;height:100%;padding:0 20px;font-size:1.3rem}.ak-res .ak-dl2{display:grid;place-items:center;flex:0 0 100px;width:100px;background:var(--y);color:#000;border:0;border-radius:0;cursor:pointer}.ak-res .ak-dl2:hover{background:var(--cream)}}
-@media(max-width:820px){.ak-res .ak-dl{display:none}.ak-pvbar{margin:16px 0 0;gap:10px}.ak-pv{flex:1 1 auto;border:3px solid #000;border-radius:14px;box-shadow:none;animation:none;padding:18px 8px;font-size:1rem;gap:8px}.ak-dl2{display:grid;place-items:center;flex:0 0 10%;width:10%;min-width:46px;background:#000;color:var(--y);border:3px solid #000;border-radius:14px;cursor:pointer}}
+.ak-dl2{display:none}.ak-dl2-t{display:none}
+.ak-gate{position:relative;background:var(--cream);color:#000;border:3px solid #000;border-radius:18px;padding:34px 26px 26px;width:min(92vw,420px);margin:auto;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;box-shadow:6px 6px 0 var(--y)}.ak-gate h3{margin:0;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;font-size:1.6rem;line-height:1.05}.ak-gate p{margin:0;font-size:.95rem}.ak-gate .ak-btn{width:100%;box-sizing:border-box;background:#000;color:var(--y)}.ak-gate .ak-btn:after{display:none}.ak-gate .ak-pmx{position:absolute;top:10px;right:10px}.ak-gate-s{color:#000;font-weight:700;text-decoration:underline;font-size:.95rem}
+@media(min-width:821px){.ak-go.ak-btn{align-self:end;height:64px;padding:0 20px;font-size:1.15rem;border-radius:14px}.ak-res .ak-dl{display:none}.ak-res{padding-bottom:108px}.ak-pvbar,.ak-res.idle>.ak-pvbar{display:flex!important;position:absolute;left:18px;right:18px;bottom:114px;margin:0;gap:8px;background:transparent;height:68px;z-index:3}.ak-res .ak-pv{border:3px solid #000;border-radius:14px;box-shadow:none;animation:none;height:100%;padding:0 20px;font-size:1.3rem}.ak-res .ak-dl2{display:grid;place-items:center;flex:0 0 100px;width:100px;background:var(--y);color:#000;border:3px solid #000;border-radius:14px;cursor:pointer}.ak-res .ak-dl2:hover{background:var(--cream)}}
+@media(max-width:820px){.ak-res .ak-dl{display:none}.ak-pvbar{margin:16px 0 0;gap:10px;flex-direction:column}.ak-pv{flex:none;width:100%;border:3px solid #000;border-radius:14px;box-shadow:none;animation:none;padding:18px 12px;font-size:1.1rem;gap:8px}.ak-dl2{display:flex;flex:none;width:100%;min-width:0;align-items:center;justify-content:center;gap:10px;padding:16px 12px;background:#000;color:var(--y);border:3px solid #000;border-radius:14px;cursor:pointer;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;font-size:1.1rem}.ak-dl2-t{display:inline}}
 
 .ak-err{margin:0;color:#ff8a7a;font-weight:700;font-size:.9rem}
 .ak-kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.ak-kw em{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:.78rem;background:#000;color:var(--y);padding:4px 9px;border-radius:99px}
@@ -974,7 +1034,7 @@ const AK_CSS = `
 .ak-pmg{position:relative;width:170px;height:170px}.ak-pmg svg{width:170px;height:170px;transform:rotate(-90deg)}
 .ak-pmg circle{fill:none;stroke-width:12}.ak-pmg .bg{stroke:rgba(255,255,255,.14)}.ak-pmg .fg{stroke:var(--y);stroke-linecap:round}
 .ak-pmg.good .fg{stroke:#2ecc71}.ak-pmg.bad .fg{stroke:#ff5a43}
-.ak-pmn{position:absolute;inset:0;display:flex;align-items:baseline;justify-content:center;padding-top:50px}.ak-pmn b{font-size:3.4rem;line-height:1;font-family:var(--font-display,inherit)}.ak-pmn span{opacity:.7;margin-left:2px}
+.ak-pmn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:0}.ak-pmn b{font-size:3.4rem;line-height:1;font-family:var(--font-display,inherit)}.ak-pmn span{opacity:.7;margin-left:2px}
 .ak-pml p{margin:0;font-weight:600}
 .ak-pmd{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;border:0;border-radius:12px;padding:16px 18px;width:100%;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
 .ak-pmr{padding:28px 30px;overflow-y:auto;overscroll-behavior:contain}
@@ -983,7 +1043,13 @@ const AK_CSS = `
 .ak-pmb .tr{height:12px;background:rgba(0,0,0,.12);border-radius:99px;overflow:hidden}.ak-pmb i{display:block;height:100%;border-radius:99px}.ak-pmb i.g{background:#0a7a2f}.ak-pmb i.m{background:#e0a800}.ak-pmb i.b{background:#c4230f}.ak-pmb em{font-style:normal;text-align:right}
 .ak-pmf{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:11px 0;border-bottom:1px dashed rgba(0,0,0,.25)}.ak-pmf b{display:block}.ak-pmf p{margin:3px 0 0;font-size:.92rem;color:rgba(0,0,0,.75)}
 .ak-pmn2{font-size:.8rem;opacity:.7;margin:18px 0 0}
-@media(max-width:820px){.ak-scroll{padding-right:0}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;width:34px;height:34px;margin:8px 8px -42px 0;box-shadow:0 0 0 4px var(--cream)}.ak-pmr{padding-right:18px}}
+.ak-gauge .ak-num{top:0!important;bottom:0!important;height:auto!important;padding:0!important;left:0!important;right:0!important;width:auto!important;transform:none!important;flex-direction:column;align-items:center;justify-content:center}.ak-gauge .ak-num span{margin:2px 0 0!important;line-height:1}.ak-pmn span{margin:2px 0 0!important;line-height:1}
+.ak-rb{margin-top:22px}.ak-rbs{margin:0 0 10px;font-size:.85rem;opacity:.75}.ak-rbg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ak-rbg>div{border:2px solid #000;border-radius:10px;padding:8px 10px;min-width:0}.ak-rbg>div.no{border-style:dashed;background:rgba(214,60,40,.08)}.ak-rbg span{display:block;font-family:ui-monospace,Menlo,monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;opacity:.65}.ak-rbg b{display:block;font-size:.88rem;overflow-wrap:anywhere}.ak-rbg .no b{color:#b3261e}
+.ak-rbc{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.ak-rbc span{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;border-radius:999px;padding:4px 10px;border:2px solid #000}.ak-rbc .ok{background:#000;color:var(--y)}.ak-rbc .no{border-style:dashed;opacity:.65}
+.ak-rbl{margin:10px 0 0;padding-left:18px;font-size:.85rem}.ak-rbw{margin:10px 0 0;font-size:.88rem;font-weight:700;color:#b3261e}
+.ak-rbt{margin-top:12px}.ak-rbt summary{cursor:pointer;font-weight:700;font-size:.9rem}.ak-rbt pre{margin:8px 0 0;max-height:240px;overflow:auto;background:#000;color:#f6f1d6;border-radius:10px;padding:12px;font-size:.75rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:820px){.ak-rbg{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:820px){.ak-scroll{padding-right:12px}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;width:34px;height:34px;margin:8px 8px -42px 0;box-shadow:0 0 0 4px var(--cream)}.ak-pmr{padding-right:18px}}
 
 .ak-tail{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#000;color:var(--y);border:4px solid var(--y);border-radius:16px;padding:18px 16px;text-decoration:none;text-align:center;position:relative;isolation:isolate;margin-top:16px;box-shadow:6px 6px 0 var(--y);transition:transform .15s}
 .ak-tail:hover{transform:translate(-2px,-2px)}
@@ -992,8 +1058,8 @@ const AK_CSS = `
 .ak-tail-t{display:flex;align-items:center;gap:10px;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:1.65rem;line-height:1}
 .ak-tail-s{font-size:.82rem;font-weight:600;color:var(--cream);opacity:.85}
 .ak-res.idle .ak-tail{display:none}
-@media(min-width:821px){.ak-tail{position:absolute;left:18px;right:18px;bottom:96px;margin:0;height:84px;z-index:3;box-shadow:5px 5px 0 var(--y)}.ak-tail-t{font-size:1.9rem}.ak-res .ak-scroll{bottom:196px!important}}
-@media(max-width:820px){.ak-tail{padding:22px 12px}.ak-tail-t{font-size:1.75rem}.ak-tail-s{font-size:.78rem}}
+@media(min-width:821px){.ak-tail{position:absolute;left:18px;right:18px;bottom:18px;margin:0;height:84px;z-index:3;box-shadow:5px 5px 0 var(--y)}.ak-tail-t{font-size:1.9rem}.ak-res .ak-scroll{bottom:204px!important}}
+@media(max-width:820px){.ak-tail{padding:20px 12px;margin:10px 0 0;width:100%;box-sizing:border-box;border-width:3px;box-shadow:none}.ak-tail:before{display:none}.ak-tail-t{font-size:1.6rem}.ak-tail-s{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
 
