@@ -59,6 +59,7 @@ const speakSchema = z.object({
   voice: z.enum(["Leda", "Puck", "Zephyr", "Aoede", "Laomedeia", "Achird"]).default("Leda"),
   meow: z.boolean().default(false),
   slow: z.boolean().default(false),
+  engine: z.enum(["gemini", "cf"]).default("gemini"),
 });
 
 // One model only, so the voice never changes mid interview. A second try on the same model covers a rambling reply; a quota error stops at once and the room uses the browser voice.
@@ -118,10 +119,25 @@ export const cocoSpeak = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { enforcePolicy } = await import("@/lib/rate-limit.server");
     const ctx = context as { userId: string };
-    const key = process.env.GEMINI_API_KEY;
-    if (!key) return { ok: false as const, reason: "no-key" };
     await enforcePolicy("interview_tts_global", "site");
     await enforcePolicy("interview_tts", ctx.userId);
+    if (data.engine === "cf") {
+      // Cloudflare MeloTTS on our own account. Hard stop at 490 calls per UTC day (Cloudflare's free day resets at 00:00 UTC). Past that the room uses the browser voice.
+      try {
+        const { countCall } = await import("@/lib/model-router.server");
+        if (!(await countCall("cf-melotts"))) return { ok: false as const, reason: "daily-cap" };
+        let aiEnv: any = (globalThis as any).__env__;
+        if (!aiEnv?.AI) { try { aiEnv = (await import(/* @vite-ignore */ "cloudflare:workers" as string) as any).env; } catch { /* no binding */ } }
+        if (!aiEnv?.AI) { console.warn("[coco-tts] no AI binding"); return { ok: false as const, reason: "no-ai" }; }
+        const out: any = await aiEnv.AI.run("@cf/myshell-ai/melotts", { prompt: data.text, lang: "en" });
+        const audio: string | undefined = typeof out === "string" ? out : out?.audio;
+        if (!audio || audio.length < 200) return { ok: false as const, reason: "empty" };
+        if (audio.length > 900000) return { ok: false as const, reason: "too-long" };
+        return { ok: true as const, wav: audio, model: "cf-melotts", mime: "audio/mpeg" };
+      } catch (e) { console.warn("[coco-tts] cf error", e); return { ok: false as const, reason: "cf-error" }; }
+    }
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) return { ok: false as const, reason: "no-key" };
     let lastStatus = 0;
     for (const model of TTS_MODELS) {
       try {
