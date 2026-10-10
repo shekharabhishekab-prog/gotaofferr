@@ -93,6 +93,8 @@ type SR = { start: () => void; stop: () => void; abort: () => void; onresult: ((
 
 function AiInterview() {
   const { user, loading } = useSession();
+  const [cs, setCs] = useState(1.5);
+  useEffect(() => { const f = () => setCs(window.innerWidth < 720 ? 0.9 : 1.5); f(); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
   const startFn = useServerFn(startInterview);
   const finishFn = useServerFn(finishInterview);
 
@@ -400,7 +402,7 @@ function AiInterview() {
             </div>
             <div className="ai-tiles">
               <div className="ai-tile ai-coco-tile">
-                <Coco clip={clip} fx={fx} size={1.5} />
+                <Coco clip={clip} fx={fx} size={cs} />
                 <span className="ai-name">Coco, interviewer</span>
               </div>
               <div className={`ai-tile ai-me ${listening ? "live" : ""}`}>
