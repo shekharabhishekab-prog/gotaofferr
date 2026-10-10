@@ -753,7 +753,8 @@ const AI_CSS = `
 }
 
 @media(max-width:600px){
-.ai-hero .ai-d.ai-mk{font-size:.8em;white-space:nowrap;line-height:1.25;letter-spacing:-.03em}
+.ai-hero .ai-d.ai-mk{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:.9em;white-space:normal;line-height:1.22;letter-spacing:-.04em}
+.ai-hero .ai-ln:has(.ai-d.ai-mk){margin-bottom:.22em}
 .ai-hero .ai-cur,.ai-hero .ai-y{font-size:.9em}
 .ai-hero .ai-ln:has(.ai-cur){white-space:nowrap;margin-top:.3em}
 .ai-hero .ai-sub{font-size:.88rem;line-height:1.5;margin-top:14px;color:rgba(246,241,214,.55);font-weight:400}
