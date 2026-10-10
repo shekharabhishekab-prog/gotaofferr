@@ -111,7 +111,7 @@ function CocoVideo({ talking }: { talking: boolean }) {
   return (
     <>
       {[0, 1].map((i) => (
-        <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: i === 1 ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) want(); }} onTimeUpdate={(e) => { const v = e.currentTarget; const p = prep.current; if (act.current === i && v.duration && v.duration - v.currentTime < 1.2 && p && p.ready && p.talk === tk.current) want(); }} />
+        <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: i === 1 ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) want(); }} onTimeUpdate={(e) => { const v = e.currentTarget; const p = prep.current; if (act.current === i && v.duration && v.duration - v.currentTime < 2.4 && p && p.ready && p.talk === tk.current) want(); }} />
       ))}
     </>
   );
