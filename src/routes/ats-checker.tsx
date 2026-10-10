@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useServerFn } from "@tanstack/react-start";
 import { getAtsUsage, recordAtsCheck } from "@/lib/ats-usage.functions";
-import { robotView, stuffedWords } from "@/lib/ats-robot";
+import { looksLikeResume, robotView, stuffedWords } from "@/lib/ats-robot";
 import { hardGap, regionNotes, type HardGap, type RegionNote } from "@/lib/ats-region";
 
 export const Route = createFileRoute("/ats-checker")({
@@ -308,6 +308,11 @@ function AtsDesignPreview() {
   const usageFn = useServerFn(getAtsUsage);
   const recordFn = useServerFn(recordAtsCheck);
   const [capped, setCapped] = useState(0);
+  const [quota, setQuota] = useState<{ used: number; limit: number } | null>(null);
+  useEffect(() => {
+    if (!user) { setQuota(null); return; }
+    usageFn().then((u) => setQuota({ used: u.used, limit: u.limit })).catch(() => {});
+  }, [user]);
   const [real, setReal] = useState<Sample | null>(null);
   const [pm, setPm] = useState(false);
   const [rawText, setRawText] = useState("");
@@ -346,7 +351,7 @@ function AtsDesignPreview() {
     try {
       const text = await readResume(fileObj);
       if (text.replace(/\s+/g, "").length < 80) throw new Error(/\.pdf$/i.test(fileObj.name) ? "No text found. This looks like a scan or picture. If the robot can't read it, ATS can't either. Export a text PDF or use DOCX." : "That file has almost no text. Add your full resume.");
-      if (resumeSignalScore(text) < 3) throw new Error("This doesn't look like a resume. Upload your CV or resume file.");
+      if (resumeSignalScore(text) < 3 || !looksLikeResume(text)) throw new Error("This doesn't look like a resume. Upload your own resume as a PDF, DOCX or TXT.");
       let jdt = jd.slice(0, MAX_JD);
       for (const w of (comp.toLowerCase().match(/[a-z]{3,}/g) ?? [])) jdt = jdt.replace(new RegExp("\\b" + w + "\\b", "gi"), " ");
       const jdFull = jd.slice(0, MAX_JD);
@@ -355,7 +360,7 @@ function AtsDesignPreview() {
       setRawText(text);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
       if (!user) { guestUse(); if (guestLeft() <= 0) setWall(true); }
-      else { try { await recordFn(); } catch { /* ignore */ } }
+      else { try { await recordFn(); usageFn().then((u) => setQuota({ used: u.used, limit: u.limit })).catch(() => {}); } catch { /* ignore */ } }
       setReal(out);
       setPhase("done");
       setRun((n) => n + 1);
@@ -477,6 +482,7 @@ function AtsDesignPreview() {
             <span className="ak-dt">{phase === "scan" ? STEPS[step] + "..." : file || "Drop your resume here"}</span>
             <span className="ak-dh">{file ? "Click to change" : "PDF, DOCX or TXT. Or click to browse."}</span>
           </label>
+          <p className="ak-hint">Upload only your own resume. No essays or reports.</p>
 
           <div className="ak-fields">
             <div className="ak-two">
@@ -496,6 +502,7 @@ function AtsDesignPreview() {
               {phase === "scan" ? "Scanning..." : <>Check my resume <ArrowRight className="size-4" /></>}
             </button>
           )}
+          <p className="ak-quota">{!user ? "1 free check. Sign in for 10 a month." : quota ? (quota.limit < 0 ? "Unlimited checks on your plan." : `${Math.max(0, quota.limit - quota.used)} of ${quota.limit} checks left this month.`) : "\u00a0"}</p>
         </div>
 
         {/* RESULT */}
@@ -527,7 +534,7 @@ function AtsDesignPreview() {
                 <circle cx="60" cy="60" r="54" className="bg" />
                 <circle key={key + run} cx="60" cy="60" r="54" className="fg" style={{ strokeDasharray: C, ["--to" as string]: C * (1 - s.score / 100) }} />
               </svg>
-              <div className="ak-num"><b>{shown}</b><span>/100</span></div>
+              <div className="ak-num"><b>{shown}<span>/100</span></b></div>
               <p>{s.verdict}</p>
             </div>
 
@@ -618,10 +625,11 @@ function AtsDesignPreview() {
               {title ? <div className="ak-pmt">{title}</div> : null}
               <div className={`ak-pmg ${tone}`}>
                 <svg viewBox="0 0 120 120" aria-hidden><circle cx="60" cy="60" r="54" className="bg" /><circle cx="60" cy="60" r="54" className="fg" strokeDasharray={C} strokeDashoffset={C * (1 - s.score / 100)} /></svg>
-                <div className="ak-pmn"><b>{s.score}</b><span>/100</span></div>
+                <div className="ak-pmn"><b>{s.score}<span>/100</span></b></div>
               </div>
               <p>{s.verdict}</p>
               <button type="button" className="ak-pmd" onClick={dl}><Download className="size-5" /> Download report</button>
+              <Link to="/tailor" className="ak-pmd ak-pmt2" onClick={carry}>Tailor resume <ArrowRight className="size-5" /></Link>
             </aside>
             <div className="ak-pmr">
               <h4>Score by area</h4>
@@ -1037,6 +1045,9 @@ const AK_CSS = `
 .ak-pmn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:0}.ak-pmn b{font-size:3.4rem;line-height:1;font-family:var(--font-display,inherit)}.ak-pmn span{opacity:.7;margin-left:2px}
 .ak-pml p{margin:0;font-weight:600}
 .ak-pmd{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;border:0;border-radius:12px;padding:16px 18px;width:100%;font-weight:800;text-transform:uppercase;letter-spacing:.04em;cursor:pointer}
+.ak-hint{margin:8px 2px 0;font-size:.82rem;opacity:.65;text-align:center}
+.ak-pmt2{margin-top:10px;background:#000;color:var(--y);text-decoration:none;border:2px solid var(--y)}
+.ak-gauge{display:grid;justify-items:center}.ak-gauge svg{grid-area:1/1;margin:0}.ak-gauge .ak-num{grid-area:1/1;align-self:center;position:static;top:auto;left:auto;right:auto;width:auto;height:auto;padding:0;transform:none;display:flex;flex-direction:column;align-items:center;justify-content:center}.ak-gauge .ak-num b{line-height:1}.ak-gauge .ak-num span{margin:2px 0 0}.ak-gauge p{grid-area:2/1}
 .ak-pmr{padding:28px 30px;overflow-y:auto;overscroll-behavior:contain}
 .ak-pmr h4{font-family:var(--font-display,inherit);text-transform:uppercase;font-size:1.15rem;margin:0 0 12px}.ak-pmr h4:not(:first-child){margin-top:26px;border-top:2px solid #000;padding-top:18px}
 .ak-pmb{display:grid;grid-template-columns:90px 1fr 54px;align-items:center;gap:12px;font-weight:700;font-size:.95rem;margin-bottom:10px}
@@ -1049,7 +1060,7 @@ const AK_CSS = `
 .ak-rbl{margin:10px 0 0;padding-left:18px;font-size:.85rem}.ak-rbw{margin:10px 0 0;font-size:.88rem;font-weight:700;color:#b3261e}
 .ak-rbt{margin-top:12px}.ak-rbt summary{cursor:pointer;font-weight:700;font-size:.9rem}.ak-rbt pre{margin:8px 0 0;max-height:240px;overflow:auto;background:#000;color:#f6f1d6;border-radius:10px;padding:12px;font-size:.75rem;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:820px){.ak-rbg{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:820px){.ak-scroll{padding-right:12px}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;width:34px;height:34px;margin:8px 8px -42px 0;box-shadow:0 0 0 4px var(--cream)}.ak-pmr{padding-right:18px}}
+@media(max-width:820px){.ak-scroll{padding-right:12px}.ak-res-grid>*{min-width:0}.ak-bars{min-width:0}.ak-bar{grid-template-columns:50px minmax(0,1fr) 42px!important;gap:5px!important;font-size:.64rem!important}.ak-bar em{white-space:nowrap}.ak-pmc{display:block;width:92vw;height:auto;max-height:78vh;overflow-y:auto;overscroll-behavior:contain}.ak-pml{overflow:visible;padding:22px 18px}.ak-pmd{margin-top:6px}.ak-pmt2{margin-top:10px}.ak-pmr{padding:18px;overflow:visible}.ak-pmg,.ak-pmg svg{width:130px;height:130px}.ak-pmn{padding-top:36px}.ak-pmn b{font-size:2.6rem}.ak-pmf{grid-template-columns:1fr;gap:6px}.ak-pmf .ak-ft{justify-self:start}.ak-pmb{grid-template-columns:70px 1fr 44px}.ak-pmx{position:sticky;float:right;top:8px;width:34px;height:34px;margin:8px 8px -42px 0;box-shadow:0 0 0 4px var(--cream)}.ak-pmr{padding-right:18px}}
 
 .ak-tail{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#000;color:var(--y);border:4px solid var(--y);border-radius:16px;padding:18px 16px;text-decoration:none;text-align:center;position:relative;isolation:isolate;margin-top:16px;box-shadow:6px 6px 0 var(--y);transition:transform .15s}
 .ak-tail:hover{transform:translate(-2px,-2px)}
@@ -1061,6 +1072,13 @@ const AK_CSS = `
 @media(min-width:821px){.ak-tail{position:absolute;left:18px;right:18px;bottom:18px;margin:0;height:84px;z-index:3;box-shadow:5px 5px 0 var(--y)}.ak-tail-t{font-size:1.9rem}.ak-res .ak-scroll{bottom:204px!important}}
 @media(max-width:820px){.ak-tail{padding:20px 12px;margin:10px 0 0;width:100%;box-sizing:border-box;border-width:3px;box-shadow:none}.ak-tail:before{display:none}.ak-tail-t{font-size:1.6rem}.ak-tail-s{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
+.ak-gauge .ak-num{position:static!important;grid-area:1/1!important;align-self:center!important;justify-self:center!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;margin:0!important;width:auto!important;height:auto!important;top:auto!important;transform:none!important}
+.ak-pmg .ak-pmn{position:absolute!important;inset:0!important;top:0!important;bottom:0!important;left:0!important;right:0!important;width:auto!important;height:auto!important;padding:0!important;transform:none!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:row!important}
+.ak-gauge{position:relative}
+.ak-gauge .ak-num b,.ak-pmg .ak-pmn b{position:relative;display:block;line-height:1!important;margin:0!important;padding:0!important}
+.ak-gauge .ak-num b span,.ak-pmg .ak-pmn b span{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin:4px 0 0!important;font-size:.85rem;font-weight:700;opacity:.55;line-height:1!important;white-space:nowrap}
+@media(min-width:821px){.ak-res.idle>.ak-pvbar{bottom:18px!important}}
+.ak-quota{grid-column:1/-1;margin:2px 0 0;text-align:center;font-size:.85rem;opacity:.75;font-weight:600}
 `;
 
 
