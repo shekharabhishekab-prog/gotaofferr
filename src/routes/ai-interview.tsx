@@ -765,7 +765,7 @@ const AI_CSS = `
 @media(max-width:899px){
 .ai-hero .ai-d.ai-mk{font-family:"HPSyne","HPBric",sans-serif;font-weight:800;font-size:.8em;white-space:normal;line-height:1.22;letter-spacing:-.04em}
 .ai-hero .ai-ln:has(.ai-d.ai-mk){margin-bottom:.22em}
-.ai-hero .ai-ln:has(.ai-cur){font-size:.6em;margin-left:1.1em;margin-top:.55em;line-height:1.3;white-space:nowrap}
+.ai-hero .ai-ln:has(.ai-cur){font-size:.6em;margin-left:0;margin-top:.55em;line-height:1.3;white-space:nowrap}
 .ai-hero .ai-cur,.ai-hero .ai-y{font-family:"HPSyne","HPBric",sans-serif;font-style:normal;font-weight:800;text-transform:uppercase;font-size:1em;letter-spacing:-.04em;line-height:1.3}
 .ai-brd{display:inline}
 .ai-hero .ai-sub{font-family:"DM Sans Variable","DM Sans",ui-sans-serif,system-ui,sans-serif;font-size:.88rem;line-height:1.5;margin-top:16px;color:rgba(246,241,214,.55);font-weight:400}
@@ -792,10 +792,10 @@ const AI_CSS = `
 }
 @media (min-width:900px){
 .ai-hero .ai-cur,.ai-hero .ai-y{font-family:"HPSyne","HPBric",sans-serif;font-style:normal;font-weight:800;text-transform:uppercase;letter-spacing:-.04em;font-size:1em;line-height:1.25}
-.ai-hero .ai-ln:has(.ai-cur){font-size:.5em;margin-left:4em;margin-top:.9em;line-height:1.25}
+.ai-hero .ai-ln:has(.ai-cur){font-size:.5em;margin-left:0;margin-top:.9em;line-height:1.25}
 .ai-brd{display:inline}
 .ai-hero .ai-y.ai-mk{padding:.04em .2em}
-.ai-fl{top:24px;height:auto;align-content:start;padding:22px;border:1.5px dashed rgba(255,214,0,.35);border-radius:22px;box-sizing:content-box;background:rgba(255,214,0,.04)}
+.ai-fl{top:24px;right:24px;height:auto;align-content:start;padding:22px;border:1.5px dashed rgba(255,214,0,.35);border-radius:22px;box-sizing:content-box;background:rgba(255,214,0,.04)}
 .ai-chip,.ai-flem span{animation:none!important}
 .ai-flem span{display:inline-block;animation:ai-wig 2.4s ease-in-out infinite!important}
 .ai-flem span:nth-child(2){animation-delay:-.8s!important}
