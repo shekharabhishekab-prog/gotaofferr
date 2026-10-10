@@ -59,7 +59,8 @@ export function robotView(resumeText: string): RobotView {
 
   const head = lines.slice(0, 8);
   let name: string | null = null;
-  for (const l of head.slice(0, 5)) {
+  for (const l of head.slice(0, 3)) {
+    if (/^(?:[A-Za-z] ){3,}[A-Za-z]$/.test(l)) break;
     if (/[@\d|]/.test(l) || headingKey(l)) continue;
     const w = l.split(/\s+/);
     if (w.length >= 2 && w.length <= 4 && w.every((x) => /^[A-Za-z][A-Za-z.'’-]*$/.test(x))) { name = l; break; }
