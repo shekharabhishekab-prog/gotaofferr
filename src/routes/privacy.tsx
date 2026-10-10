@@ -26,7 +26,7 @@ function Privacy() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
       <h1 className="font-display text-4xl font-bold text-foreground">Privacy Policy</h1>
-      <p className="mt-4 text-sm text-muted-foreground">Last updated: 7 October 2026</p>
+      <p className="mt-4 text-sm text-muted-foreground">Last updated: 10 October 2026</p>
 
       <div className="mt-8 space-y-8 text-muted-foreground">
         <section className="space-y-4">
@@ -63,6 +63,16 @@ function Privacy() {
           <p>
             <strong>Usage data:</strong> We record how many tailoring, resume-builder, job-search and job-alert uses you have in the
             current plan month to enforce free and paid plan limits.
+          </p>
+          <p>
+            <strong>ATS resume checker:</strong> When you use the ATS score checker, your resume file and job
+            description are read and scored inside your own browser. They are not uploaded to our servers
+            and we do not store them. If you are signed in, we store only a count of how many checks you
+            ran this month (your account ID and the time of each check) so we can apply your plan limit.
+            If you choose "Tailor my resume" after a check, your resume text is sent to our tailoring
+            service only when you run it there, as described in the rest of this policy. Like the rest of
+            our site, this page uses standard analytics and advertising services for visit and click
+            statistics; we do not send your resume or job description text to them.
           </p>
           <p>
             <strong>Payment information:</strong> We do not collect or store card details. Payments are
