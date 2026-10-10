@@ -118,6 +118,7 @@ function AiInterview() {
   const [voiceOk, setVoiceOk] = useState(true);
   const [bubble, setBubble] = useState("");
   const [clip, setClip] = useState<ClipName>("idle");
+  const [micBlocked, setMicBlocked] = useState(false);
   const [fx, setFx] = useState<"jump" | "spin" | "wander" | "">("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const recRef = useRef<SR | null>(null);
@@ -146,6 +147,7 @@ function AiInterview() {
   }, []);
 
   const startMic = useCallback(() => {
+    setMicBlocked(false);
     const w = window as any;
     const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
     if (!Ctor) { setVoiceOk(false); return; }
@@ -161,7 +163,7 @@ function AiInterview() {
     };
     rec.onerror = (ev: any) => {
       setListening(false);
-      if (ev?.error === "not-allowed" || ev?.error === "service-not-allowed") { setVoiceOk(false); setErr("Microphone is blocked. Allow it in your browser, or type your answer."); }
+      if (ev?.error === "not-allowed" || ev?.error === "service-not-allowed") setMicBlocked(true);
     };
     rec.onend = () => setListening(false);
     recRef.current = rec;
@@ -431,6 +433,7 @@ function AiInterview() {
                       {listening ? <><MicOff className="size-5" /> Stop</> : <><Mic className="size-5" /> Answer by voice</>}
                     </button>
                   ) : <span className="ai-note">Voice is not available in this browser. Type your answer.</span>}
+                  {voiceOk && micBlocked ? <span className="ai-note">Microphone is blocked. Click the lock icon in the address bar, allow Microphone, then press the mic again. Or just type.</span> : null}
                   <button type="button" className="ai-btn sm" onClick={() => goNext(false)}>{idx + 1 >= TOTAL ? "Finish" : "Next question"} <ArrowRight className="size-4" /></button>
                 </div>
                 <p className="ai-note">You have 2 minutes per answer. The timer starts when you start talking or typing.</p>
