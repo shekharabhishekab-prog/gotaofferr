@@ -719,7 +719,7 @@ export function ResumeTailor() {
                     ))}
                   </div>
                   {result.atsTopFix ? (
-                    <p className="mt-3 text-sm text-muted-foreground">ATS: {result.atsTopFix}</p>
+                    <p className="mt-3 text-sm text-muted-foreground">Top fix: {result.atsTopFix}</p>
                   ) : null}
                 </Card>
                 <Card className="p-6 shadow-soft md:col-span-2">
@@ -828,4 +828,5 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+
 
