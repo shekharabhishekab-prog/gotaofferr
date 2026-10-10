@@ -518,7 +518,7 @@ function AiInterview() {
                       {listening ? <><MicOff className="size-5" /> Stop</> : <><Mic className="size-5" /> Answer by voice</>}
                     </button>
                   ) : <span className="ai-note">Voice is not available in this browser. Type your answer.</span>}
-                  {voiceOk && micBlocked ? <span className="ai-note">Microphone is blocked. Click the lock icon in the address bar, allow Microphone, then press the mic again. On a Mac also check System Settings > Privacy & Security > Microphone > Chrome, and restart Chrome. Or just type.</span> : null}
+                  {voiceOk && micBlocked ? <span className="ai-note">Microphone is blocked. Click the lock icon in the address bar, allow Microphone, then press the mic again. On a Mac also check System Settings then Privacy & Security then Microphone then Chrome, and restart Chrome. Or just type.</span> : null}
                   <button type="button" className="ai-btn sm" onClick={onNext}>{idx + 1 >= TOTAL ? "Finish" : "Next question"} <ArrowRight className="size-4" /></button>
                 </div>
                 <p className="ai-note"><button type="button" className="ai-skip" onClick={() => { setErr(""); goNext(false); }}>Skip this question</button></p>
