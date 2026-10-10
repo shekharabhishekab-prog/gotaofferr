@@ -1123,9 +1123,9 @@ function Index() {
                   variant="outline"
                   className="hp-btn rounded-full border-white/30 bg-black/30 px-7 text-white backdrop-blur hover:bg-white/10 hover:text-white"
                 >
-                  <Link to="/resume-builder">Resume builder</Link>
+                  <Link to="/ats-checker">ATS score checker</Link>
                 </Button>
-                <small className="hp-sub">Make resume from scratch</small>
+                <small className="hp-sub">Free ATS score in 20 seconds</small>
               </span>
             </div>
 
