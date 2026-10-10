@@ -131,7 +131,7 @@ export async function buildResumePdf(r: TailoredResume) {
   const d = await createDoc();
   d.doc.setProperties({ title: `${r.name || "Resume"} - Resume`, subject: "Resume", creator: "GotaOfferr" });
 
-  d.text(r.name || "Resume", { size: 21, style: "bold", color: [17, 51, 92] });
+  d.text(r.name || "Resume", { size: 21, style: "bold", color: [0, 0, 0] });
   if (r.headline) d.text(r.headline, { size: 11, color: [80, 90, 105] });
   r.contacts?.forEach((c) => { if (c) d.text(c, { size: 9, color: [105, 112, 125] }); });
   d.space(4);
