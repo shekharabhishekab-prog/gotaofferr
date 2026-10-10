@@ -759,14 +759,15 @@ const AI_CSS = `
 .ai-hero .ai-ln{animation:ai-rise .6s ease-out both}
 .ai-hero .ai-ln:nth-child(2){animation-delay:.12s}
 .ai-hero .ai-sub{max-width:54rem;animation:ai-rise .7s .25s ease-out both}
-.ai-fl{display:block;position:absolute;right:0;top:0;width:34%;height:100%;pointer-events:none}
+.ai-hero .ai-d.ai-mk{font-size:.9em}
+.ai-fl{display:block;position:absolute;right:0;top:0;width:27%;height:100%;pointer-events:none}
 .ai-fl span{position:absolute;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:.9rem;white-space:nowrap;padding:9px 16px;border-radius:999px;background:var(--y);color:#0b0a08;box-shadow:0 8px 24px rgba(255,214,0,.22);animation:ai-flt 4s ease-in-out infinite}
 .ai-fl1{right:14%;top:8%;font-size:1.25rem!important;transform:rotate(-6deg);animation-delay:0s!important}
 .ai-fl2{right:2%;top:34%;background:#0b0a08!important;color:var(--y)!important;border:2px solid var(--y);animation-delay:-1s!important}
 .ai-fl3{right:20%;top:58%;background:#f6f1d6!important;animation-delay:-2s!important}
 .ai-fl5{right:3%;top:80%;background:#0b0a08!important;color:#f6f1d6!important;border:2px dashed rgba(255,214,0,.6);animation-delay:-3s!important}
 .ai-fl4,.ai-fl6,.ai-fl7{background:none!important;box-shadow:none!important;padding:0!important;font-size:2.6rem!important}
-.ai-fl4{right:36%;top:30%;animation-duration:3.2s!important}
+.ai-fl4{right:28%;top:30%;animation-duration:3.2s!important}
 .ai-fl6{right:0;top:2%;animation:ai-spinz 6s linear infinite!important}
 .ai-fl7{right:30%;top:84%;animation-duration:2.6s!important}
 @keyframes ai-flt{0%,100%{translate:0 0;rotate:-2deg}50%{translate:0 -16px;rotate:3deg}}
