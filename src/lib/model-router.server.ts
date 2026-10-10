@@ -7,6 +7,7 @@ export type RoutingTier = "free" | "starter" | "job_hunt" | "career_pro";
 
 // Daily request caps (requests per day, Pacific-time reset) from the AI Studio rate-limit page.
 export const MODEL_DAILY_CAP: Record<string, number> = {
+  "cf-melotts": 490,
   "gemini-3.5-flash-lite": 500,
   "gemini-3.1-flash-lite": 500,
   "gemini-3.6-flash": 20,
@@ -81,7 +82,7 @@ export async function countCall(model: string): Promise<boolean> {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const warn = Math.min(50, Math.max(1, Math.ceil(cap * 0.2)));
     const { data, error } = await (supabaseAdmin as any).rpc("bump_ai_model_usage", {
-      p_day: pacificDay(),
+      p_day: model.startsWith("cf-") ? new Date().toISOString().slice(0, 10) : pacificDay(),
       p_model: model,
       p_cap: cap,
       p_warn: warn,
