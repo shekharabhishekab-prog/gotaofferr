@@ -78,7 +78,7 @@ function Coco({ clip, fx, size = 1.5 }: { clip: ClipName; fx?: "jump" | "spin" |
   const col = frame % COLS;
   const row = Math.floor(frame / COLS);
   return (
-    <div ref={ref} className={`ai-coco ${fx ? "fx-" + fx : ""}`} style={{ width: FW * size, height: FH * size }} role="img" aria-label="Coco, a yellow cat who is your interviewer">
+    <div ref={ref} className={`ai-coco ${fx ? "fx-" + fx : ""} ${clip === "talk" ? "talking" : ""}`} style={{ width: FW * size, height: FH * size }} role="img" aria-label="Coco, a yellow cat who is your interviewer">
       <div style={{ width: FW, height: FH, transform: `scale(${size})`, transformOrigin: "top left", backgroundImage: "url(/coco-sprite.webp)", backgroundSize: `${FW * COLS}px ${FH * 4}px`, backgroundPosition: `-${col * FW}px -${row * FH}px` }} />
     </div>
   );
@@ -348,15 +348,29 @@ function AiInterview() {
       const ss = window.speechSynthesis;
       if (!ss) return;
       ss.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      const vs = ss.getVoices().filter((x) => x.lang.toLowerCase().startsWith("en"));
-      const male = /david|mark|alex|daniel|fred|george|james|guy|ryan|male(?!.*female)|rishi|oliver|arthur|aaron|thomas|eddy|reed|rocko|grandpa|ravi/i;
-      const pick = (re: RegExp) => vs.find((x) => re.test(x.name) && !male.test(x.name));
-      const v = pick(/google uk english female/i) || pick(/samantha|ava|allison|susan|zira|aria|jenny|hazel|karen|tessa|moira|victoria|fiona|serena|female|google us english/i) || vs.find((x) => !male.test(x.name)) || vs[0];
-      if (v) u.voice = v;
-      u.rate = 1.12;
-      u.pitch = 2;
-      ss.speak(u);
+      const go = () => {
+        const vs = ss.getVoices().filter((x) => /^en/i.test(x.lang));
+        const male = /\b(david|mark|alex|daniel|fred|george|james|guy|ryan|male|rishi|oliver|arthur|aaron|thomas|eddy|reed|rocko|grandpa|ravi|albert|bruce|junior|ralph|jacques)\b/i;
+        const prefer = ["Google UK English Female", "Samantha", "Victoria", "Karen", "Moira", "Tessa", "Microsoft Zira", "Microsoft Aria", "Microsoft Jenny", "Ava", "Allison", "Susan", "Fiona", "Serena", "Kate", "Nicky", "Google US English"];
+        let v: SpeechSynthesisVoice | undefined;
+        for (const n of prefer) { v = vs.find((x) => x.name.toLowerCase().includes(n.toLowerCase())); if (v) break; }
+        if (!v) v = vs.find((x) => /female|woman|girl/i.test(x.name)) || vs.find((x) => !male.test(x.name)) || vs[0];
+        const u = new SpeechSynthesisUtterance(text);
+        if (v) { u.voice = v; u.lang = v.lang; }
+        u.rate = 1.1;
+        u.pitch = 2;
+        u.onstart = () => setClip("talk");
+        u.onend = () => setClip("idle");
+        u.onerror = () => setClip("idle");
+        ss.speak(u);
+      };
+      if (ss.getVoices().length) go();
+      else {
+        let done = false;
+        const once = () => { if (done) return; done = true; ss.removeEventListener("voiceschanged", once); go(); };
+        ss.addEventListener("voiceschanged", once);
+        window.setTimeout(once, 1200);
+      }
     } catch { /* voice is optional */ }
   };
 
@@ -571,6 +585,8 @@ const AI_CSS = `
 .ai-skip:hover{color:var(--y)}
 .ai-coco-tile .ai-coco:not([class*="fx-"]){animation:ai-sway 7s ease-in-out infinite}
 @keyframes ai-sway{0%,100%{transform:translate(-16px,0)}25%{transform:translate(0,-6px)}50%{transform:translate(16px,0)}75%{transform:translate(0,-6px)}}
+.ai-coco-tile .ai-coco.talking:not([class*="fx-"]){animation:ai-talkbob .55s ease-in-out infinite}
+@keyframes ai-talkbob{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(-8px,-10px) rotate(-3deg)}75%{transform:translate(8px,-10px) rotate(3deg)}}
 .ai-card,.ai-tiles,.ai-bubble{animation:ai-rise .6s ease-out both}
 @keyframes ai-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .ai::before,.ai::after{content:"";position:absolute;border-radius:50%;pointer-events:none;filter:blur(60px);opacity:.16;background:#ffd600}
