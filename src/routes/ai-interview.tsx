@@ -159,15 +159,20 @@ function AiInterview() {
     const nl = navigator.language || "en-US";
     rec.lang = /^en/i.test(nl) ? nl : "en-US";
     rec.continuous = true;
-    rec.interimResults = false;
+    rec.interimResults = true;
+    const baseHolder = { v: answerRef.current };
     let gotAny = false;
     let errored = false;
     const t0 = Date.now();
     rec.onstart = () => { if (recRef.current === rec) { setListening(true); setRunning(true); } };
     rec.onresult = (e: any) => {
-      let add = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) add += e.results[i][0].transcript + " ";
-      if (add) { gotAny = true; setAnswer((a) => (a ? a.replace(/\s*$/, " ") : "") + add.trim()); }
+      let t = "";
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      t = t.trim();
+      if (!t) return;
+      gotAny = true;
+      const b0 = baseHolder.v.replace(/\s+$/, "");
+      setAnswer((b0 ? b0 + " " : "") + t);
     };
     rec.onerror = (ev: any) => {
       if (recRef.current !== rec) return;
@@ -189,7 +194,7 @@ function AiInterview() {
       if (recRef.current !== rec) return;
       if (wantMicRef.current && !errored && Date.now() - t0 > 1500) {
         // Chrome ends a session after a pause. Keep listening until the user taps Stop.
-        try { rec.start(); return; } catch { /* fall through */ }
+        try { baseHolder.v = answerRef.current; rec.start(); return; } catch { /* fall through */ }
       }
       setListening(false);
       if (!errored && !gotAny && Date.now() - t0 < 1500) {
@@ -223,15 +228,26 @@ function AiInterview() {
     });
   }, [startRec]);
 
-  // Coco keeps moving: every so often she wanders around the tile while you are not talking.
+  // Coco roams around her tile: hop, hop, rest, then somewhere else. She stays put while you talk.
+  const tileRef = useRef<HTMLDivElement | null>(null);
+  const [roam, setRoam] = useState({ x: 0, y: 0, dir: 1, moving: false });
   useEffect(() => {
     if (stage !== "room" || listening) return;
+    let to = 0;
     const id = window.setInterval(() => {
-      setFx((f) => (f === "" ? "wander" : f));
-      window.setTimeout(() => setFx((f) => (f === "wander" ? "" : f)), 4700);
-    }, 13000);
-    return () => window.clearInterval(id);
-  }, [stage, listening]);
+      const t = tileRef.current;
+      const rx = t ? Math.max(0, (t.clientWidth - FW * cs) / 2 - 8) : 0;
+      const ry = t ? Math.max(0, (t.clientHeight - FH * cs) / 2 - 8) : 0;
+      setRoam((r) => {
+        const nx = (Math.random() * 2 - 1) * rx;
+        const ny = (Math.random() * 2 - 1) * ry;
+        return { x: nx, y: ny, dir: nx > r.x ? -1 : 1, moving: true };
+      });
+      window.clearTimeout(to);
+      to = window.setTimeout(() => setRoam((r) => ({ ...r, moving: false })), 1500);
+    }, 3200);
+    return () => { window.clearInterval(id); window.clearTimeout(to); };
+  }, [stage, listening, cs]);
 
   // 2 minute answer timer. It starts when you start talking or typing.
   useEffect(() => {
@@ -407,8 +423,8 @@ function AiInterview() {
       <style>{AI_CSS}</style>
       <section className="ai-hero">
         <div className="ai-wrap">
-          <span className="ai-mono">( ai interview, 10 short questions )</span>
-          <h1 className="ai-h1">Practice with <mark>Coco.</mark></h1>
+          <span className="ai-mono">( practice with coco, 10 short questions )</span>
+          <h1 className="ai-h1">AI <mark>Interview.</mark></h1>
           <p className="ai-sub">She reads your resume and the job description, then asks 10 short questions. Answer out loud or type. Get honest feedback at the end. Nothing you say or upload is saved.</p>
         </div>
       </section>
@@ -489,9 +505,14 @@ function AiInterview() {
               <span className="ai-qn">Question {Math.min(idx + 1, TOTAL)} of {TOTAL}</span>
               <span className={`ai-timer ${low ? "low" : ""} ${running ? "on" : ""}`} aria-live="off">{fmt(Math.max(0, left))}</span>
             </div>
+            <div className="ai-body">
             <div className="ai-tiles">
-              <div className="ai-tile ai-coco-tile">
-                <Coco clip={clip} fx={fx} size={cs} />
+              <div className="ai-tile ai-coco-tile" ref={tileRef}>
+                <div className="ai-roam" style={{ transform: `translate(${roam.x}px, ${roam.y}px)` }}>
+                  <div className={roam.moving ? "ai-hopper" : ""} style={{ transform: `scaleX(${roam.dir})` }}>
+                    <Coco clip={clip} fx={fx} size={cs} />
+                  </div>
+                </div>
                 <span className="ai-name">Coco, interviewer</span>
               </div>
               <div className={`ai-tile ai-me ${listening ? "live" : ""}`}>
@@ -500,6 +521,7 @@ function AiInterview() {
                 <div className="ai-wave" aria-hidden="true"><i /><i /><i /><i /><i /></div>
               </div>
             </div>
+            <div className="ai-right">
             <div className="ai-bubble" role="status">
               <p>{stage === "wrapping" ? bubble : bubble || questions[idx]}</p>
               {stage === "room" && questions[idx] ? <button type="button" className="ai-ico" onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
@@ -528,6 +550,8 @@ function AiInterview() {
             ) : (
               <p className="ai-note ai-center">Writing your feedback...</p>
             )}
+            </div>
+            </div>
           </div>
         )}
       </section>
@@ -582,9 +606,10 @@ const AI_CSS = `
 .ai-rec{font-size:.8rem;display:inline-flex;align-items:center;gap:8px;color:rgba(246,241,214,.8)}
 .ai-rec:before{content:"";width:9px;height:9px;border-radius:50%;background:#ff5252}
 .ai-qn{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:var(--y)}
-.ai-timer{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:1.25rem;color:rgba(246,241,214,.55);min-width:64px;text-align:right}
-.ai-timer.on{color:var(--cream)}
-.ai-timer.low{color:#ff5252;animation:ai-pulse 1s ease-in-out infinite}
+.ai-timer{font-family:ui-monospace,Menlo,monospace;font-weight:800;font-size:1.7rem;line-height:1;padding:8px 16px;border-radius:999px;border:2px solid var(--y);color:var(--y);box-shadow:0 0 18px rgba(255,214,0,.35);min-width:92px;text-align:right}
+.ai-timer.on{background:var(--y);color:#000;animation:ai-tglow 1.6s ease-in-out infinite}
+@keyframes ai-tglow{0%,100%{box-shadow:0 0 14px rgba(255,214,0,.4)}50%{box-shadow:0 0 30px rgba(255,214,0,.85)}}
+.ai-timer.low{background:#ff3b30;border-color:#ff3b30;color:#fff;box-shadow:0 0 26px rgba(255,59,48,.7);animation:ai-pulse 1s ease-in-out infinite}
 @keyframes ai-pulse{50%{opacity:.45}}
 .ai-tiles{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;padding:14px}
 .ai-tile{position:relative;border-radius:16px;background:radial-gradient(70% 70% at 50% 40%,#1c1a10,#0e0e0e);min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
@@ -609,7 +634,23 @@ const AI_CSS = `
 .ai-coco{will-change:transform}
 .ai-skip{background:none;border:0;padding:0;color:rgba(246,241,214,.6);text-decoration:underline;cursor:pointer;font-size:.72rem}
 .ai-skip:hover{color:var(--y)}
-.ai-coco-tile .ai-coco:not([class*="fx-"]){animation:ai-sway 7s ease-in-out infinite}
+.ai-roam{transition:transform 1.4s ease-in-out;will-change:transform}
+.ai-hopper{animation:ai-hop .5s ease-in-out 3;transform-origin:50% 100%}
+@keyframes ai-hop{0%,100%{margin-top:0;filter:none}40%{margin-top:-22px}55%{margin-top:-22px}}
+.ai-body{display:block}
+@media (min-width:900px){
+.ai-body{display:grid;grid-template-columns:minmax(320px,34%) 1fr;gap:0 8px;align-items:stretch}
+.ai-tiles{grid-template-columns:1fr;grid-template-rows:1fr auto;padding:14px 8px 14px 14px}
+.ai-coco-tile{min-height:460px}
+.ai-me{min-height:76px;flex-direction:row;gap:14px;justify-content:flex-start;padding:0 16px}
+.ai-me .ai-av{width:46px;height:46px;font-size:1.2rem;margin:0}
+.ai-me .ai-name{position:static;background:none;padding:0;font-size:.9rem}
+.ai-right{display:flex;flex-direction:column;justify-content:center;min-width:0}
+.ai-right .ai-bubble{margin:14px 14px 0 0}
+.ai-right .ai-answer{padding:14px 14px 14px 0}
+.ai-right .ai-answer textarea{min-height:170px}
+}
+
 @keyframes ai-sway{0%,100%{transform:translate(-16px,0)}25%{transform:translate(0,-6px)}50%{transform:translate(16px,0)}75%{transform:translate(0,-6px)}}
 .ai-coco-tile .ai-coco.talking:not([class*="fx-"]){animation:ai-talkbob .55s ease-in-out infinite}
 @keyframes ai-talkbob{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(-8px,-10px) rotate(-3deg)}75%{transform:translate(8px,-10px) rotate(3deg)}}
@@ -657,5 +698,5 @@ const AI_CSS = `
 .ai-bubble{font-size:1.02rem;margin:0 10px}
 .ai-answer{padding:10px}
 }
-@media (prefers-reduced-motion:reduce){.ai-coco-tile .ai-coco,.ai-card,.ai-tiles,.ai-bubble,.ai::before,.ai::after,.ai-h1 mark{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
+@media (prefers-reduced-motion:reduce){.ai-hopper,.ai-roam,.ai-timer.on,.ai-card,.ai-tiles,.ai-bubble,.ai::before,.ai::after,.ai-h1 mark{animation:none}.ai-coco.fx-jump,.ai-coco.fx-spin,.ai-timer.low{animation:none}}
 `;
