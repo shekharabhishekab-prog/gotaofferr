@@ -529,11 +529,11 @@ function AtsDesignPreview() {
           </div>
 
           </div>
-          <Link to="/tailor" className="ak-tail" onClick={carry}><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 15 seconds. No fake skills.</span></Link>
           <div className="ak-pvbar">
             <button type="button" className={`ak-pv ${hl ? "hl" : ""}`} onClick={openPv}><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
-            <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /></button>
+            <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /><span className="ak-dl2-t">Download report</span></button>
           </div>
+          <Link to="/tailor" className="ak-tail" onClick={carry}><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 15 seconds. No fake skills.</span></Link>
 
         </div>
         </div>
@@ -961,9 +961,9 @@ const AK_CSS = `
 .ak-pv{flex:1;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--y);color:#000;border:3px solid #000;border-radius:14px;padding:18px 20px;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:1.2rem;cursor:pointer;box-shadow:5px 5px 0 #000;animation:ak-pvp 2.2s ease-in-out infinite}
 .ak-pv:hover{background:#000;color:var(--y)}
 @keyframes ak-pvp{50%{box-shadow:5px 5px 0 #000,0 0 0 7px rgba(255,214,0,.55)}}
-.ak-dl2{display:none}
+.ak-dl2{display:none}.ak-dl2-t{display:none}
 @media(min-width:821px){.ak-go.ak-btn{align-self:end;height:64px;padding:0 20px;font-size:1.15rem;border-radius:14px}.ak-res .ak-dl{display:none}.ak-res{padding-bottom:108px}.ak-pvbar,.ak-res.idle>.ak-pvbar{display:flex!important;position:absolute;left:0;right:0;bottom:0;margin:0;gap:8px;background:#000;height:78px;z-index:3}.ak-res .ak-pv{border:0;border-radius:0;box-shadow:none;animation:none;height:100%;padding:0 20px;font-size:1.3rem}.ak-res .ak-dl2{display:grid;place-items:center;flex:0 0 100px;width:100px;background:var(--y);color:#000;border:0;border-radius:0;cursor:pointer}.ak-res .ak-dl2:hover{background:var(--cream)}}
-@media(max-width:820px){.ak-res .ak-dl{display:none}.ak-pvbar{margin:16px 0 0;gap:10px}.ak-pv{flex:1 1 auto;border:3px solid #000;border-radius:14px;box-shadow:none;animation:none;padding:18px 8px;font-size:1rem;gap:8px}.ak-dl2{display:grid;place-items:center;flex:0 0 10%;width:10%;min-width:46px;background:#000;color:var(--y);border:3px solid #000;border-radius:14px;cursor:pointer}}
+@media(max-width:820px){.ak-res .ak-dl{display:none}.ak-pvbar{margin:16px 0 0;gap:10px;flex-direction:column}.ak-pv{flex:none;width:100%;border:3px solid #000;border-radius:14px;box-shadow:none;animation:none;padding:18px 12px;font-size:1.1rem;gap:8px}.ak-dl2{display:flex;flex:none;width:100%;min-width:0;align-items:center;justify-content:center;gap:10px;padding:16px 12px;background:#000;color:var(--y);border:3px solid #000;border-radius:14px;cursor:pointer;font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;font-size:1.1rem}.ak-dl2-t{display:inline}}
 
 .ak-err{margin:0;color:#ff8a7a;font-weight:700;font-size:.9rem}
 .ak-kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.ak-kw em{font-style:normal;font-family:ui-monospace,Menlo,monospace;font-size:.78rem;background:#000;color:var(--y);padding:4px 9px;border-radius:99px}
@@ -999,7 +999,7 @@ const AK_CSS = `
 .ak-tail-s{font-size:.82rem;font-weight:600;color:var(--cream);opacity:.85}
 .ak-res.idle .ak-tail{display:none}
 @media(min-width:821px){.ak-tail{position:absolute;left:18px;right:18px;bottom:96px;margin:0;height:84px;z-index:3;box-shadow:5px 5px 0 var(--y)}.ak-tail-t{font-size:1.9rem}.ak-res .ak-scroll{bottom:196px!important}}
-@media(max-width:820px){.ak-tail{padding:22px 12px}.ak-tail-t{font-size:1.75rem}.ak-tail-s{font-size:.78rem}}
+@media(max-width:820px){.ak-tail{padding:20px 12px;margin:10px 0 0;width:100%;box-sizing:border-box;border-width:3px;box-shadow:none}.ak-tail:before{display:none}.ak-tail-t{font-size:1.6rem}.ak-tail-s{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){.ak *{animation-duration:.01s!important;animation-iteration-count:1!important;transition-duration:.01s!important}.ak-rv{opacity:1;transform:none}}
 `;
 
