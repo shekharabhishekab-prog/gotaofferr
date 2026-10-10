@@ -54,7 +54,9 @@ const shuffled = (a: number[]) => { const b = a.slice(); for (let i = b.length -
 
 // Long rotating loop of Coco clips. Talking clips play while she speaks, idle clips otherwise.
 // Two stacked videos crossfade. The next clip is loaded in the hidden video ahead of time, so there is no wait between clips.
-function CocoVideo({ talking }: { talking: boolean }) {
+function CocoVideo({ talking, levelRef }: { talking: boolean; levelRef: { current: number } }) {
+  const [catOk, setCatOk] = useState(false);
+  const catRef = useRef<HTMLDivElement | null>(null);
   const refs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)];
   const act = useRef(1);
     const q = useRef<number[]>([]);
@@ -110,12 +112,21 @@ function CocoVideo({ talking }: { talking: boolean }) {
   useEffect(() => { want(); }, []);
   // Talking layer: short front-facing talking segments, crossfaded one into the next, shown only while Coco speaks.
   const tvs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)];
+  // Cartoon cat: the mouth follows the loudness of the voice (0 closed, 1 small, 2 open, 3 wide), checked 20 times a second.
+  useEffect(() => {
+    const el = catRef.current;
+    if (!el) return;
+    if (!talking) { el.dataset.m = "0"; return; }
+    const iv = window.setInterval(() => { el.dataset.m = String(levelRef.current | 0); }, 50);
+    return () => { window.clearInterval(iv); el.dataset.m = "0"; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [talking]);
   useEffect(() => {
     const SEG = [{ a: 1.5, b: 6.5 }, { a: 1.5, b: 4.5 }];
     const [v0, v1] = [tvs[0].current, tvs[1].current];
     if (!v0 || !v1) return;
     const vs = [v0, v1];
-    if (!talking) {
+    if (!talking || catOk) {
       vs.forEach((v) => { v.style.opacity = "0"; });
       const t = window.setTimeout(() => vs.forEach((v) => v.pause()), 400);
       return () => window.clearTimeout(t);
@@ -141,12 +152,22 @@ function CocoVideo({ talking }: { talking: boolean }) {
     }, 80);
     return () => window.clearInterval(iv);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [talking]);
+  }, [talking, catOk]);
   return (
     <>
       {[0, 1].map((i) => (
         <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: i === 1 ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) want(); }} onTimeUpdate={(e) => { const v = e.currentTarget; const p = prep.current; if (act.current === i && v.duration && v.duration - v.currentTime < 2.4 && p && p.ready && p.talk === tk.current) want(); }} />
       ))}
+      <div ref={catRef} className={`ai-cat ${talking && catOk ? "on" : ""}`} data-m="0" aria-hidden="true">
+        <div className="ai-cat-in">
+          <img src="/coco-cat.webp" alt="" width={460} height={535} decoding="async" draggable={false} onLoad={() => setCatOk(true)} onError={() => setCatOk(false)} />
+          <svg viewBox="0 0 460 535" preserveAspectRatio="none">
+            <g className="m1"><path d="M112 195Q127 192 142 195Q140 211 127 212Q114 211 112 195Z" /></g>
+            <g className="m2"><path d="M107 194Q127 190 147 194Q145 219 127 220Q109 219 107 194Z" /><ellipse className="tg" cx="127" cy="212" rx="9" ry="5" /></g>
+            <g className="m3"><path d="M100 194Q127 189 154 194Q152 229 127 230Q102 229 100 194Z" /><ellipse className="tg" cx="127" cy="221" rx="11" ry="6" /></g>
+          </svg>
+        </div>
+      </div>
       {[4, 2].map((n, i) => (
         <video key={"t" + n} ref={tvs[i]} className="ai-cvid ai-cvid-t" style={{ opacity: 0 }} src={"/coco-clip/" + n} muted playsInline preload="auto" aria-hidden="true" />
       ))}
@@ -205,7 +226,7 @@ function AiInterview() {
   const startFn = useServerFn(startInterview);
   const finishFn = useServerFn(finishInterview);
   const speakFn = useServerFn(cocoSpeak);
-  const [voiceKind, setVoiceKind] = useState<"A" | "B" | "C" | "D" | "E" | "F" | "browser">("E");
+  const [voiceKind, setVoiceKind] = useState<"A" | "B" | "C" | "D" | "E" | "F" | "browser">("D");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const voiceCache = useRef<Map<string, string>>(new Map());
   const lifts = useRef<Map<string, number>>(new Map());
@@ -226,6 +247,7 @@ function AiInterview() {
   const [answer, setAnswer] = useState("");
   const [left, setLeft] = useState(ANSWER_SECONDS);
   const [running, setRunning] = useState(false);
+  const [started, setStarted] = useState(false);
   const [listening, setListening] = useState(false);
   const [voiceOk, setVoiceOk] = useState(true);
   const [bubble, setBubble] = useState("");
@@ -380,7 +402,7 @@ function AiInterview() {
       setIdx(idx + 1);
       setAnswer("");
       setLeft(ANSWER_SECONDS);
-      setRunning(false);
+      setRunning(true);
       hintedRef.current = false;
       setBubble(auto ? "Time. No worries, next one." : questions[idx + 1]);
       if (auto) window.setTimeout(() => setBubble(questions[idx + 1]), 1400);
@@ -398,6 +420,17 @@ function AiInterview() {
     }
     if (left <= 0 && running) goNext(true);
   }, [left, running, stage, goNext]);
+  const startSession = () => {
+    setErr("");
+    setStarted(true);
+    setFx("");
+    setIdx(0);
+    setAnswer("");
+    setLeft(ANSWER_SECONDS);
+    setRunning(true);
+    hintedRef.current = false;
+    setBubble(questions[0]);
+  };
   const onNext = () => {
     if (!answerRef.current.trim()) { setErr("Write or say an answer first, or tap Skip this question."); return; }
     setErr("");
@@ -449,12 +482,12 @@ function AiInterview() {
       setLeft(ANSWER_SECONDS);
       setRunning(false);
       hintedRef.current = false;
+      setStarted(false);
+      ttsFails.current = 0;
       setStage("room");
       setClip("idle");
       setFx("wander");
-      setBubble("Coco is looking around...");
-      window.setTimeout(() => { setClip("wave"); setFx("jump"); setBubble("Hi! I'm Coco. Let's practice. Take your time."); }, 4600);
-      window.setTimeout(() => { setFx(""); setBubble(r.questions[0]); }, 7000);
+      setBubble("Hi! I'm Coco. Press Start when you are ready and I will ask your first question.");
       window.setTimeout(() => stageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } catch (e) {
       setStage("setup");
@@ -483,6 +516,7 @@ function AiInterview() {
   }
 
   const reset = () => {
+    setStarted(false);
     stopMic();
     setStage("setup");
     setFeedback(null);
@@ -510,9 +544,9 @@ function AiInterview() {
         u.rate = 0.85;
         u.pitch = 1.3;
         try { console.info("Coco voice:", v ? v.name + " (" + v.lang + ", " + (v.localService ? "local" : "online") + ")" : "default"); } catch { /* ignore */ }
-        u.onstart = () => setClip("talk");
-        u.onend = () => setClip("idle");
-        u.onerror = () => setClip("idle");
+        u.onstart = () => { setClip("talk"); startMeter(null); };
+        u.onend = () => { meterStop.current?.(); setClip("idle"); };
+        u.onerror = () => { meterStop.current?.(); setClip("idle"); };
         ss.speak(u);
       };
       if (ss.getVoices().length) go();
@@ -527,6 +561,31 @@ function AiInterview() {
 
   const inflight = useRef<Map<string, Promise<string | null>>>(new Map());
   const decoded = useRef<Map<string, AudioBuffer>>(new Map());
+  const levelRef = useRef(0);
+  const meterStop = useRef<(() => void) | null>(null);
+  const ttsFails = useRef(0);
+  const startMeter = (an: AnalyserNode | null) => {
+    meterStop.current?.();
+    const data = an ? new Uint8Array(an.fftSize) : null;
+    let peak = 0.05;
+    const iv = window.setInterval(() => {
+      let lvl = 0;
+      if (an && data) {
+        an.getByteTimeDomainData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) { const x = (data[i] - 128) / 128; sum += x * x; }
+        const rms = Math.sqrt(sum / data.length);
+        peak = Math.max(rms, peak * 0.996);
+        const r = rms / Math.max(peak, 0.04);
+        lvl = rms < 0.008 ? 0 : r < 0.2 ? 1 : r < 0.5 ? 2 : 3;
+        if (rms >= 0.008 && r < 0.08) lvl = 0;
+      } else {
+        lvl = [1, 2, 3, 2, 0, 2, 3, 1][Math.floor(Math.random() * 8)];
+      }
+      levelRef.current = lvl;
+    }, 50);
+    meterStop.current = () => { window.clearInterval(iv); levelRef.current = 0; meterStop.current = null; };
+  };
   const ctxRef = useRef<AudioContext | null>(null);
   const srcRef = useRef<AudioBufferSourceNode | null>(null);
   const [voiceBusy, setVoiceBusy] = useState(false);
@@ -557,16 +616,12 @@ function AiInterview() {
     return p;
   };
 
-  // Get the current question's voice ready while the user reads it, so the speaker button plays at once.
-  useEffect(() => {
-    if (stage !== "room" || voiceKind === "browser" || !questions[idx]) return;
-    void fetchVoice(questions[idx], voiceKind);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage, idx, questions, voiceKind]);
+  // Voice is made only when the speaker is tapped (one call per question, then cached), so reading-only users cost nothing.
 
   const speak = async (text: string) => {
+    meterStop.current?.();
     try { audioRef.current?.pause(); window.speechSynthesis?.cancel(); const o = srcRef.current; srcRef.current = null; if (o) { o.onended = null; o.stop(); } } catch { /* ignore */ }
-    if (voiceKind === "browser") { speakBrowser(text); return; }
+    if (voiceKind === "browser" || ttsFails.current >= 2) { speakBrowser(text); return; }
     // Wake the audio engine inside the tap so the first sound is not delayed or clipped.
     let ctx: AudioContext | null = null;
     try { ctx = getCtx(); void ctx.resume(); } catch { ctx = null; }
@@ -575,7 +630,8 @@ function AiInterview() {
       const ck = await fetchVoice(text, voiceKind);
       setVoiceBusy(false);
       const url = ck ? voiceCache.current.get(ck) : undefined;
-      if (!ck || !url) throw new Error("tts");
+      if (!ck || !url) { ttsFails.current += 1; throw new Error("tts"); }
+      ttsFails.current = 0;
       const lf = lifts.current.get(ck) || 1;
       const buf = decoded.current.get(ck);
       if (ctx && buf) {
@@ -588,6 +644,9 @@ function AiInterview() {
         if (lf > 1.1) { const hs = ctx.createBiquadFilter(); hs.type = "highshelf"; hs.frequency.value = 3200; hs.gain.value = 3; src.connect(hs); node = hs; }
         node.connect(g);
         g.connect(ctx.destination);
+        const an = ctx.createAnalyser();
+        an.fftSize = 1024;
+        g.connect(an);
         const t = ctx.currentTime + 0.03;
         const len = buf.duration / lf;
         g.gain.setValueAtTime(0, t);
@@ -595,17 +654,18 @@ function AiInterview() {
         g.gain.setValueAtTime(1, t + Math.max(0.1, len - 0.12));
         g.gain.linearRampToValueAtTime(0, t + len);
         srcRef.current = src;
-        src.onended = () => { if (srcRef.current === src) { srcRef.current = null; setClip("idle"); } };
+        src.onended = () => { if (srcRef.current === src) { srcRef.current = null; meterStop.current?.(); setClip("idle"); } };
         setClip("talk");
+        startMeter(an);
         src.start(t);
         return;
       }
       const a = new Audio(url);
       if (lf !== 1) { a.preservesPitch = false; (a as any).mozPreservesPitch = false; (a as any).webkitPreservesPitch = false; a.playbackRate = lf; }
       audioRef.current = a;
-      a.onplay = () => setClip("talk");
-      a.onended = () => setClip("idle");
-      a.onerror = () => setClip("idle");
+      a.onplay = () => { setClip("talk"); startMeter(null); };
+      a.onended = () => { meterStop.current?.(); setClip("idle"); };
+      a.onerror = () => { meterStop.current?.(); setClip("idle"); };
       await a.play();
     } catch {
       setVoiceBusy(false);
@@ -707,13 +767,13 @@ function AiInterview() {
           <div className="ai-room ph-no-capture" data-ph-no-capture="true">
             <div className="ai-bar">
               <span className="ai-rec">Coco&apos;s interview room</span>
-              <span className="ai-qn">Question {Math.min(idx + 1, TOTAL)} of {TOTAL}</span>
+              <span className="ai-qn">{stage === "room" && !started ? `${TOTAL} questions` : `Question ${Math.min(idx + 1, TOTAL)} of ${TOTAL}`}</span>
               <span className={`ai-timer ${low ? "low" : ""} ${running ? "on" : ""}`} aria-live="off">{fmt(Math.max(0, left))}</span>
             </div>
             <div className="ai-body">
             <div className="ai-tiles">
               <div className="ai-tile ai-coco-tile" ref={tileRef}>
-                <CocoVideo talking={clip === "talk"} />
+                <CocoVideo talking={clip === "talk"} levelRef={levelRef} />
                 <span className="ai-name">Coco, interviewer</span>
               </div>
               <div className={`ai-tile ai-me ${listening ? "live" : ""}`}>
@@ -724,11 +784,16 @@ function AiInterview() {
             </div>
             <div className="ai-right">
             <div className="ai-bubble" role="status">
-              <p>{stage === "wrapping" ? bubble : bubble || questions[idx]}</p>
-              {stage === "room" && questions[idx] ? <button type="button" className={`ai-ico ${voiceBusy ? "busy" : ""}`} onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
-              {stage === "room" && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "E", E: "F", F: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Zephyr + meow, kitten pitch", D: "D Leda, kitten pitch, no meow", E: "E Leda, kitten pitch (default)", F: "F Zephyr, highest kitten", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
+              <p>{stage === "wrapping" || !started ? bubble : bubble || questions[idx]}</p>
+              {stage === "room" && started && questions[idx] ? <button type="button" className={`ai-ico ${voiceBusy ? "busy" : ""}`} onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
+              {stage === "room" && started && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "E", E: "F", F: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Zephyr + meow, kitten pitch", D: "D Leda, soft little girl (default)", E: "E Leda, kitten pitch", F: "F Zephyr, highest kitten", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
             </div>
-            {stage === "room" ? (
+            {stage === "room" && !started ? (
+              <div className="ai-answer ai-startbox">
+                <button type="button" className="ai-btn" onClick={startSession}>Start <ArrowRight className="size-4" /></button>
+                <p className="ai-note">{TOTAL} questions, 2 minutes for each answer. The timer starts when you press Start.</p>
+              </div>
+            ) : stage === "room" ? (
               <div className="ai-answer">
                 <textarea
                   value={answer}
@@ -747,7 +812,7 @@ function AiInterview() {
                   <button type="button" className="ai-btn sm" onClick={onNext}>{idx + 1 >= TOTAL ? "Finish" : "Next question"} <ArrowRight className="size-4" /></button>
                 </div>
                 <p className="ai-note"><button type="button" className="ai-skip" onClick={() => { setErr(""); goNext(false); }}>Skip this question</button></p>
-                <p className="ai-note">You have 2 minutes per answer. The timer starts when you start talking or typing.</p>
+                <p className="ai-note">You have 2 minutes per answer. The timer starts when each question appears.</p>
               </div>
             ) : (
               <p className="ai-note ai-center">Writing your feedback...</p>
@@ -829,6 +894,17 @@ const AI_CSS = `
 .ai-ico.busy{animation:ai-busy .7s ease-in-out infinite}
 @keyframes ai-busy{50%{opacity:.45;transform:scale(.92)}}
 .ai-cvid-t{transition:opacity .3s ease!important}
+.ai-cat{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;opacity:0;transition:opacity .25s ease;pointer-events:none}
+.ai-cat.on{opacity:1}
+.ai-cat-in{position:relative;height:90%;max-width:96%;aspect-ratio:460/535;transform-origin:50% 90%}
+.ai-cat.on .ai-cat-in{animation:ai-catbob .7s ease-in-out infinite}
+.ai-cat-in img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none}
+.ai-cat-in svg{position:absolute;inset:0;width:100%;height:100%}
+.ai-cat-in g{display:none}
+.ai-cat-in path{fill:#3d1511;stroke:#1d0a08;stroke-width:2;stroke-linejoin:round}
+.ai-cat-in .tg{fill:#e9798b}
+.ai-cat[data-m="1"] .m1,.ai-cat[data-m="2"] .m2,.ai-cat[data-m="3"] .m3{display:inline}
+@keyframes ai-catbob{0%,100%{transform:translateY(0) rotate(-.4deg) scale(1)}50%{transform:translateY(-1.5%) rotate(.4deg) scale(1.012)}}
 .ai-cvid{transition:opacity .7s ease;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%;pointer-events:none;transform:scale(1.1);-webkit-mask-image:radial-gradient(ellipse 60% 64% at 50% 52%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 60% 64% at 50% 52%,#000 62%,transparent 100%)}
 .ai-name{position:absolute;left:12px;bottom:10px;font-size:.78rem;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:999px;color:var(--cream)}
 .ai-me.live{border-color:#4caf50;box-shadow:0 0 0 2px rgba(76,175,80,.35)}
@@ -842,6 +918,7 @@ const AI_CSS = `
 .ai-bubble p{margin:0}
 .ai-ico{position:absolute;top:8px;right:8px;flex:none;width:38px;height:38px;border-radius:50%;border:0;background:#000;color:var(--y);display:grid;place-items:center;cursor:pointer}
 .ai-answer{padding:14px}
+.ai-startbox{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
 .ai-answer textarea{min-height:110px;resize:vertical}
 .ai-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
 @media(max-width:899px){.ai-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ai-actions .ai-mic,.ai-actions .ai-btn.sm{width:100%;justify-content:center;padding:13px 10px;font-size:.9rem;white-space:nowrap;box-sizing:border-box}}
