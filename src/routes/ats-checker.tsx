@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { useServerFn } from "@tanstack/react-start";
 import { getAtsUsage, recordAtsCheck } from "@/lib/ats-usage.functions";
-import { robotView } from "@/lib/ats-robot";
+import { robotView, stuffedWords } from "@/lib/ats-robot";
 import { hardGap, regionNotes, type HardGap, type RegionNote } from "@/lib/ats-region";
 
 export const Route = createFileRoute("/ats-checker")({
@@ -112,7 +112,7 @@ function plain(c: { id: string; label: string; hint: string | null }): [string, 
     case "sections": return h.includes("Summary") ? ["Summary", "Add a 2-line summary at the top."] : ["Section headings", "Use plain headings: Experience, Education, Skills."];
     case "bullets": return h.includes("Shorten") ? ["Long bullets", "Keep each bullet to 1 or 2 lines."] : ["Bullet points", "Write each job as 3 to 5 short bullets."];
     case "numbers": return ["Numbers", "Add real numbers where true: %, money, team size."];
-    case "verbs": return ["How bullets start", "Start bullets with Led, Built, Grew and similar."];
+    case "verbs": if (h.includes("weak phrases")) return ["Weak phrases", "Say what you did and what changed, not 'responsible for' or 'worked on'."]; return ["How bullets start", "Start bullets with Led, Built, Grew and similar."];
     case "length": return /very short|a bit short/.test(h) ? ["Length", "A little short. Add more about your roles and results."] : ["Length", "Too long. Keep the most useful 1 to 2 pages."];
     case "format": return ["Layout", "Use one plain column. No tables, icons or pictures."];
     case "dates": return ["Job dates", "Add start and end dates, like Jan 2022 - Present."];
@@ -120,7 +120,7 @@ function plain(c: { id: string; label: string; hint: string | null }): [string, 
   }
 }
 
-function toSample(r: AtsResult, hasJd: boolean, extra?: { gap?: HardGap | null; region?: RegionNote | null }): Sample {
+function toSample(r: AtsResult, hasJd: boolean, extra?: { gap?: HardGap | null; region?: RegionNote | null; stuffed?: string[] }): Sample {
   const parts: [string, number, number][] = r.checks.map((c) => [SHORT[c.id] ?? c.label, c.points, c.max]);
   const fixes: Fix[] = [];
   for (const c of r.checks) {
@@ -134,6 +134,7 @@ function toSample(r: AtsResult, hasJd: boolean, extra?: { gap?: HardGap | null; 
     }
   }
   if (!hasJd) fixes.push({ tag: "YOUR CALL", bad: "No job post pasted", fix: "Paste it to see which job words you miss." });
+  if (extra?.stuffed?.length) fixes.push({ tag: "NEEDS YOU", bad: "Repeated words", fix: "You repeat " + extra.stuffed.map((w) => '"' + w + '"').join(", ") + " a lot. Say it once or twice. Robots flag stuffing." });
   if (extra?.gap) fixes.push({ tag: "HARD GAP", bad: extra.gap.bad, fix: extra.gap.fix });
   if (extra?.region) fixes.push({ tag: "REGION", bad: "Job location: " + extra.region.label, fix: extra.region.notes.slice(0, 2).join(" ") });
   const rank = (t: Fix["tag"]) => (t === "HARD GAP" ? 0 : t === "NEEDS YOU" ? 1 : 2);
@@ -350,7 +351,7 @@ function AtsDesignPreview() {
       for (const w of (comp.toLowerCase().match(/[a-z]{3,}/g) ?? [])) jdt = jdt.replace(new RegExp("\\b" + w + "\\b", "gi"), " ");
       const jdFull = jd.slice(0, MAX_JD);
       const wc = (text.match(/\S+/g) ?? []).length;
-      const out = toSample(checkAts(text, jdt), jdt.trim().length > 40, { gap: hardGap(text, jdFull), region: regionNotes(jdFull, comp, wc) });
+      const out = toSample(checkAts(text, jdt), jdt.trim().length > 40, { gap: hardGap(text, jdFull), region: regionNotes(jdFull, comp, wc), stuffed: stuffedWords(text) });
       setRawText(text);
       await new Promise((r) => window.setTimeout(r, Math.max(0, 1850 - (Date.now() - t0))));
       if (!user) { guestUse(); if (guestLeft() <= 0) setWall(true); }
