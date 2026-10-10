@@ -10,9 +10,13 @@ import { getAtsUsage, recordAtsCheck } from "@/lib/ats-usage.functions";
 export const Route = createFileRoute("/ats-checker")({
   head: () => ({
     meta: [
-      { title: "ATS score design preview | GotaOfferr" },
-      { name: "robots", content: "noindex, nofollow" },
+      { title: "Free ATS Score Checker: Test Your Resume | GotaOfferr" },
+      { name: "description", content: "Check your resume against ATS rules in seconds. Your file is read in your browser and never uploaded. See what to fix. No fake skills." },
+      { property: "og:title", content: "Free ATS Score Checker: Test Your Resume | GotaOfferr" },
+      { property: "og:description", content: "Check your resume against ATS rules in seconds. Your file is read in your browser and never uploaded. See what to fix. No fake skills." },
+      { property: "og:url", content: "https://gotaofferr.com/ats-checker" },
     ],
+    links: [{ rel: "canonical", href: "https://gotaofferr.com/ats-checker" }],
   }),
   component: AtsDesignPreview,
 });
