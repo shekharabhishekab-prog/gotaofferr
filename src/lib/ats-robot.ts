@@ -94,12 +94,12 @@ export function robotView(resumeText: string): RobotView {
   const skills = skillAll.slice(0, 14);
 
   const avgLen = lines.length ? lines.reduce((s, l) => s + l.length, 0) / lines.length : 0;
-  if (text.trim().length < 120) warnings.push("Almost no text came out. This looks like a scanned or image-only file. A robot would see an empty page.");
-  if (/(?:\b[A-Za-z] ){5,}[A-Za-z]\b/.test(text)) warnings.push("Letters are spaced apart (like S k i l l s). A robot may read them as separate letters, not words.");
-  if (/[\uFFFD\uE000-\uF8FF]/.test(text)) warnings.push("Some symbols did not decode and show as boxes or odd marks. A robot may drop or garble them.");
-  if (/[\uFB00-\uFB06]/.test(text)) warnings.push("Special joined letters (like fi) were found. Some robots cannot match words that contain them.");
-  if (lines.length > 6 && avgLen > 110) warnings.push("Very long lines. Two columns may have been read straight across, mixing the text.");
-  if (!name && text.trim().length >= 120) warnings.push("The robot could not find your name at the top. Put it alone on the first line.");
+  if (text.trim().length < 120) warnings.push("Almost no text found. This looks like a scan or picture. A robot sees an empty page.");
+  if (/(?:\b[A-Za-z] ){5,}[A-Za-z]\b/.test(text)) warnings.push("Letters are spread out (like S k i l l s). A robot may not read them as words.");
+  if (/[\uFFFD\uE000-\uF8FF]/.test(text)) warnings.push("Some symbols turned into odd marks. A robot may drop them.");
+  if (/[\uFB00-\uFB06]/.test(text)) warnings.push("Some letters are joined (like fi). Some robots cannot match those words.");
+  if (lines.length > 6 && avgLen > 110) warnings.push("Very long lines. Two columns may be read straight across and get mixed.");
+  if (!name && text.trim().length >= 120) warnings.push("No name found at the top. Put it alone on the first line.");
 
   const MAX = 2400;
   const cleaned = text.split("\n").map((l) => l.trim()).join("\n").replace(/\n{3,}/g, "\n\n").trim();
