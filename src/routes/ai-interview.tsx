@@ -602,7 +602,7 @@ function AiInterview() {
     const pr = ({ A: { voice: "Zephyr", meow: true, slow: false, lift: 1 }, B: { voice: "Puck", meow: true, slow: false, lift: 1 }, C: { voice: "Zephyr", meow: true, slow: true, lift: 1.22 }, D: { voice: "Leda", meow: false, slow: true, lift: 1.22 }, E: { voice: "Leda", meow: false, slow: false, lift: 1.38 }, F: { voice: "Zephyr", meow: false, slow: false, lift: 1.55 }, G: { voice: "cf", meow: false, slow: false, lift: 1.15 }, H: { voice: "cf", meow: false, slow: false, lift: 1.28 }, I: { voice: "cf", meow: false, slow: false, lift: 1.4 } } as const)[kind];
     const p = (async () => {
       try {
-        const r: any = await speakFn({ data: { text, voice: pr.voice, meow: pr.meow, slow: pr.slow, engine: pr.voice === "cf" ? "cf" : "gemini" } });
+        const r: any = await speakFn({ data: { text, voice: pr.voice === "cf" ? "Leda" : pr.voice, meow: pr.meow, slow: pr.slow, engine: pr.voice === "cf" ? "cf" : "gemini" } });
         if (!r?.ok || !r.wav) return null;
         const bin = atob(r.wav);
         const bytes = new Uint8Array(bin.length);
