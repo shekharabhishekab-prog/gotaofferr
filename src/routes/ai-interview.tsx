@@ -52,51 +52,70 @@ const TALK_CLIPS = [4, 2];
 const IDLE_CLIPS = [1, 3, 5, 6, 7];
 const shuffled = (a: number[]) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
 
-// Long rotating loop of Coco clips. Talking clips play while she speaks, idle clips otherwise. Two stacked videos crossfade.
+// Long rotating loop of Coco clips. Talking clips play while she speaks, idle clips otherwise.
+// Two stacked videos crossfade. The next clip is loaded in the hidden video ahead of time, so there is no wait between clips.
 function CocoVideo({ talking }: { talking: boolean }) {
   const refs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)];
-  const act = useRef(0);
-  const [show, setShow] = useState(0);
+  const act = useRef(1);
+  const [show, setShow] = useState(1);
   const q = useRef<number[]>([]);
   const first = useRef(true);
   const last = useRef(0);
   const tk = useRef(talking);
-  const go = useCallback((t: boolean) => {
-    let n: number;
-    if (t) { const c = TALK_CLIPS.filter((x) => x !== last.current); n = c[Math.floor(Math.random() * c.length)]; }
-    else {
-      if (!q.current.length) {
-        if (first.current) { q.current = [1, 3, 5, 6, 7]; first.current = false; }
-        else { q.current = shuffled(IDLE_CLIPS); if (q.current[0] === last.current) q.current.push(q.current.shift() as number); }
-      }
-      n = q.current.shift() as number;
+  const prep = useRef<{ n: number; talk: boolean; ready: boolean; now: boolean } | null>(null);
+  const pick = (t: boolean) => {
+    if (t) { const c = TALK_CLIPS.filter((x) => x !== last.current); return c[Math.floor(Math.random() * c.length)]; }
+    if (!q.current.length) {
+      if (first.current) { q.current = [1, 3, 5, 6, 7]; first.current = false; }
+      else { q.current = shuffled(IDLE_CLIPS); if (q.current[0] === last.current) q.current.push(q.current.shift() as number); }
     }
-    last.current = n;
+    return q.current.shift() as number;
+  };
+  const swap = () => {
+    const p = prep.current;
+    if (!p || !p.ready) return;
     const nx = act.current ^ 1;
     const v = refs[nx].current;
+    const old = refs[act.current].current;
     if (!v) return;
-    v.onloadeddata = () => {
-      v.onloadeddata = null;
-      v.currentTime = 0;
-      v.play().catch(() => { /* autoplay blocked */ });
-      const old = refs[act.current].current;
-      act.current = nx;
-      setShow(nx);
-      window.setTimeout(() => { if (old && act.current !== (nx ^ 1)) old.pause(); }, 800);
-    };
+    v.currentTime = 0;
+    v.play().catch(() => { /* autoplay blocked */ });
+    act.current = nx;
+    last.current = p.n;
+    prep.current = null;
+    setShow(nx);
+    window.setTimeout(() => { if (old && act.current === nx) old.pause(); }, 900);
+    prepare(tk.current, false);
+  };
+  const prepare = (t: boolean, now: boolean) => {
+    const v = refs[act.current ^ 1].current;
+    if (!v) return;
+    const n = pick(t);
+    const p = { n, talk: t, ready: false, now };
+    prep.current = p;
+    v.onloadeddata = () => { v.onloadeddata = null; if (prep.current !== p) return; p.ready = true; if (p.now) swap(); };
+    v.pause();
     v.src = "/coco-clip/" + n;
     v.load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  useEffect(() => { tk.current = talking; go(talking); }, [talking, go]);
+  };
+  const want = () => {
+    const p = prep.current;
+    if (!p) { prepare(tk.current, true); return; }
+    if (p.talk !== tk.current) { if (!p.talk) q.current.unshift(p.n); prepare(tk.current, true); return; }
+    p.now = true;
+    if (p.ready) swap();
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { tk.current = talking; want(); }, [talking]);
   return (
     <>
       {[0, 1].map((i) => (
-        <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: show === i ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) go(tk.current); }} />
+        <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: show === i ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) want(); }} />
       ))}
     </>
   );
 }
+
 function Coco({ clip, fx, size = 1.5 }: { clip: ClipName; fx?: "jump" | "spin" | ""; size?: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [frame, setFrame] = useState(0);
