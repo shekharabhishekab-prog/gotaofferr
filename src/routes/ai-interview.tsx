@@ -47,6 +47,56 @@ const CLIPS: Record<string, { from: number; to: number; loop: boolean; bounce?: 
 };
 type ClipName = keyof typeof CLIPS;
 
+
+const TALK_CLIPS = [4, 2];
+const IDLE_CLIPS = [1, 3, 5, 6, 7];
+const shuffled = (a: number[]) => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+
+// Long rotating loop of Coco clips. Talking clips play while she speaks, idle clips otherwise. Two stacked videos crossfade.
+function CocoVideo({ talking }: { talking: boolean }) {
+  const refs = [useRef<HTMLVideoElement | null>(null), useRef<HTMLVideoElement | null>(null)];
+  const act = useRef(0);
+  const [show, setShow] = useState(0);
+  const q = useRef<number[]>([]);
+  const first = useRef(true);
+  const last = useRef(0);
+  const tk = useRef(talking);
+  const go = useCallback((t: boolean) => {
+    let n: number;
+    if (t) { const c = TALK_CLIPS.filter((x) => x !== last.current); n = c[Math.floor(Math.random() * c.length)]; }
+    else {
+      if (!q.current.length) {
+        if (first.current) { q.current = [1, 3, 5, 6, 7]; first.current = false; }
+        else { q.current = shuffled(IDLE_CLIPS); if (q.current[0] === last.current) q.current.push(q.current.shift() as number); }
+      }
+      n = q.current.shift() as number;
+    }
+    last.current = n;
+    const nx = act.current ^ 1;
+    const v = refs[nx].current;
+    if (!v) return;
+    v.onloadeddata = () => {
+      v.onloadeddata = null;
+      v.currentTime = 0;
+      v.play().catch(() => { /* autoplay blocked */ });
+      const old = refs[act.current].current;
+      act.current = nx;
+      setShow(nx);
+      window.setTimeout(() => { if (old && act.current !== (nx ^ 1)) old.pause(); }, 800);
+    };
+    v.src = "/coco-clip/" + n;
+    v.load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => { tk.current = talking; go(talking); }, [talking, go]);
+  return (
+    <>
+      {[0, 1].map((i) => (
+        <video key={i} ref={refs[i]} className="ai-cvid" style={{ opacity: show === i ? 1 : 0 }} muted playsInline preload="auto" aria-hidden="true" onEnded={() => { if (act.current === i) go(tk.current); }} />
+      ))}
+    </>
+  );
+}
 function Coco({ clip, fx, size = 1.5 }: { clip: ClipName; fx?: "jump" | "spin" | ""; size?: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [frame, setFrame] = useState(0);
@@ -421,24 +471,43 @@ function AiInterview() {
     } catch { /* voice is optional */ }
   };
 
+  const inflight = useRef<Map<string, Promise<string | null>>>(new Map());
+  const fetchVoice = (text: string, kind: "A" | "B" | "C" | "D"): Promise<string | null> => {
+    const ck = kind + "|" + text;
+    if (voiceCache.current.has(ck)) return Promise.resolve(ck);
+    const ex = inflight.current.get(ck);
+    if (ex) return ex;
+    const pr = ({ A: { voice: "Zephyr", meow: true, slow: false, lift: 1 }, B: { voice: "Puck", meow: true, slow: false, lift: 1 }, C: { voice: "Zephyr", meow: true, slow: true, lift: 1.22 }, D: { voice: "Leda", meow: false, slow: true, lift: 1.22 } } as const)[kind];
+    const p = (async () => {
+      try {
+        const r: any = await speakFn({ data: { text, voice: pr.voice, meow: pr.meow, slow: pr.slow } });
+        if (!r?.ok || !r.wav) return null;
+        const bin = atob(r.wav);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        voiceCache.current.set(ck, URL.createObjectURL(new Blob([bytes], { type: "audio/wav" })));
+        lifts.current.set(ck, pr.lift);
+        return ck;
+      } catch { return null; } finally { inflight.current.delete(ck); }
+    })();
+    inflight.current.set(ck, p);
+    return p;
+  };
+
+  // Get the current question's voice ready while the user reads it, so the speaker button plays at once.
+  useEffect(() => {
+    if (stage !== "room" || voiceKind === "browser" || !questions[idx]) return;
+    void fetchVoice(questions[idx], voiceKind);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, idx, questions, voiceKind]);
+
   const speak = async (text: string) => {
     try { audioRef.current?.pause(); window.speechSynthesis?.cancel(); } catch { /* ignore */ }
     if (voiceKind === "browser") { speakBrowser(text); return; }
     try {
-      const ck = voiceKind + "|" + text;
-      let url = voiceCache.current.get(ck);
-      if (!url) {
-        setClip("talk");
-        const pr = ({ A: { voice: "Zephyr", meow: true, slow: false, lift: 1 }, B: { voice: "Puck", meow: true, slow: false, lift: 1 }, C: { voice: "Zephyr", meow: true, slow: true, lift: 1.22 }, D: { voice: "Leda", meow: false, slow: true, lift: 1.22 } } as const)[voiceKind];
-        const r: any = await speakFn({ data: { text, voice: pr.voice, meow: pr.meow, slow: pr.slow } });
-        if (!r?.ok || !r.wav) throw new Error("tts");
-        const bin = atob(r.wav);
-        const bytes = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        url = URL.createObjectURL(new Blob([bytes], { type: "audio/wav" }));
-        voiceCache.current.set(ck, url);
-        lifts.current.set(ck, pr.lift);
-      }
+      const ck = await fetchVoice(text, voiceKind);
+      const url = ck ? voiceCache.current.get(ck) : undefined;
+      if (!ck || !url) throw new Error("tts");
       const a = new Audio(url);
       const lf = lifts.current.get(ck) || 1;
       if (lf !== 1) { a.preservesPitch = false; (a as any).mozPreservesPitch = false; (a as any).webkitPreservesPitch = false; a.playbackRate = lf; }
@@ -552,7 +621,7 @@ function AiInterview() {
             <div className="ai-body">
             <div className="ai-tiles">
               <div className="ai-tile ai-coco-tile" ref={tileRef}>
-                <video className="ai-cvid" src="/coco-room.mp4" autoPlay loop muted playsInline preload="auto" aria-hidden="true" />
+                <CocoVideo talking={clip === "talk"} />
                 <span className="ai-name">Coco, interviewer</span>
               </div>
               <div className={`ai-tile ai-me ${listening ? "live" : ""}`}>
@@ -664,8 +733,8 @@ const AI_CSS = `
 @keyframes ai-pulse{50%{opacity:.45}}
 .ai-tiles{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;padding:14px}
 .ai-tile{position:relative;border-radius:16px;background:radial-gradient(70% 70% at 50% 40%,#1c1a10,#0e0e0e);min-height:260px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
-.ai-coco-tile{border-color:rgba(255,214,0,.4);background:#0b0a08}
-.ai-cvid{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%;pointer-events:none;transform:scale(1.1);-webkit-mask-image:radial-gradient(ellipse 60% 64% at 50% 52%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 60% 64% at 50% 52%,#000 62%,transparent 100%)}
+.ai-coco-tile{border-color:rgba(255,214,0,.4);background:#000}
+.ai-cvid{transition:opacity .7s ease;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 50%;pointer-events:none;transform:scale(1.1);-webkit-mask-image:radial-gradient(ellipse 60% 64% at 50% 52%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 60% 64% at 50% 52%,#000 62%,transparent 100%)}
 .ai-name{position:absolute;left:12px;bottom:10px;font-size:.78rem;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:999px;color:var(--cream)}
 .ai-me.live{border-color:#4caf50;box-shadow:0 0 0 2px rgba(76,175,80,.35)}
 .ai-av{width:84px;height:84px;border-radius:50%;background:#333;color:var(--y);display:grid;place-items:center;font-size:2.2rem;font-weight:700}
@@ -674,9 +743,9 @@ const AI_CSS = `
 .ai-me.live .ai-wave i{opacity:1;animation:ai-w .8s ease-in-out infinite}
 .ai-me.live .ai-wave i:nth-child(2){animation-delay:.12s}.ai-me.live .ai-wave i:nth-child(3){animation-delay:.24s}.ai-me.live .ai-wave i:nth-child(4){animation-delay:.36s}.ai-me.live .ai-wave i:nth-child(5){animation-delay:.48s}
 @keyframes ai-w{50%{height:22px}}
-.ai-bubble{margin:0 14px;background:var(--cream);color:#0a0a0a;border-radius:16px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:1.15rem;font-weight:600;line-height:1.35;min-height:70px}
+.ai-bubble{margin:0 14px;background:var(--cream);color:#0a0a0a;border-radius:16px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:1.15rem;font-weight:600;line-height:1.35;min-height:70px;position:relative;padding-right:60px}
 .ai-bubble p{margin:0}
-.ai-ico{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:#000;color:var(--y);display:grid;place-items:center;cursor:pointer}
+.ai-ico{position:absolute;top:8px;right:8px;flex:none;width:38px;height:38px;border-radius:50%;border:0;background:#000;color:var(--y);display:grid;place-items:center;cursor:pointer}
 .ai-answer{padding:14px}
 .ai-answer textarea{min-height:110px;resize:vertical}
 .ai-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
