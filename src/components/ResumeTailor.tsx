@@ -476,7 +476,7 @@ export function ResumeTailor() {
                 {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter — free"}
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                No account needed for your first rewrite. ~15 seconds, quicker than chai.
+                No account needed for your first rewrite. ~15 seconds, quicker than coffee.
               </p>
             </div>
           )
