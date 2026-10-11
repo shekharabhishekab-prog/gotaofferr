@@ -39,7 +39,7 @@ export function UpgradePopup({
       aria-modal="true"
       aria-label="Upgrade for more"
       onClick={onClose}
-      style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
