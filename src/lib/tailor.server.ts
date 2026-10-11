@@ -379,6 +379,17 @@ ${data.resume}`;
     }
     if ((error as Error)?.name === "QualityError" || (error as any)?.issues) throw error;
     console.error("[tailor] failed:", (error as Error)?.name, String((error as Error)?.message ?? error).slice(0, 300));
+    // A provider-side failure (server error, retries exhausted, API call error) must hand over to the next model in the chain,
+    // not end the run. The wording matches the router's overloaded check. Quality rules are not touched.
+    {
+      const pe: any = error;
+      const pst = pe?.statusCode ?? pe?.lastError?.statusCode ?? pe?.cause?.statusCode ?? pe?.status;
+      const pname = String(pe?.name ?? "");
+      if (pname.includes("RetryError") || pname.includes("APICallError") || (typeof pst === "number" && pst >= 500)) {
+        console.warn(`[tailor] provider error handed to next model: ${pname} status=${pst ?? "-"}`);
+        throw new Error(`overloaded: provider error ${pname} ${pst ?? ""}`);
+      }
+    }
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
     throw new Error(aiGatewayErrorMessage(error));
   }
