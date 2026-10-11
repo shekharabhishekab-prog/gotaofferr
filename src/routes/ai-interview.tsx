@@ -481,6 +481,8 @@ function AiInterview() {
     if (resume.trim().length < 80) return setErr("Add your resume first (upload it or paste it).");
     setBusy(true);
     setStage("loading");
+    // Make Coco's greeting voice while the questions are being written, so she can say it the moment the room opens.
+    if (voiceKind !== "browser") void fetchVoice("Hi! I'm Coco. Press Start when you are ready and I will ask your first question.", voiceKind);
     try {
       const r = await startFn({ data: { company, role, jd, resume } });
       setQuestions(r.questions);
