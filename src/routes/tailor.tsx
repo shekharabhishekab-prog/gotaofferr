@@ -65,7 +65,7 @@ const TL_CSS = `
 .tl button.rounded-full:not(:disabled):hover{transform:translateY(-3px) scale(1.02)}
 .tl-cur{display:inline-block;transition:transform .3s}
 .tl-h1:hover .tl-cur{transform:rotate(-2deg) scale(1.04)}
-@supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear both;animation-timeline:view();animation-range:entry 0% entry 45%}}
+@supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
 @media (max-width:640px){.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:clamp(2.1rem,11vw,3rem)}.tl-sub{font-size:.98rem}}
 @media (prefers-reduced-motion:reduce){.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
 `;
