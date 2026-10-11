@@ -571,10 +571,10 @@ export function ResumeTailor() {
         <div id="result" className="mt-12 scroll-mt-8">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-4 pl-2">
+              <div className="flex items-center gap-6 pl-4">
                 <div className="relative">
-                  <span aria-hidden className="pointer-events-none absolute -inset-2 translate-x-1 translate-y-0.5 rounded-full border-2 border-primary/80" />
-                  <div data-testid="score-ats" className="relative flex h-[72px] w-[72px] flex-col items-center justify-center rounded-xl bg-hero text-foreground">
+                  <span aria-hidden className="pointer-events-none absolute -inset-4 translate-x-1 translate-y-0.5 rounded-full border-2 border-primary/80" />
+                  <div data-testid="score-ats" className="relative flex h-16 w-16 flex-col items-center justify-center rounded-xl bg-primary text-black">
                     <span className="font-display text-2xl leading-none font-bold">
                       {Math.round(result.atsScore)}
                     </span>
