@@ -55,6 +55,49 @@ const LEGACY_ANON_EMAIL_KEY = "gao_anon_email";
 type Usage = { used: number; limit: number; remaining: number };
 
 
+async function docxText(f: File): Promise<string> {
+  const buf = new Uint8Array(await f.arrayBuffer());
+  const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  let e = -1;
+  for (let i = buf.length - 22; i >= Math.max(0, buf.length - 70000); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+  if (e < 0) throw new Error("That DOCX looks damaged. Save it again or use a PDF.");
+  const count = dv.getUint16(e + 10, true);
+  let p = dv.getUint32(e + 16, true);
+  for (let k = 0; k < count; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+    const lho = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(buf.subarray(p + 46, p + 46 + nlen));
+    if (name === "word/document.xml") {
+      const start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true);
+      const data = buf.slice(start, start + csize);
+      let xml = "";
+      if (method === 0) xml = new TextDecoder().decode(data);
+      else if (method === 8) {
+        const DS = (globalThis as unknown as { DecompressionStream?: new (f: string) => unknown }).DecompressionStream;
+        if (!DS) throw new Error("This browser can't open DOCX. Please upload a PDF.");
+        const stream = new Blob([data]).stream().pipeThrough(new DS("deflate-raw") as unknown as ReadableWritablePair<Uint8Array, Uint8Array>);
+        xml = await new Response(stream).text();
+      } else throw new Error("That DOCX can't be read. Please upload a PDF.");
+      xml = xml
+        .replace(/<w:tab\/>/g, " ")
+        .replace(/<w:br\/>/g, "\n")
+        .replace(/<\/w:tc>/g, " | ")
+        .replace(/<w:p[ >][\s\S]*?<\/w:p>/g, (para) => (/<w:numPr>/.test(para) ? "\u2022 " : "") + para + "\n");
+      return xml.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n").trim();
+    }
+    p += 46 + nlen + xlen + clen;
+  }
+  throw new Error("Couldn't find any text in that DOCX.");
+}
+
+function isDocx(f: File): boolean {
+  const n = f.name.toLowerCase();
+  return n.endsWith(".docx") || f.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+}
+
 export function ResumeTailor() {
   const run = useServerFn(tailorResume);
   const runAnon = useServerFn(tailorResumeAnonymous);
@@ -136,8 +179,10 @@ export function ResumeTailor() {
     setParsing(true);
     try {
       // Type, size and real content are all checked before we parse anything.
-      await assertValidResumeFile(file);
-      const text = isPdfFile(file) ? await extractPdfText(file) : await file.text();
+      if (file.name.toLowerCase().endsWith(".doc")) throw new Error("Old .doc files can't be read. Save it as DOCX or PDF and try again.");
+      if (isDocx(file) && (file.size === 0 || file.size > 8 * 1024 * 1024)) throw new Error("That file is empty or too big. Use one under 8 MB.");
+      if (!isDocx(file)) await assertValidResumeFile(file);
+      const text = isDocx(file) ? await docxText(file) : isPdfFile(file) ? await extractPdfText(file) : await file.text();
       if (text.trim().length < 30) throw new Error("Almost no text found — is this a scanned PDF?");
       assertLooksLikeResume(text);
       setResume(text);
@@ -305,14 +350,14 @@ export function ResumeTailor() {
             </span>
             <div>
               <h2 className="tl-h text-base font-semibold">1. Your current resume</h2>
-              <p className="text-xs text-muted-foreground">Upload a PDF or paste the text</p>
+              <p className="text-xs text-muted-foreground">Dust off that old PDF, or paste the text</p>
             </div>
           </div>
 
           <input
             ref={fileRef}
             type="file"
-            accept="application/pdf,text/plain,.pdf,.txt,.md"
+            accept="application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.docx,.txt,.md"
             className="hidden"
             onChange={(e) => onFile(e.target.files?.[0])}
           />
@@ -327,9 +372,9 @@ export function ResumeTailor() {
               <Upload className="size-5 text-muted-foreground" />
             )}
             <span className="text-sm font-medium">
-              {fileName || (parsing ? "Reading file…" : "Upload resume PDF")}
+              {fileName || (parsing ? "Reading file…" : "Tap to upload your resume")}
             </span>
-            <span className="text-xs text-muted-foreground">PDF, TXT or MD</span>
+            <span className="text-xs text-muted-foreground">PDF, DOCX, TXT or MD. Old formatting welcome.</span>
           </button>
 
           <Textarea
@@ -348,7 +393,7 @@ export function ResumeTailor() {
             </span>
             <div>
               <h2 className="tl-h text-base font-semibold">2. The job you want</h2>
-              <p className="text-xs text-muted-foreground">Paste the posting from the company</p>
+              <p className="text-xs text-muted-foreground">Paste the dream job post</p>
             </div>
           </div>
 
@@ -381,7 +426,7 @@ export function ResumeTailor() {
             aria-label="Target job description"
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste the full job description, responsibilities and requirements…"
+            placeholder="Paste the whole job post. Yes, even the boring about-us part."
             className="min-h-56 flex-1 resize-y text-sm"
           />
         </Card>
@@ -415,7 +460,7 @@ export function ResumeTailor() {
                 {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter — free"}
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                No account needed for your first rewrite. Takes ~15 seconds.
+                No account needed for your first rewrite. ~15 seconds, quicker than chai.
               </p>
             </div>
           )
@@ -460,7 +505,7 @@ export function ResumeTailor() {
                   ? tier === "career_pro"
                     ? "199 rewrites included per month"
                     : "129 rewrites included per month"
-                  : "Takes ~15 seconds"}
+                  : "Takes ~15 seconds. Chai can wait."}
               </p>
             )}
 
@@ -495,7 +540,7 @@ export function ResumeTailor() {
               <div>
                 <h2 className="text-xl font-bold">Tailored for {company || "this role"}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Rewritten resume and cover letter, ready to download.
+                  Fresh resume + cover letter, hot off the press. Go get that offer.
                 </p>
               </div>
             </div>
