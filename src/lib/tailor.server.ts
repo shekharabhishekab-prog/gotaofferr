@@ -363,6 +363,7 @@ ${data.resume}`;
     if ((error as Error)?.name === "QualityError" || (error as any)?.issues) throw error;
     console.error("[tailor] failed:", (error as Error)?.name, String((error as Error)?.message ?? error).slice(0, 300));
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
+    { const x: any = error; const de2: any = new Error(`🔎 [raw] ${x?.name} status=${x?.statusCode ?? x?.status ?? x?.cause?.statusCode ?? "-"} cause=${x?.cause?.name ?? "-"} url=${String(x?.url ?? "").replace(/key=[^&]*/g, "key=X").slice(0, 80)} msg=${String(x?.message ?? x).replace(/[\r\n]+/g, " ").slice(0, 200)} body=${String(x?.responseBody ?? "").replace(/[\r\n]+/g, " ").slice(0, 200)}`); throw de2; }
     throw new Error(aiGatewayErrorMessage(error));
   }
 }
