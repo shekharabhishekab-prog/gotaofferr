@@ -610,7 +610,7 @@ function AiInterview() {
         for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
         voiceCache.current.set(ck, URL.createObjectURL(new Blob([bytes], { type: r.mime || "audio/wav" })));
         lifts.current.set(ck, pr.lift);
-        try { const dec = await getCtx().decodeAudioData(bytes.buffer.slice(0) as ArrayBuffer); const px = (pr as any).pitch; decoded.current.set(ck, px ? shiftVoice(getCtx(), dec, px, (pr as any).rate || 1) : dec); } catch { /* falls back to the audio tag */ }
+        try { const dec = await getCtx().decodeAudioData(bytes.buffer.slice(0) as ArrayBuffer); const px = r.model === "azure-f0" ? 0 : (pr as any).pitch; decoded.current.set(ck, px ? shiftVoice(getCtx(), dec, px, (pr as any).rate || 1) : dec); } catch { /* falls back to the audio tag */ }
         return ck;
       } catch { return null; } finally { inflight.current.delete(ck); }
     })();
