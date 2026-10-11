@@ -219,7 +219,6 @@ const JD_ONLY_GENERIC = new Set([
   "customer", "support", "analytics", "reporting", "strategy", "campaign", "campaigns", "search", "paid", "team", "communication",
   "experience", "skills", "tools", "platform", "software", "system", "systems", "service", "services", "english", "hindi",
 ]);
-const BRIDGE_WORDS = /\b(quickly|adapt|learn|transfer|transferable|rather than|not yet|while my|although|though|haven't|have not|built on|based on|primarily|mainly)\b/i;
 
 function jdOnlyTerms(missing: string[] | undefined, src: Src): string[] {
   const out = new Set<string>();
@@ -233,14 +232,14 @@ function jdOnlyTerms(missing: string[] | undefined, src: Src): string[] {
   return [...out];
 }
 
-function dropJdOnlySentences(text: string, terms: string[], letter: boolean): string {
+function dropJdOnlySentences(text: string, terms: string[], _letter: boolean): string {
   if (!terms.length || !text) return text;
   const sentences = text.split(/(?<=[.!?])\s+/);
   const kept = sentences.filter((sent) => {
     const n = " " + norm(sent) + " ";
     const hit = terms.some((t) => n.includes(" " + t + " ") || n.includes(" " + t));
     if (!hit) return true;
-    return letter && BRIDGE_WORDS.test(sent);
+    return false;
   });
   return kept.join(" ");
 }
