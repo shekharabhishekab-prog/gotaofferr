@@ -538,20 +538,20 @@ export function ResumeTailor() {
             </div>
           )}
           {slow === 1 && (
-            <div data-testid="slow-note" className="mb-4 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
-              ☕ The servers are a bit busy right now. Your resume is still cooking, hang tight.
+            <div data-testid="slow-note" className="mb-3 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-[13px] leading-snug text-foreground">
+              ☕ The servers sneaked out for chai. Your resume is still cooking, hang tight.
             </div>
           )}
           {slow === 2 && (
-            <div data-testid="slow-stuck" className="mb-4 rounded-xl border border-primary/50 bg-primary/10 px-4 py-4 text-sm text-foreground">
-              <p className="text-base font-bold">
+            <div data-testid="slow-stuck" className="mb-3 rounded-lg border border-primary/50 bg-primary/10 px-3 py-3 text-[13px] leading-snug text-foreground">
+              <p className="text-sm font-bold">
                 Okay, this one is <span className="font-serif italic text-primary">taking its sweet time</span> 🐌
               </p>
-              <p className="mt-1 text-muted-foreground">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Our AI went for chai and forgot to come back. Coco is judging the servers. Your resume is safe, and a stuck rebuild does not use up a rewrite.
               </p>
               {session ? (
-                <Button type="button" variant="ink" className="mt-3" onClick={() => onGenerate()}>
+                <Button type="button" variant="ink" size="sm" className="mt-2" onClick={() => onGenerate()}>
                   Try again 🔁
                 </Button>
               ) : (
