@@ -3,9 +3,11 @@
 import { countCall } from "@/lib/model-router.server";
 
 export async function azureFallback(text: string): Promise<{ ok: true; wav: string; model: string; mime: string } | null> {
-  const key = process.env.AZURE_SPEECH_KEY;
+  let cfe: any = null;
+  try { cfe = ((await import(/* @vite-ignore */ "cloudflare:workers" as string)) as any).env; } catch { cfe = null; }
+  const key = process.env.AZURE_SPEECH_KEY || cfe?.AZURE_SPEECH_KEY;
   if (!key) return null;
-  const region = (process.env.AZURE_SPEECH_REGION || "centralindia").replace(/[^a-z0-9]/gi, "");
+  const region = String(process.env.AZURE_SPEECH_REGION || cfe?.AZURE_SPEECH_REGION || "centralindia").replace(/[^a-z0-9]/gi, "");
   const t = text.replace("[[cf-down]]", "").replace(/[<>&]/g, " ").slice(0, 300);
   try {
     if (!(await countCall("azure-speech"))) return null;
