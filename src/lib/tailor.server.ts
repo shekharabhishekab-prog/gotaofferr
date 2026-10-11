@@ -231,7 +231,11 @@ ${data.resume}`;
     } catch { /* keep the model's list */ }
 
     // Never ship a draft that silently dropped facts from the default resume.
-    const { findMissingFacts } = await import("./resume-facts.server");
+    const { findMissingFacts: findMissingRaw } = await import("./resume-facts.server");
+    // When the cross-country money rule converts currencies, the original money figure is meant to disappear.
+    const convertsMoney0 = crossBorder.some((r) => r.includes("CROSS-COUNTRY MONEY"));
+    const isMoneyFact0 = (f: string) => /[₹$€£¥]|\b(INR|USD|EUR|GBP|AUD|CAD|NZD|SGD|AED|JPY|CNY|BRL|Rs\.?|lakh|lakhs|crore|crores|cr)\b/i.test(f);
+    const findMissingFacts = (src: string, r: any) => findMissingRaw(src, r).filter((f: string) => !(convertsMoney0 && isMoneyFact0(f)));
     let missing = findMissingFacts(data.resume, result);
     // The repair pass doubles the wait, so only pay for it when the draft is
     // genuinely thin or dropped several real facts, not for cosmetic gaps.
@@ -274,7 +278,9 @@ ${data.resume}`;
     // Last line of defence: a numeric fact from the source that the model or the
     // guard dropped goes back as the candidate's own source line, in the right role.
     try {
-      const miss = findMissingFacts(data.resume, result).filter((f) => /\d/.test(f));
+      const convertsMoney = crossBorder.some((r) => r.includes("CROSS-COUNTRY MONEY"));
+      const isMoneyFact = (f: string) => /[₹$€£¥]|\b(INR|USD|EUR|GBP|AUD|CAD|NZD|SGD|AED|JPY|CNY|BRL|Rs\.?|lakh|lakhs|crore|crores|cr)\b/i.test(f);
+      const miss = findMissingFacts(data.resume, result).filter((f) => /\d/.test(f) && !(convertsMoney && isMoneyFact(f)));
       if (miss.length && result.experience?.length) {
         const lines = data.resume.split(/\r?\n/);
         const roleOf = (idx: number) => {
