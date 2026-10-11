@@ -468,6 +468,7 @@ function AiInterview() {
   };
 
   const begin = async () => {
+    try { void getCtx().resume(); } catch { /* unlock audio inside the tap */ }
     setErr("");
     if (!role.trim()) return setErr("Add the job role.");
     if (jd.trim().length < 40) return setErr("Paste the job description (a few lines at least).");
@@ -490,6 +491,7 @@ function AiInterview() {
       setClip("idle");
       setFx("wander");
       setBubble("Hi! I'm Coco. Press Start when you are ready and I will ask your first question.");
+      void speak("Hi! I'm Coco. Press Start when you are ready and I will ask your first question.");
       window.setTimeout(() => stageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } catch (e) {
       setStage("setup");
