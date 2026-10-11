@@ -295,16 +295,16 @@ export function ResumeTailor() {
   const base = `${slug(result?.name || "resume")}-${slug(company || role || "tailored")}`;
 
   return (
-    <div className="site-container w-full px-4 pb-24 sm:px-0">
-      <div className="grid items-stretch gap-5 lg:grid-cols-2">
-        <Card className="flex flex-col border-border/70 p-6 shadow-soft">
+    <div className="tl tl-wrap w-full pb-24">
+      <div id="tailor-form" className="tl-grid grid items-stretch gap-5 lg:grid-cols-2">
+        <Card className="tl-card flex flex-col p-6">
 
           <div className="mb-4 flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+            <span className="tl-ic flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
               <FileText className="size-4" />
             </span>
             <div>
-              <h2 className="text-base font-semibold">Your current resume</h2>
+              <h2 className="tl-h text-base font-semibold">1. Your current resume</h2>
               <p className="text-xs text-muted-foreground">Upload a PDF or paste the text</p>
             </div>
           </div>
@@ -319,7 +319,7 @@ export function ResumeTailor() {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="mb-3 flex w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-muted"
+            className="tl-drop mb-3 flex w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-muted"
           >
             {parsing ? (
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
@@ -341,13 +341,13 @@ export function ResumeTailor() {
           />
         </Card>
 
-        <Card className="flex flex-col border-border/70 p-6 shadow-soft">
+        <Card className="tl-card flex flex-col p-6">
           <div className="mb-4 flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+            <span className="tl-ic flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
               <Target className="size-4" />
             </span>
             <div>
-              <h2 className="text-base font-semibold">The job you want</h2>
+              <h2 className="tl-h text-base font-semibold">2. The job you want</h2>
               <p className="text-xs text-muted-foreground">Paste the posting from the company</p>
             </div>
           </div>
