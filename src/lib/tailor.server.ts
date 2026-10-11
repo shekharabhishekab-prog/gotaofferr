@@ -2,6 +2,8 @@ import { PROMPT_GUARD } from "./prompt-guard";
 import { formatLetterParagraphs } from "./letter-format";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
 
+const AI_CALL_TIMEOUT_MS = 75_000;
+
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 import { computeAtsReadiness } from "./ats-score.server";
 import { tailoredResumeSchema, type TailorInput, type TailoredResume } from "./tailor-schema";
@@ -204,6 +206,9 @@ ${data.resume}`;
     const tOnce = Date.now();
     const { output } = await generateText({
       model: gateway("google/gemini-3.6-flash"),
+      // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
+      abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
+      maxRetries: 1,
       output: Output.object({ schema: tailoredResumeSchema }),
       prompt,
       maxOutputTokens: 16000,
@@ -395,6 +400,9 @@ async function refillLetter(
     const { guardLetter } = await import("./truth-guard.server");
     const { text } = await generateText({
       model: gateway("google/gemini-3.6-flash"),
+      // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
+      abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
+      maxRetries: 1,
       maxOutputTokens: 1500,
       prompt: `${PROMPT_GUARD}
 Write a cover letter for ${data.company || "the company"} for the job below. Tone: ${data.tone || "confident and professional"}.
@@ -431,6 +439,9 @@ async function repairDepth(
   try {
     const { output } = await generateText({
       model: gateway("google/gemini-3.6-flash"),
+      // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
+      abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
+      maxRetries: 1,
       output: Output.object({ schema: tailoredResumeSchema }),
       maxOutputTokens: 16000,
       prompt: `${basePrompt}
