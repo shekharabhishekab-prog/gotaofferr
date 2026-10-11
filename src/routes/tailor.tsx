@@ -104,6 +104,31 @@ const TL_CSS = `
 @media (max-width:640px){.tl-hero,.tl-hero *{text-align:left}.tl-h1{margin:16px 0 0;max-width:none}.tl-h1 span{text-wrap:wrap}.tl-sub{margin:14px 0 0;text-wrap:pretty;font-size:.78rem!important;line-height:1.5}.tl-chips{justify-content:flex-start}.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 26px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(246,241,214,.55);max-width:19rem}}
 .tl{overflow-x:clip}.tl-grid>*{min-width:0}.tl-drop{overflow:hidden;max-width:100%}.tl-drop span{max-width:100%;overflow-wrap:anywhere;word-break:break-word}.tl textarea,.tl input{max-width:100%;min-width:0}
 @media (prefers-reduced-motion:reduce){.tl-ins-fill{animation:none}.tl-ins-card:hover,.tl-chip:hover{transform:none}.tl-sticker:hover,.tl-drop:hover svg,.tl button.rounded-full:hover,#result,#result .bg-hero{animation:none}.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
+.tl-br{display:flex;flex-direction:column;align-items:center;padding:34px 16px 6px}
+.tl-bl{display:block;width:1px;height:64px;background:linear-gradient(to bottom,transparent,var(--y))}
+.tl-bp{display:inline-flex;align-items:center;gap:8px;margin-top:8px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.7);color:var(--y);border-radius:99px;padding:6px 16px;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:1.15rem;text-decoration:none;transition:border-color .2s,transform .2s}
+.tl-bp:hover{border-color:rgba(255,214,0,.7);transform:translateY(-2px)}
+.tl-bp i{width:7px;height:7px;border-radius:99px;background:var(--y);display:block}
+.tl-strip{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:22px auto 0;max-width:34rem}
+.tl-strip span{font-size:.78rem;border:1px solid rgba(255,214,0,.35);color:var(--cream);border-radius:99px;padding:5px 12px;background:rgba(255,214,0,.06)}
+.tl-strip span:nth-child(odd){transform:rotate(-1.5deg)}.tl-strip span:nth-child(even){transform:rotate(1.5deg);border-color:rgba(255,255,255,.25);background:transparent}
+.tl-seo2{max-width:1100px;margin:0 auto;padding:44px 20px 80px;color:rgba(246,241,214,.72)}
+.tl-seo2 h2{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:1;letter-spacing:-.01em;font-size:clamp(1.7rem,4.2vw,2.8rem);color:var(--cream);margin:0;text-wrap:balance}
+.tl-seo2 h2 mark{background:var(--y);color:#000;padding:0 .12em;display:inline-block;transform:rotate(-1deg);line-height:1}
+.tl-seo2 .tl-lead{margin:18px 0 0;font-size:1.02rem;line-height:1.7;max-width:46rem;overflow-wrap:anywhere}
+.tl-seo2 h3{margin:40px 0 14px;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;font-size:1.5rem;color:var(--y)}
+.tl-gets{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tl-gets li{background:linear-gradient(160deg,rgba(255,214,0,.07),rgba(255,255,255,.015));border:1px solid rgba(255,214,0,.3);border-radius:20px;padding:18px;line-height:1.55;transition:transform .25s,border-color .25s;overflow-wrap:anywhere}
+.tl-gets li:hover{transform:translateY(-4px) rotate(-.4deg);border-color:rgba(255,214,0,.7)}
+.tl-gets b{display:block;font-size:1.7rem;margin-bottom:6px;font-weight:400}
+.tl-more{margin:30px 0 0;padding:20px;border:1px dashed rgba(255,214,0,.35);border-radius:20px;line-height:1.9;max-width:100%;overflow-wrap:anywhere}
+.tl-more a{color:var(--y);text-decoration:none;border-bottom:1px solid rgba(255,214,0,.5);padding:0 2px;transition:background .2s,color .2s}
+.tl-more a:hover{background:var(--y);color:#000}
+@supports (animation-timeline:view()){.tl-bl{animation:tl-grow linear both;animation-timeline:view();animation-range:entry 0% cover 40%}@keyframes tl-grow{from{height:8px}to{height:64px}}.tl-gets li{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 55%}}
+@media (max-width:760px){.tl-gets{grid-template-columns:minmax(0,1fr)}.tl-seo2{padding:30px 14px 56px}.tl-seo2 .tl-lead{font-size:.95rem}.tl-br{padding-top:24px}.tl-bl{height:44px}.tl-more{padding:16px}.tl-seo2 h3{font-size:1.3rem;margin-top:30px}}
+@media (min-width:1280px){.tl-seo2{max-width:1480px;padding-left:32px;padding-right:32px}}
+@media (min-width:1700px){.tl-seo2{max-width:1780px;padding-left:40px;padding-right:40px}.tl-seo2 .tl-lead{font-size:1.12rem;max-width:56rem}}
+@media (prefers-reduced-motion:reduce){.tl-bl,.tl-gets li{animation:none}.tl-gets li:hover,.tl-bp:hover{transform:none}}
 `;
 
 function TailorPage() {
@@ -126,53 +151,34 @@ function TailorPage() {
       </section>
       <ResumeTailor />
 
-      <section className="tl-seo site-container mx-auto max-w-3xl space-y-4 py-16 text-muted-foreground">
-        <h2 className="font-display text-2xl font-bold text-foreground">
-          What happens when you tailor a resume
-        </h2>
-        <p>
+      <div className="tl-br">
+        <span aria-hidden className="tl-bl" />
+        <a href="#tl-how" className="tl-bp"><i aria-hidden />how the magic works</a>
+        <div className="tl-strip" aria-hidden>
+          <span>one column</span><span>real text</span><span>no fake skills</span><span>no tables</span>
+        </div>
+      </div>
+
+      <section id="tl-how" className="tl-seo2">
+        <h2>What happens when you <mark>tailor</mark> a resume</h2>
+        <p className="tl-lead">
           GotaOfferr reads the job description, finds the skills, keywords and responsibilities the
           employer cares about, and rewrites your summary, skills and experience bullets around
           them. It keeps your real experience. Anything the job asks for that your resume does not
           show appears in a missing keywords list, so you know what to add honestly.
         </p>
-        <h3 className="font-display text-lg font-semibold text-foreground">What you get back</h3>
-        <ul className="list-disc space-y-2 pl-6">
-          <li>A rewritten resume in a single-column, ATS-friendly layout, ready to download as a PDF.</li>
-          <li>A cover letter written for that company and role.</li>
-          <li>A match score, the missing keywords and tips to improve your fit for the job.</li>
+        <h3>What you get back</h3>
+        <ul className="tl-gets">
+          <li><b aria-hidden>📄</b>A rewritten resume in a single-column, ATS-friendly layout, ready to download as a PDF.</li>
+          <li><b aria-hidden>✉️</b>A cover letter written for that company and role.</li>
+          <li><b aria-hidden>🎯</b>A match score, the missing keywords and tips to improve your fit for the job.</li>
         </ul>
-        <p>
+        <p className="tl-more">
           Applying in another country? Tailoring follows the resume conventions of 11 job markets.
-          Read the{" "}
-          <a className="underline" href="/guides/dubai-resume-format">
-            Dubai
-          </a>
-          ,{" "}
-          <a className="underline" href="/guides/india-resume-format">
-            India
-          </a>{" "}
-          or{" "}
-          <a className="underline" href="/guides/uk-resume-format">
-            UK
-          </a>{" "}
-          resume format guides. No resume yet? Start with the{" "}
-          <a className="underline" href="/resume-builder">
-            resume builder
-          </a>
-          , or{" "}
-          <a className="underline" href="/jobs">
-            find jobs
-          </a>{" "}
-          first. See{" "}
-          <a className="underline" href="/how-it-works">
-            how it works
-          </a>{" "}
-          or the{" "}
-          <a className="underline" href="/faq">
-            FAQ
-          </a>
-          .
+          Read the <a href="/guides/dubai-resume-format">Dubai</a>, <a href="/guides/india-resume-format">India</a> or{" "}
+          <a href="/guides/uk-resume-format">UK</a> resume format guides. No resume yet? Start with the{" "}
+          <a href="/resume-builder">resume builder</a>, or <a href="/jobs">find jobs</a> first. See{" "}
+          <a href="/how-it-works">how it works</a> or the <a href="/faq">FAQ</a>.
         </p>
       </section>
     </main>
