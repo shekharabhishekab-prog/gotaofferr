@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && node -e \"const fs=require('fs');const p='.output/server/wrangler.json';if(fs.existsSync(p)){const j=JSON.parse(fs.readFileSync(p,'utf8'));j.previews=j.previews||{};j.previews.ai={binding:'AI'};j.previews.vars=j.previews.vars||{};['AZURE_SPEECH_KEY','AZURE_SPEECH_REGION'].forEach(function(k){if(process.env[k])j.previews.vars[k]=process.env[k]});fs.writeFileSync(p,JSON.stringify(j))}\"",
+    "build": "vite build && node -e \"const fs=require('fs');const p='.output/server/wrangler.json';if(fs.existsSync(p)){const j=JSON.parse(fs.readFileSync(p,'utf8'));j.previews=j.previews||{};j.previews.ai={binding:'AI'};j.previews.vars=j.previews.vars||{};['AZURE_SPEECH_KEY','AZURE_SPEECH_REGION'].forEach(function(k){if(process.env[k])j.previews.vars[k]=process.env[k]});j.previews.vars['AZURE_BUILD_SEEN_'+(process.env.AZURE_SPEECH_KEY?'KEY':'NOKEY')+'_'+(process.env.AZURE_SPEECH_REGION?'REG':'NOREG')]='1';fs.writeFileSync(p,JSON.stringify(j))}\"",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
