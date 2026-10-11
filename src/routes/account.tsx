@@ -49,6 +49,11 @@ import {
   updateProfile,
 } from "@/lib/account.functions";
 import { checkIsAdmin } from "@/lib/admin.functions";
+import { getBuilderUsage } from "@/lib/builder-usage.functions";
+import { getAlertUsage, getJobSearchUsage } from "@/lib/jobs.functions";
+import { getInterviewStatus } from "@/lib/interview.functions";
+import { getUsageTotals } from "@/lib/usage-totals.functions";
+import { getAtsUsage } from "@/lib/ats-usage.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { FREE_MONTHLY_LIMIT, STARTER_MONTHLY_LIMIT, JOB_HUNT_MONTHLY_LIMIT, CAREER_PRO_MONTHLY_LIMIT } from "@/lib/tailor-schema";
 
@@ -125,6 +130,15 @@ function Account() {
   const saveProfile = useServerFn(updateProfile);
 
   const [overview, setOverview] = useState<Overview | null>(null);
+  type Lim = { used: number; limit: number } | null;
+  const [usage, setUsage] = useState<{ builder: Lim; interview: Lim; jobs: Lim; alerts: Lim; totals: { resumesBuilt: number | null; interviews: number | null; jobSearches: number | null; jobAlerts: number | null } | null } | null>(null);
+  const loadBuilder = useServerFn(getBuilderUsage);
+  const loadJobs = useServerFn(getJobSearchUsage);
+  const loadAlerts = useServerFn(getAlertUsage);
+  const loadInterview = useServerFn(getInterviewStatus);
+  const loadTotals = useServerFn(getUsageTotals);
+  const loadAts = useServerFn(getAtsUsage);
+  const [atsUse, setAtsUse] = useState<{ used: number; limit: number } | null>(null);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -318,6 +332,12 @@ function Account() {
   useEffect(() => {
     if (!session) return;
     let alive = true;
+    Promise.allSettled([loadBuilder(), loadInterview(), loadJobs(), loadTotals(), loadAlerts()]).then(([b, i, j, t, al]) => {
+      if (!alive) return;
+      const pick = (x: PromiseSettledResult<any>): Lim => (x.status === "fulfilled" && x.value ? { used: Number(x.value.used ?? 0), limit: Number(x.value.limit ?? 0) } : null);
+      setUsage({ builder: pick(b), interview: pick(i), jobs: pick(j), alerts: pick(al), totals: t.status === "fulfilled" ? (t.value as any) : null });
+    });
+    loadAts().then((r: any) => { if (alive && r) setAtsUse({ used: Number(r.used ?? 0), limit: Number(r.limit ?? 0) }); }).catch(() => undefined);
     loadOverview()
       .then((data) => {
         if (!alive) return;
@@ -437,26 +457,31 @@ function Account() {
         </TabsList>
 
         <TabsContent value="overview" className="mt-8 space-y-6">
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              { label: "Current plan", value: planLabel },
-              {
-                label: "Rewrites this month",
-                value:
-                  overview ? `${overview.runsThisMonth ?? 0} / ${monthlyLimit}` : "…",
-              },
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Current plan</p>
+            <p className="font-display text-lg font-bold text-card-foreground">{planLabel}</p>
+          </div>
 
-              { label: "Resumes tailored (all time)", value: `${overview?.runsTotal ?? 0}` },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-2xl border border-border bg-card p-6">
-                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-                  {stat.label}
-                </p>
-                <p className="mt-2 font-display text-2xl font-bold text-card-foreground">
-                  {stat.value}
-                </p>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+            {(() => {
+              const m = (l: Lim) => (l ? `${Math.min(l.used, l.limit)} / ${l.limit}` : "…");
+              const t = (n: number | null | undefined) => (typeof n === "number" ? `${n} total` : "");
+              const cards: Array<{ label: string; value: string; note: string }> = [
+                { label: "Tailor resume", value: overview ? `${overview.runsThisMonth ?? 0} / ${monthlyLimit}` : "…", note: `this month · ${overview?.runsTotal ?? 0} total` },
+                { label: "Resume builder", value: m(usage?.builder ?? null), note: `this month · ${t(usage?.totals?.resumesBuilt)}` },
+                { label: "Job search", value: m(usage?.jobs ?? null), note: `this month · ${t(usage?.totals?.jobSearches)}` },
+                { label: "Job alert", value: m(usage?.alerts ?? null), note: `this month · ${t(usage?.totals?.jobAlerts)}` },
+                { label: "ATS checker", value: atsUse ? (atsUse.limit < 0 ? "Unlimited" : `${Math.min(atsUse.used, atsUse.limit)} / ${atsUse.limit}`) : "…", note: "this month · runs in your browser, only a count is kept" },
+                { label: "AI interview", value: m(usage?.interview ?? null), note: `this month · ${t(usage?.totals?.interviews)}` },
+              ];
+              return cards.map((c) => (
+                <div key={c.label} className="rounded-xl border border-border bg-card px-3 py-2.5">
+                  <p className="truncate text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{c.label}</p>
+                  <p className="mt-0.5 font-display text-xl font-bold leading-tight text-card-foreground">{c.value}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">{c.note.replace(/ · $/, "")}</p>
+                </div>
+              ));
+            })()}
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">

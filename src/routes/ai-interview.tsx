@@ -6,7 +6,10 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { useSession } from "@/hooks/useSession";
 import { readResumeFile } from "@/lib/interview-read";
-import { cocoSpeak, finishInterview, startInterview } from "@/lib/interview.functions";
+import { cocoSpeak, finishInterview, getInterviewStatus, startInterview } from "@/lib/interview.functions";
+import { INTERVIEW_MONTHLY_LIMIT, INTERVIEW_TIER_LABEL, type InterviewTier } from "@/lib/interview-limits";
+import { UpgradePopup } from "@/components/UpgradePopup";
+import { nextTier } from "@/lib/plans";
 
 export const Route = createFileRoute("/ai-interview")({
   head: () => ({
@@ -240,6 +243,15 @@ function AiInterview() {
   const lifts = useRef<Map<string, number>>(new Map());
 
   const [stage, setStage] = useState<Stage>("setup");
+  const statusFn = useServerFn(getInterviewStatus);
+  const [allow, setAllow] = useState<{ tier: InterviewTier; limit: number; used: number } | null>(null);
+  useEffect(() => {
+    if (!user || (stage !== "setup" && stage !== "room")) return;
+    let live = true;
+    statusFn().then((a) => { if (live) setAllow(a as { tier: InterviewTier; limit: number; used: number }); }).catch(() => { /* counter is optional */ });
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, stage]);
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
   const [jd, setJd] = useState("");
@@ -247,6 +259,7 @@ function AiInterview() {
   const [fileName, setFileName] = useState("");
   const [pasteMode, setPasteMode] = useState(false);
   const [err, setErr] = useState("");
+  const [showUp, setShowUp] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const [questions, setQuestions] = useState<string[]>([]);
@@ -476,6 +489,7 @@ function AiInterview() {
   const begin = async () => {
     try { const c0 = getCtx(); void c0.resume(); const sb = c0.createBufferSource(); sb.buffer = c0.createBuffer(1, 1, 22050); sb.connect(c0.destination); sb.start(0); } catch { /* unlock audio inside the tap */ }
     setErr("");
+    if (allow && allow.used >= allow.limit) { setShowUp(true); return; }
     if (!role.trim()) return setErr("Add the job role.");
     if (jd.trim().length < 40) return setErr("Paste the job description (a few lines at least).");
     if (resume.trim().length < 80) return setErr("Add your resume first (upload it or paste it).");
@@ -496,6 +510,7 @@ function AiInterview() {
       setStarted(false);
       ttsFails.current = 0;
       setStage("room");
+      setAllow((a) => (a ? { ...a, used: Math.min(a.limit, a.used + 1) } : a));
       setClip("idle");
       setFx("wander");
       setBubble("Hi! I'm Coco. Press Start when you are ready and I will ask your first question.");
@@ -503,7 +518,9 @@ function AiInterview() {
       window.setTimeout(() => stageRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } catch (e) {
       setStage("setup");
-      setErr(e instanceof Error ? e.message : "Could not start the interview. Please try again.");
+      const em = e instanceof Error ? e.message : "";
+      if (/used all \d+ AI interview/i.test(em)) { setShowUp(true); setAllow((a) => (a ? { ...a, used: a.limit } : a)); }
+      else setErr(em || "Could not start the interview. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -688,6 +705,22 @@ function AiInterview() {
 
   const low = running && left <= 20;
 
+  const usageBadge = (
+user && allow ? (
+            allow.used >= allow.limit ? (
+              nextTier(allow.tier) ? (
+                <button type="button" className="ai-usage ai-usage-cta" onClick={() => setShowUp(true)} aria-live="polite">
+                  <b>{allow.limit} of {allow.limit}</b> interviews used <span>· Upgrade to {INTERVIEW_TIER_LABEL[nextTier(allow.tier) as InterviewTier]} →</span>
+                </button>
+              ) : (
+                <div className="ai-usage" aria-live="polite"><b>{allow.limit} of {allow.limit}</b> interviews used <span>· resets next month 🐾</span></div>
+              )
+            ) : (
+              <div className="ai-usage" aria-live="polite">🐾 <b>{allow.used} of {allow.limit}</b> interviews used <span>· {allow.limit - allow.used} left on {INTERVIEW_TIER_LABEL[allow.tier]}</span></div>
+            )
+          ) : null
+  );
+
   return (
     <main className="ai">
       <style>{AI_CSS}</style>
@@ -707,6 +740,7 @@ function AiInterview() {
       </section>
 
       <section className="ai-wrap ai-stage" ref={stageRef}>
+        {usageBadge && (stage === "setup" || stage === "loading" || stage === "room" || stage === "wrapping") ? <div className="ai-usage-row">{usageBadge}</div> : null}
         {loading ? null : !user ? (
           <div className="ai-card ai-center">
             <Coco clip="wave" size={1.4} />
@@ -783,6 +817,11 @@ function AiInterview() {
               <span className="ai-qn">{stage === "room" && !started ? `${TOTAL} questions` : `Question ${Math.min(idx + 1, TOTAL)} of ${TOTAL}`}</span>
               <span className={`ai-timer ${low ? "low" : ""} ${running ? "on" : ""}`} aria-live="off">{fmt(Math.max(0, left))}</span>
             </div>
+            {allow ? (
+              <p className="ai-quota ai-quota-line ai-quota-room" aria-live="polite">
+                Interview <b>{allow.used}</b> of {allow.limit} this month · {INTERVIEW_TIER_LABEL[allow.tier]} plan
+              </p>
+            ) : null}
             <div className="ai-body">
             <div className="ai-tiles">
               <div className="ai-tile ai-coco-tile" ref={tileRef}>
@@ -835,6 +874,7 @@ function AiInterview() {
           </div>
         )}
       </section>
+      <UpgradePopup open={showUp} onClose={() => setShowUp(false)} tier={(allow?.tier ?? "free") as InterviewTier} feature="interview" />
     </main>
   );
 }
@@ -884,6 +924,8 @@ const AI_CSS = `
 .ai-dt{font-family:var(--font-display,inherit);font-weight:700;font-size:1.1rem;text-transform:uppercase;word-break:break-word}
 .ai-dh,.ai-note{font-size:.85rem;color:rgba(246,241,214,.6);line-height:1.45}
 .ai-link{align-self:flex-start;background:none;border:0;color:var(--y);text-decoration:underline;cursor:pointer;font-size:.9rem;padding:0}
+.ai-quota{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 16px;padding:7px 14px;border:1px solid rgba(255,214,0,.5);border-radius:999px;font-size:.88rem;line-height:1.3;color:rgba(246,241,214,.8)}.ai-quota b{color:#ffd600}.ai-quota-line{display:flex;justify-content:center;text-align:center;border-radius:14px;margin:14px 0 0}.ai-quota-room{margin:10px 0 0;font-size:.8rem;padding:5px 12px}.ai-usage-row{display:flex;justify-content:center;margin:0 0 14px}.ai-usage{position:relative;z-index:3;display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 7px;max-width:100%;padding:8px 16px;border:1.5px solid #ffd600;border-radius:999px;background:#ffd600;color:#0b0a08;font-weight:700;font:inherit;font-size:.9rem;line-height:1.25;box-shadow:0 0 24px -6px rgba(255,214,0,.5)}.ai-usage b{color:#0b0a08}.ai-usage-cta{cursor:pointer;background:#ffd600;color:#0b0a08;font-weight:700;animation:ai-usage-pulse 2.4s ease-in-out infinite}.ai-usage-cta b{color:#0b0a08}.ai-usage-cta:hover{transform:translateY(-2px)}@keyframes ai-usage-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.5)}50%{box-shadow:0 0 0 8px rgba(255,214,0,0)}}@media (prefers-reduced-motion:reduce){.ai-usage-cta{animation:none}}@media (max-width:600px){.ai-usage{font-size:.72rem;padding:4px 10px;gap:0 4px;text-align:center}.ai-usage-row{margin:0 0 10px}}
+.ai-quota-cta{border-color:#ffd600;background:rgba(255,214,0,.14);color:#ffd600;text-decoration:none;font-weight:700}.ai-quota-cta:hover{background:rgba(255,214,0,.24)}
 .ai-err{color:#ff8a80;font-size:.92rem;margin:12px 0 0}
 .ai-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;font-weight:700;border-radius:999px;padding:15px 28px;font-size:1rem;border:0;cursor:pointer;text-decoration:none;transition:transform .2s}
 .ai-btn:hover{transform:translateY(-2px)}

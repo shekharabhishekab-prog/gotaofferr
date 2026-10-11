@@ -28,10 +28,11 @@ async function tierFor(ctx: Ctx): Promise<{ tier: InterviewTier; since: string }
   return { tier: "free", since: monthStart };
 }
 
-/** Throws a clear message when the user has used all interviews their plan allows this month. */
-export async function assertInterviewAllowed(ctx: Ctx): Promise<void> {
-  const { tier, since } = await tierFor(ctx);
-  const limit = INTERVIEW_MONTHLY_LIMIT[tier] ?? INTERVIEW_MONTHLY_LIMIT.free;
+/** How many interviews this user has started in the current window, and how many their plan allows. */
+export async function getInterviewAllowance(ctx: Ctx): Promise<{ tier: InterviewTier; limit: number; used: number }> {
+  const { tier: t, since } = await tierFor(ctx);
+  const tier: InterviewTier = t in INTERVIEW_MONTHLY_LIMIT ? t : "free";
+  const limit = INTERVIEW_MONTHLY_LIMIT[tier];
   const admin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
   const { count, error } = await admin
     .from("interview_log")
@@ -39,5 +40,11 @@ export async function assertInterviewAllowed(ctx: Ctx): Promise<void> {
     .eq("user_id", ctx.userId)
     .gte("created_at", since);
   if (error) throw new Error("Could not check your interview allowance. Please try again.");
-  if ((count ?? 0) >= limit) throw new Error(interviewLimitMessage(tier in INTERVIEW_MONTHLY_LIMIT ? tier : "free"));
+  return { tier, limit, used: count ?? 0 };
+}
+
+/** Throws a clear message when the user has used all interviews their plan allows this month. */
+export async function assertInterviewAllowed(ctx: Ctx): Promise<void> {
+  const { tier, limit, used } = await getInterviewAllowance(ctx);
+  if (used >= limit) throw new Error(interviewLimitMessage(tier));
 }

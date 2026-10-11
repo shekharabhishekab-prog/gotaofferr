@@ -1,3 +1,4 @@
+import { InterviewBand } from "@/components/InterviewBand";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { WipSplash } from "@/components/WipSplash";
 import { WIP_ENABLED, WIP_HEAD_SCRIPT } from "@/lib/wip";
@@ -148,20 +149,6 @@ const scope = [
   },
 ] as const;
 
-const notWhat = [
-  {
-    title: "Not a resume builder",
-    body: "We don't hand you a blank template. We take the resume you already have and reshape it for each specific job description.",
-  },
-  {
-    title: "Not a job board",
-    body: "We search across the boards you'd otherwise open in ten tabs and bring the matches to you.",
-  },
-  {
-    title: "One workflow, not three tools",
-    body: "Job search, resume tailoring and cover letter writing happen in the same place, so an application takes 15 seconds instead of hours.",
-  },
-];
 
 
 const showcaseExamples = resumeExamples.filter((example) => example.builtWithAi).slice(0, 3);
@@ -1424,21 +1411,8 @@ function Index() {
 
       <div aria-hidden className="gap-mq gap-b"><div className="gap-mq-in">{[0, 1].map((n) => (<span key={n}>ONE RESUME <b>*</b> TWENTY JOBS <b>*</b> ONE RESUME <b>*</b> TWENTY JOBS <b>*</b> ONE RESUME <b>*</b> TWENTY JOBS <b>*</b> </span>))}</div></div>
 
-      {/* Why */}
-      <section data-p className="y-why site-container py-12 sm:py-24">
-        <h2 data-rv className="hp-r max-w-3xl font-display text-4xl font-bold uppercase leading-none sm:text-6xl">
-          Built for applying at scale
-        </h2>
-        <div className="mt-8 sm:mt-14">
-          {notWhat.map((n, k) => (
-            <div key={n.title} data-rv className="hp-r tx-why" style={{ ["--k" as string]: k }}>
-              <span className="tx-n">0{k + 1}</span>
-              <h3 className={`tx-big ${k === 1 ? "tx-out" : ""} ${k === 2 ? "tx-yel" : ""}`}>{n.title}</h3>
-              <p className="tx-sm">{n.body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* AI interview band (replaced the old Built for applying at scale section) */}
+      <InterviewBand />
 
       <Bridge label="real people, real applications" href="#reel" />
 

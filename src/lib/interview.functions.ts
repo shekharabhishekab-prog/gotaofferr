@@ -179,3 +179,11 @@ export const cocoSpeak = createServerFn({ method: "POST" })
     }
     return { ok: false as const, reason: "status-" + lastStatus };
   });
+
+
+export const getInterviewStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { getInterviewAllowance } = await import("@/lib/interview-limits.server");
+    return await getInterviewAllowance(context as any);
+  });
