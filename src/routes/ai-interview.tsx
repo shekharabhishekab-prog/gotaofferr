@@ -6,7 +6,8 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { useSession } from "@/hooks/useSession";
 import { readResumeFile } from "@/lib/interview-read";
-import { cocoSpeak, finishInterview, startInterview } from "@/lib/interview.functions";
+import { cocoSpeak, finishInterview, getInterviewStatus, startInterview } from "@/lib/interview.functions";
+import { INTERVIEW_TIER_LABEL, type InterviewTier } from "@/lib/interview-limits";
 
 export const Route = createFileRoute("/ai-interview")({
   head: () => ({
@@ -240,6 +241,15 @@ function AiInterview() {
   const lifts = useRef<Map<string, number>>(new Map());
 
   const [stage, setStage] = useState<Stage>("setup");
+  const statusFn = useServerFn(getInterviewStatus);
+  const [allow, setAllow] = useState<{ tier: InterviewTier; limit: number; used: number } | null>(null);
+  useEffect(() => {
+    if (!user || stage !== "setup") return;
+    let live = true;
+    statusFn().then((a) => { if (live) setAllow(a as { tier: InterviewTier; limit: number; used: number }); }).catch(() => { /* counter is optional */ });
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, stage]);
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
   const [jd, setJd] = useState("");
@@ -716,6 +726,12 @@ function AiInterview() {
           </div>
         ) : stage === "setup" || stage === "loading" ? (
           <div className="ai-card ph-no-capture" data-ph-no-capture="true">
+            {allow ? (
+              <p className={`ai-quota ${allow.used >= allow.limit ? "out" : ""}`} aria-live="polite">
+                <b>{Math.min(allow.used, allow.limit)} of {allow.limit}</b> interviews used this month
+                <span> · {allow.used >= allow.limit ? "none left" : `${allow.limit - allow.used} left`} on {INTERVIEW_TIER_LABEL[allow.tier]}</span>
+              </p>
+            ) : null}
             <div className="ai-grid">
               <div className="ai-fields">
                 <label><span>Company (optional)</span><input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Corp" maxLength={120} /></label>
@@ -884,6 +900,7 @@ const AI_CSS = `
 .ai-dt{font-family:var(--font-display,inherit);font-weight:700;font-size:1.1rem;text-transform:uppercase;word-break:break-word}
 .ai-dh,.ai-note{font-size:.85rem;color:rgba(246,241,214,.6);line-height:1.45}
 .ai-link{align-self:flex-start;background:none;border:0;color:var(--y);text-decoration:underline;cursor:pointer;font-size:.9rem;padding:0}
+.ai-quota{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 16px;padding:7px 14px;border:1px solid rgba(255,214,0,.5);border-radius:999px;font-size:.88rem;line-height:1.3;color:rgba(246,241,214,.8)}.ai-quota b{color:#ffd600}.ai-quota.out{border-color:rgba(255,138,128,.6)}.ai-quota.out b{color:#ff8a80}
 .ai-err{color:#ff8a80;font-size:.92rem;margin:12px 0 0}
 .ai-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;font-weight:700;border-radius:999px;padding:15px 28px;font-size:1rem;border:0;cursor:pointer;text-decoration:none;transition:transform .2s}
 .ai-btn:hover{transform:translateY(-2px)}
