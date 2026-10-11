@@ -8,7 +8,7 @@ export async function azureFallback(text: string): Promise<{ ok: true; wav: stri
   const key = process.env.AZURE_SPEECH_KEY || cfe?.AZURE_SPEECH_KEY;
   if (!key) return null;
   const region = String(process.env.AZURE_SPEECH_REGION || cfe?.AZURE_SPEECH_REGION || "centralindia").replace(/[^a-z0-9]/gi, "");
-  const t = text.replace("[[cf-down]]", "").replace(/[<>&]/g, " ").slice(0, 300);
+  const t = text.replace(/[<>&]/g, " ").slice(0, 300);
   try {
     if (!(await countCall("azure-speech"))) return null;
     const ssml = `<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' name='en-US-AnaNeural'>${t}</voice></speak>`;
