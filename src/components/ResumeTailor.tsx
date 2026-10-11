@@ -521,7 +521,7 @@ export function ResumeTailor() {
                   ? tier === "career_pro"
                     ? "199 rewrites included per month"
                     : "129 rewrites included per month"
-                  : "Takes ~15 seconds. Chai can wait."}
+                  : "Takes ~15 seconds. Coffee can wait."}
               </p>
             )}
 
