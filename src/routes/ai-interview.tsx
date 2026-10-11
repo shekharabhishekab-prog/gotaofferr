@@ -510,6 +510,7 @@ function AiInterview() {
       setStarted(false);
       ttsFails.current = 0;
       setStage("room");
+      setAllow((a) => (a ? { ...a, used: Math.min(a.limit, a.used + 1) } : a));
       setClip("idle");
       setFx("wander");
       setBubble("Hi! I'm Coco. Press Start when you are ready and I will ask your first question.");
