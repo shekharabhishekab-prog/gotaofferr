@@ -42,6 +42,8 @@ import { useSession } from "@/hooks/useSession";
 import { useSubscription } from "@/hooks/useSubscription";
 import { ResultSkeleton, TailorProgress, type TailorStage } from "@/components/TailorProgress";
 import { UsageMeter } from "@/components/UsageMeter";
+import { UpgradePopup } from "@/components/UpgradePopup";
+import type { PlanTier } from "@/lib/plans";
 import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
 
 const ANON_USED_KEY = "gao_anon_used";
@@ -61,6 +63,7 @@ export function ResumeTailor() {
 
   const { session, loading: sessionLoading } = useSession();
   const { isSubscribed, tier, loading: subLoading } = useSubscription();
+  const [showUp, setShowUp] = useState(false);
 
   const [usage, setUsage] = useState<Usage | null>(null);
 
@@ -420,7 +423,8 @@ export function ResumeTailor() {
 
           <div className="mx-auto flex w-full max-w-md flex-col items-stretch">
             {usage ? <UsageMeter usage={usage} /> : null}
-            {(!subLoading && !isSubscribed && usage && usage.remaining === 0) ? (
+            <UpgradePopup open={showUp} onClose={() => setShowUp(false)} tier={(tier ?? "free") as PlanTier} feature="tailor" />
+            {false ? (
               <Button
                 variant="hero"
                 size="xl"
@@ -436,8 +440,8 @@ export function ResumeTailor() {
               variant="hero"
               size="xl"
               className="mt-3 w-full rounded-full shadow-[0_0_40px_-10px_color-mix(in_oklab,var(--primary)_45%,transparent)]"
-              onClick={onGenerate}
-              disabled={loading || parsing || (!isSubscribed && usage?.remaining === 0)}
+              onClick={() => { if (!isSubscribed && usage && usage.remaining === 0) setShowUp(true); else onGenerate(); }}
+              disabled={loading || parsing}
             >
               {loading ? <Loader2 className="animate-spin" /> : <Sparkles />}
               {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter"}
