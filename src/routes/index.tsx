@@ -1100,7 +1100,7 @@ function Index() {
             </div>
 
             <p className="hp-rise mx-auto mt-5 hidden max-w-md text-[0.68rem] uppercase leading-relaxed tracking-[0.16em] text-white/55 [animation-delay:140ms] sm:block sm:max-w-none">
-              Works with resumes from Indeed, LinkedIn, Naukri, Glassdoor and more
+              Works with resumes from Indeed, Naukri, Glassdoor and more
             </p>
 
             <div className="hp-rise mx-auto mt-7 flex max-w-xs flex-col items-stretch gap-3 [animation-delay:240ms] sm:mt-8 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center">
@@ -1130,7 +1130,7 @@ function Index() {
             </div>
 
             <p className="hp-rise mt-4 text-[0.68rem] uppercase tracking-[0.2em] text-white/60 sm:hidden"><span className="text-highlight">5 free</span> a month / no card</p>
-            <p className="hp-rise mt-2 text-[0.5rem] uppercase tracking-[0.1em] text-white/45 whitespace-nowrap sm:hidden">Works with Indeed, LinkedIn, Glassdoor, Naukri</p>
+            <p className="hp-rise mt-2 text-[0.5rem] uppercase tracking-[0.1em] text-white/45 whitespace-nowrap sm:hidden">Works with Indeed, Glassdoor, Naukri</p>
 
             <ul className="hp-rise mt-6 hidden flex-wrap justify-center gap-2 sm:flex text-[0.66rem] uppercase tracking-[0.16em] text-white/75 [animation-delay:320ms] sm:text-xs">
               <li><Link to="/jobs" search={{ alert: undefined }} className="hp-chip">Job finder</Link></li>
@@ -1200,7 +1200,7 @@ function Index() {
               <span className="jf-b">Get one merged list.</span>
             </h2>
             <p data-rv className="hp-r jf-p">
-              Type the role, location, experience and salary once. Our AI searches Indeed, LinkedIn, Glassdoor, Naukri and more at the same time, filters out the mismatches, and hands you one clean list — then tailors your resume for any listing in a click.
+              Type the role, location, experience and salary once. Our AI searches Indeed, Glassdoor, Naukri and more at the same time, filters out the mismatches, and hands you one clean list — then tailors your resume for any listing in a click.
             </p>
             <div data-rv className="hp-r jf-cta">
               <Link to="/jobs" search={{ alert: undefined }} className="jf-btn jf-btn-y">Try the job finder free <ArrowRight className="size-4" /></Link>
