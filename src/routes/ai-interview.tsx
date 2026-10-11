@@ -136,15 +136,21 @@ function CocoVideo({ talking, levelRef }: { talking: boolean; levelRef: { curren
     let cur = Math.random() < 0.5 ? 0 : 1;
     const show = (i: number) => {
       const v = vs[i];
+      v.playbackRate = 1;
       v.currentTime = SEG[i].a;
       v.play().catch(() => { /* autoplay blocked */ });
       v.style.opacity = "1";
     };
     show(cur);
     vs[cur ^ 1].style.opacity = "0";
+    let segT = performance.now();
     const iv = window.setInterval(() => {
       const v = vs[cur];
-      if (v.currentTime >= SEG[cur].b - 0.4) {
+      // Follow the voice: clip plays while she is loud, nearly freezes in pauses, and switches clips at a pause.
+      const lv = levelRef.current | 0;
+      v.playbackRate = lv > 0 ? 1 : 0.2;
+      if (v.currentTime >= SEG[cur].b - 0.4 || (lv === 0 && performance.now() - segT > 2200 && v.currentTime >= SEG[cur].a + 1.5)) {
+        segT = performance.now();
         const old = vs[cur];
         cur ^= 1;
         show(cur);
