@@ -1,5 +1,6 @@
 import { getRequest } from "@tanstack/react-start/server";
 import { regionForCountry } from "./region";
+import { COUNTRY_INFO } from "./region-detect";
 
 /**
  * Resume conventions differ sharply by market: a US resume that carries a
@@ -56,7 +57,7 @@ const COMMON_NO_PHOTO = [
  * currency.
  */
 const CURRENCY_TRUTH = [
-  "NEVER convert, re-denominate or relabel a money figure. Reproduce every budget, salary, revenue and valuation in the exact currency and symbol the source resume uses (₹, INR, Rs, $, £, €). Writing an Indian rupee figure as AUD/USD is a factual error.",
+  "MONEY: never change the number itself, never invent a figure, and never attach a currency to a number the source left unlabelled. Keep every figure in the source resume's own currency unless a CROSS-COUNTRY MONEY rule further down tells you to convert. On a same-country application never convert anything. Any rule above that says amounts are \"in AUD/CAD/EUR\" only describes local custom; it is not an instruction to convert.",
 ];
 
 
@@ -187,7 +188,7 @@ export function resumeMarket(country: string | null): ResumeMarket {
   const match = code ? MARKETS[code] : undefined;
   if (match) return { country: code, label: match.label, rules: [...match.rules, ...CURRENCY_TRUTH] };
   const regionRules = code ? REGION_RULES[regionForCountry(code)] : undefined;
-  if (regionRules) return { country: code, label: `the candidate's market (${code})`, rules: [...regionRules, ...CURRENCY_TRUTH] };
+  if (regionRules) return { country: code, label: `the hiring market (${COUNTRY_INFO[code!]?.name ?? code})`, rules: [...regionRules, ...CURRENCY_TRUTH] };
   return {
     country: code,
     label: code ? `the candidate's market (${code})` : "the country of the job (read it from the job description)",
@@ -283,7 +284,31 @@ const MARKET_CURRENCY: Record<string, { code: string; symbol: string }> = {
   AE: { code: "AED", symbol: "AED " },
   ZA: { code: "ZAR", symbol: "R" },
   IN: { code: "INR", symbol: "₹" },
+  SA: { code: "SAR", symbol: "SAR " },
+  QA: { code: "QAR", symbol: "QAR " },
+  KW: { code: "KWD", symbol: "KWD " },
+  BH: { code: "BHD", symbol: "BHD " },
+  OM: { code: "OMR", symbol: "OMR " },
+  TH: { code: "THB", symbol: "THB " },
+  MY: { code: "MYR", symbol: "RM" },
+  VN: { code: "VND", symbol: "VND " },
+  ID: { code: "IDR", symbol: "IDR " },
+  PH: { code: "PHP", symbol: "₱" },
 };
+
+/** Currency of a country: the market table first, then every country the detector knows. */
+function currencyFor(code: string | null): { code: string; symbol: string } | undefined {
+  if (!code) return undefined;
+  const hit = MARKET_CURRENCY[code];
+  if (hit) return hit;
+  const info = COUNTRY_INFO[code];
+  return info ? { code: info.currency, symbol: info.symbol } : undefined;
+}
+
+/** Readable country name for any country the detector can return. */
+function countryName(code: string): string {
+  return MARKETS[code]?.label ?? COUNTRY_INFO[code]?.name ?? code;
+}
 
 /**
  * Rules for an application that crosses borders (for example an India-based
@@ -296,10 +321,10 @@ export function crossBorderRules(sourceCountry: string | null, jobCountry: strin
   const dst = jobCountry?.toUpperCase() ?? null;
   if (!dst || !src || src === dst) return [];
 
-  const srcLabel = MARKETS[src]?.label ?? src;
-  const dstLabel = MARKETS[dst]?.label ?? dst;
-  const dstCurrency = MARKET_CURRENCY[dst];
-  const srcCurrency = MARKET_CURRENCY[src];
+  const srcLabel = countryName(src);
+  const dstLabel = countryName(dst);
+  const dstCurrency = currencyFor(dst);
+  const srcCurrency = currencyFor(src);
 
   const rules = [
     `CROSS-BORDER APPLICATION: the candidate's history is from ${srcLabel}, but the job is in ${dstLabel}. Write the resume and cover letter for a ${dstLabel} recruiter and a ${dstLabel} ATS.`,
@@ -313,11 +338,10 @@ export function crossBorderRules(sourceCountry: string | null, jobCountry: strin
     `If the source resume already states a visa, work permit or PR status for ${dstLabel}, state that instead by its specific name and drop the sponsorship wording.`,
   ];
 
-  if (srcCurrency && dstCurrency) {
+  if (srcCurrency && dstCurrency && srcCurrency.code !== dstCurrency.code) {
     rules.push(
-      `MONEY, CROSS-BORDER RULE: keep the original figure in the source currency exactly as written (${srcCurrency.symbol}${srcCurrency.code === "INR" ? ", including lakh/crore" : ""}), then add an approximate ${dstCurrency.code} equivalent in brackets so a ${dstLabel} recruiter can read the scale, marked as approximate. Format: "₹25 lakh annual budget (approx. ${dstCurrency.symbol}45K)". Round hard to one or two significant figures and never present the converted number as exact.`,
-      `Never REPLACE the source figure with a converted one, never relabel a ${srcCurrency.code} number as ${dstCurrency.code}, and never attach a currency to a number the source left unlabelled. If you are unsure of the rate, omit the bracketed equivalent and keep only the original figure.`,
-      `${srcCurrency.code === "INR" ? "Where a figure uses lakh or crore, keep it and add the plain number too if it helps (for example \"₹1.2 crore (₹12,000,000)\")." : ""}`.trim(),
+      `CROSS-COUNTRY MONEY RULE: this application crosses countries, so convert every money figure the source resume writes in ${srcCurrency.code} into ${dstCurrency.code} at a sensible current approximate rate, and write ONLY the converted value, always marked as approximate (for example "approx. ${dstCurrency.symbol}7.2K" or "~${dstCurrency.symbol}7.2K"). Do NOT keep the original figure next to it.`,
+      `${srcCurrency.code === "INR" ? `Where the source uses lakh or crore, convert the full amount and write it in the normal ${dstLabel} style (thousands or millions). ` : ""}Leave alone: numbers that are not money (percentages, team sizes, counts), figures with no currency stated, and figures already in ${dstCurrency.code}. If you cannot give a sensible approximate rate, keep the original figure exactly as written instead of guessing.`,
     );
   }
 
@@ -333,11 +357,11 @@ export function crossBorderRules(sourceCountry: string | null, jobCountry: strin
 export function domesticRules(sourceCountry: string | null, jobCountry: string | null): string[] {
   const src = sourceCountry?.toUpperCase() ?? null;
   const dst = jobCountry?.toUpperCase() ?? null;
-  const code = dst ?? src;
-  if (!code || (src && dst && src !== dst)) return [];
+  if (!dst || (src && src !== dst)) return [];
+  const code = dst;
 
-  const label = MARKETS[code]?.label ?? code;
-  const currency = MARKET_CURRENCY[code];
+  const label = countryName(code);
+  const currency = currencyFor(code);
 
   return [
     `DOMESTIC APPLICATION: the candidate and the employer are both in ${label}. Write entirely to ${label} conventions with no international hedging.`,
