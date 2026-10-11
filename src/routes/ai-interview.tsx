@@ -776,7 +776,6 @@ user && allow ? (
             <button type="button" className="ai-btn ai-go" disabled={busy} onClick={() => void begin()}>
               {busy ? "Coco is reading your resume..." : <>Start my interview <ArrowRight className="size-4" /></>}
             </button>
-            <UpgradePopup open={showUp} onClose={() => setShowUp(false)} tier={(allow?.tier ?? "free") as InterviewTier} feature="interview" />
           </div>
         ) : stage === "feedback" && feedback ? (
           <div className="ai-card ph-no-capture" data-ph-no-capture="true">
@@ -875,6 +874,7 @@ user && allow ? (
           </div>
         )}
       </section>
+      <UpgradePopup open={showUp} onClose={() => setShowUp(false)} tier={(allow?.tier ?? "free") as InterviewTier} feature="interview" />
     </main>
   );
 }
