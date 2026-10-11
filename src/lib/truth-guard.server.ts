@@ -119,6 +119,9 @@ function contactInvented(part: string, src: Src): boolean {
     const noCc = digits.replace(/^(91|971|44|1|61|65|1)(?=\d{8,})/, "");
     if (!srcDigits.includes(digits) && !(noCc.length >= 7 && srcDigits.includes(noCc))) return true;
   }
+  // Links (LinkedIn, portfolio) must be written in the source resume too.
+  const links = part.match(/(?:https?:\/\/|www\.)[^\s|,;)]+|(?:linkedin|github|behance)\.com\/[^\s|,;)]+/gi) ?? [];
+  if (links.some((u) => !src.raw.includes(u.toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "")))) return true;
   const mail = part.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
   if (mail && !src.raw.includes(mail[0].toLowerCase())) return true;
   return false;
