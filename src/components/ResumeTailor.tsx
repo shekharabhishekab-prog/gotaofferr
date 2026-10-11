@@ -471,7 +471,7 @@ export function ResumeTailor() {
         ) : (
 
           <div className="mx-auto flex w-full max-w-md flex-col items-stretch">
-            {usage ? <UsageMeter usage={usage} /> : null}
+            {usage ? <UsageMeter usage={usage} fun /> : null}
             <UpgradePopup open={showUp} onClose={() => setShowUp(false)} tier={(tier ?? "free") as PlanTier} feature="tailor" />
             {false ? (
               <Button
@@ -493,7 +493,7 @@ export function ResumeTailor() {
               disabled={loading || parsing}
             >
               {loading ? <Loader2 className="animate-spin" /> : <Sparkles />}
-              {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter"}
+              {loading ? "Rebuilding your resume…" : !subLoading && !isSubscribed && usage && usage.remaining === 0 ? "Out of rewrites. Upgrade to keep tailoring" : "Rebuild resume + cover letter"}
             </Button>
             )}
             {!subLoading && !isSubscribed && usage && usage.remaining === 0 ? (
