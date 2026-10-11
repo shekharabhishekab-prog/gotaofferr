@@ -565,7 +565,7 @@ function AtsDesignPreview() {
             <button type="button" className={`ak-pv ${hl ? "hl" : ""}`} onClick={openPv}><Maximize2 className="size-5" /> Full preview <ArrowRight className="size-5" /></button>
             <button type="button" className="ak-dl2" onClick={dl} aria-label="Download report" title="Download report"><Download className="size-6" /><span className="ak-dl2-t">Download report</span></button>
           </div>
-          <Link to="/tailor" className="ak-tail" onClick={carry}><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 15 seconds. No fake skills.</span></Link>
+          <Link to="/tailor" className="ak-tail" onClick={carry}><span className="ak-tail-t">Tailor my resume <ArrowRight className="size-7" /></span><span className="ak-tail-s">Fix every red item for this job in 30 seconds. No fake skills.</span></Link>
 
         </div>
         </div>
