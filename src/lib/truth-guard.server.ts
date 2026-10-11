@@ -28,7 +28,8 @@ function buildSource(source: string) {
     .split(/\n|(?<=[.!?;])\s+/)
     .map((seg) => new Set(words(seg).map(stem)))
     .filter((set) => set.size > 0);
-  return { text, stems, numbers, raw: source.toLowerCase(), segments };
+  const lines = source.split(/\r?\n/).map((l) => l.replace(/^\s*[-•*▪●]\s*/, "").trim()).filter((l) => l.length > 15);
+  return { text, stems, numbers, raw: source.toLowerCase(), segments, lines };
 }
 type Src = ReturnType<typeof buildSource>;
 
@@ -79,9 +80,22 @@ function keepBullets(bullets: string[], src: Src, note: (k: string, v: string) =
     bullets.filter((b) => !kept.includes(b)).forEach((b) => note("duty", b));
     return kept;
   }
-  const best = [...bullets].map((b) => ({ b, sc: lineScore(b, src) })).filter((x) => x.sc >= 0.3).sort((a, c) => c.sc - a.sc).slice(0, 2).map((x) => x.b);
-  bullets.filter((b) => !best.includes(b)).forEach((b) => note("duty", b));
-  return bests(best, bullets);
+  // No model bullet is backed by the source: put the candidate's own source lines back instead of invented ones.
+  bullets.forEach((b) => note("duty", b));
+  const ownLines: string[] = [];
+  for (const b of bullets) {
+    const ws = [...new Set(words(b).map(stem))];
+    if (!ws.length) continue;
+    let top = { line: "", sc: 0 };
+    for (const line of src.lines) {
+      const ls = new Set(words(line).map(stem));
+      const sc = ws.filter((w) => ls.has(w)).length / Math.max(1, Math.min(ws.length, ls.size));
+      if (sc > top.sc) top = { line, sc };
+    }
+    if (top.sc >= 0.5 && !ownLines.includes(top.line) && !/^[A-Z][^.]*\(?\d{4}/.test(top.line)) ownLines.push(top.line);
+    if (ownLines.length >= 3) break;
+  }
+  return ownLines;
 }
 function bests(best: string[], original: string[]): string[] {
   return original.filter((b) => best.includes(b));
@@ -154,6 +168,24 @@ function languageClaimUnsupported(text: string, src: Src): boolean {
     if (lang && /(strong|excellent|exceptional|outstanding|fluent|fluency|proficient|proficiency|native|advanced|business|full|command)/i.test(m[0]) && !/fluen|proficien|native|advanced|command|business|professional|\bC1\b|\bC2\b|\bB2\b/i.test(src.raw)) return true;
   }
   return false;
+}
+
+const RANGE_RE = /((?:[A-Za-z]{3,9}\.?\s+)?\d{4})\s*(?:-|–|—|to)\s*((?:[A-Za-z]{3,9}\.?\s+)?\d{4}|present|current|now)/i;
+// A date range the source never wrote (for example 2021 - 2022 turned into 2021 - 2021) is replaced by the source's own range for that employer.
+function fixDateRange(dates: string | null | undefined, employer: string | undefined, src: Src, source: string): string | null | undefined {
+  if (!dates) return dates;
+  const m = dates.match(RANGE_RE);
+  if (!m) return dates;
+  const y1 = m[1].match(/\d{4}/)![0];
+  const y2 = /\d{4}/.test(m[2]) ? m[2].match(/\d{4}/)![0] : m[2].toLowerCase();
+  if (new RegExp(y1 + "\\D{1,14}" + y2, "i").test(src.raw)) return dates;
+  const emp = (employer || "").toLowerCase().trim();
+  if (!emp) return dates;
+  const raw = source.split(/\r?\n/);
+  const at = raw.findIndex((l) => l.toLowerCase().includes(emp) && RANGE_RE.test(l));
+  if (at < 0) return dates;
+  const r = raw[at].match(RANGE_RE)!;
+  return `${r[1]} - ${r[2]}`;
 }
 
 function claimUnsupported(text: string, src: Src): boolean {
@@ -254,7 +286,7 @@ export function guardResume(result: TailoredResume, source: string): { result: T
   const keyAchievements = result.keyAchievements.filter((a) => lineSupported(a, src) || (note("achievement", a), false));
 
   const experience = result.experience.map((e) => {
-    const d = stripInventedMonths(e.dates, src);
+    const d = fixDateRange(stripInventedMonths(e.dates, src), (e as any).company, src, source);
     if (d !== e.dates) note("date month", String(e.dates));
     return { ...e, dates: d as typeof e.dates, bullets: keepBullets(e.bullets, src, note) };
   });
