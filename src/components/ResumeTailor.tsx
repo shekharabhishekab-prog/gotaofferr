@@ -191,7 +191,7 @@ export function ResumeTailor() {
       toast.error(
         e instanceof Error && e.message
           ? e.message
-          : "Could not read that file — try pasting your resume text instead.",
+          : "Could not read that file. Try a PDF or DOCX.",
       );
     } finally {
       setParsing(false);
@@ -349,7 +349,7 @@ export function ResumeTailor() {
             </span>
             <div>
               <h2 className="tl-h text-base font-semibold">1. Your current resume</h2>
-              <p className="text-xs text-muted-foreground">Dust off that old PDF, or paste the text</p>
+              <p className="text-xs text-muted-foreground">Dust off that old PDF or Word file</p>
             </div>
           </div>
 
@@ -363,26 +363,28 @@ export function ResumeTailor() {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="tl-drop mb-3 flex w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-muted"
+            className="tl-drop flex min-h-64 w-full flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-8 text-center transition-colors hover:border-primary/40 hover:bg-muted"
           >
             {parsing ? (
-              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+              <Loader2 className="size-7 animate-spin text-muted-foreground" />
+            ) : resume.trim().length >= 30 ? (
+              <span className="text-4xl" aria-hidden>🐱</span>
             ) : (
-              <Upload className="size-5 text-muted-foreground" />
+              <Upload className="size-7 text-muted-foreground" />
             )}
-            <span className="text-sm font-medium">
-              {fileName || (parsing ? "Reading file…" : "Tap to upload your resume")}
+            <span className="text-base font-semibold">
+              {parsing
+                ? "Reading file…"
+                : resume.trim().length >= 30
+                  ? fileName || "Resume loaded"
+                  : "Tap to upload your resume"}
             </span>
-            <span className="text-xs text-muted-foreground">PDF, DOCX, TXT or MD. Old formatting welcome.</span>
+            <span className="text-xs text-muted-foreground">
+              {resume.trim().length >= 30
+                ? `Coco sniffed ${resume.trim().split(/\s+/).length} words. Tap to swap the file.`
+                : "PDF, DOCX, TXT or MD. Old formatting welcome."}
+            </span>
           </button>
-
-          <Textarea
-            aria-label="Current resume text"
-            value={resume}
-            onChange={(e) => setResume(e.target.value)}
-            placeholder="…or paste it here. We won't judge the 2013 formatting."
-            className="min-h-56 flex-1 resize-y text-sm"
-          />
         </Card>
 
         <Card className="tl-card flex flex-col p-6">
