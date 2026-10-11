@@ -129,6 +129,24 @@ const TL_CSS = `
 @media (min-width:1280px){.tl-seo2{max-width:1480px;padding-left:32px;padding-right:32px}}
 @media (min-width:1700px){.tl-seo2{max-width:1780px;padding-left:40px;padding-right:40px}.tl-seo2 .tl-lead{font-size:1.12rem;max-width:56rem}}
 @media (prefers-reduced-motion:reduce){.tl-bl,.tl-gets li{animation:none}.tl-gets li:hover,.tl-bp:hover{transform:none}}
+.tl-gap{display:none}
+@media (min-width:761px){
+.tl-br{display:none}
+.tl-gap{display:block;position:relative;overflow:hidden;margin:90px 0 30px;padding:20px 0}
+.tl-bw{white-space:nowrap;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;font-size:clamp(3rem,8.4vw,8.2rem);line-height:1.05;color:var(--cream);margin-left:-8%}
+.tl-bw b{color:var(--y);display:inline-block}
+.tl-bw.out{color:transparent;-webkit-text-stroke:2px var(--cream)}
+.tl-gchips{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:24px 0;padding:0 20px}
+.tl-gchip{font-family:ui-monospace,Menlo,monospace;font-weight:800;text-transform:uppercase;font-size:1rem;padding:11px 16px;border:2px solid var(--cream);border-radius:999px;transition:transform .2s}
+.tl-gchip.y{background:var(--y);color:#000;border-color:var(--y)}
+.tl-gchip:hover{transform:translateY(-3px) rotate(-1.5deg)}
+@supports (animation-timeline:view()){.tl-bw{animation:tl-bwl linear both;animation-timeline:view();animation-range:entry 0% exit 100%}.tl-bw.out{animation-name:tl-bwr}@keyframes tl-bwl{from{transform:translateX(18%)}to{transform:translateX(-18%)}}@keyframes tl-bwr{from{transform:translateX(-18%)}to{transform:translateX(18%)}}}
+.tl-seo2 h2{font-size:clamp(2.4rem,4.6vw,5rem);line-height:.98}
+.tl-seo2 h2 mark{padding:.02em .2em;transform:rotate(-1.5deg);box-shadow:7px 7px 0 rgba(255,255,255,.9);transition:transform .25s}
+.tl-seo2 h2:hover mark{transform:rotate(0) scale(1.03)}
+.tl-seo2 h2:after{content:"";display:block;width:min(100%,520px);height:6px;margin-top:20px;border-radius:9px;background:linear-gradient(90deg,var(--y),rgba(255,214,0,0))}
+}
+@media (prefers-reduced-motion:reduce){.tl-bw{animation:none}.tl-gchip:hover{transform:none}}
 `;
 
 function TailorPage() {
@@ -150,6 +168,17 @@ function TailorPage() {
         </div>
       </section>
       <ResumeTailor />
+
+      <section aria-hidden className="tl-gap">
+        <div className="tl-bw">One column <b>+</b> Real text <b>+</b> Real months <b>+</b> One column <b>+</b> Real text <b>+</b> Real months <b>+</b></div>
+        <div className="tl-gchips">
+          <span className="tl-gchip">&#10003; one column</span>
+          <span className="tl-gchip y">&#10003; real text</span>
+          <span className="tl-gchip">&#10003; no fake skills</span>
+          <span className="tl-gchip y">! gaps stay gaps</span>
+        </div>
+        <div className="tl-bw out">No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b> No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b></div>
+      </section>
 
       <div className="tl-br">
         <span aria-hidden className="tl-bl" />
