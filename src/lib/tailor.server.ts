@@ -146,7 +146,7 @@ PHASE 3 — SOUND LIKE A HUMAN WROTE IT. A hiring manager must never suspect AI.
   - consistencyFlags: plain-language notes on date-math errors or conflicting numbers found in the SOURCE resume (for example "Resume says 5 years of experience, but the listed dates add up to 3 years and 4 months; the conservative figure was used"). Empty array when the source is clean. Never silently fix a conflict by inventing history: use the conservative, defensible number and flag it here.
   - regionAdaptations: what you changed for the hiring market (spelling convention, currency treatment, page length, personal information added or removed, visa or notice-period statement). Empty array for a same-country application with no changes.
   - fitWarning: if the candidate is a genuinely poor fit (major skill gaps or a clear seniority mismatch), say so honestly instead of force-fitting. Otherwise null. Write it in plain, simple English for an ordinary job seeker, not for a recruiter: 1 or 2 short sentences, everyday words, no jargon or formal phrases (no words like "extensive", "familiarity", "proficiency", "exposure", "demonstrated"). Say what is strong, then what the job needs that the resume does not show. Example: "Your social media skills are strong, but this role in Australia needs driving and local farming knowledge. Your resume does not show these." Name only things that are really in the job post or the resume.
-  - matchedKeywords / missingKeywords: keywords from the job description present or absent in the candidate's background. missingKeywords are only ones the candidate could truthfully add if they genuinely have that experience.
+  - matchedKeywords / missingKeywords: keywords from the job description present or absent in the candidate's background. missingKeywords are only ones the candidate could truthfully add if they genuinely have that experience. A keyword is missing only when the activity is truly absent from the source resume: if the source shows the same activity in different words (content calendar = content planning, newsletters = email marketing), count it as present, not missing.
   - tips: 3-5 short, actionable coaching suggestions the candidate can act on themselves. Never suggest fabricating anything.
   - atsScore: integer 0-100 estimating how ATS-friendly and parseable the generated resume is. It must be 95 or higher because the output uses a single-column layout, standard fonts, clear section labels, and strong keyword alignment. If you are not confident it exceeds 95, return 95.
   - FINAL COMPLETENESS AUDIT (do this before returning): walk the source resume line by line and confirm every employer, role, date range, client name, partner organisation, event, tool, number, link and section appears somewhere in your output. Restore anything missing. Then confirm each role meets its minimum bullet count and add back detail from the source if it does not.
@@ -214,6 +214,21 @@ ${data.resume}`;
       maxOutputTokens: 16000,
     });
     let result = output;
+    // Gaps list only: drop a "missing" keyword when every word of it already appears in the source resume.
+    // This never adds anything to the resume itself.
+    try {
+      const stem = (w: string) => w.toLowerCase().replace(/[^a-z0-9]/g, "").replace(/(ing|ers|er|ed|es|s)$/, "");
+      const src = new Set((data.resume.toLowerCase().match(/[a-z0-9]+/g) ?? []).map(stem));
+      const mk = (result as any).missingKeywords;
+      if (Array.isArray(mk)) {
+        const kept = mk.filter((k: unknown) => {
+          const words = String(k).toLowerCase().match(/[a-z0-9]+/g) ?? [];
+          const sig = words.filter((w) => w.length > 2).map(stem).filter(Boolean);
+          return !(sig.length > 0 && sig.every((w) => src.has(w)));
+        });
+        (result as any).missingKeywords = kept;
+      }
+    } catch { /* keep the model's list */ }
 
     // Never ship a draft that silently dropped facts from the default resume.
     const { findMissingFacts } = await import("./resume-facts.server");
