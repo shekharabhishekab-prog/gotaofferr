@@ -771,6 +771,7 @@ function AiInterview() {
               ))}
             </ol>
             <p className="ai-note">This is AI coaching, not a verdict. It is gone when you leave this page, so copy anything you want to keep.</p>
+            <button type="button" className="ai-btn" onClick={async () => { try { const { makeInterviewPdf } = await import("@/lib/interview-pdf"); await makeInterviewPdf(feedback, questions, answers); } catch { setErr("Could not make the PDF. Please try again."); } }}>Download feedback (PDF)</button>
             <button type="button" className="ai-btn" onClick={reset}>Practice again <ArrowRight className="size-4" /></button>
           </div>
         ) : (
