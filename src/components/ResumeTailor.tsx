@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "@/lib/toast";
 import {
   AlertCircle,
-  ArrowRight,
   BadgeCheck,
   CheckCircle2,
   Download,
