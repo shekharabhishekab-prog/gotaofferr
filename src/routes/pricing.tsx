@@ -152,7 +152,6 @@ const plans: Record<PlanKey, {
       "Rewrite history: every resume you've generated, re-downloadable",
       "Choose your resume template and accent",
       "Cover letter tone: concise, confident or impact-led",
-      "LinkedIn 'About' rewrite from your master resume",
       "Priority generation queue — faster rewrites at peak hours",
       "Cancel any time, keep every PDF you made",
     ],
@@ -175,7 +174,7 @@ const plans: Record<PlanKey, {
       "50 resumes in the resume builder",
       "30 AI job finder searches per month - one clean list across every board",
       "7 job alerts (3 emails each, every 3 days)",
-      "Everything else in Job Hunt Pack — history, keyword gaps, templates, LinkedIn About",
+      "Everything else in Job Hunt Pack — history, keyword gaps, templates",
       "Your filters, saved: location, remote, experience, salary, company type",
       "One click from a listing to the company's own apply page",
       "One-click tailor: send any listing straight into the resume builder",
@@ -510,7 +509,7 @@ function Pricing() {
 
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>You do: search and pick the roles</li>
-              <li>We do: tailoring, cover letters, LinkedIn About, keyword gaps, history</li>
+              <li>We do: tailoring, cover letters, keyword gaps, history</li>
             </ul>
           </div>
           <div className="rounded-xl border border-primary p-6">
