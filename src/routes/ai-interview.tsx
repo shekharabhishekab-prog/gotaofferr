@@ -474,7 +474,7 @@ function AiInterview() {
   };
 
   const begin = async () => {
-    try { void getCtx().resume(); } catch { /* unlock audio inside the tap */ }
+    try { const c0 = getCtx(); void c0.resume(); const sb = c0.createBufferSource(); sb.buffer = c0.createBuffer(1, 1, 22050); sb.connect(c0.destination); sb.start(0); } catch { /* unlock audio inside the tap */ }
     setErr("");
     if (!role.trim()) return setErr("Add the job role.");
     if (jd.trim().length < 40) return setErr("Paste the job description (a few lines at least).");
@@ -797,7 +797,7 @@ function AiInterview() {
             <div className="ai-bubble" role="status">
               <p>{stage === "wrapping" || !started ? bubble : bubble || questions[idx]}</p>
               {stage === "room" && started && questions[idx] ? <button type="button" className={`ai-ico ${voiceBusy ? "busy" : ""}`} onClick={() => speak(questions[idx])} aria-label="Read the question out loud"><Volume2 className="size-4" /></button> : null}
-              {stage === "room" && started && questions[idx] ? <button type="button" className="ai-skip" onClick={() => setVoiceKind(({ A: "B", B: "C", C: "D", D: "E", E: "F", F: "G", G: "H", H: "I", I: "browser", browser: "A" } as const)[voiceKind])}>Voice sample: {({ A: "A Zephyr + meow", B: "B Puck + meow", C: "C Zephyr + meow, kitten pitch", D: "D Leda, soft little girl (default)", E: "E Leda, kitten pitch", F: "F Zephyr, highest kitten", G: "G Cloudflare FINAL: pitch +15%, speed 0.9x", H: "H Cloudflare, pitch 1.28", I: "I Cloudflare, pitch 1.40", browser: "Browser voice" } as const)[voiceKind]} (tap to switch)</button> : null}
+              
             </div>
             {stage === "room" && !started ? (
               <div className="ai-answer ai-startbox">
