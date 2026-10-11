@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "@/lib/toast";
 import {
   AlertCircle,
-  ArrowRight,
   BadgeCheck,
   CheckCircle2,
   Download,
@@ -54,6 +53,49 @@ const LEGACY_ANON_EMAIL_KEY = "gao_anon_email";
 
 type Usage = { used: number; limit: number; remaining: number };
 
+
+async function docxText(f: File): Promise<string> {
+  const buf = new Uint8Array(await f.arrayBuffer());
+  const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  let e = -1;
+  for (let i = buf.length - 22; i >= Math.max(0, buf.length - 70000); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+  if (e < 0) throw new Error("That DOCX looks damaged. Save it again or use a PDF.");
+  const count = dv.getUint16(e + 10, true);
+  let p = dv.getUint32(e + 16, true);
+  for (let k = 0; k < count; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+    const lho = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(buf.subarray(p + 46, p + 46 + nlen));
+    if (name === "word/document.xml") {
+      const start = lho + 30 + dv.getUint16(lho + 26, true) + dv.getUint16(lho + 28, true);
+      const data = buf.slice(start, start + csize);
+      let xml = "";
+      if (method === 0) xml = new TextDecoder().decode(data);
+      else if (method === 8) {
+        const DS = (globalThis as unknown as { DecompressionStream?: new (f: string) => unknown }).DecompressionStream;
+        if (!DS) throw new Error("This browser can't open DOCX. Please upload a PDF.");
+        const stream = new Blob([data]).stream().pipeThrough(new DS("deflate-raw") as unknown as ReadableWritablePair<Uint8Array, Uint8Array>);
+        xml = await new Response(stream).text();
+      } else throw new Error("That DOCX can't be read. Please upload a PDF.");
+      xml = xml
+        .replace(/<w:tab\/>/g, " ")
+        .replace(/<w:br\/>/g, "\n")
+        .replace(/<\/w:tc>/g, " | ")
+        .replace(/<w:p[ >][\s\S]*?<\/w:p>/g, (para) => (/<w:numPr>/.test(para) ? "\u2022 " : "") + para + "\n");
+      return xml.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n").trim();
+    }
+    p += 46 + nlen + xlen + clen;
+  }
+  throw new Error("Couldn't find any text in that DOCX.");
+}
+
+function isDocx(f: File): boolean {
+  const n = f.name.toLowerCase();
+  return n.endsWith(".docx") || f.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+}
 
 export function ResumeTailor() {
   const run = useServerFn(tailorResume);
@@ -136,8 +178,10 @@ export function ResumeTailor() {
     setParsing(true);
     try {
       // Type, size and real content are all checked before we parse anything.
-      await assertValidResumeFile(file);
-      const text = isPdfFile(file) ? await extractPdfText(file) : await file.text();
+      if (file.name.toLowerCase().endsWith(".doc")) throw new Error("Old .doc files can't be read. Save it as DOCX or PDF and try again.");
+      if (isDocx(file) && (file.size === 0 || file.size > 8 * 1024 * 1024)) throw new Error("That file is empty or too big. Use one under 8 MB.");
+      if (!isDocx(file)) await assertValidResumeFile(file);
+      const text = isDocx(file) ? await docxText(file) : isPdfFile(file) ? await extractPdfText(file) : await file.text();
       if (text.trim().length < 30) throw new Error("Almost no text found — is this a scanned PDF?");
       assertLooksLikeResume(text);
       setResume(text);
@@ -147,7 +191,7 @@ export function ResumeTailor() {
       toast.error(
         e instanceof Error && e.message
           ? e.message
-          : "Could not read that file — try pasting your resume text instead.",
+          : "Could not read that file. Try a PDF or DOCX.",
       );
     } finally {
       setParsing(false);
@@ -295,60 +339,65 @@ export function ResumeTailor() {
   const base = `${slug(result?.name || "resume")}-${slug(company || role || "tailored")}`;
 
   return (
-    <div className="site-container w-full px-4 pb-24 sm:px-0">
-      <div className="grid items-stretch gap-5 lg:grid-cols-2">
-        <Card className="flex flex-col border-border/70 p-6 shadow-soft">
+    <div className="tl tl-wrap w-full pb-24">
+      <div id="tailor-form" className="tl-grid grid items-stretch gap-5 lg:grid-cols-2">
+        <Card className="tl-card flex flex-col p-6">
 
           <div className="mb-4 flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+            <span className="tl-ic flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
               <FileText className="size-4" />
             </span>
             <div>
-              <h2 className="text-base font-semibold">Your current resume</h2>
-              <p className="text-xs text-muted-foreground">Upload a PDF or paste the text</p>
+              <h2 className="tl-h text-base font-semibold">1. Your current resume</h2>
+              <p className="text-xs text-muted-foreground">Dust off that old PDF or Word file</p>
             </div>
           </div>
 
           <input
             ref={fileRef}
             type="file"
-            accept="application/pdf,text/plain,.pdf,.txt,.md"
+            accept="application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.docx,.txt,.md"
             className="hidden"
             onChange={(e) => onFile(e.target.files?.[0])}
           />
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="mb-3 flex w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-muted"
+            className="tl-drop flex min-h-64 w-full flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-8 text-center transition-colors hover:border-primary/40 hover:bg-muted"
           >
             {parsing ? (
-              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+              <Loader2 className="size-7 animate-spin text-muted-foreground" />
+            ) : resume.trim().length >= 30 ? (
+              <span className="text-4xl" aria-hidden>🐱</span>
             ) : (
-              <Upload className="size-5 text-muted-foreground" />
+              <Upload className="size-7 text-muted-foreground" />
             )}
-            <span className="text-sm font-medium">
-              {fileName || (parsing ? "Reading file…" : "Upload resume PDF")}
+            <span className="text-base font-semibold">
+              {parsing
+                ? "Reading file…"
+                : resume.trim().length >= 30
+                  ? fileName || "Resume loaded"
+                  : "Tap to upload your resume"}
             </span>
-            <span className="text-xs text-muted-foreground">PDF, TXT or MD</span>
+            <span className="text-xs text-muted-foreground">
+              {resume.trim().length >= 30
+                ? `Coco sniffed ${resume.trim().split(/\s+/).length} words. Tap to swap the file.`
+                : "PDF, DOCX, TXT or MD. Old formatting welcome."}
+            </span>
+            {!parsing && resume.trim().length < 30 && (
+              <span className="tl-wait mt-2 rounded-full border border-primary/40 px-3 py-1 text-xs text-primary">Coco is waiting to sniff it 🐾</span>
+            )}
           </button>
-
-          <Textarea
-            aria-label="Current resume text"
-            value={resume}
-            onChange={(e) => setResume(e.target.value)}
-            placeholder="…or paste your resume text here"
-            className="min-h-56 flex-1 resize-y text-sm"
-          />
         </Card>
 
-        <Card className="flex flex-col border-border/70 p-6 shadow-soft">
+        <Card className="tl-card flex flex-col p-6">
           <div className="mb-4 flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+            <span className="tl-ic flex size-8 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
               <Target className="size-4" />
             </span>
             <div>
-              <h2 className="text-base font-semibold">The job you want</h2>
-              <p className="text-xs text-muted-foreground">Paste the posting from the company</p>
+              <h2 className="tl-h text-base font-semibold">2. The job you want</h2>
+              <p className="text-xs text-muted-foreground">Paste the dream job post</p>
             </div>
           </div>
 
@@ -381,7 +430,7 @@ export function ResumeTailor() {
             aria-label="Target job description"
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste the full job description, responsibilities and requirements…"
+            placeholder="Paste the whole job post. Yes, even the boring about-us part."
             className="min-h-56 flex-1 resize-y text-sm"
           />
         </Card>
@@ -415,14 +464,14 @@ export function ResumeTailor() {
                 {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter — free"}
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                No account needed for your first rewrite. Takes ~15 seconds.
+                No account needed for your first rewrite. ~15 seconds, quicker than chai.
               </p>
             </div>
           )
         ) : (
 
           <div className="mx-auto flex w-full max-w-md flex-col items-stretch">
-            {usage ? <UsageMeter usage={usage} /> : null}
+            {usage ? <UsageMeter usage={usage} fun /> : null}
             <UpgradePopup open={showUp} onClose={() => setShowUp(false)} tier={(tier ?? "free") as PlanTier} feature="tailor" />
             {false ? (
               <Button
@@ -444,7 +493,7 @@ export function ResumeTailor() {
               disabled={loading || parsing}
             >
               {loading ? <Loader2 className="animate-spin" /> : <Sparkles />}
-              {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter"}
+              {loading ? "Rebuilding your resume…" : !subLoading && !isSubscribed && usage && usage.remaining === 0 ? "Out of rewrites. Upgrade to keep tailoring" : "Rebuild resume + cover letter"}
             </Button>
             )}
             {!subLoading && !isSubscribed && usage && usage.remaining === 0 ? (
@@ -460,7 +509,7 @@ export function ResumeTailor() {
                   ? tier === "career_pro"
                     ? "199 rewrites included per month"
                     : "129 rewrites included per month"
-                  : "Takes ~15 seconds"}
+                  : "Takes ~15 seconds. Chai can wait."}
               </p>
             )}
 
@@ -495,7 +544,7 @@ export function ResumeTailor() {
               <div>
                 <h2 className="text-xl font-bold">Tailored for {company || "this role"}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Rewritten resume and cover letter, ready to download.
+                  Fresh resume + cover letter, hot off the press. Go get that offer.
                 </p>
               </div>
             </div>
@@ -678,37 +727,55 @@ export function ResumeTailor() {
             </TabsContent>
 
             <TabsContent value="insights">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="tl-ins grid gap-4 md:grid-cols-2">
+                <Card className="tl-ins-hero md:col-span-2">
+                  <div className="tl-ins-score">{Math.round(result.matchScore)}</div>
+                  <div>
+                    <p className="tl-ins-verdict">
+                      {result.matchScore >= 80
+                        ? "Strong match. Go apply."
+                        : result.matchScore >= 65
+                          ? "Solid fit. A few tweaks and you're in."
+                          : result.matchScore >= 45
+                            ? "A stretch role. Honest gaps below."
+                            : "Big stretch. Read the gaps first."}
+                    </p>
+                    <p className="tl-ins-sub">Your match, explained. No fluff, no fake skills.</p>
+                  </div>
+                </Card>
                 {result.fitWarning && (
-                  <Card className="border-destructive/40 bg-destructive/5 p-6 shadow-soft md:col-span-2">
-                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold">
-                      <AlertCircle className="size-4 text-destructive" /> Honest read on fit
+                  <Card className="tl-ins-card tl-ins-warn md:col-span-2">
+                    <h4 className="tl-ins-h">
+                      <AlertCircle className="size-4" /> Real talk
                     </h4>
                     <p className="text-sm text-muted-foreground">{result.fitWarning}</p>
                   </Card>
                 )}
                 {result.scoreBreakdown && (
-                  <Card className="p-6 shadow-soft md:col-span-2">
-                    <h4 className="mb-3 text-sm font-semibold">How the {Math.round(result.matchScore)} match score is built</h4>
-                    <div className="space-y-2.5">
+                  <Card className="tl-ins-card md:col-span-2">
+                    <h4 className="tl-ins-h">How the {Math.round(result.matchScore)} was built</h4>
+                    <div className="space-y-3">
                       {[
-                        { label: "Keyword match", value: result.scoreBreakdown.keywordMatch, max: 40 },
-                        { label: "Title & seniority alignment", value: result.scoreBreakdown.titleAlignment, max: 15 },
-                        { label: "Formatting & parseability", value: result.scoreBreakdown.formatting, max: 20 },
-                        { label: "Experience relevance", value: result.scoreBreakdown.experienceRelevance, max: 15 },
-                        { label: "Quantified impact", value: result.scoreBreakdown.quantifiedImpact, max: 10 },
-                      ].map((row) => (
+                        { label: "Keyword match", emoji: "🔑", value: result.scoreBreakdown.keywordMatch, max: 40 },
+                        { label: "Title & seniority alignment", emoji: "🪪", value: result.scoreBreakdown.titleAlignment, max: 15 },
+                        { label: "Formatting & parseability", emoji: "🧾", value: result.scoreBreakdown.formatting, max: 20 },
+                        { label: "Experience relevance", emoji: "🧭", value: result.scoreBreakdown.experienceRelevance, max: 15 },
+                        { label: "Quantified impact", emoji: "📈", value: result.scoreBreakdown.quantifiedImpact, max: 10 },
+                      ].map((row, i) => (
                         <div key={row.label}>
                           <div className="flex justify-between text-xs">
-                            <span>{row.label}</span>
-                            <span className="text-muted-foreground">
+                            <span>
+                              {row.emoji} {row.label}
+                            </span>
+                            <span className="tl-ins-num">
                               {Math.round(row.value)}/{row.max}
+                              {row.value / row.max >= 0.9 ? " 🔥" : ""}
                             </span>
                           </div>
-                          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+                          <div className="tl-ins-bar">
                             <div
-                              className="h-full rounded-full bg-highlight"
-                              style={{ width: `${Math.min(100, (row.value / row.max) * 100)}%` }}
+                              className="tl-ins-fill"
+                              style={{ width: `${Math.min(100, (row.value / row.max) * 100)}%`, ["--i" as string]: i }}
                             />
                           </div>
                         </div>
@@ -716,51 +783,50 @@ export function ResumeTailor() {
                     </div>
                   </Card>
                 )}
-                <Card className="p-6 shadow-soft">
-
-                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <CheckCircle2 className="size-4 text-success" /> Keywords you match
+                <Card className="tl-ins-card">
+                  <h4 className="tl-ins-h">
+                    <CheckCircle2 className="size-4" /> You already speak their language
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {result.matchedKeywords.map((k) => (
-                      <Badge key={k} variant="secondary" className="font-normal">
-                        {k}
-                      </Badge>
+                      <span key={k} className="tl-chip tl-chip-yes">
+                        ✓ {k}
+                      </span>
                     ))}
                   </div>
                 </Card>
-                <Card className="p-6 shadow-soft">
-                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <AlertCircle className="size-4 text-destructive" /> Gaps to address
+                <Card className="tl-ins-card">
+                  <h4 className="tl-ins-h tl-ins-h-gap">
+                    <AlertCircle className="size-4" /> Gaps (honest, never faked)
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {result.missingKeywords.map((k) => (
-                      <Badge key={k} variant="outline" className="font-normal">
+                      <span key={k} className="tl-chip tl-chip-no">
                         {k}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                   {result.atsTopFix ? (
                     <p className="mt-3 text-sm text-muted-foreground">Top fix: {result.atsTopFix}</p>
                   ) : null}
                 </Card>
-                <Card className="p-6 shadow-soft md:col-span-2">
-                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <Lightbulb className="size-4 text-highlight" /> How to strengthen this application
+                <Card className="tl-ins-card md:col-span-2">
+                  <h4 className="tl-ins-h">
+                    <Lightbulb className="size-4" /> Level-up moves
                   </h4>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2.5">
                     {result.tips.map((t, i) => (
-                      <li key={i} className="flex gap-2 text-sm">
-                        <ArrowRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      <li key={i} className="tl-tip">
+                        <b>{i + 1}</b>
                         <span>{t}</span>
                       </li>
                     ))}
                   </ul>
                 </Card>
                 {result.consistencyFlags?.length > 0 && (
-                  <Card className="p-6 shadow-soft">
-                    <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                      <AlertCircle className="size-4 text-destructive" /> Things to double-check
+                  <Card className="tl-ins-card">
+                    <h4 className="tl-ins-h tl-ins-h-gap">
+                      <AlertCircle className="size-4" /> Double-check these
                     </h4>
                     <ul className="space-y-2">
                       {result.consistencyFlags.map((f, i) => (
@@ -772,9 +838,9 @@ export function ResumeTailor() {
                   </Card>
                 )}
                 {result.regionAdaptations?.length > 0 && (
-                  <Card className="p-6 shadow-soft">
-                    <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                      <CheckCircle2 className="size-4 text-success" /> Adapted for the hiring market
+                  <Card className="tl-ins-card">
+                    <h4 className="tl-ins-h">
+                      <CheckCircle2 className="size-4" /> Adapted for the hiring market
                     </h4>
                     <ul className="space-y-2">
                       {result.regionAdaptations.map((a, i) => (

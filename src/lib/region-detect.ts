@@ -17,6 +17,16 @@ const JOB_COUNTRY_HINTS: Array<{ code: string; patterns: RegExp[] }> = [
   { code: "SG", patterns: [/\bsingapore\b/i, /\bSGD\b/] },
   { code: "AE", patterns: [/\bunited arab emirates\b/i, /\bdubai\b/i, /\babu dhabi\b/i, /\bsharjah\b/i, /\bAED\b/] },
   { code: "ZA", patterns: [/\bsouth africa\b/i, /\bjohannesburg\b/i, /\bcape town\b/i, /\bZAR\b/] },
+  { code: "SA", patterns: [/\bsaudi\b/i, /\bsaudi arabia\b/i, /\briyadh\b/i, /\bjeddah\b/i, /\bdammam\b/i, /\bKSA\b/, /\bSAR\b/] },
+  { code: "QA", patterns: [/\bqatar\b/i, /\bdoha\b/i, /\bQAR\b/] },
+  { code: "KW", patterns: [/\bkuwait\b/i, /\bKWD\b/] },
+  { code: "BH", patterns: [/\bbahrain\b/i, /\bmanama\b/i, /\bBHD\b/] },
+  { code: "OM", patterns: [/\boman\b/i, /\bmuscat\b/i, /\bOMR\b/] },
+  { code: "MY", patterns: [/\bmalaysia(n)?\b/i, /\bkuala lumpur\b/i, /\bpenang\b/i, /\bMYR\b/] },
+  { code: "TH", patterns: [/\bthailand\b/i, /\bbangkok\b/i, /\bTHB\b/] },
+  { code: "VN", patterns: [/\bvietnam(ese)?\b/i, /\bho chi minh\b/i, /\bhanoi\b/i, /\bVND\b/] },
+  { code: "ID", patterns: [/\bindonesia(n)?\b/i, /\bjakarta\b/i, /\bIDR\b/] },
+  { code: "PH", patterns: [/\bphilippines\b/i, /\bmanila\b/i, /\bmakati\b/i, /\bcebu\b/i, /₱/] },
   { code: "IN", patterns: [/\bindia\b/i, /\bbengaluru\b/i, /\bbangalore\b/i, /\bmumbai\b/i, /\bdelhi\b/i, /\bgurgaon\b/i, /\bgurugram\b/i, /\bnoida\b/i, /\bhyderabad\b/i, /\bpune\b/i, /\bchennai\b/i, /\bINR\b/, /\blakh\b/i, /\bcrore\b/i, /₹/] },
 ];
 

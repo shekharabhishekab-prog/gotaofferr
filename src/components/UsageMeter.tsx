@@ -5,12 +5,13 @@ import { cn } from "@/lib/utils";
 
 export type UsageValue = { used: number; limit: number; remaining: number; topup?: number };
 
-export function UsageMeter({ usage }: { usage: UsageValue }) {
+export function UsageMeter({ usage, fun = false }: { usage: UsageValue; fun?: boolean }) {
   const unlimited = usage.limit >= 1000000;
   const pct = unlimited
     ? 100
     : Math.min(100, Math.round((usage.used / Math.max(1, usage.limit)) * 100));
   const empty = !unlimited && usage.remaining <= 0;
+  const tone = fun ? (empty ? "bg-[#ff6b35]" : pct >= 80 ? "bg-[#ffb300]" : "bg-hero") : "bg-hero";
 
 
   if (unlimited) {
@@ -39,7 +40,7 @@ export function UsageMeter({ usage }: { usage: UsageValue }) {
           <Zap className="size-3.5 text-highlight" />
           Your usage this month
         </p>
-        <span className="font-display text-xs font-bold text-highlight">
+        <span className={cn("font-display text-xs font-bold", fun && empty ? "text-[#ff6b35]" : "text-highlight")}>
           {usage.used} / {usage.limit} used
         </span>
       </div>
@@ -55,7 +56,7 @@ export function UsageMeter({ usage }: { usage: UsageValue }) {
         <div
           className={cn(
             "h-full rounded-full transition-[width] duration-500 ease-out",
-            "bg-hero",
+            tone,
           )}
           style={{ width: `${Math.max(pct, 4)}%` }}
         />
