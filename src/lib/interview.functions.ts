@@ -123,7 +123,6 @@ export const cocoSpeak = createServerFn({ method: "POST" })
     await enforcePolicy("interview_tts", ctx.userId);
     if (data.engine === "cf") {
     const cfRes: any = await (async () => {
-      if (data.text.startsWith("[[cf-down]]")) { let dbgE = ""; try { const ce: any = (await import(/* @vite-ignore */ "cloudflare:workers" as string) as any).env; dbgE = " cw:" + Object.keys(ce || {}).filter((k) => /AZURE|GEMINI|^AI$/i.test(k)).join(","); } catch { dbgE = " cw-err"; } return { ok: false as const, reason: "test-forced pe:" + Object.keys(process.env).filter((k) => /AZURE|GEMINI/i.test(k)).join(",") + dbgE }; } // TEST ONLY, remove
       // Cloudflare MeloTTS on our own account. Hard stop at 490 calls per UTC day (Cloudflare's free day resets at 00:00 UTC). Past that the room uses the browser voice.
       try {
         const { countCall } = await import("@/lib/model-router.server");
@@ -131,7 +130,7 @@ export const cocoSpeak = createServerFn({ method: "POST" })
         let aiEnv: any = (globalThis as any).__env__;
         let dbg = "g:" + (aiEnv ? "y" : "n");
         if (!aiEnv?.AI) { try { aiEnv = (await import(/* @vite-ignore */ "cloudflare:workers" as string) as any).env; dbg += " imp:" + (aiEnv ? "y" : "n"); } catch (e) { dbg += " imp-err:" + String((e as Error)?.message || e).slice(0, 80); } }
-        if (!aiEnv?.AI) { console.warn("[coco-tts] no AI binding", dbg); return { ok: false as const, reason: "no-ai " + dbg + " bind:" + Object.keys(aiEnv || {}).filter((k) => /^(AI|ASSETS|DB)$/i.test(k)).join(",") }; }
+        if (!aiEnv?.AI) { console.warn("[coco-tts] no AI binding", dbg); return { ok: false as const, reason: "no-ai" }; }
         const out: any = await aiEnv.AI.run("@cf/myshell-ai/melotts", { prompt: data.text, lang: "en" });
         const audio: string | undefined = typeof out === "string" ? out : out?.audio;
         if (!audio || audio.length < 200) return { ok: false as const, reason: "empty" };
