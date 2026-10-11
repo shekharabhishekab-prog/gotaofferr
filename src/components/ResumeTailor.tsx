@@ -535,11 +535,19 @@ export function ResumeTailor() {
         <div id="result" className="mt-12 scroll-mt-8">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex size-14 flex-col items-center justify-center rounded-xl bg-hero text-foreground">
-                <span className="font-display text-lg leading-none font-bold">
-                  {Math.round(result.matchScore)}
-                </span>
-                <span className="text-[9px] tracking-wide uppercase opacity-80">match</span>
+              <div className="flex gap-2">
+                <div data-testid="score-match" className="flex h-16 w-16 flex-col items-center justify-center rounded-xl bg-hero text-foreground">
+                  <span className="font-display text-xl leading-none font-bold">
+                    {Math.round(result.matchScore)}
+                  </span>
+                  <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">Match /100</span>
+                </div>
+                <div data-testid="score-ats" className="flex h-16 w-16 flex-col items-center justify-center rounded-xl border border-primary/50 text-foreground">
+                  <span className="font-display text-xl leading-none font-bold text-primary">
+                    {Math.round(result.atsScore)}
+                  </span>
+                  <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">ATS /100</span>
+                </div>
               </div>
               <div>
                 <h2 className="text-xl font-bold">Tailored for {company || "this role"}</h2>
@@ -729,7 +737,16 @@ export function ResumeTailor() {
             <TabsContent value="insights">
               <div className="tl-ins grid gap-4 md:grid-cols-2">
                 <Card className="tl-ins-hero md:col-span-2">
-                  <div className="tl-ins-score">{Math.round(result.matchScore)}</div>
+                  <div className="flex shrink-0 gap-4">
+                    <div className="text-center">
+                      <div className="tl-ins-score">{Math.round(result.matchScore)}</div>
+                      <p className="mt-1 text-[10px] font-bold tracking-wider uppercase">Match score</p>
+                    </div>
+                    <div className="text-center">
+                      <div className="tl-ins-score">{Math.round(result.atsScore)}</div>
+                      <p className="mt-1 text-[10px] font-bold tracking-wider uppercase">ATS score</p>
+                    </div>
+                  </div>
                   <div>
                     <p className="tl-ins-verdict">
                       {result.matchScore >= 80
@@ -740,7 +757,9 @@ export function ResumeTailor() {
                             ? "A stretch role. Honest gaps below."
                             : "Big stretch. Read the gaps first."}
                     </p>
-                    <p className="tl-ins-sub">Your match, explained. No fluff, no fake skills.</p>
+                    <p className="tl-ins-sub">
+                      Match score: how well you fit this job. ATS score: how cleanly a robot can read your resume. No fluff, no fake skills.
+                    </p>
                   </div>
                 </Card>
                 {result.fitWarning && (
