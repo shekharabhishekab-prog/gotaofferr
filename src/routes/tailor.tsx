@@ -77,10 +77,30 @@ const TL_CSS = `
 #result{animation:tl-rise .7s cubic-bezier(.2,.8,.2,1) both}
 #result .bg-hero{animation:tl-pop .7s cubic-bezier(.3,1.6,.5,1) .15s backwards}
 @keyframes tl-pop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
+.tl-ins-hero{display:flex;align-items:center;gap:18px;padding:20px 22px;border:1px solid rgba(255,214,0,.5);border-radius:22px;background:linear-gradient(135deg,rgba(255,214,0,.16),rgba(255,214,0,.03))}
+.tl-ins-score{flex:none;width:76px;height:76px;border-radius:20px;background:var(--y);color:#000;font-family:var(--font-display,inherit);font-weight:800;font-size:2.4rem;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg);box-shadow:4px 4px 0 #000,0 0 0 2px var(--y)}
+.tl-ins-verdict{font-family:var(--font-display,inherit);font-weight:700;font-size:1.35rem;line-height:1.15}
+.tl-ins-sub{margin-top:4px;font-size:.85rem;color:rgba(246,241,214,.65)}
+.tl-ins-card{background:linear-gradient(160deg,rgba(255,214,0,.06),rgba(255,255,255,.012));border:1px solid rgba(255,214,0,.3);border-radius:20px;padding:22px;box-shadow:none;transition:transform .2s,border-color .2s}
+.tl-ins-card:hover{transform:translateY(-2px);border-color:rgba(255,214,0,.6)}
+.tl-ins-warn{border-color:rgba(255,160,60,.5);background:rgba(255,160,60,.06)}
+.tl-ins-h{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-family:var(--font-display,inherit);font-weight:700;font-size:1rem;color:var(--y)}
+.tl-ins-h-gap,.tl-ins-warn .tl-ins-h{color:#ffa94d}
+.tl-ins-num{font-family:ui-monospace,Menlo,monospace;color:var(--y)}
+.tl-ins-bar{margin-top:5px;height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.tl-ins-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#ffb300,var(--y));transform-origin:left;animation:tl-grow .8s cubic-bezier(.2,.8,.2,1) calc(var(--i,0)*.1s + .2s) backwards}
+@keyframes tl-grow{from{transform:scaleX(0)}}
+.tl-chip{display:inline-block;font-size:.8rem;padding:4px 11px;border-radius:999px;transition:transform .15s}
+.tl-chip:hover{transform:scale(1.08) rotate(-2deg)}
+.tl-chip-yes{background:var(--y);color:#000;font-weight:600}
+.tl-chip-no{border:1.5px dashed rgba(255,169,77,.8);color:#ffc078}
+.tl-tip{display:flex;gap:12px;align-items:flex-start;font-size:.92rem;line-height:1.45}
+.tl-tip b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--y);color:#000;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+@media (max-width:640px){.tl-ins-hero{gap:14px;padding:16px}.tl-ins-score{width:62px;height:62px;font-size:2rem}.tl-ins-verdict{font-size:1.1rem}}
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
 @media (max-width:900px){.tl-sticker{position:static;display:inline-block;margin-bottom:12px;transform:rotate(-3deg)}}
 @media (max-width:640px){.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:clamp(2.1rem,11vw,3rem)}.tl-sub{font-size:.98rem}}
-@media (prefers-reduced-motion:reduce){.tl-sticker:hover,.tl-drop:hover svg,.tl button.rounded-full:hover,#result,#result .bg-hero{animation:none}.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
+@media (prefers-reduced-motion:reduce){.tl-ins-fill{animation:none}.tl-ins-card:hover,.tl-chip:hover{transform:none}.tl-sticker:hover,.tl-drop:hover svg,.tl button.rounded-full:hover,#result,#result .bg-hero{animation:none}.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
 `;
 
 function TailorPage() {
