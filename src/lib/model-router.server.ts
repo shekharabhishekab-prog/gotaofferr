@@ -68,7 +68,12 @@ export function isQuotaError(error: unknown): boolean {
     text.includes("busy right now") ||
     text.includes("resource_exhausted") ||
     text.includes("quota") ||
-    text.includes("rate limit")
+    text.includes("rate limit") ||
+    // A call that never answered (our own timeout) also hands over to the next model.
+    e?.name === "TimeoutError" ||
+    e?.name === "AbortError" ||
+    text.includes("aborted due to timeout") ||
+    text.includes("timed out")
   );
 }
 
