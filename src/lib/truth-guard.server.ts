@@ -56,6 +56,10 @@ function skillSupported(skill: string, src: Src): boolean {
   if (src.text.includes(n)) return true;
   const ws = words(skill);
   if (!ws.length) return src.text.includes(n);
+  // Short tokens such as "ads", "seo" or "crm" are skipped by words(); they still must appear as whole words.
+  const SHORT_OK = new Set(["and", "the", "for", "of", "in", "to", "on", "at", "or", "a"]);
+  const shorts = n.split(" ").filter((t) => t.length >= 2 && t.length <= 3 && !SHORT_OK.has(t));
+  if (shorts.some((t) => !(" " + src.text + " ").includes(" " + t + " "))) return false;
   return ws.every((w) => src.stems.has(stem(w)));
 }
 
@@ -101,7 +105,35 @@ const CLAIM_WORDS: Array<[RegExp, RegExp]> = [
   [/\broas\b|return on (ad )?spend/i, /\broas\b|return on (ad )?spend/i],
   [/\broi\b|return on investment/i, /\broi\b|return on investment/i],
   [/conversion rates?/i, /conversion/i],
+  // Phase 3.9: claims the model adds when it adapts to a new market or mirrors the job ad.
+  [/bilingual|multilingual|trilingual/i, /bilingual|multilingual|fluent|languages?|arabic|hindi|french|spanish|german|mandarin|tamil|marathi/i],
+  [/paid (ads?|media|search|social|campaigns?|advertising)|\bppc\b|google ads|meta ads|facebook ads|adwords/i, /paid|\bppc\b|google ads|meta ads|facebook ads|adwords|advertis|\bads\b/i],
+  [/agenc(y|ies)|external partners?/i, /agenc|partner|vendor|external/i],
 ];
+
+// Phone numbers and emails must come from the source resume, never from the model.
+function contactInvented(part: string, src: Src): boolean {
+  const digits = part.replace(/\D/g, "");
+  if (digits.length >= 7) {
+    const srcDigits = src.raw.replace(/\D/g, "");
+    const noCc = digits.replace(/^(91|971|44|1|61|65|1)(?=\d{8,})/, "");
+    if (!srcDigits.includes(digits) && !(noCc.length >= 7 && srcDigits.includes(noCc))) return true;
+  }
+  const mail = part.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
+  if (mail && !src.raw.includes(mail[0].toLowerCase())) return true;
+  return false;
+}
+
+const MONTH_RE = /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b\.?\s*,?\s*(?=\d{4})/gi;
+// A month the source never wrote is an invented date detail: keep the year only.
+function stripInventedMonths(dates: string | null | undefined, src: Src): string | null | undefined {
+  if (!dates) return dates;
+  return dates.replace(MONTH_RE, (m, mon: string) => {
+    const key = mon.slice(0, 3).toLowerCase();
+    const numericMonths = /\b\d{1,2}[\/.-]\d{4}\b/.test(src.raw);
+    return numericMonths || new RegExp("\\b" + key + "[a-z]*\\.?[\\s,/-]*'?\\d{2,4}", "i").test(src.raw) ? m : "";
+  }).replace(/\s{2,}/g, " ").trim();
+}
 
 function claimUnsupported(text: string, src: Src): boolean {
   return CLAIM_WORDS.some(([inOut, inSrc]) => inOut.test(text) && !inSrc.test(src.raw));
@@ -109,7 +141,7 @@ function claimUnsupported(text: string, src: Src): boolean {
 
 function dropClaimParts(entry: string, src: Src): string {
   const parts = entry.split(/\s*[|•]\s*/);
-  const kept = parts.filter((p) => !claimUnsupported(p, src));
+  const kept = parts.filter((p) => !claimUnsupported(p, src) && !contactInvented(p, src));
   return kept.join(" | ");
 }
 
@@ -166,7 +198,13 @@ export function guardResume(result: TailoredResume, source: string): { result: T
     })
     .filter((c) => c.trim().length > 0);
 
-  const jdOnly = jdOnlyTerms((result as any).missingKeywords, src);
+  // Insights: a "you already speak their language" keyword the resume does not back up moves to the honest gaps list.
+  const matchedIn: string[] = (result as any).matchedKeywords ?? [];
+  const matchedKeywords = matchedIn.filter((k) => skillSupported(k, src) || (note("matched keyword", k), false));
+  const movedToGaps = matchedIn.filter((k) => !matchedKeywords.includes(k));
+  const missingKeywords = [...((result as any).missingKeywords ?? []), ...movedToGaps.filter((k) => !((result as any).missingKeywords ?? []).includes(k))];
+  const regionAdaptations = ((result as any).regionAdaptations ?? []).filter((r: string) => !claimUnsupported(r, src) || (note("claim", r), false));
+  const jdOnly = jdOnlyTerms(missingKeywords, src);
   const summary = dropJdOnlySentences(dropClaimSentences(result.summary, src), jdOnly, false);
   if (summary !== result.summary) note("claim", "summary sentence");
   const coverLetter = dropJdOnlySentences(dropClaimSentences(result.coverLetter, src), jdOnly, true);
@@ -179,10 +217,11 @@ export function guardResume(result: TailoredResume, source: string): { result: T
 
   const keyAchievements = result.keyAchievements.filter((a) => lineSupported(a, src) || (note("achievement", a), false));
 
-  const experience = result.experience.map((e) => ({
-    ...e,
-    bullets: keepBullets(e.bullets, src, note),
-  }));
+  const experience = result.experience.map((e) => {
+    const d = stripInventedMonths(e.dates, src);
+    if (d !== e.dates) note("date month", String(e.dates));
+    return { ...e, dates: d as typeof e.dates, bullets: keepBullets(e.bullets, src, note) };
+  });
   const projects = result.projects.map((p) => ({
     ...p,
     bullets: p.bullets.filter((b) => lineSupported(b, src) || (note("duty", b), false)),
@@ -204,7 +243,9 @@ export function guardResume(result: TailoredResume, source: string): { result: T
       credential = credential.replace(new RegExp(`\\s*(?:,|-|–|—|at|from)?\\s*${esc}\\s*$`, "i"), "").trim();
     }
     credential = credential.replace(/\s*\(([^)]*)\)/g, (m, inner) => (skillSupported(inner, src) ? m : (note("education note", inner), ""))).trim();
-    return credential && credential !== ed.credential ? { ...ed, credential } : ed;
+    const edDates = (ed as any).dates !== undefined ? stripInventedMonths((ed as any).dates, src) : undefined;
+    const withDates = edDates !== undefined && edDates !== (ed as any).dates ? { ...ed, dates: edDates } : ed;
+    return credential && credential !== ed.credential ? { ...withDates, credential } : withDates;
   });
 
   // The headline must not claim a title the source never held.
@@ -216,7 +257,7 @@ export function guardResume(result: TailoredResume, source: string): { result: T
   }
 
   return {
-    result: { ...result, contacts, summary, coverLetter, skills, skillGroups, keyAchievements, experience, projects, additionalSections, headline, education },
+    result: { ...result, matchedKeywords, missingKeywords, regionAdaptations, contacts, summary, coverLetter, skills, skillGroups, keyAchievements, experience, projects, additionalSections, headline, education },
     removed,
   };
 }
