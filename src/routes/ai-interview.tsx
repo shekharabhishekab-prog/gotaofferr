@@ -244,7 +244,7 @@ function AiInterview() {
   const statusFn = useServerFn(getInterviewStatus);
   const [allow, setAllow] = useState<{ tier: InterviewTier; limit: number; used: number } | null>(null);
   useEffect(() => {
-    if (!user || stage !== "setup") return;
+    if (!user || (stage !== "setup" && stage !== "room")) return;
     let live = true;
     statusFn().then((a) => { if (live) setAllow(a as { tier: InterviewTier; limit: number; used: number }); }).catch(() => { /* counter is optional */ });
     return () => { live = false; };
@@ -726,12 +726,6 @@ function AiInterview() {
           </div>
         ) : stage === "setup" || stage === "loading" ? (
           <div className="ai-card ph-no-capture" data-ph-no-capture="true">
-            {allow ? (
-              <p className={`ai-quota ${allow.used >= allow.limit ? "out" : ""}`} aria-live="polite">
-                <b>{Math.min(allow.used, allow.limit)} of {allow.limit}</b> interviews used this month
-                <span> · {allow.used >= allow.limit ? "none left" : `${allow.limit - allow.used} left`} on {INTERVIEW_TIER_LABEL[allow.tier]}</span>
-              </p>
-            ) : null}
             <div className="ai-grid">
               <div className="ai-fields">
                 <label><span>Company (optional)</span><input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Corp" maxLength={120} /></label>
@@ -758,6 +752,13 @@ function AiInterview() {
             <button type="button" className="ai-btn ai-go" disabled={busy} onClick={() => void begin()}>
               {busy ? "Coco is reading your resume..." : <>Start my interview <ArrowRight className="size-4" /></>}
             </button>
+            {allow ? (
+              <p className={`ai-quota ai-quota-line ${allow.used >= allow.limit ? "out" : ""}`} aria-live="polite">
+                <b>{Math.min(allow.used, allow.limit)} of {allow.limit}</b> interviews used this month
+                <span>· {allow.used >= allow.limit ? "none left" : `${allow.limit - allow.used} left`} on {INTERVIEW_TIER_LABEL[allow.tier]}</span>
+                <span>· Every practice round makes the real one easier 🐾</span>
+              </p>
+            ) : null}
           </div>
         ) : stage === "feedback" && feedback ? (
           <div className="ai-card ph-no-capture" data-ph-no-capture="true">
@@ -799,6 +800,11 @@ function AiInterview() {
               <span className="ai-qn">{stage === "room" && !started ? `${TOTAL} questions` : `Question ${Math.min(idx + 1, TOTAL)} of ${TOTAL}`}</span>
               <span className={`ai-timer ${low ? "low" : ""} ${running ? "on" : ""}`} aria-live="off">{fmt(Math.max(0, left))}</span>
             </div>
+            {allow ? (
+              <p className="ai-quota ai-quota-line ai-quota-room" aria-live="polite">
+                Interview <b>{allow.used}</b> of {allow.limit} this month · {INTERVIEW_TIER_LABEL[allow.tier]} plan
+              </p>
+            ) : null}
             <div className="ai-body">
             <div className="ai-tiles">
               <div className="ai-tile ai-coco-tile" ref={tileRef}>
@@ -900,7 +906,7 @@ const AI_CSS = `
 .ai-dt{font-family:var(--font-display,inherit);font-weight:700;font-size:1.1rem;text-transform:uppercase;word-break:break-word}
 .ai-dh,.ai-note{font-size:.85rem;color:rgba(246,241,214,.6);line-height:1.45}
 .ai-link{align-self:flex-start;background:none;border:0;color:var(--y);text-decoration:underline;cursor:pointer;font-size:.9rem;padding:0}
-.ai-quota{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 16px;padding:7px 14px;border:1px solid rgba(255,214,0,.5);border-radius:999px;font-size:.88rem;line-height:1.3;color:rgba(246,241,214,.8)}.ai-quota b{color:#ffd600}.ai-quota.out{border-color:rgba(255,138,128,.6)}.ai-quota.out b{color:#ff8a80}
+.ai-quota{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 16px;padding:7px 14px;border:1px solid rgba(255,214,0,.5);border-radius:999px;font-size:.88rem;line-height:1.3;color:rgba(246,241,214,.8)}.ai-quota b{color:#ffd600}.ai-quota-line{display:flex;justify-content:center;text-align:center;border-radius:14px;margin:14px 0 0}.ai-quota-room{margin:10px 0 0;font-size:.8rem;padding:5px 12px}.ai-quota.out{border-color:rgba(255,138,128,.6)}.ai-quota.out b{color:#ff8a80}
 .ai-err{color:#ff8a80;font-size:.92rem;margin:12px 0 0}
 .ai-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;font-weight:700;border-radius:999px;padding:15px 28px;font-size:1rem;border:0;cursor:pointer;text-decoration:none;transition:transform .2s}
 .ai-btn:hover{transform:translateY(-2px)}
