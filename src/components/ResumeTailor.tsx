@@ -384,6 +384,9 @@ export function ResumeTailor() {
                 ? `Coco sniffed ${resume.trim().split(/\s+/).length} words. Tap to swap the file.`
                 : "PDF, DOCX, TXT or MD. Old formatting welcome."}
             </span>
+            {!parsing && resume.trim().length < 30 && (
+              <span className="tl-wait mt-2 rounded-full border border-primary/40 px-3 py-1 text-xs text-primary">Coco is waiting to sniff it 🐾</span>
+            )}
           </button>
         </Card>
 
