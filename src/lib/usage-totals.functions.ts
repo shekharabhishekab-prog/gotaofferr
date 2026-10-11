@@ -8,7 +8,7 @@ export const getUsageTotals = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
     const count = async (table: string) => {
-      const { count: c, error } = await admin.from(table).select("id", { count: "exact", head: true }).eq("user_id", context.userId);
+      const { count: c, error } = await admin.from(table).select("user_id", { count: "exact", head: true }).eq("user_id", context.userId);
       return error ? null : (c ?? 0);
     };
     const [resumesBuilt, interviews, jobSearches] = await Promise.all([
