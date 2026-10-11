@@ -41,7 +41,6 @@ export function SiteFooter() {
 <li><Link to="/ats-resume-checker" className="sf-a"><span>ATS resume checker</span></Link></li>
 <li><Link to="/ai-cover-letter-generator" className="sf-a"><span>AI cover letter generator</span></Link></li>
 <li><Link to="/jobs" search={{ alert: undefined }} className="sf-a"><span>Job finder</span></Link></li>
-<li><Link to="/linkedin-profile-reviewer" className="sf-a"><span>LinkedIn profile reviewer</span></Link></li>
 <li><Link to="/how-it-works" className="sf-a"><span>How it works</span></Link></li>
 <li><Link to="/pricing" className="sf-a"><span>Pricing</span></Link></li></ul></div>
 <div className="sf-col"><h2 className="sf-h2">Company</h2><ul className="sf-list"><li><Link to="/about" className="sf-a"><span>About</span></Link></li>
