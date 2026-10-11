@@ -132,6 +132,8 @@ export function ResumeTailor() {
   const [downloading, setDownloading] = useState<"resume" | "cover" | null>(null);
   const [result, setResult] = useState<TailoredResume | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const runId = useRef(0);
+  const [slow, setSlow] = useState<0 | 1 | 2>(0);
 
   // Logged-out ("anonymous") one-free-rewrite state
   const [anonUsed, setAnonUsed] = useState(false);
@@ -202,11 +204,15 @@ export function ResumeTailor() {
     if (resume.trim().length < 30) return toast.error("Add your current resume first.");
     if (jobDescription.trim().length < 20) return toast.error("Paste the job description.");
     if (jobDescription.trim().length > 30000) return toast.error("That JD is doing too much 😄 Keep the key responsibilities and requirements, and paste again.");
+    const myRun = ++runId.current;
     setLoading(true);
     setResult(null);
+    setSlow(0);
     setStage("upload");
     timers.current.forEach(clearTimeout);
     timers.current = [
+      setTimeout(() => setSlow(1), 45000),
+      setTimeout(() => setSlow(2), 120000),
       setTimeout(() => setStage("analyze"), 700),
       setTimeout(() => setStage("rewrite"), 3500),
       setTimeout(() => setStage("format"), 11000),
@@ -232,6 +238,7 @@ export function ResumeTailor() {
         // Tokens are single-use — clear and re-issue after every attempt.
         setCaptchaToken(null);
         resetTurnstile();
+        if (myRun !== runId.current) return;
         timers.current.forEach(clearTimeout);
         setStage("done");
         setResult(out.result);
@@ -255,6 +262,7 @@ export function ResumeTailor() {
           },
         );
 
+        if (myRun !== runId.current) return;
         timers.current.forEach(clearTimeout);
         setStage("done");
         setResult(out.result);
@@ -263,6 +271,7 @@ export function ResumeTailor() {
       toast.success("Your tailored resume is ready");
       setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch (e) {
+      if (myRun !== runId.current) return;
       timers.current.forEach(clearTimeout);
       if (!session) {
         setCaptchaToken(null);
@@ -279,8 +288,11 @@ export function ResumeTailor() {
       }
       toast.error(message);
     } finally {
-      setLoading(false);
-      setQueueNote(null);
+      if (myRun === runId.current) {
+        setLoading(false);
+        setQueueNote(null);
+        setSlow(0);
+      }
     }
   }
 
@@ -523,6 +535,30 @@ export function ResumeTailor() {
           {queueNote && (
             <div className="mb-4 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
               {queueNote}
+            </div>
+          )}
+          {slow === 1 && (
+            <div data-testid="slow-note" className="mb-4 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
+              ☕ The servers are a bit busy right now. Your resume is still cooking, hang tight.
+            </div>
+          )}
+          {slow === 2 && (
+            <div data-testid="slow-stuck" className="mb-4 rounded-xl border border-primary/50 bg-primary/10 px-4 py-4 text-sm text-foreground">
+              <p className="text-base font-bold">
+                Okay, this one is <span className="font-serif italic text-primary">taking its sweet time</span> 🐌
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                Our AI went for chai and forgot to come back. Coco is judging the servers. Your resume is safe, and a stuck rebuild does not use up a rewrite.
+              </p>
+              {session ? (
+                <Button type="button" variant="ink" className="mt-3" onClick={() => onGenerate()}>
+                  Try again 🔁
+                </Button>
+              ) : (
+                <p className="mt-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  Refresh the page and give it another go.
+                </p>
+              )}
             </div>
           )}
           <TailorProgress stage={stage} />
