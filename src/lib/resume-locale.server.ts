@@ -1,4 +1,5 @@
 import { getRequest } from "@tanstack/react-start/server";
+import { regionForCountry } from "./region";
 
 /**
  * Resume conventions differ sharply by market: a US resume that carries a
@@ -141,6 +142,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
       "Warmer, more conversational tone than a US or UK resume: confident and plain-spoken, never aggressive self-promotion.",
       'Add a short "What I Bring" block (3-4 plain lines about working style and strengths) only when the source resume supports those claims.',
       "State visa or sponsorship status plainly and by its specific name (for example, Subclass 482) when the source resume states it.",
+      'Referees: if the source resume lists referees, keep them as a final "Referees" section exactly as given. If it lists none, add a final additional section titled "Referees" with the single item "Referees available on request". Never invent names, titles or contact details.',
     ],
   },
   NZ: {
@@ -150,6 +152,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
       "Two-page CV, Australian/NZ spelling, amounts in NZD ($).",
       "Warm, conversational and confident tone rather than aggressive self-promotion.",
       'Add a short "What I Bring" block only when the source resume supports it, and name visa/work-rights status specifically when stated.',
+      'Referees: if the source resume lists referees, keep them as a final "Referees" section exactly as given. If it lists none, add a final additional section titled "Referees" with the single item "Referees available on request". Never invent names, titles or contact details.',
     ],
   },
 
@@ -168,11 +171,23 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
   ZA: { label: "South Africa", rules: ["Two to three page CV, British spelling, amounts in ZAR (R). Keep qualification names as written."] },
 };
 
+/** Region defaults: used when a country has no rules of its own. Country entries above override these. */
+const REGION_RULES: Record<string, string[]> = {
+  Europe: ["Two-page CV at most, factual and restrained wording, DD/MM/YYYY or Mon YYYY dates.", "Keep qualification names as written and list language levels when the source has them.", "Do not add a photo or personal data unless the source resume already includes them."],
+  "North America": [...COMMON_NO_PHOTO, "One page for most candidates, two for senior ones. Results first, no personal details."],
+  "South America": ["Two-page CV, clear and factual. Keep qualification names as written and list language levels (Spanish, Portuguese, English) when the source has them.", "Do not add a photo or personal data unless the source resume already includes them."],
+  Africa: ["Two to three page CV, British-style spelling, clear and factual. Keep qualification names as written.", "Do not add a photo or personal data unless the source resume already includes them."],
+  Asia: ["Two-page resume, clear and keyword-rich. Keep qualification names as written.", "Do not add a photo or personal data unless the source resume already includes them."],
+  Australia: [...COMMON_NO_PHOTO, "Two to three pages, Australian/NZ spelling, warm confident tone.", 'Referees: if the source resume lists referees, keep them as a final "Referees" section exactly as given. If it lists none, add a final additional section titled "Referees" with the single item "Referees available on request". Never invent names, titles or contact details.'],
+};
+
 /** Prompt-ready market rules for a country code. */
 export function resumeMarket(country: string | null): ResumeMarket {
   const code = country?.toUpperCase() ?? null;
   const match = code ? MARKETS[code] : undefined;
   if (match) return { country: code, label: match.label, rules: [...match.rules, ...CURRENCY_TRUTH] };
+  const regionRules = code ? REGION_RULES[regionForCountry(code)] : undefined;
+  if (regionRules) return { country: code, label: `the candidate's market (${code})`, rules: [...regionRules, ...CURRENCY_TRUTH] };
   return {
     country: code,
     label: code ? `the candidate's market (${code})` : "the country of the job (read it from the job description)",
