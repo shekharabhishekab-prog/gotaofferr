@@ -30,6 +30,8 @@ export const startInterview = createServerFn({ method: "POST" })
     const ctx = context as { userId: string };
     await enforcePolicy("interview_global", "site");
     await enforcePolicy("interview", ctx.userId);
+    const { assertInterviewAllowed } = await import("@/lib/interview-limits.server");
+    await assertInterviewAllowed(context as any);
     const questions = await makeQuestions(data);
     try {
       const admin = (await import("@/integrations/supabase/client.server")).supabaseAdmin as any;
