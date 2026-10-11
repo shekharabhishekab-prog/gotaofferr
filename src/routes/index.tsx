@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { WipSplash } from "@/components/WipSplash";
 import { WIP_ENABLED, WIP_HEAD_SCRIPT } from "@/lib/wip";
-import { ArrowRight, ArrowUpRight, Clock, Hourglass, MousePointerClick, Sparkles, Target } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Clock, Hourglass, Sparkles, Target } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -337,10 +337,10 @@ const aboutLines: { t: string; c: string; m?: boolean }[][] = [
 
 /* Stats from the current live site. Edit the wording here (second entry: 10 hrs a week shown as 600+ min). */
 const stats = [
-  { to: 15, pre: "", suf: " sec", label: "to a tailored resume", body: "Upload once. Rebuild for every company instantly.", Icon: Clock },
-  { to: 600, pre: "", suf: "+ min", label: "saved weekly", body: "Stop spending 1-2 hours every day hunting jobs and rewriting CVs.", Icon: Hourglass },
   { to: 1000, pre: "", suf: "+", label: "applications automated", body: "The reality of getting hired: hundreds of applications. We do the searching and tailoring for you.", Icon: Target },
-  { to: 1, pre: "", suf: " click", label: "to apply", body: "Find, tailor, download, then go straight to the company.", Icon: MousePointerClick },
+  { to: 100, pre: "", suf: "s", label: "of interview rejections avoided", body: "Practice with Coco, our AI interviewer, so the real interview feels familiar.", Icon: Sparkles },
+  { to: 600, pre: "", suf: "+ min", label: "saved weekly", body: "Stop spending 1-2 hours every day hunting jobs and rewriting CVs.", Icon: Hourglass },
+  { to: 15, pre: "", suf: " sec", label: "to a tailored resume", body: "Upload once. Rebuild for every company instantly.", Icon: Clock },
 ] as const;
 
 
