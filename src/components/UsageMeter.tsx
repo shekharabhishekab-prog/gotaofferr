@@ -55,7 +55,7 @@ export function UsageMeter({ usage }: { usage: UsageValue }) {
         <div
           className={cn(
             "h-full rounded-full transition-[width] duration-500 ease-out",
-            empty ? "bg-destructive" : "bg-hero",
+            "bg-hero",
           )}
           style={{ width: `${Math.max(pct, 4)}%` }}
         />
