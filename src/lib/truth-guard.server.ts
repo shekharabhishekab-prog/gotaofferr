@@ -135,8 +135,30 @@ function stripInventedMonths(dates: string | null | undefined, src: Src): string
   }).replace(/\s{2,}/g, " ").trim();
 }
 
+const LANGS = "english|hindi|arabic|german|french|spanish|dutch|mandarin|chinese|portuguese|italian|japanese|korean|russian|tamil|marathi|bengali|urdu|malay|tagalog|afrikaans|swahili|turkish|polish";
+const LANG_LEVEL = "strong|excellent|exceptional|outstanding|fluent|fluency|proficient|proficiency|native|advanced|professional|business|good|solid|working|full|bilingual|written|verbal|spoken|command";
+const LANG_CLAIM = new RegExp(`\\b(?:${LANG_LEVEL})\\b[^.!?;]{0,30}?\\b(${LANGS})\\b|\\b(${LANGS})\\b\\s+(?:language\\s+)?(?:fluency|proficiency|communication|skills?|speaker|speaking|writing)`, "gi");
+// Soft-skill level claims ("strong communication skills") must be backed by the source too.
+const SOFT_CLAIM: Array<[RegExp, RegExp]> = [
+  [/\b(?:strong|excellent|exceptional|outstanding|superior|proven|solid|great)\s+(?:\w+\s+){0,2}?communicat/i, /communicat/i],
+  [/\b(?:strong|excellent|exceptional|outstanding|superior|proven|solid|great)\s+(?:\w+\s+){0,2}?(?:interpersonal|leadership|negotiation|presentation|organi[sz]ational|problem[- ]solving|analytical|time[- ]management)/i, /interpersonal|leadership|leader|\bled\b|negotiat|presentation|organi[sz]ational|problem[- ]solv|analytical|time[- ]management/i],
+];
+function languageClaimUnsupported(text: string, src: Src): boolean {
+  for (const m of text.matchAll(LANG_CLAIM)) {
+    const lang = (m[1] || m[2] || "").toLowerCase();
+    if (lang && !new RegExp("\\b" + lang + "\\b", "i").test(src.raw)) return true;
+    // A language the source names, but with a level the source never states, also stays out.
+    if (lang && /(strong|excellent|exceptional|outstanding|fluent|fluency|proficient|proficiency|native|advanced|business|full|command)/i.test(m[0]) && !/fluen|proficien|native|advanced|command|business|professional|\bC1\b|\bC2\b|\bB2\b/i.test(src.raw)) return true;
+  }
+  return false;
+}
+
 function claimUnsupported(text: string, src: Src): boolean {
-  return CLAIM_WORDS.some(([inOut, inSrc]) => inOut.test(text) && !inSrc.test(src.raw));
+  return (
+    CLAIM_WORDS.some(([inOut, inSrc]) => inOut.test(text) && !inSrc.test(src.raw)) ||
+    SOFT_CLAIM.some(([inOut, inSrc]) => inOut.test(text) && !inSrc.test(src.raw)) ||
+    languageClaimUnsupported(text, src)
+  );
 }
 
 function dropClaimParts(entry: string, src: Src): string {
@@ -183,6 +205,17 @@ function dropJdOnlySentences(text: string, terms: string[], letter: boolean): st
     return letter && BRIDGE_WORDS.test(sent);
   });
   return kept.join(" ");
+}
+
+/** Same honesty check for a letter the model rewrote: drop invented claims, new numbers and job-ad-only tools. */
+export function guardLetter(letter: string, missingKeywords: string[] | undefined, source: string): string {
+  const src = buildSource(source);
+  const jdOnly = jdOnlyTerms(missingKeywords, src);
+  const paragraphs = letter.split(/\n{2,}/).map((para) => {
+    const sentences = para.split(/(?<=[.!?])\s+/).filter((sent) => !claimUnsupported(sent, src) && numbersOk(sent, src) && !contactInvented(sent, src));
+    return dropJdOnlySentences(sentences.join(" "), jdOnly, true);
+  });
+  return paragraphs.filter((x) => x.trim()).join("\n\n");
 }
 
 export function guardResume(result: TailoredResume, source: string): { result: TailoredResume; removed: string[] } {
