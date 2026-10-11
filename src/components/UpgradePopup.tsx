@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 import { PLAN_LABEL, nextTier, type PlanTier } from "@/lib/plans";
 
@@ -33,7 +34,8 @@ export function UpgradePopup({
   }, [open, onClose]);
   if (!open) return null;
   const up = nextTier(tier);
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -64,6 +66,7 @@ export function UpgradePopup({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
