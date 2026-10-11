@@ -76,7 +76,7 @@ const TL_CSS = `
 @keyframes tl-wig2{25%{transform:translateY(-3px) rotate(-1.2deg)}60%{transform:translateY(-3px) rotate(1.2deg)}100%{transform:translateY(-3px) rotate(0)}}
 #result{animation:tl-rise .7s cubic-bezier(.2,.8,.2,1) both}
 #result .bg-hero{animation:tl-pop .7s cubic-bezier(.3,1.6,.5,1) .15s backwards}
-@keyframes tl-pop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
+@keyframes tl-up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}@keyframes tl-pop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
 .tl-ins-hero{display:flex;align-items:center;gap:18px;padding:20px 22px;border:1px solid rgba(255,214,0,.5);border-radius:22px;background:linear-gradient(135deg,rgba(255,214,0,.16),rgba(255,214,0,.03))}
 .tl-ins-score{flex:none;width:76px;height:76px;border-radius:20px;background:var(--y);color:#000;font-family:var(--font-display,inherit);font-weight:800;font-size:2.4rem;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg);box-shadow:4px 4px 0 #000,0 0 0 2px var(--y)}
 .tl-ins-verdict{font-family:var(--font-display,inherit);font-weight:700;font-size:1.35rem;line-height:1.15}
@@ -124,7 +124,7 @@ const TL_CSS = `
 .tl-more{margin:30px 0 0;padding:20px;border:1px dashed rgba(255,214,0,.35);border-radius:20px;line-height:1.9;max-width:100%;overflow-wrap:anywhere}
 .tl-more a{color:var(--y);text-decoration:none;border-bottom:1px solid rgba(255,214,0,.5);padding:0 2px;transition:background .2s,color .2s}
 .tl-more a:hover{background:var(--y);color:#000}
-@supports (animation-timeline:view()){.tl-bl{animation:tl-grow linear both;animation-timeline:view();animation-range:entry 0% cover 40%}@keyframes tl-grow{from{height:8px}to{height:64px}}.tl-gets li{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 55%}}
+@supports (animation-timeline:view()){.tl-bl{animation:tl-grow linear both;animation-timeline:view();animation-range:entry 0% cover 40%}@keyframes tl-grow{from{height:8px}to{height:64px}}.tl-gets li{animation:tl-up linear backwards;animation-timeline:view();animation-range:entry 0% entry 55%}}
 @media (max-width:760px){.tl-gets{grid-template-columns:minmax(0,1fr)}.tl-seo2{padding:30px 14px 56px}.tl-seo2 .tl-lead{font-size:.95rem}.tl-br{padding-top:24px}.tl-bl{height:44px}.tl-more{padding:16px}.tl-seo2 h3{font-size:1.3rem;margin-top:30px}}
 @media (min-width:1280px){.tl-seo2{max-width:1480px;padding-left:32px;padding-right:32px}}
 @media (min-width:1700px){.tl-seo2{max-width:1780px;padding-left:40px;padding-right:40px}.tl-seo2 .tl-lead{font-size:1.12rem;max-width:56rem}}
@@ -140,7 +140,7 @@ const TL_CSS = `
 .tl-gchip{font-family:ui-monospace,Menlo,monospace;font-weight:800;text-transform:uppercase;font-size:1rem;padding:11px 16px;border:2px solid var(--cream);border-radius:999px;transition:transform .2s}
 .tl-gchip.y{background:var(--y);color:#000;border-color:var(--y)}
 .tl-gchip:hover{transform:translateY(-3px) rotate(-1.5deg)}
-@supports (animation-timeline:view()){.tl-bw{animation:tl-bwl linear both;animation-timeline:view();animation-range:entry 0% exit 100%}.tl-bw.out{animation-name:tl-bwr}@keyframes tl-bwl{from{transform:translateX(24%)}to{transform:translateX(-24%)}}@keyframes tl-bwr{from{transform:translateX(-24%)}to{transform:translateX(24%)}}.tl-gchip{animation:tl-pop linear backwards;animation-timeline:view();animation-range:entry 0% entry 60%}.tl-gchip:nth-child(2){animation-range:entry 5% entry 65%}.tl-gchip:nth-child(3){animation-range:entry 10% entry 70%}.tl-gchip:nth-child(4){animation-range:entry 15% entry 75%}.tl-seo2 h2,.tl-seo2 .tl-lead,.tl-more{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 50%}@keyframes tl-pop{from{opacity:0;transform:translateY(26px) scale(.85)}to{opacity:1;transform:none}}}
+@supports (animation-timeline:view()){.tl-bw{animation:tl-bwl linear both;animation-timeline:view();animation-range:entry 0% exit 100%}.tl-bw.out{animation-name:tl-bwr}@keyframes tl-bwl{from{transform:translateX(24%)}to{transform:translateX(-24%)}}@keyframes tl-bwr{from{transform:translateX(-24%)}to{transform:translateX(24%)}}.tl-gchip{animation:tl-pop linear backwards;animation-timeline:view();animation-range:entry 0% entry 60%}.tl-gchip:nth-child(2){animation-range:entry 5% entry 65%}.tl-gchip:nth-child(3){animation-range:entry 10% entry 70%}.tl-gchip:nth-child(4){animation-range:entry 15% entry 75%}.tl-seo2 h2,.tl-seo2 .tl-lead,.tl-more{animation:tl-up linear backwards;animation-timeline:view();animation-range:entry 0% entry 50%}@keyframes tl-pop{from{opacity:0;transform:translateY(26px) scale(.85)}to{opacity:1;transform:none}}}
 .tl-seo2 h2{font-size:clamp(2.4rem,4.6vw,5rem);line-height:.98}
 .tl-seo2 h2 mark{padding:.02em .2em;transform:rotate(-1.5deg);box-shadow:7px 7px 0 rgba(255,255,255,.9);transition:transform .25s}
 .tl-seo2 h2:hover mark{transform:rotate(0) scale(1.03)}
