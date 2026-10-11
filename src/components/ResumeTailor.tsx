@@ -476,7 +476,7 @@ export function ResumeTailor() {
                 {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter — free"}
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                No account needed for your first rewrite. ~15 seconds, quicker than coffee.
+                No account needed for your first rewrite. ~30 seconds, quicker than coffee.
               </p>
             </div>
           )
@@ -521,7 +521,7 @@ export function ResumeTailor() {
                   ? tier === "career_pro"
                     ? "199 rewrites included per month"
                     : "129 rewrites included per month"
-                  : "Takes ~15 seconds. Coffee can wait."}
+                  : "Takes ~30 seconds. Coffee can wait."}
               </p>
             )}
 
@@ -573,19 +573,20 @@ export function ResumeTailor() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-6 pl-4">
                 <div className="relative">
-                  <span aria-hidden className="pointer-events-none absolute -inset-4 translate-x-1 translate-y-0.5 rounded-full border-2 border-primary/80" />
-                  <div data-testid="score-ats" className="relative flex h-16 w-16 flex-col items-center justify-center rounded-xl bg-primary text-black">
+                  <div data-testid="score-ats" className="relative flex h-[76px] w-[76px] flex-col items-center justify-center rounded-xl bg-primary text-black">
                     <span className="font-display text-2xl leading-none font-bold">
                       {Math.round(result.atsScore)}
                     </span>
-                    <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">ATS /100</span>
+                    <span className="text-[11px] leading-none font-bold">/100</span>
+                    <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">ATS</span>
                   </div>
                 </div>
-                <div data-testid="score-match" className="flex h-14 w-14 flex-col items-center justify-center rounded-xl border border-primary/40 text-foreground">
+                <div data-testid="score-match" className="flex h-16 w-16 flex-col items-center justify-center rounded-xl border border-primary/40 text-foreground">
                   <span className="font-display text-lg leading-none font-bold text-primary">
                     {Math.round(result.matchScore)}
                   </span>
-                  <span className="mt-0.5 text-[7px] font-bold tracking-wide uppercase opacity-80">Match /100</span>
+                  <span className="text-[10px] leading-none font-bold">/100</span>
+                  <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">Match</span>
                 </div>
               </div>
               <div>
@@ -778,12 +779,11 @@ export function ResumeTailor() {
                 <Card className="tl-ins-hero md:col-span-2">
                   <div className="flex shrink-0 items-center gap-5 pl-2">
                     <div className="relative text-center">
-                      <span aria-hidden className="pointer-events-none absolute -inset-3 -top-3 translate-x-1 rounded-full border-2 border-primary/70" />
-                      <div className="tl-ins-score relative">{Math.round(result.atsScore)}</div>
+                      <div className="tl-ins-score relative">{Math.round(result.atsScore)}<small>/100</small></div>
                       <p className="relative mt-1 text-[10px] font-bold tracking-wider uppercase">ATS score</p>
                     </div>
                     <div className="origin-left scale-75 text-center opacity-90">
-                      <div className="tl-ins-score">{Math.round(result.matchScore)}</div>
+                      <div className="tl-ins-score">{Math.round(result.matchScore)}<small>/100</small></div>
                       <p className="mt-1 text-[10px] font-bold tracking-wider uppercase">Match score</p>
                     </div>
                   </div>
@@ -812,7 +812,7 @@ export function ResumeTailor() {
                 )}
                 {result.scoreBreakdown && (
                   <Card className="tl-ins-card md:col-span-2">
-                    <h4 className="tl-ins-h">How the {Math.round(result.matchScore)} was built</h4>
+                    <h4 className="tl-ins-h">How the {Math.round(result.matchScore)}/100 was built</h4>
                     <div className="space-y-3">
                       {[
                         { label: "Keyword match", emoji: "🔑", value: result.scoreBreakdown.keywordMatch, max: 40 },
