@@ -78,7 +78,7 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   const market = resumeMarket(detectedJobCountry);
   const letterRules = coverLetterRules(detectedJobCountry);
   const withLetterDate = <T extends { coverLetter: string }>(r0: T): T => {
-    const r = applyTruthFixes(r0);
+    const r = withRefereesLine(applyTruthFixes(r0), detectedJobCountry);
     const text = (r.coverLetter ?? "").trim();
     if (!text) return r;
     return { ...r, coverLetter: `${letterDateLine(jobCountry)}\n\n${text}` };
@@ -698,6 +698,25 @@ export function applyTruthFixes<T>(r: T): T {
     return { ...any, consistencyFlags: [...flags, note] } as T;
   } catch (e) {
     console.error("[truth-fix] failed", e);
+    return r;
+  }
+}
+
+
+
+/**
+ * Australia and New Zealand resumes carry a referees section. We never invent referees: when the
+ * resume has no referees/references section, add one plain line. Real referees from the source stay as they are.
+ */
+export function withRefereesLine<T>(r: T, country: string | null | undefined): T {
+  try {
+    const c = (country ?? "").toUpperCase();
+    if (c !== "AU" && c !== "NZ") return r;
+    const sections = (r as unknown as { additionalSections?: Array<{ title: string; items: string[] }> }).additionalSections;
+    if (!Array.isArray(sections)) return r;
+    if (sections.some((x) => /referee|reference/i.test(x?.title ?? ""))) return r;
+    return { ...r, additionalSections: [...sections, { title: "Referees", items: ["Referees available on request"] }] } as T;
+  } catch {
     return r;
   }
 }
