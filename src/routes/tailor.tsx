@@ -98,7 +98,9 @@ const TL_CSS = `
 .tl-tip b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--y);color:#000;display:flex;align-items:center;justify-content:center;font-size:.8rem}
 @media (max-width:640px){.tl-ins-hero{gap:14px;padding:16px}.tl-ins-score{width:62px;height:62px;font-size:2rem}.tl-ins-verdict{font-size:1.1rem}}
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
-@media (min-width:900px){.tl-h1{max-width:1120px;font-size:clamp(2.6rem,4.3vw,4.2rem)}.tl-h1 span:nth-child(-n+2){display:inline}.tl-h1 span:nth-child(2):before{content:" "}.tl-h1 .tl-cur{display:block;margin-top:.08em}.tl-sub{max-width:40rem}}
+@media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.3vw,4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-h1 span:nth-child(-n+2){display:inline}.tl-h1 span:nth-child(2):before{content:" "}.tl-h1 .tl-cur{display:block;margin-top:.08em}.tl-sub{max-width:46rem}}
+@media (min-width:1280px){.tl-wrap{max-width:1440px;padding-left:32px;padding-right:32px}}
+@media (min-width:1700px){.tl-wrap{max-width:1600px}}
 @media (max-width:640px){.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:clamp(2.1rem,11vw,3rem)}.tl-sub{font-size:.98rem}}
 @media (prefers-reduced-motion:reduce){.tl-ins-fill{animation:none}.tl-ins-card:hover,.tl-chip:hover{transform:none}.tl-sticker:hover,.tl-drop:hover svg,.tl button.rounded-full:hover,#result,#result .bg-hero{animation:none}.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
 `;
