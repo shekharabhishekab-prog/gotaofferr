@@ -20,7 +20,6 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as JobsRouteImport } from './routes/jobs'
-import { Route as LinkedinProfileReviewerRouteImport } from './routes/linkedin-profile-reviewer'
 import { Route as OgImageDotpngRouteImport } from './routes/og-image[.]png'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -103,11 +102,6 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LinkedinProfileReviewerRoute = LinkedinProfileReviewerRouteImport.update({
-  id: '/linkedin-profile-reviewer',
-  path: '/linkedin-profile-reviewer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OgImageDotpngRoute = OgImageDotpngRouteImport.update({
@@ -275,7 +269,6 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/jobs': typeof JobsRoute
-  '/linkedin-profile-reviewer': typeof LinkedinProfileReviewerRoute
   '/og-image.png': typeof OgImageDotpngRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -317,7 +310,6 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/jobs': typeof JobsRoute
-  '/linkedin-profile-reviewer': typeof LinkedinProfileReviewerRoute
   '/og-image.png': typeof OgImageDotpngRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -360,7 +352,6 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/jobs': typeof JobsRoute
-  '/linkedin-profile-reviewer': typeof LinkedinProfileReviewerRoute
   '/og-image.png': typeof OgImageDotpngRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -404,7 +395,6 @@ export interface FileRouteTypes {
     | '/faq'
     | '/how-it-works'
     | '/jobs'
-    | '/linkedin-profile-reviewer'
     | '/og-image.png'
     | '/pricing'
     | '/privacy'
@@ -446,7 +436,6 @@ export interface FileRouteTypes {
     | '/faq'
     | '/how-it-works'
     | '/jobs'
-    | '/linkedin-profile-reviewer'
     | '/og-image.png'
     | '/pricing'
     | '/privacy'
@@ -488,7 +477,6 @@ export interface FileRouteTypes {
     | '/faq'
     | '/how-it-works'
     | '/jobs'
-    | '/linkedin-profile-reviewer'
     | '/og-image.png'
     | '/pricing'
     | '/privacy'
@@ -531,7 +519,6 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   HowItWorksRoute: typeof HowItWorksRoute
   JobsRoute: typeof JobsRoute
-  LinkedinProfileReviewerRoute: typeof LinkedinProfileReviewerRoute
   OgImageDotpngRoute: typeof OgImageDotpngRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -639,13 +626,6 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof JobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/linkedin-profile-reviewer': {
-      id: '/linkedin-profile-reviewer'
-      path: '/linkedin-profile-reviewer'
-      fullPath: '/linkedin-profile-reviewer'
-      preLoaderRoute: typeof LinkedinProfileReviewerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/og-image.png': {
@@ -859,7 +839,6 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   HowItWorksRoute: HowItWorksRoute,
   JobsRoute: JobsRoute,
-  LinkedinProfileReviewerRoute: LinkedinProfileReviewerRoute,
   OgImageDotpngRoute: OgImageDotpngRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
