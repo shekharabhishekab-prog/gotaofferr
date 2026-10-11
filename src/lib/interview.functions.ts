@@ -123,6 +123,7 @@ export const cocoSpeak = createServerFn({ method: "POST" })
     await enforcePolicy("interview_tts", ctx.userId);
     if (data.engine === "cf") {
     const cfRes: any = await (async () => {
+      if (data.text.startsWith("[[cf-down]]")) return { ok: false as const, reason: "test-forced" }; // TEST ONLY, remove
       // Cloudflare MeloTTS on our own account. Hard stop at 490 calls per UTC day (Cloudflare's free day resets at 00:00 UTC). Past that the room uses the browser voice.
       try {
         const { countCall } = await import("@/lib/model-router.server");
