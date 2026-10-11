@@ -34,10 +34,7 @@ export async function runTailor(
   } catch (e) {
     // Real cause goes to the server log; the customer only sees the friendly line.
     console.error(`[tailor] run failed tier=${tier} after=${Math.round((Date.now() - t0) / 1000)}s ${(e as Error)?.name}: ${String((e as Error)?.message ?? e).slice(0, 300)}`);
-    // DIAGNOSTIC BUILD (preview only, never merge): show the real error class so the stall can be found.
-    const de: any = new Error(`🔎 [diag ${Math.round((Date.now() - t0) / 1000)}s] ${(e as any)?.name} status=${(e as any)?.statusCode ?? (e as any)?.status ?? (e as any)?.cause?.statusCode ?? "-"} ${String((e as Error)?.message ?? e).replace(/[\r\n]+/g, " ").slice(0, 220)}`);
-    de.userFacing = true;
-    throw de;
+    throw e;
   }
 }
 
@@ -383,7 +380,6 @@ ${data.resume}`;
     if ((error as Error)?.name === "QualityError" || (error as any)?.issues) throw error;
     console.error("[tailor] failed:", (error as Error)?.name, String((error as Error)?.message ?? error).slice(0, 300));
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
-    { const x: any = error; const de2: any = new Error(`🔎 [raw] ${x?.name} status=${x?.statusCode ?? x?.status ?? x?.cause?.statusCode ?? "-"} cause=${x?.cause?.name ?? "-"} url=${String(x?.url ?? "").replace(/key=[^&]*/g, "key=X").slice(0, 80)} msg=${String(x?.message ?? x).replace(/[\r\n]+/g, " ").slice(0, 200)} body=${String(x?.responseBody ?? "").replace(/[\r\n]+/g, " ").slice(0, 200)}`); throw de2; }
     throw new Error(aiGatewayErrorMessage(error));
   }
 }
