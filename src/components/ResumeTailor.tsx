@@ -723,37 +723,55 @@ export function ResumeTailor() {
             </TabsContent>
 
             <TabsContent value="insights">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="tl-ins grid gap-4 md:grid-cols-2">
+                <Card className="tl-ins-hero md:col-span-2">
+                  <div className="tl-ins-score">{Math.round(result.matchScore)}</div>
+                  <div>
+                    <p className="tl-ins-verdict">
+                      {result.matchScore >= 80
+                        ? "Strong match. Go apply."
+                        : result.matchScore >= 65
+                          ? "Solid fit. A few tweaks and you're in."
+                          : result.matchScore >= 45
+                            ? "A stretch role. Honest gaps below."
+                            : "Big stretch. Read the gaps first."}
+                    </p>
+                    <p className="tl-ins-sub">Your match, explained. No fluff, no fake skills.</p>
+                  </div>
+                </Card>
                 {result.fitWarning && (
-                  <Card className="border-destructive/40 bg-destructive/5 p-6 shadow-soft md:col-span-2">
-                    <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold">
-                      <AlertCircle className="size-4 text-destructive" /> Honest read on fit
+                  <Card className="tl-ins-card tl-ins-warn md:col-span-2">
+                    <h4 className="tl-ins-h">
+                      <AlertCircle className="size-4" /> Real talk
                     </h4>
                     <p className="text-sm text-muted-foreground">{result.fitWarning}</p>
                   </Card>
                 )}
                 {result.scoreBreakdown && (
-                  <Card className="p-6 shadow-soft md:col-span-2">
-                    <h4 className="mb-3 text-sm font-semibold">How the {Math.round(result.matchScore)} match score is built</h4>
-                    <div className="space-y-2.5">
+                  <Card className="tl-ins-card md:col-span-2">
+                    <h4 className="tl-ins-h">How the {Math.round(result.matchScore)} was built</h4>
+                    <div className="space-y-3">
                       {[
-                        { label: "Keyword match", value: result.scoreBreakdown.keywordMatch, max: 40 },
-                        { label: "Title & seniority alignment", value: result.scoreBreakdown.titleAlignment, max: 15 },
-                        { label: "Formatting & parseability", value: result.scoreBreakdown.formatting, max: 20 },
-                        { label: "Experience relevance", value: result.scoreBreakdown.experienceRelevance, max: 15 },
-                        { label: "Quantified impact", value: result.scoreBreakdown.quantifiedImpact, max: 10 },
-                      ].map((row) => (
+                        { label: "Keyword match", emoji: "🔑", value: result.scoreBreakdown.keywordMatch, max: 40 },
+                        { label: "Title & seniority alignment", emoji: "🪪", value: result.scoreBreakdown.titleAlignment, max: 15 },
+                        { label: "Formatting & parseability", emoji: "🧾", value: result.scoreBreakdown.formatting, max: 20 },
+                        { label: "Experience relevance", emoji: "🧭", value: result.scoreBreakdown.experienceRelevance, max: 15 },
+                        { label: "Quantified impact", emoji: "📈", value: result.scoreBreakdown.quantifiedImpact, max: 10 },
+                      ].map((row, i) => (
                         <div key={row.label}>
                           <div className="flex justify-between text-xs">
-                            <span>{row.label}</span>
-                            <span className="text-muted-foreground">
+                            <span>
+                              {row.emoji} {row.label}
+                            </span>
+                            <span className="tl-ins-num">
                               {Math.round(row.value)}/{row.max}
+                              {row.value / row.max >= 0.9 ? " 🔥" : ""}
                             </span>
                           </div>
-                          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+                          <div className="tl-ins-bar">
                             <div
-                              className="h-full rounded-full bg-highlight"
-                              style={{ width: `${Math.min(100, (row.value / row.max) * 100)}%` }}
+                              className="tl-ins-fill"
+                              style={{ width: `${Math.min(100, (row.value / row.max) * 100)}%`, ["--i" as string]: i }}
                             />
                           </div>
                         </div>
@@ -761,51 +779,50 @@ export function ResumeTailor() {
                     </div>
                   </Card>
                 )}
-                <Card className="p-6 shadow-soft">
-
-                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <CheckCircle2 className="size-4 text-success" /> Keywords you match
+                <Card className="tl-ins-card">
+                  <h4 className="tl-ins-h">
+                    <CheckCircle2 className="size-4" /> You already speak their language
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {result.matchedKeywords.map((k) => (
-                      <Badge key={k} variant="secondary" className="font-normal">
-                        {k}
-                      </Badge>
+                      <span key={k} className="tl-chip tl-chip-yes">
+                        ✓ {k}
+                      </span>
                     ))}
                   </div>
                 </Card>
-                <Card className="p-6 shadow-soft">
-                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <AlertCircle className="size-4 text-destructive" /> Gaps to address
+                <Card className="tl-ins-card">
+                  <h4 className="tl-ins-h tl-ins-h-gap">
+                    <AlertCircle className="size-4" /> Gaps (honest, never faked)
                   </h4>
                   <div className="flex flex-wrap gap-1.5">
                     {result.missingKeywords.map((k) => (
-                      <Badge key={k} variant="outline" className="font-normal">
+                      <span key={k} className="tl-chip tl-chip-no">
                         {k}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                   {result.atsTopFix ? (
                     <p className="mt-3 text-sm text-muted-foreground">Top fix: {result.atsTopFix}</p>
                   ) : null}
                 </Card>
-                <Card className="p-6 shadow-soft md:col-span-2">
-                  <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                    <Lightbulb className="size-4 text-highlight" /> How to strengthen this application
+                <Card className="tl-ins-card md:col-span-2">
+                  <h4 className="tl-ins-h">
+                    <Lightbulb className="size-4" /> Level-up moves
                   </h4>
-                  <ul className="space-y-2">
+                  <ul className="space-y-2.5">
                     {result.tips.map((t, i) => (
-                      <li key={i} className="flex gap-2 text-sm">
-                        <ArrowRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      <li key={i} className="tl-tip">
+                        <b>{i + 1}</b>
                         <span>{t}</span>
                       </li>
                     ))}
                   </ul>
                 </Card>
                 {result.consistencyFlags?.length > 0 && (
-                  <Card className="p-6 shadow-soft">
-                    <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                      <AlertCircle className="size-4 text-destructive" /> Things to double-check
+                  <Card className="tl-ins-card">
+                    <h4 className="tl-ins-h tl-ins-h-gap">
+                      <AlertCircle className="size-4" /> Double-check these
                     </h4>
                     <ul className="space-y-2">
                       {result.consistencyFlags.map((f, i) => (
@@ -817,9 +834,9 @@ export function ResumeTailor() {
                   </Card>
                 )}
                 {result.regionAdaptations?.length > 0 && (
-                  <Card className="p-6 shadow-soft">
-                    <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                      <CheckCircle2 className="size-4 text-success" /> Adapted for the hiring market
+                  <Card className="tl-ins-card">
+                    <h4 className="tl-ins-h">
+                      <CheckCircle2 className="size-4" /> Adapted for the hiring market
                     </h4>
                     <ul className="space-y-2">
                       {result.regionAdaptations.map((a, i) => (
