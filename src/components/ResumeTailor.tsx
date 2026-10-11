@@ -539,7 +539,7 @@ export function ResumeTailor() {
           )}
           {slow === 1 && (
             <div data-testid="slow-note" className="mb-3 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-[13px] leading-snug text-foreground">
-              ☕ The servers sneaked out for chai. Your resume is still cooking, hang tight.
+              ☕ The servers sneaked out for coffee. Your resume is still cooking, hang tight.
             </div>
           )}
           {slow === 2 && (
@@ -548,7 +548,7 @@ export function ResumeTailor() {
                 Okay, this one is <span className="font-serif italic text-primary">taking its sweet time</span> 🐌
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Our AI went for chai and forgot to come back. Coco is judging the servers. Your resume is safe, and a stuck rebuild does not use up a rewrite.
+                Our AI went for coffee and forgot to come back. Coco is judging the servers. Your resume is safe, and a stuck rebuild does not use up a rewrite.
               </p>
               {session ? (
                 <Button type="button" variant="ink" size="sm" className="mt-2" onClick={() => onGenerate()}>
