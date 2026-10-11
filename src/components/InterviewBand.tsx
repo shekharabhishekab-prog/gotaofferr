@@ -32,7 +32,7 @@ export function InterviewBand() {
       <div className="ivb-grid">
         <div>
           <h2 id="ivb-h" className="ivb-h">
-            Panic with Coco. <span className="ivb-out">Not with the</span> <span className="ivb-mk">hiring manager.</span>
+            <span className="ivb-p">Your next</span> <span className="ivb-it">interview?</span> <span className="ivb-p">Already a rematch.</span> <span className="ivb-out">Seen it,</span> <span className="ivb-mk">nailed it.</span>
           </h2>
           <p className="ivb-sub">
             A kitten asks the real questions out loud. You answer. You get a score and straight feedback. One free interview every month.
@@ -57,9 +57,10 @@ const CSS = `
 .ivb-mono{font-family:ui-monospace,monospace;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:#ffd600;margin:0 0 14px}
 .ivb-grid{display:grid;gap:36px;align-items:center}
 @media(min-width:900px){.ivb-grid{grid-template-columns:1.15fr .85fr;gap:56px}}
-.ivb-h{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.98;letter-spacing:-.01em;font-size:2.6rem;margin:0;text-wrap:balance}
-@media(min-width:640px){.ivb-h{font-size:4rem}}
-@media(min-width:1024px){.ivb-h{font-size:4.8rem}}
+.ivb-h{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.98;letter-spacing:-.01em;font-size:2.3rem;margin:0;text-wrap:balance}
+@media(min-width:640px){.ivb-h{font-size:3.4rem}}
+@media(min-width:1024px){.ivb-h{font-size:4rem}}
+.ivb-it{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;text-transform:none;color:#ffd600;letter-spacing:0;font-size:1.12em}
 .ivb-out{color:transparent;-webkit-text-stroke:1.5px #f6f1d6}
 .ivb-mk{background:#ffd600;color:#0b0a08;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .ivb-sub{margin:22px 0 0;max-width:34rem;font-size:1.05rem;line-height:1.5;color:rgba(246,241,214,.75)}
@@ -75,16 +76,17 @@ const CSS = `
 .ivb-score b{font-size:1.6rem;margin-right:2px}.ivb-score span{opacity:.7;margin-left:6px}
 .ivb-chat{transform:translate3d(0,calc(var(--ivp,0)*-28px),0);will-change:transform}
 .ivb-cat{transform:translate3d(0,calc(var(--ivp,0)*22px),0) rotate(8deg)}
-.ivb-js .ivb-mono,.ivb-js .ivb-sub,.ivb-js .ivb-cta,.ivb-js .ivb-out,.ivb-js .ivb-mk,.ivb-js .ivb-b,.ivb-js .ivb-score,.ivb-js .ivb-cat{opacity:0;transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.ivb-js .ivb-p,.ivb-js .ivb-it,.ivb-js .ivb-mono,.ivb-js .ivb-sub,.ivb-js .ivb-cta,.ivb-js .ivb-out,.ivb-js .ivb-mk,.ivb-js .ivb-b,.ivb-js .ivb-score,.ivb-js .ivb-cat{opacity:0;transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
 .ivb-js .ivb-mono,.ivb-js .ivb-sub,.ivb-js .ivb-cta{transform:translateY(26px)}
+.ivb-js .ivb-p,.ivb-js .ivb-it{display:inline-block;transform:translateY(22px)}
 .ivb-js .ivb-out{display:inline-block;transform:translateX(-40px)}
 .ivb-js .ivb-mk{display:inline-block;transform:translateX(40px) rotate(-2deg)}
 .ivb-js .ivb-b1,.ivb-js .ivb-b3{transform:translateX(-36px)}
 .ivb-js .ivb-b2{transform:translateX(36px)}
 .ivb-js .ivb-score{transform:scale(.6)}
 .ivb-js .ivb-cat{transform:scale(.3) rotate(-40deg)}
-.ivb-in .ivb-mono,.ivb-in .ivb-sub,.ivb-in .ivb-cta,.ivb-in .ivb-out,.ivb-in .ivb-mk,.ivb-in .ivb-b,.ivb-in .ivb-score{opacity:1;transform:none}
+.ivb-in .ivb-p,.ivb-in .ivb-it,.ivb-in .ivb-mono,.ivb-in .ivb-sub,.ivb-in .ivb-cta,.ivb-in .ivb-out,.ivb-in .ivb-mk,.ivb-in .ivb-b,.ivb-in .ivb-score{opacity:1;transform:none}
 .ivb-in .ivb-cat{opacity:1;transform:translate3d(0,calc(var(--ivp,0)*22px),0) rotate(8deg)}
-.ivb-in .ivb-out{transition-delay:.1s}.ivb-in .ivb-mk{transition-delay:.25s}.ivb-in .ivb-sub{transition-delay:.4s}.ivb-in .ivb-cta{transition-delay:.55s}
+.ivb-in .ivb-p{transition-delay:.05s}.ivb-in .ivb-it{transition-delay:.18s}.ivb-in .ivb-out{transition-delay:.3s}.ivb-in .ivb-mk{transition-delay:.42s}.ivb-in .ivb-sub{transition-delay:.4s}.ivb-in .ivb-cta{transition-delay:.55s}
 .ivb-in .ivb-b1{transition-delay:.35s}.ivb-in .ivb-b2{transition-delay:.65s}.ivb-in .ivb-b3{transition-delay:.95s}.ivb-in .ivb-score{transition-delay:1.25s}.ivb-in .ivb-cat{transition-delay:.2s}
 `;
