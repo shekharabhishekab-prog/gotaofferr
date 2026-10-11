@@ -229,7 +229,12 @@ ${data.resume}`;
     try {
       const { guardResume } = await import("./truth-guard.server");
       const guarded = guardResume(result, data.resume);
+      const letterBefore = result.coverLetter;
       result = guarded.result;
+      if (result.coverLetter !== letterBefore) {
+        const refilled = await refillLetter(gateway, data, result, letterRules);
+        if (refilled) result = { ...result, coverLetter: refilled };
+      }
       if (guarded.removed.length) console.log(`[truth-guard] removed ${guarded.removed.length}`);
       const { polishResume, QualityError } = await import("./truth-guard.server");
       const polished = polishResume(result, final);
@@ -373,6 +378,45 @@ function needsDepthRepair(r: TailoredResume): boolean {
 }
 
 /** Second pass that expands a thin draft back to full recruiter-grade depth. */
+const wordCount = (t: string) => t.split(/\s+/).filter(Boolean).length;
+
+/**
+ * The truth check cut invented lines out of the cover letter. Ask the model once to write the
+ * letter again from the source resume only, then run the same truth check on the new text.
+ * Returns null when the rewrite is missing, thin or fails, and the shorter honest letter stays.
+ */
+async function refillLetter(
+  gateway: ReturnType<typeof createLovableAiGatewayProvider>,
+  data: TailorInput,
+  result: TailoredResume,
+  letterRules: string[],
+): Promise<string | null> {
+  try {
+    const { guardLetter } = await import("./truth-guard.server");
+    const { text } = await generateText({
+      model: gateway("google/gemini-3.6-flash"),
+      maxOutputTokens: 1500,
+      prompt: `${PROMPT_GUARD}
+Write a cover letter for ${data.company || "the company"} for the job below. Tone: ${data.tone || "confident and professional"}.
+STRICT TRUTH RULES: use ONLY facts, numbers, employers, tools and skills written in the candidate's resume. Never claim a tool, language level, soft skill, certification, work permit, relocation or experience that the resume does not state. The job description tells you what the company wants, not what the candidate has. If the resume lacks something the job asks for, do not mention it. No placeholders. No dates. Plain text, paragraphs separated by a blank line.
+Format rules:
+${letterRules.map((rule) => `- ${rule}`).join("\n")}
+Candidate name: ${result.name}
+Role the letter is for: ${data.role || ""}
+
+--- JOB DESCRIPTION ---
+${data.jobDescription}
+
+--- CANDIDATE'S RESUME ---
+${data.resume}`,
+    });
+    const clean = guardLetter(text.trim(), (result as any).missingKeywords, data.resume);
+    return wordCount(clean) >= Math.max(120, wordCount(result.coverLetter) + 40) ? clean : null;
+  } catch {
+    return null;
+  }
+}
+
 async function repairDepth(
   gateway: ReturnType<typeof createLovableAiGatewayProvider>,
   draft: TailoredResume,
