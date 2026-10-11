@@ -105,6 +105,8 @@ function lineSupported(line: string, src: Src): boolean {
   if (!numbersOk(line, src)) return false;
   const ws = [...new Set(words(line).map(stem))];
   if (!ws.length) return true;
+  // Most of the words must exist somewhere in the source resume at all.
+  if (supportedFraction(line, src) < 0.7) return false;
   // A real duty is a rewording of ONE source line. A line stitched together
   // from words scattered across the resume is an invented duty.
   const best = Math.max(0, ...src.segments.map((seg) => ws.filter((w) => seg.has(w)).length / ws.length));
@@ -122,6 +124,7 @@ const CLAIM_WORDS: Array<[RegExp, RegExp]> = [
   // Phase 3.9: claims the model adds when it adapts to a new market or mirrors the job ad.
   [/bilingual|multilingual|trilingual/i, /bilingual|multilingual|fluent|languages?|arabic|hindi|french|spanish|german|mandarin|tamil|marathi/i],
   [/paid (ads?|media|search|social|campaigns?|advertising)|\bppc\b|google ads|meta ads|facebook ads|adwords/i, /paid|\bppc\b|google ads|meta ads|facebook ads|adwords|advertis|\bads\b/i],
+  [/available to start|start (as soon as possible|immediately|right away)|ready to start|can start (immediately|right away)/i, /available|start date|notice|immediate/i],
   [/agenc(y|ies)|external partners?/i, /agenc|partner|vendor|external/i],
 ];
 
@@ -297,9 +300,9 @@ export function guardResume(result: TailoredResume, source: string): { result: T
   const additionalSections = result.additionalSections
     .map((s) => ({
       ...s,
-      items: s.items.filter((i) => !claimUnsupported(i, src) || (note("claim", i), false)),
+      items: s.items.filter((i) => (!claimUnsupported(i, src) && supportedFraction(i, src) >= 0.85) || (note("claim", i), false)),
     }))
-    .filter((s) => s.items.length > 0);
+    .filter((s) => s.items.length > 0 && !/^\s*titles?\s*$/i.test(String((s as any).title ?? (s as any).heading ?? "")));
 
   // Education: never repeat the school inside the degree, and drop explanatory
   // brackets such as "(three-year undergraduate degree)" that the source never had.
