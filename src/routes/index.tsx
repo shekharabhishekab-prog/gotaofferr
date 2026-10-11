@@ -491,7 +491,7 @@ function HeroVideo() {
   );
 }
 
-const popTexts = ["92% match", "Cover letter ready", "Applied in 15 sec", "Resume tailored", "New match found", "ATS score 94"];
+const popTexts = ["92% match", "Cover letter ready", "Applied in 30 sec", "Resume tailored", "New match found", "ATS score 94"];
 function HeroPops() {
   useEffect(() => {
     const root = document.documentElement;
@@ -1353,7 +1353,7 @@ function Index() {
             </div>
             <div className="wy-l">
               <span data-rv className="hp-wd text-highlight" style={{ ["--k" as string]: 1 }}>tailored</span>{" "}
-              <span data-rv className="hp-wd" style={{ ["--k" as string]: 2 }}>in 15 seconds</span>
+              <span data-rv className="hp-wd" style={{ ["--k" as string]: 2 }}>in 30 seconds</span>
             </div>
             <div aria-hidden className="wy-badge absolute right-0 top-1/2 -translate-y-1/2">
               <svg viewBox="0 0 120 120" className="wy-b1">
