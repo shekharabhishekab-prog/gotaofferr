@@ -53,6 +53,7 @@ import { getBuilderUsage } from "@/lib/builder-usage.functions";
 import { getAlertUsage, getJobSearchUsage } from "@/lib/jobs.functions";
 import { getInterviewStatus } from "@/lib/interview.functions";
 import { getUsageTotals } from "@/lib/usage-totals.functions";
+import { getAtsUsage } from "@/lib/ats-usage.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { FREE_MONTHLY_LIMIT, STARTER_MONTHLY_LIMIT, JOB_HUNT_MONTHLY_LIMIT, CAREER_PRO_MONTHLY_LIMIT } from "@/lib/tailor-schema";
 
@@ -136,6 +137,8 @@ function Account() {
   const loadAlerts = useServerFn(getAlertUsage);
   const loadInterview = useServerFn(getInterviewStatus);
   const loadTotals = useServerFn(getUsageTotals);
+  const loadAts = useServerFn(getAtsUsage);
+  const [atsUse, setAtsUse] = useState<{ used: number; limit: number } | null>(null);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -334,6 +337,7 @@ function Account() {
       const pick = (x: PromiseSettledResult<any>): Lim => (x.status === "fulfilled" && x.value ? { used: Number(x.value.used ?? 0), limit: Number(x.value.limit ?? 0) } : null);
       setUsage({ builder: pick(b), interview: pick(i), jobs: pick(j), alerts: pick(al), totals: t.status === "fulfilled" ? (t.value as any) : null });
     });
+    loadAts().then((r: any) => { if (alive && r) setAtsUse({ used: Number(r.used ?? 0), limit: Number(r.limit ?? 0) }); }).catch(() => undefined);
     loadOverview()
       .then((data) => {
         if (!alive) return;
@@ -467,7 +471,7 @@ function Account() {
                 { label: "Resume builder", value: m(usage?.builder ?? null), note: `this month · ${t(usage?.totals?.resumesBuilt)}` },
                 { label: "Job search", value: m(usage?.jobs ?? null), note: `this month · ${t(usage?.totals?.jobSearches)}` },
                 { label: "Job alert", value: m(usage?.alerts ?? null), note: `this month · ${t(usage?.totals?.jobAlerts)}` },
-                { label: "ATS checker", value: "No limit", note: "runs in your browser, none stored" },
+                { label: "ATS checker", value: atsUse ? (atsUse.limit < 0 ? "Unlimited" : `${Math.min(atsUse.used, atsUse.limit)} / ${atsUse.limit}`) : "…", note: "this month · runs in your browser, only a count is kept" },
                 { label: "AI interview", value: m(usage?.interview ?? null), note: `this month · ${t(usage?.totals?.interviews)}` },
               ];
               return cards.map((c) => (
