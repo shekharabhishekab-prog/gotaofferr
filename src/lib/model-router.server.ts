@@ -7,6 +7,9 @@ export type RoutingTier = "free" | "starter" | "job_hunt" | "career_pro";
 
 // Daily request caps (requests per day, Pacific-time reset) from the AI Studio rate-limit page.
 export const MODEL_DAILY_CAP: Record<string, number> = {
+  "cf-melotts": 490,
+  // Azure Speech F0 backup voice. F0 stops at 500K characters a month; 140 calls x ~100 chars x 31 days stays under it.
+  "azure-speech": 140,
   "gemini-3.5-flash-lite": 500,
   "gemini-3.1-flash-lite": 500,
   "gemini-3.6-flash": 20,
@@ -18,6 +21,8 @@ export const MODEL_DAILY_CAP: Record<string, number> = {
   // Only 20/day on the free tier (AI Studio 2026-10-09): a small buffer, not a main lite model.
   "gemini-2.5-flash-lite": 20,
   // Adzuna free tier: 250/day, 2,500/month. Our own cap sits under both.
+  // Voice for the interview room. Google free tier shows 10 requests/day for this model (AI Studio 2026-10-11).
+  "gemini-3.1-flash-tts-preview": 10,
   "adzuna-search": 65,
   // Firecrawl searches are only counted for visibility (cap never reached).
   "firecrawl-search": 100000,
@@ -79,7 +84,7 @@ export async function countCall(model: string): Promise<boolean> {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const warn = Math.min(50, Math.max(1, Math.ceil(cap * 0.2)));
     const { data, error } = await (supabaseAdmin as any).rpc("bump_ai_model_usage", {
-      p_day: pacificDay(),
+      p_day: model.startsWith("cf-") ? new Date().toISOString().slice(0, 10) : pacificDay(),
       p_model: model,
       p_cap: cap,
       p_warn: warn,

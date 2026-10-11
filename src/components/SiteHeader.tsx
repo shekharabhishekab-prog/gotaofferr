@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Menu, User, X } from "lucide-react";
 
 import { useState } from "react";
@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 const nav = [
   { to: "/ats-checker", label: "ATS score checker" },
   { to: "/resume-builder", label: "Resume builder" },
-  { to: "/examples/resumes", label: "Examples" },
+  { to: "/ai-interview", label: "AI Interview" },
   { to: "/jobs", label: "Job finder" },
   { to: "/pricing", label: "Pricing" },
   { to: "/about", label: "About" },
@@ -23,6 +23,8 @@ const nav = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const { session, loading } = useSession();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const signInTo = pathname === "/ai-interview" || pathname === "/ats-checker" ? pathname : "/tailor";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -65,7 +67,7 @@ export function SiteHeader() {
             </Button>
           ) : (
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/auth" search={{ redirect: "/tailor" }}>
+              <Link to="/auth" search={{ redirect: signInTo }}>
                 Sign in
               </Link>
             </Button>
@@ -112,7 +114,7 @@ export function SiteHeader() {
               </>
             ) : (
               <Button variant="outline" className="mt-2" asChild>
-                <Link to="/auth" search={{ redirect: "/tailor" }} onClick={() => setOpen(false)}>
+                <Link to="/auth" search={{ redirect: signInTo }} onClick={() => setOpen(false)}>
                   Sign in
                 </Link>
               </Button>

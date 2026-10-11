@@ -56,6 +56,12 @@ const DEFAULTS = {
   'job-search': { limit: 30, windowSeconds: 600, tier: 'authenticated', message: 'Too many searches in a short time. Please wait a few minutes and try again.' },
   'job-alert-write': { limit: 30, windowSeconds: 600, tier: 'authenticated', message: 'Too many alert updates. Please wait a moment and try again.' },
   'profile-write': { limit: 20, windowSeconds: 600, tier: 'authenticated', message: 'Too many profile updates. Please wait a moment and try again.' },
+  // AI Interview: one interview = two AI calls (questions, feedback). Per user, plus a site-wide circuit breaker that protects the shared free AI quota.
+  'interview': { limit: 12, windowSeconds: 600, tier: 'authenticated', message: 'You are starting interviews very quickly. Please wait a few minutes and try again.' },
+  'interview_global': { limit: 100, windowSeconds: 86400, tier: 'public', message: 'AI Interview is very busy today. Please try again a little later.' },
+  // Coco's voice (Gemini text-to-speech, free tier). One interview reads up to 10 questions.
+  'interview_tts': { limit: 40, windowSeconds: 600, tier: 'authenticated', message: 'Coco needs a short breather. Please wait a few minutes.' },
+  'interview_tts_global': { limit: 1500, windowSeconds: 86400, tier: 'public', message: 'Coco voice is very busy today. Using the browser voice instead.' },
   'run-download': { limit: 60, windowSeconds: 600, tier: 'authenticated', message: TOO_MANY },
   
 } as const satisfies Record<string, RateLimitPolicy>;

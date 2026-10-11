@@ -70,7 +70,7 @@ function securityHeaders(nonce?: string, hostname?: string): Record<string, stri
     // payment must allow self + Razorpay, otherwise wallet/UPI/card methods
     // never render inside the embedded checkout iframe.
     "permissions-policy":
-      'camera=(), microphone=(), geolocation=(), usb=(), interest-cohort=(), payment=(self "https://checkout.razorpay.com" "https://api.razorpay.com")',
+      'camera=(), microphone=(self), geolocation=(), usb=(), interest-cohort=(), payment=(self "https://checkout.razorpay.com" "https://api.razorpay.com")',
     "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
     // Locks script/connect/frame origins to ourselves plus the payment provider,
     // so an injected tag cannot beacon data to an attacker-controlled host.
