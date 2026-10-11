@@ -571,18 +571,21 @@ export function ResumeTailor() {
         <div id="result" className="mt-12 scroll-mt-8">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex gap-2">
-                <div data-testid="score-match" className="flex h-16 w-16 flex-col items-center justify-center rounded-xl bg-hero text-foreground">
-                  <span className="font-display text-xl leading-none font-bold">
+              <div className="flex items-center gap-4 pl-2">
+                <div className="relative">
+                  <span aria-hidden className="pointer-events-none absolute -inset-2 translate-x-1 translate-y-0.5 rounded-full border-2 border-primary/80" />
+                  <div data-testid="score-ats" className="relative flex h-[72px] w-[72px] flex-col items-center justify-center rounded-xl bg-hero text-foreground">
+                    <span className="font-display text-2xl leading-none font-bold">
+                      {Math.round(result.atsScore)}
+                    </span>
+                    <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">ATS /100</span>
+                  </div>
+                </div>
+                <div data-testid="score-match" className="flex h-14 w-14 flex-col items-center justify-center rounded-xl border border-primary/40 text-foreground">
+                  <span className="font-display text-lg leading-none font-bold text-primary">
                     {Math.round(result.matchScore)}
                   </span>
-                  <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">Match /100</span>
-                </div>
-                <div data-testid="score-ats" className="flex h-16 w-16 flex-col items-center justify-center rounded-xl border border-primary/50 text-foreground">
-                  <span className="font-display text-xl leading-none font-bold text-primary">
-                    {Math.round(result.atsScore)}
-                  </span>
-                  <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">ATS /100</span>
+                  <span className="mt-0.5 text-[7px] font-bold tracking-wide uppercase opacity-80">Match /100</span>
                 </div>
               </div>
               <div>
@@ -773,14 +776,15 @@ export function ResumeTailor() {
             <TabsContent value="insights">
               <div className="tl-ins grid gap-4 md:grid-cols-2">
                 <Card className="tl-ins-hero md:col-span-2">
-                  <div className="flex shrink-0 gap-4">
-                    <div className="text-center">
+                  <div className="flex shrink-0 items-center gap-5 pl-2">
+                    <div className="relative text-center">
+                      <span aria-hidden className="pointer-events-none absolute -inset-3 -top-3 translate-x-1 rounded-full border-2 border-primary/70" />
+                      <div className="tl-ins-score relative">{Math.round(result.atsScore)}</div>
+                      <p className="relative mt-1 text-[10px] font-bold tracking-wider uppercase">ATS score</p>
+                    </div>
+                    <div className="origin-left scale-75 text-center opacity-90">
                       <div className="tl-ins-score">{Math.round(result.matchScore)}</div>
                       <p className="mt-1 text-[10px] font-bold tracking-wider uppercase">Match score</p>
-                    </div>
-                    <div className="text-center">
-                      <div className="tl-ins-score">{Math.round(result.atsScore)}</div>
-                      <p className="mt-1 text-[10px] font-bold tracking-wider uppercase">ATS score</p>
                     </div>
                   </div>
                   <div>
