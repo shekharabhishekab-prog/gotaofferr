@@ -740,6 +740,7 @@ user && allow ? (
       </section>
 
       <section className="ai-wrap ai-stage" ref={stageRef}>
+        {usageBadge && (stage === "setup" || stage === "loading" || stage === "room" || stage === "wrapping") ? <div className="ai-usage-row">{usageBadge}</div> : null}
         {loading ? null : !user ? (
           <div className="ai-card ai-center">
             <Coco clip="wave" size={1.4} />
@@ -749,7 +750,6 @@ user && allow ? (
           </div>
         ) : stage === "setup" || stage === "loading" ? (
           <div className="ai-card ph-no-capture" data-ph-no-capture="true">
-            {usageBadge ? <div className="ai-usage-row">{usageBadge}</div> : null}
             <div className="ai-grid">
               <div className="ai-fields">
                 <label><span>Company (optional)</span><input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Corp" maxLength={120} /></label>
@@ -924,7 +924,7 @@ const AI_CSS = `
 .ai-dt{font-family:var(--font-display,inherit);font-weight:700;font-size:1.1rem;text-transform:uppercase;word-break:break-word}
 .ai-dh,.ai-note{font-size:.85rem;color:rgba(246,241,214,.6);line-height:1.45}
 .ai-link{align-self:flex-start;background:none;border:0;color:var(--y);text-decoration:underline;cursor:pointer;font-size:.9rem;padding:0}
-.ai-quota{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 16px;padding:7px 14px;border:1px solid rgba(255,214,0,.5);border-radius:999px;font-size:.88rem;line-height:1.3;color:rgba(246,241,214,.8)}.ai-quota b{color:#ffd600}.ai-quota-line{display:flex;justify-content:center;text-align:center;border-radius:14px;margin:14px 0 0}.ai-quota-room{margin:10px 0 0;font-size:.8rem;padding:5px 12px}.ai-usage-row{display:flex;justify-content:flex-end;margin:-6px 0 12px}.ai-usage{position:relative;z-index:3;display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 7px;max-width:100%;padding:8px 16px;border:1.5px solid #ffd600;border-radius:999px;background:rgba(255,214,0,.12);color:#f6f1d6;font:inherit;font-size:.9rem;line-height:1.25;box-shadow:0 0 24px -6px rgba(255,214,0,.5)}.ai-usage b{color:#ffd600}.ai-usage-cta{cursor:pointer;background:#ffd600;color:#0b0a08;font-weight:700;animation:ai-usage-pulse 2.4s ease-in-out infinite}.ai-usage-cta b{color:#0b0a08}.ai-usage-cta:hover{transform:translateY(-2px)}@keyframes ai-usage-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.5)}50%{box-shadow:0 0 0 8px rgba(255,214,0,0)}}@media (prefers-reduced-motion:reduce){.ai-usage-cta{animation:none}}@media (max-width:600px){.ai-usage{font-size:.78rem;padding:5px 12px;gap:0 5px}}
+.ai-quota{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 16px;padding:7px 14px;border:1px solid rgba(255,214,0,.5);border-radius:999px;font-size:.88rem;line-height:1.3;color:rgba(246,241,214,.8)}.ai-quota b{color:#ffd600}.ai-quota-line{display:flex;justify-content:center;text-align:center;border-radius:14px;margin:14px 0 0}.ai-quota-room{margin:10px 0 0;font-size:.8rem;padding:5px 12px}.ai-usage-row{display:flex;justify-content:center;margin:0 0 14px}.ai-usage{position:relative;z-index:3;display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 7px;max-width:100%;padding:8px 16px;border:1.5px solid #ffd600;border-radius:999px;background:#ffd600;color:#0b0a08;font-weight:700;font:inherit;font-size:.9rem;line-height:1.25;box-shadow:0 0 24px -6px rgba(255,214,0,.5)}.ai-usage b{color:#0b0a08}.ai-usage-cta{cursor:pointer;background:#ffd600;color:#0b0a08;font-weight:700;animation:ai-usage-pulse 2.4s ease-in-out infinite}.ai-usage-cta b{color:#0b0a08}.ai-usage-cta:hover{transform:translateY(-2px)}@keyframes ai-usage-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,214,0,.5)}50%{box-shadow:0 0 0 8px rgba(255,214,0,0)}}@media (prefers-reduced-motion:reduce){.ai-usage-cta{animation:none}}@media (max-width:600px){.ai-usage{font-size:.72rem;padding:4px 10px;gap:0 4px;text-align:center}.ai-usage-row{margin:0 0 10px}}
 .ai-quota-cta{border-color:#ffd600;background:rgba(255,214,0,.14);color:#ffd600;text-decoration:none;font-weight:700}.ai-quota-cta:hover{background:rgba(255,214,0,.24)}
 .ai-err{color:#ff8a80;font-size:.92rem;margin:12px 0 0}
 .ai-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#000;font-weight:700;border-radius:999px;padding:15px 28px;font-size:1rem;border:0;cursor:pointer;text-decoration:none;transition:transform .2s}
