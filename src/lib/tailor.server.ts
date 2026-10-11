@@ -18,7 +18,7 @@ import {
 // Time budgets (ms). One tailor is several AI calls in a row; when the first ones are slow we
 // stop stacking more so the request never runs into the platform time limit.
 const REPAIR_BUDGET_MS = 40_000;
-const RETRY_BUDGET_MS = 40_000;
+const RETRY_BUDGET_MS = 100_000;
 const SLOW_MSG = "This one is taking longer than usual \u23F3 Please try again in a moment.";
 
 export async function runTailor(
