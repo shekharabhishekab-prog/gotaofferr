@@ -957,7 +957,7 @@ const AI_CSS = `
 }
 
 @keyframes ai-sway{0%,100%{transform:translate(-16px,0)}25%{transform:translate(0,-6px)}50%{transform:translate(16px,0)}75%{transform:translate(0,-6px)}}
-.ai-coco-tile .ai-coco.talking:not([class*="fx-"]){animation:ai-talkbob .55s ease-in-out infinite}
+
 @keyframes ai-talkbob{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(-8px,-10px) rotate(-3deg)}75%{transform:translate(8px,-10px) rotate(3deg)}}
 .ai-card,.ai-tiles,.ai-bubble{animation:ai-rise .6s ease-out both}
 @keyframes ai-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
