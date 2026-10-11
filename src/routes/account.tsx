@@ -50,7 +50,7 @@ import {
 } from "@/lib/account.functions";
 import { checkIsAdmin } from "@/lib/admin.functions";
 import { getBuilderUsage } from "@/lib/builder-usage.functions";
-import { getJobSearchUsage } from "@/lib/jobs.functions";
+import { getAlertUsage, getJobSearchUsage } from "@/lib/jobs.functions";
 import { getInterviewStatus } from "@/lib/interview.functions";
 import { getUsageTotals } from "@/lib/usage-totals.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
@@ -130,9 +130,10 @@ function Account() {
 
   const [overview, setOverview] = useState<Overview | null>(null);
   type Lim = { used: number; limit: number } | null;
-  const [usage, setUsage] = useState<{ builder: Lim; interview: Lim; jobs: Lim; totals: { resumesBuilt: number | null; interviews: number | null; jobSearches: number | null } | null } | null>(null);
+  const [usage, setUsage] = useState<{ builder: Lim; interview: Lim; jobs: Lim; alerts: Lim; totals: { resumesBuilt: number | null; interviews: number | null; jobSearches: number | null; jobAlerts: number | null } | null } | null>(null);
   const loadBuilder = useServerFn(getBuilderUsage);
   const loadJobs = useServerFn(getJobSearchUsage);
+  const loadAlerts = useServerFn(getAlertUsage);
   const loadInterview = useServerFn(getInterviewStatus);
   const loadTotals = useServerFn(getUsageTotals);
   const [name, setName] = useState("");
@@ -328,10 +329,10 @@ function Account() {
   useEffect(() => {
     if (!session) return;
     let alive = true;
-    Promise.allSettled([loadBuilder(), loadInterview(), loadJobs(), loadTotals()]).then(([b, i, j, t]) => {
+    Promise.allSettled([loadBuilder(), loadInterview(), loadJobs(), loadTotals(), loadAlerts()]).then(([b, i, j, t, al]) => {
       if (!alive) return;
       const pick = (x: PromiseSettledResult<any>): Lim => (x.status === "fulfilled" && x.value ? { used: Number(x.value.used ?? 0), limit: Number(x.value.limit ?? 0) } : null);
-      setUsage({ builder: pick(b), interview: pick(i), jobs: pick(j), totals: t.status === "fulfilled" ? (t.value as any) : null });
+      setUsage({ builder: pick(b), interview: pick(i), jobs: pick(j), alerts: pick(al), totals: t.status === "fulfilled" ? (t.value as any) : null });
     });
     loadOverview()
       .then((data) => {
@@ -452,44 +453,28 @@ function Account() {
         </TabsList>
 
         <TabsContent value="overview" className="mt-8 space-y-6">
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              { label: "Current plan", value: planLabel },
-              {
-                label: "Rewrites this month",
-                value:
-                  overview ? `${overview.runsThisMonth ?? 0} / ${monthlyLimit}` : "…",
-              },
-
-              { label: "Resumes tailored (all time)", value: `${overview?.runsTotal ?? 0}` },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-2xl border border-border bg-card p-6">
-                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-                  {stat.label}
-                </p>
-                <p className="mt-2 font-display text-2xl font-bold text-card-foreground">
-                  {stat.value}
-                </p>
-              </div>
-            ))}
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Current plan</p>
+            <p className="font-display text-lg font-bold text-card-foreground">{planLabel}</p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
             {(() => {
               const m = (l: Lim) => (l ? `${Math.min(l.used, l.limit)} / ${l.limit}` : "…");
-              const t = (n: number | null | undefined) => (typeof n === "number" ? `${n} all time` : "");
+              const t = (n: number | null | undefined) => (typeof n === "number" ? `${n} total` : "");
               const cards: Array<{ label: string; value: string; note: string }> = [
-                { label: "Tailor resume", value: overview ? `${overview.runsThisMonth ?? 0} / ${monthlyLimit}` : "…", note: `this month · ${overview?.runsTotal ?? 0} all time` },
+                { label: "Tailor resume", value: overview ? `${overview.runsThisMonth ?? 0} / ${monthlyLimit}` : "…", note: `this month · ${overview?.runsTotal ?? 0} total` },
                 { label: "Resume builder", value: m(usage?.builder ?? null), note: `this month · ${t(usage?.totals?.resumesBuilt)}` },
+                { label: "Job search", value: m(usage?.jobs ?? null), note: `this month · ${t(usage?.totals?.jobSearches)}` },
+                { label: "Job alert", value: m(usage?.alerts ?? null), note: `this month · ${t(usage?.totals?.jobAlerts)}` },
+                { label: "ATS checker", value: "No limit", note: "runs in your browser, none stored" },
                 { label: "AI interview", value: m(usage?.interview ?? null), note: `this month · ${t(usage?.totals?.interviews)}` },
-                { label: "Job finder", value: m(usage?.jobs ?? null), note: `searches this month · ${t(usage?.totals?.jobSearches)}` },
-                { label: "ATS checker", value: "No limit", note: "Runs in your browser. Nothing is saved, so we keep no count." },
               ];
               return cards.map((c) => (
-                <div key={c.label} className="rounded-2xl border border-border bg-card p-6">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{c.label}</p>
-                  <p className="mt-2 font-display text-2xl font-bold text-card-foreground">{c.value}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{c.note.replace(/ · $/, "")}</p>
+                <div key={c.label} className="rounded-xl border border-border bg-card px-3 py-2.5">
+                  <p className="truncate text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{c.label}</p>
+                  <p className="mt-0.5 font-display text-xl font-bold leading-tight text-card-foreground">{c.value}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">{c.note.replace(/ · $/, "")}</p>
                 </div>
               ));
             })()}
