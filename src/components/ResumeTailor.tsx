@@ -336,7 +336,7 @@ export function ResumeTailor() {
             aria-label="Current resume text"
             value={resume}
             onChange={(e) => setResume(e.target.value)}
-            placeholder="…or paste your resume text here"
+            placeholder="…or paste it here. We won't judge the 2013 formatting."
             className="min-h-56 flex-1 resize-y text-sm"
           />
         </Card>
