@@ -49,6 +49,10 @@ import {
   updateProfile,
 } from "@/lib/account.functions";
 import { checkIsAdmin } from "@/lib/admin.functions";
+import { getBuilderUsage } from "@/lib/builder-usage.functions";
+import { getJobSearchUsage } from "@/lib/jobs.functions";
+import { getInterviewStatus } from "@/lib/interview.functions";
+import { getUsageTotals } from "@/lib/usage-totals.functions";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { FREE_MONTHLY_LIMIT, STARTER_MONTHLY_LIMIT, JOB_HUNT_MONTHLY_LIMIT, CAREER_PRO_MONTHLY_LIMIT } from "@/lib/tailor-schema";
 
@@ -125,6 +129,12 @@ function Account() {
   const saveProfile = useServerFn(updateProfile);
 
   const [overview, setOverview] = useState<Overview | null>(null);
+  type Lim = { used: number; limit: number } | null;
+  const [usage, setUsage] = useState<{ builder: Lim; interview: Lim; jobs: Lim; totals: { resumesBuilt: number | null; interviews: number | null; jobSearches: number | null } | null } | null>(null);
+  const loadBuilder = useServerFn(getBuilderUsage);
+  const loadJobs = useServerFn(getJobSearchUsage);
+  const loadInterview = useServerFn(getInterviewStatus);
+  const loadTotals = useServerFn(getUsageTotals);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -318,6 +328,11 @@ function Account() {
   useEffect(() => {
     if (!session) return;
     let alive = true;
+    Promise.allSettled([loadBuilder(), loadInterview(), loadJobs(), loadTotals()]).then(([b, i, j, t]) => {
+      if (!alive) return;
+      const pick = (x: PromiseSettledResult<any>): Lim => (x.status === "fulfilled" && x.value ? { used: Number(x.value.used ?? 0), limit: Number(x.value.limit ?? 0) } : null);
+      setUsage({ builder: pick(b), interview: pick(i), jobs: pick(j), totals: t.status === "fulfilled" ? (t.value as any) : null });
+    });
     loadOverview()
       .then((data) => {
         if (!alive) return;
@@ -457,6 +472,27 @@ function Account() {
                 </p>
               </div>
             ))}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {(() => {
+              const m = (l: Lim) => (l ? `${Math.min(l.used, l.limit)} / ${l.limit}` : "…");
+              const t = (n: number | null | undefined) => (typeof n === "number" ? `${n} all time` : "");
+              const cards: Array<{ label: string; value: string; note: string }> = [
+                { label: "Tailor resume", value: overview ? `${overview.runsThisMonth ?? 0} / ${monthlyLimit}` : "…", note: `this month · ${overview?.runsTotal ?? 0} all time` },
+                { label: "Resume builder", value: m(usage?.builder ?? null), note: `this month · ${t(usage?.totals?.resumesBuilt)}` },
+                { label: "AI interview", value: m(usage?.interview ?? null), note: `this month · ${t(usage?.totals?.interviews)}` },
+                { label: "Job finder", value: m(usage?.jobs ?? null), note: `searches this month · ${t(usage?.totals?.jobSearches)}` },
+                { label: "ATS checker", value: "No limit", note: "Runs in your browser. Nothing is saved, so we keep no count." },
+              ];
+              return cards.map((c) => (
+                <div key={c.label} className="rounded-2xl border border-border bg-card p-6">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{c.label}</p>
+                  <p className="mt-2 font-display text-2xl font-bold text-card-foreground">{c.value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{c.note.replace(/ · $/, "")}</p>
+                </div>
+              ));
+            })()}
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">
