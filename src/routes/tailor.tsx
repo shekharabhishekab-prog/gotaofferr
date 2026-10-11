@@ -65,9 +65,22 @@ const TL_CSS = `
 .tl button.rounded-full:not(:disabled):hover{transform:translateY(-3px) scale(1.02)}
 .tl-cur{display:inline-block;transition:transform .3s}
 .tl-h1:hover .tl-cur{transform:rotate(-2deg) scale(1.04)}
+.tl-sticker{position:absolute;top:26px;right:max(20px,calc(50% - 560px));background:var(--y);color:#000;font-weight:700;font-size:.82rem;padding:7px 14px;border-radius:999px;transform:rotate(8deg);box-shadow:3px 3px 0 #000,0 0 0 2px var(--y);transition:transform .25s}
+.tl-sticker:hover{animation:tl-wig .55s}
+@keyframes tl-wig{25%{transform:rotate(-6deg) scale(1.08)}60%{transform:rotate(14deg) scale(1.08)}100%{transform:rotate(8deg)}}
+.tl-card:hover .tl-ic{transform:rotate(-10deg) scale(1.12)}
+.tl-ic{transition:transform .25s}
+.tl-drop:hover svg{animation:tl-hop .5s}
+@keyframes tl-hop{40%{transform:translateY(-7px)}}
+.tl button.rounded-full:not(:disabled):hover{animation:tl-wig2 .5s}
+@keyframes tl-wig2{25%{transform:translateY(-3px) rotate(-1.2deg)}60%{transform:translateY(-3px) rotate(1.2deg)}100%{transform:translateY(-3px) rotate(0)}}
+#result{animation:tl-rise .7s cubic-bezier(.2,.8,.2,1) both}
+#result .bg-hero{animation:tl-pop .7s cubic-bezier(.3,1.6,.5,1) .15s backwards}
+@keyframes tl-pop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
+@media (max-width:900px){.tl-sticker{position:static;display:inline-block;margin-bottom:12px;transform:rotate(-3deg)}}
 @media (max-width:640px){.tl-mono{font-size:.68rem}.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:clamp(2.1rem,11vw,3rem)}.tl-sub{font-size:.98rem}}
-@media (prefers-reduced-motion:reduce){.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
+@media (prefers-reduced-motion:reduce){.tl-sticker:hover,.tl-drop:hover svg,.tl button.rounded-full:hover,#result,#result .bg-hero{animation:none}.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
 `;
 
 function TailorPage() {
@@ -75,6 +88,7 @@ function TailorPage() {
     <main className="tlp bg-background">
       <style>{TL_CSS}</style>
       <section className="tl-hero">
+        <span className="tl-sticker" aria-hidden>Coco approved 🐾</span>
         <span className="tl-mono tl-rise" style={{ ["--d" as string]: "0s" }}>( resume tailor, ~15 seconds, no fake skills )</span>
         <h1 className="tl-h1" aria-label="Their job post. Your real resume. Tailored.">
           <span className="tl-rise" style={{ ["--d" as string]: ".06s" }}>Their <mark>job post.</mark></span>
@@ -82,10 +96,10 @@ function TailorPage() {
           <span className="tl-rise tl-cur" style={{ ["--d" as string]: ".22s" }}>Tailored.</span>
         </h1>
         <p className="tl-sub tl-rise" style={{ ["--d" as string]: ".3s" }}>
-          Add your resume and the job description. We rebuild your resume and cover letter for that exact role, in a plain ATS-safe layout. Gaps stay gaps, we never invent skills.
+          Drop in your resume and the job post. We rebuild your resume and cover letter for that exact role, in a plain ATS-safe layout. Gaps stay gaps, we never invent skills.
         </p>
         <div className="tl-chips tl-rise" style={{ ["--d" as string]: ".38s" }} aria-hidden>
-          <i>ATS-safe</i><i>Resume + cover letter</i><i>Match score</i>
+          <i>ATS-safe ✅</i><i>Resume + cover letter ✉️</i><i>Match score 🎯</i>
         </div>
       </section>
       <ResumeTailor />
