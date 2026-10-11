@@ -122,6 +122,7 @@ export const cocoSpeak = createServerFn({ method: "POST" })
     await enforcePolicy("interview_tts_global", "site");
     await enforcePolicy("interview_tts", ctx.userId);
     if (data.engine === "cf") {
+    const cfRes: any = await (async () => {
       // Cloudflare MeloTTS on our own account. Hard stop at 490 calls per UTC day (Cloudflare's free day resets at 00:00 UTC). Past that the room uses the browser voice.
       try {
         const { countCall } = await import("@/lib/model-router.server");
@@ -136,6 +137,11 @@ export const cocoSpeak = createServerFn({ method: "POST" })
         if (audio.length > 900000) return { ok: false as const, reason: "too-long" };
         return { ok: true as const, wav: audio, model: "cf-melotts", mime: "audio/mpeg" };
       } catch (e) { console.warn("[coco-tts] cf error", e); return { ok: false as const, reason: "cf-error" }; }
+    })();
+    if (cfRes.ok) return cfRes;
+    const { azureFallback } = await import("@/lib/azure-tts.server");
+    const az = await azureFallback(data.text);
+    return az || cfRes;
     }
     const key = process.env.GEMINI_API_KEY;
     if (!key) return { ok: false as const, reason: "no-key" };
