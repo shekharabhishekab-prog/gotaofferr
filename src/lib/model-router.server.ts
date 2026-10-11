@@ -8,6 +8,8 @@ export type RoutingTier = "free" | "starter" | "job_hunt" | "career_pro";
 // Daily request caps (requests per day, Pacific-time reset) from the AI Studio rate-limit page.
 export const MODEL_DAILY_CAP: Record<string, number> = {
   "cf-melotts": 490,
+  // Azure Speech F0 backup voice. F0 stops at 500K characters a month; 140 calls x ~100 chars x 31 days stays under it.
+  "azure-speech": 140,
   "gemini-3.5-flash-lite": 500,
   "gemini-3.1-flash-lite": 500,
   "gemini-3.6-flash": 20,
