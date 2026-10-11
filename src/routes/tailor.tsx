@@ -56,8 +56,8 @@ const TL_CSS = `
 .tl-seo{border-top:1px solid rgba(255,214,0,.2)}
 .tl-seo h2{font-family:var(--font-display,inherit)}
 .tl-chips i{transition:transform .2s}
-.tl-chips i:nth-child(odd){transform:rotate(-2.5deg)}
-.tl-chips i:nth-child(even){transform:rotate(2deg)}
+.tl-chips i:nth-child(odd){transform:rotate(-1.5deg)}
+.tl-chips i:nth-child(even){transform:rotate(1.5deg)}
 .tl-chips i:hover{transform:rotate(0) scale(1.08);background:rgba(255,214,0,.12)}
 .tl-card{transition:transform .25s,box-shadow .25s}
 .tl-card:hover{transform:translateY(-3px);box-shadow:0 14px 40px -18px rgba(255,214,0,.35)}
@@ -65,9 +65,9 @@ const TL_CSS = `
 .tl button.rounded-full:not(:disabled):hover{transform:translateY(-3px) scale(1.02)}
 .tl-cur{display:inline-block;transition:transform .3s}
 .tl-h1:hover .tl-cur{transform:rotate(-2deg) scale(1.04)}
-.tl-sticker{position:absolute;top:26px;right:max(20px,calc(50% - 560px));background:var(--y);color:#000;font-weight:700;font-size:.82rem;padding:7px 14px;border-radius:999px;transform:rotate(8deg);box-shadow:3px 3px 0 #000,0 0 0 2px var(--y);transition:transform .25s}
+.tl-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#000;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 #000,0 0 0 2px var(--y);transition:transform .25s}
 .tl-sticker:hover{animation:tl-wig .55s}
-@keyframes tl-wig{25%{transform:rotate(-6deg) scale(1.08)}60%{transform:rotate(14deg) scale(1.08)}100%{transform:rotate(8deg)}}
+@keyframes tl-wig{25%{transform:rotate(-8deg) scale(1.08)}60%{transform:rotate(6deg) scale(1.08)}100%{transform:rotate(-2deg)}}
 .tl-card:hover .tl-ic{transform:rotate(-10deg) scale(1.12)}
 .tl-ic{transition:transform .25s}
 .tl-drop:hover svg{animation:tl-hop .5s}
@@ -98,8 +98,8 @@ const TL_CSS = `
 .tl-tip b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--y);color:#000;display:flex;align-items:center;justify-content:center;font-size:.8rem}
 @media (max-width:640px){.tl-ins-hero{gap:14px;padding:16px}.tl-ins-score{width:62px;height:62px;font-size:2rem}.tl-ins-verdict{font-size:1.1rem}}
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
-@media (max-width:900px){.tl-sticker{position:static;display:inline-block;margin-bottom:12px;transform:rotate(-3deg)}}
-@media (max-width:640px){.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:clamp(2.1rem,11vw,3rem)}.tl-sub{font-size:.98rem}}
+@media (min-width:900px){.tl-h1{max-width:1120px;font-size:clamp(2.6rem,4.3vw,4.2rem)}.tl-h1 span:nth-child(-n+2){display:inline}.tl-h1 span:nth-child(2):before{content:" "}.tl-h1 .tl-cur{display:block;margin-top:.08em}.tl-sub{max-width:40rem}}
+@media (max-width:640px){.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:clamp(2.1rem,11vw,3rem)}.tl-sub{font-size:.98rem}}
 @media (prefers-reduced-motion:reduce){.tl-ins-fill{animation:none}.tl-ins-card:hover,.tl-chip:hover{transform:none}.tl-sticker:hover,.tl-drop:hover svg,.tl button.rounded-full:hover,#result,#result .bg-hero{animation:none}.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
 `;
 
@@ -108,7 +108,7 @@ function TailorPage() {
     <main className="tlp bg-background">
       <style>{TL_CSS}</style>
       <section className="tl-hero">
-        <span className="tl-sticker" aria-hidden>Coco approved 🐾</span>
+        <span className="tl-sticker" aria-hidden>Coco approved 🐾 (our kitten)</span>
         <span className="tl-mono tl-rise" style={{ ["--d" as string]: "0s" }}>( resume tailor, ~15 seconds, no fake skills )</span>
         <h1 className="tl-h1" aria-label="Their job post. Your real resume. Tailored.">
           <span className="tl-rise" style={{ ["--d" as string]: ".06s" }}>Their <mark>job post.</mark></span>
