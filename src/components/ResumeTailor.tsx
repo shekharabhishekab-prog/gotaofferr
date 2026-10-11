@@ -106,6 +106,7 @@ export function ResumeTailor() {
   const { session, loading: sessionLoading } = useSession();
   const { isSubscribed, tier, loading: subLoading } = useSubscription();
   const [showUp, setShowUp] = useState(false);
+  const [resultTab, setResultTab] = useState("resume");
 
   const [usage, setUsage] = useState<Usage | null>(null);
 
@@ -571,7 +572,7 @@ export function ResumeTailor() {
         <div id="result" className="mt-12 scroll-mt-8">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-6 pl-4">
+              <div className={`${resultTab === "insights" ? "hidden" : "flex"} items-center gap-6 pl-4`}>
                 <div className="relative">
                   <div data-testid="score-ats" className="relative flex h-[76px] w-[76px] flex-col items-center justify-center rounded-xl bg-primary text-black">
                     <span className="font-display text-2xl leading-none font-bold">
@@ -613,7 +614,7 @@ export function ResumeTailor() {
 
           </div>
 
-          <Tabs defaultValue="resume">
+          <Tabs value={resultTab} onValueChange={setResultTab}>
             <TabsList>
               <TabsTrigger value="resume">Resume</TabsTrigger>
               <TabsTrigger value="cover">Cover letter</TabsTrigger>
