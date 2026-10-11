@@ -1,10 +1,32 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 /** Homepage band for the AI interview. Black, white and yellow like the rest of the page. */
 export function InterviewBand() {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    el.classList.add("ivb-js");
+    const io = new IntersectionObserver((es) => {
+      if (es.some((e) => e.isIntersecting)) { el.classList.add("ivb-in"); io.disconnect(); }
+    }, { threshold: 0.2 });
+    io.observe(el);
+    let raf = 0;
+    const upd = () => {
+      raf = 0;
+      const r = el.getBoundingClientRect();
+      const p = Math.max(-1, Math.min(1, (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight));
+      el.style.setProperty("--ivp", p.toFixed(3));
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(upd); };
+    window.addEventListener("scroll", on, { passive: true });
+    upd();
+    return () => { io.disconnect(); window.removeEventListener("scroll", on); if (raf) cancelAnimationFrame(raf); };
+  }, []);
   return (
-    <section data-p className="ivb site-container py-12 sm:py-24" aria-labelledby="ivb-h">
+    <section ref={ref} data-p className="ivb site-container py-12 sm:py-24" aria-labelledby="ivb-h">
       <style>{CSS}</style>
       <p className="ivb-mono">( new: ai interview )</p>
       <div className="ivb-grid">
@@ -51,6 +73,18 @@ const CSS = `
 .ivb-b3{background:#f6f1d6;color:#0b0a08;border-bottom-left-radius:4px;align-self:flex-start}
 .ivb-score{align-self:flex-end;margin-top:4px;background:#ffd600;color:#0b0a08;border-radius:14px;padding:8px 14px;font-size:.9rem}
 .ivb-score b{font-size:1.6rem;margin-right:2px}.ivb-score span{opacity:.7;margin-left:6px}
-@media(prefers-reduced-motion:no-preference){.ivb-b{animation:ivb-in .6s both}.ivb-b2{animation-delay:.25s}.ivb-b3{animation-delay:.5s}.ivb-score{animation:ivb-in .6s .75s both}}
-@keyframes ivb-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ivb-chat{transform:translate3d(0,calc(var(--ivp,0)*-28px),0);will-change:transform}
+.ivb-cat{transform:translate3d(0,calc(var(--ivp,0)*22px),0) rotate(8deg)}
+.ivb-js .ivb-mono,.ivb-js .ivb-sub,.ivb-js .ivb-cta,.ivb-js .ivb-out,.ivb-js .ivb-mk,.ivb-js .ivb-b,.ivb-js .ivb-score,.ivb-js .ivb-cat{opacity:0;transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.ivb-js .ivb-mono,.ivb-js .ivb-sub,.ivb-js .ivb-cta{transform:translateY(26px)}
+.ivb-js .ivb-out{display:inline-block;transform:translateX(-40px)}
+.ivb-js .ivb-mk{display:inline-block;transform:translateX(40px) rotate(-2deg)}
+.ivb-js .ivb-b1,.ivb-js .ivb-b3{transform:translateX(-36px)}
+.ivb-js .ivb-b2{transform:translateX(36px)}
+.ivb-js .ivb-score{transform:scale(.6)}
+.ivb-js .ivb-cat{transform:scale(.3) rotate(-40deg)}
+.ivb-in .ivb-mono,.ivb-in .ivb-sub,.ivb-in .ivb-cta,.ivb-in .ivb-out,.ivb-in .ivb-mk,.ivb-in .ivb-b,.ivb-in .ivb-score{opacity:1;transform:none}
+.ivb-in .ivb-cat{opacity:1;transform:translate3d(0,calc(var(--ivp,0)*22px),0) rotate(8deg)}
+.ivb-in .ivb-out{transition-delay:.1s}.ivb-in .ivb-mk{transition-delay:.25s}.ivb-in .ivb-sub{transition-delay:.4s}.ivb-in .ivb-cta{transition-delay:.55s}
+.ivb-in .ivb-b1{transition-delay:.35s}.ivb-in .ivb-b2{transition-delay:.65s}.ivb-in .ivb-b3{transition-delay:.95s}.ivb-in .ivb-score{transition-delay:1.25s}.ivb-in .ivb-cat{transition-delay:.2s}
 `;
