@@ -98,10 +98,10 @@ const TL_CSS = `
 .tl-tip b{flex:none;width:26px;height:26px;border-radius:50%;background:var(--y);color:#000;display:flex;align-items:center;justify-content:center;font-size:.8rem}
 @media (max-width:640px){.tl-ins-hero{gap:14px;padding:16px}.tl-ins-score{width:62px;height:62px;font-size:2rem}.tl-ins-verdict{font-size:1.1rem}}
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
-@media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.3vw,4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-h1 span:nth-child(-n+2){display:inline}.tl-h1 span:nth-child(2):before{content:" "}.tl-h1 .tl-cur{display:block;margin-top:.08em}.tl-sub{max-width:46rem}}
+@media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.6vw,4.4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-sub{max-width:46rem}}
 @media (min-width:1280px){.tl-wrap{max-width:1440px;padding-left:32px;padding-right:32px}}
 @media (min-width:1700px){.tl-wrap{max-width:1600px}}
-@media (max-width:640px){.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:9vw;white-space:nowrap}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(246,241,214,.55);max-width:19rem}}
+@media (max-width:640px){.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(246,241,214,.55);max-width:19rem}}
 @media (prefers-reduced-motion:reduce){.tl-ins-fill{animation:none}.tl-ins-card:hover,.tl-chip:hover{transform:none}.tl-sticker:hover,.tl-drop:hover svg,.tl button.rounded-full:hover,#result,#result .bg-hero{animation:none}.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
 `;
 
@@ -112,10 +112,9 @@ function TailorPage() {
       <section className="tl-hero">
         <span className="tl-sticker" aria-hidden>Coco approved 🐾 (our kitten)</span>
         <span className="tl-mono tl-rise" style={{ ["--d" as string]: "0s" }}>( resume tailor, ~15 seconds, no fake skills )</span>
-        <h1 className="tl-h1" aria-label="Their job post. Your real resume. Tailored.">
-          <span className="tl-rise" style={{ ["--d" as string]: ".06s" }}>Their <mark>job post.</mark></span>
-          <span className="tl-rise" style={{ ["--d" as string]: ".14s" }}>Your real resume.</span>
-          <span className="tl-rise tl-cur" style={{ ["--d" as string]: ".22s" }}>Tailored.</span>
+        <h1 className="tl-h1" aria-label="Tailored paperwork so good, even you would hire yourself.">
+          <span className="tl-rise" style={{ ["--d" as string]: ".06s" }}><mark>Tailored</mark> paperwork so good,</span>
+          <span className="tl-rise" style={{ ["--d" as string]: ".16s" }}>even YOU would <em className="tl-cur">hire yourself.</em></span>
         </h1>
         <p className="tl-sub tl-rise" style={{ ["--d" as string]: ".3s" }}>
           Drop in your resume and the job post. We rebuild your resume and cover letter for that exact role, in a plain ATS-safe layout. Gaps stay gaps, we never invent skills.
