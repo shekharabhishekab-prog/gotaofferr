@@ -28,7 +28,7 @@ function buildSource(source: string) {
     .split(/\n|(?<=[.!?;])\s+/)
     .map((seg) => new Set(words(seg).map(stem)))
     .filter((set) => set.size > 0);
-  const lines = source.split(/\r?\n/).map((l) => l.replace(/^\s*[-•*▪●]\s*/, "").trim()).filter((l) => l.length > 15);
+  const lines = source.split(/\r?\n/).map((l) => l.replace(/^\s*[-•*▪●]\s*/, "").trim()).filter((l) => l.length > 24);
   return { text, stems, numbers, raw: source.toLowerCase(), segments, lines };
 }
 type Src = ReturnType<typeof buildSource>;
