@@ -11,10 +11,11 @@ export const getUsageTotals = createServerFn({ method: "GET" })
       const { count: c, error } = await admin.from(table).select("user_id", { count: "exact", head: true }).eq("user_id", context.userId);
       return error ? null : (c ?? 0);
     };
-    const [resumesBuilt, interviews, jobSearches] = await Promise.all([
+    const [resumesBuilt, interviews, jobSearches, jobAlerts] = await Promise.all([
       count("builder_uses"),
       count("interview_log"),
       count("job_search_runs"),
+      count("job_alerts"),
     ]);
-    return { resumesBuilt, interviews, jobSearches };
+    return { resumesBuilt, interviews, jobSearches, jobAlerts };
   });
