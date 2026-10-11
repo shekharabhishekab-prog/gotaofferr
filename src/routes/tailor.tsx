@@ -55,9 +55,19 @@ const TL_CSS = `
 .tl [role=tablist]{border:1px solid rgba(255,214,0,.3)}
 .tl-seo{border-top:1px solid rgba(255,214,0,.2)}
 .tl-seo h2{font-family:var(--font-display,inherit)}
+.tl-chips i{transition:transform .2s}
+.tl-chips i:nth-child(odd){transform:rotate(-2.5deg)}
+.tl-chips i:nth-child(even){transform:rotate(2deg)}
+.tl-chips i:hover{transform:rotate(0) scale(1.08);background:rgba(255,214,0,.12)}
+.tl-card{transition:transform .25s,box-shadow .25s}
+.tl-card:hover{transform:translateY(-3px);box-shadow:0 14px 40px -18px rgba(255,214,0,.35)}
+.tl button.rounded-full{transition:transform .2s}
+.tl button.rounded-full:not(:disabled):hover{transform:translateY(-3px) scale(1.02)}
+.tl-cur{display:inline-block;transition:transform .3s}
+.tl-h1:hover .tl-cur{transform:rotate(-2deg) scale(1.04)}
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear both;animation-timeline:view();animation-range:entry 0% entry 45%}}
 @media (max-width:640px){.tl-hero{padding:32px 16px 8px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:clamp(2.1rem,11vw,3rem)}.tl-sub{font-size:.98rem}}
-@media (prefers-reduced-motion:reduce){.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
+@media (prefers-reduced-motion:reduce){.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
 `;
 
 function TailorPage() {
