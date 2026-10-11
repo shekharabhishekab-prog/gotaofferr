@@ -54,7 +54,7 @@ async function runTailorInner(
       const { QualityError } = await import("./truth-guard.server");
       if (!(error instanceof QualityError)) throw error;
       console.warn(`[quality] retry: ${error.issues.slice(0, 3).join("; ")}`);
-      if (Date.now() - startedAt > RETRY_BUDGET_MS) throw new Error(SLOW_MSG);
+      if (Date.now() - startedAt > RETRY_BUDGET_MS) throw new Error(`🔎 [slow ${Math.round((Date.now() - startedAt) / 1000)}s model=${modelId}] issues: ${error.issues.slice(0, 6).join(" | ").slice(0, 400)}`);
       return runTailorOnce(data, country, modelId, true);
     }
   });
