@@ -29,6 +29,7 @@ export function CountryPicker({ value, onChange }: { value?: string; onChange: (
       <label htmlFor="builder-country" className="text-sm font-semibold text-foreground">
         Country you are applying in
       </label>
+      <div className="relative mt-1">
       <input
         id="builder-country"
         type="text"
@@ -43,10 +44,18 @@ export function CountryPicker({ value, onChange }: { value?: string; onChange: (
           setText(e.target.value);
           setOpen(true);
         }}
-        className="mt-1 block w-full rounded-lg border border-border/60 bg-card px-3 py-2 text-base text-foreground"
+        onClick={(e) => (e.target as HTMLInputElement).select()}
+        className="block w-full rounded-lg border border-primary/60 bg-card px-3 py-2 pr-24 text-base text-foreground"
       />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-primary"
+      >
+        ✎ Change
+      </span>
+      </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        We guessed from your connection. Wrong? Type and pick the right one. Your resume follows that country's format.
+        We guessed this from your connection. Tap the box and type to change it. Your resume follows that country's format.
       </p>
       {open && hits.length > 0 && (
         <ul
