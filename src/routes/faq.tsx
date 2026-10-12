@@ -169,7 +169,8 @@ const FQ_CSS = `
 .tl-fq .tl-go{border-radius:999px;background:var(--y);color:#000;font-weight:700;padding:0 28px;margin-top:22px;transition:transform .2s}
 .tl-fq .tl-go:hover{transform:translateY(-3px) rotate(-1deg);background:var(--y)}
 @media (max-width:640px){.tl-fq{padding:4px 14px 24px}.tl-fq .tl-q{padding:0 14px}}
-@media (min-width:1280px){.tl-fq{max-width:980px}}
+@media (min-width:900px){.tl-fq{max-width:1180px}.tl-aclist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;align-items:start}}
+@media (min-width:1280px){.tl-fq{max-width:1320px}}
 `;
 
 function Faq() {
@@ -190,7 +191,7 @@ function Faq() {
 
       <div className="tl-fq">
         <h2 className="sr-only">Common questions</h2>
-        <Accordion type="single" collapsible>
+        <Accordion type="single" collapsible className="tl-aclist">
           {faqs.map((f) => (
             <AccordionItem key={f.q} value={f.q} className="tl-q">
               <AccordionTrigger className="text-left">{f.q}</AccordionTrigger>
