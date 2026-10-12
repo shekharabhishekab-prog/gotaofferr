@@ -228,6 +228,21 @@ const PR_CSS = `
 @keyframes tl-up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}@keyframes tl-pop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
 @keyframes tl-grow{from{transform:scaleX(0)}}
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
+@media (min-width:900px){
+.tl-pr .tl-pw>div[class*=grid]{gap:28px!important}
+.tl-pr .tl-plan{padding:34px 30px!important;border-color:rgba(255,214,0,.14)!important}
+.tl-pr .tl-plan.tl-st{background:linear-gradient(160deg,rgba(255,214,0,.12),rgba(255,255,255,.018))!important}
+.tl-pr .tl-plan.tl-hl{border-color:var(--y)!important}
+.tl-pr .tl-plan .tl-dup,.tl-pr .tl-plan .tl-bf{display:none!important}
+.tl-pr .tl-plan ul{margin-top:26px!important}
+.tl-pr .tl-plan ul li{margin-top:0}
+.tl-pr .tl-plan ul.space-y-2\.5>*+*{margin-top:13px!important}
+.tl-pr .tl-pw>p.tl-ar{background:transparent!important;border-color:rgba(255,255,255,.12)!important;color:rgba(246,241,214,.55)!important;margin-top:18px!important;margin-bottom:44px!important}
+.tl-pr .tl-pw>p.tl-ar strong{color:rgba(246,241,214,.8)}
+.tl-pr .tl-pw>p:not(.tl-ar):not(.tl-lo){margin-top:10px;margin-bottom:6px}
+.tl-pr .tl-cmp{border-color:rgba(255,214,0,.14)!important;margin-top:70px!important}
+.tl-hero{padding-bottom:26px!important}
+}
 @media (min-width:900px){.tl-pm-full{display:none!important}.tl-pm-short{display:inline!important;font-size:1rem!important}.tl-h1 span{display:inline}.tl-h1 span+span{margin-left:.25em}.tl-ar{width:fit-content;max-width:100%;padding:9px 16px!important;font-size:.84rem!important}.tl-lo{display:none!important}}
 @media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.6vw,4.4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-sub{max-width:46rem}}
 @media (min-width:1700px){.tl-wrap{max-width:1780px;padding-left:40px;padding-right:40px}.tl-h1{max-width:1700px;font-size:4.9rem}.tl-sub{max-width:54rem;font-size:1.15rem}}
@@ -492,7 +507,7 @@ function Pricing() {
           return (
             <div
               key={key}
-              className={`tl-plan ${p.highlight ? "tl-hl" : ""} relative flex flex-col rounded-2xl border p-7 ${
+              className={`tl-plan ${key === "starter" ? "tl-st" : ""} ${p.highlight ? "tl-hl" : ""} relative flex flex-col rounded-2xl border p-7 ${
                 isCurrent
                   ? "border-primary ring-2 ring-primary/40 bg-card shadow-lg"
                   : p.highlight
@@ -512,13 +527,13 @@ function Pricing() {
                   </span>
                 ) : null}
                 {key === "starter" && !isCurrent ? (
-                  <span className="w-fit rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                  <span className="tl-dup w-fit rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
                     Limited Launch Offer
                   </span>
                 ) : null}
               </div>
               {key === "starter" ? (
-                <p className="-mt-1 mb-2 text-xs font-medium text-muted-foreground">
+                <p className="tl-dup -mt-1 mb-2 text-xs font-medium text-muted-foreground">
                   40 AI actions bundled together
                 </p>
               ) : null}
@@ -549,7 +564,7 @@ function Pricing() {
                 </div>
               ) : null}
               <p className="mt-2 text-sm text-muted-foreground">{p.tagline}</p>
-              <p className="mt-2 text-xs font-medium text-primary">{p.bestFor}</p>
+              <p className="tl-bf mt-2 text-xs font-medium text-primary">{p.bestFor}</p>
 
               <ul className="mt-6 flex-1 space-y-2.5">
                 {p.features.map((f) => (
