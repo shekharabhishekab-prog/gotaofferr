@@ -327,7 +327,7 @@ const stats = [
   { to: 1000, pre: "", suf: "+", label: "applications automated", body: "The reality of getting hired: hundreds of applications. We do the searching and tailoring for you.", Icon: Target },
   { to: 100, pre: "", suf: "s", label: "of interview rejections avoided", body: "Practice with Coco, our AI interviewer, so the real interview feels familiar.", Icon: Sparkles },
   { to: 600, pre: "", suf: "+ min", label: "saved weekly", body: "Stop spending 1-2 hours every day hunting jobs and rewriting CVs.", Icon: Hourglass },
-  { to: 15, pre: "", suf: " sec", label: "to a tailored resume", body: "Upload once. Rebuild for every company instantly.", Icon: Clock },
+  { to: 30, pre: "", suf: " sec", label: "to a tailored resume", body: "Upload once. Rebuild for every company instantly.", Icon: Clock },
 ] as const;
 
 
@@ -1030,7 +1030,7 @@ function Index() {
               const t0 = performance.now();
               const tick = (now: number) => {
                 const k = Math.min(1, (now - t0) / 1300);
-                num.textContent = String(Math.round(15 * (1 - Math.pow(1 - k, 3))));
+                num.textContent = String(Math.round(30 * (1 - Math.pow(1 - k, 3))));
                 if (k < 1) requestAnimationFrame(tick); else num.classList.add("done");
               };
               requestAnimationFrame(tick);
