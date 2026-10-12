@@ -228,6 +228,7 @@ const PR_CSS = `
 @keyframes tl-up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}@keyframes tl-pop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
 @keyframes tl-grow{from{transform:scaleX(0)}}
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
+@media (min-width:900px){.tl-pm-full{display:none!important}.tl-pm-short{display:inline!important;font-size:1rem!important}.tl-h1 span{display:inline}.tl-h1 span+span{margin-left:.25em}.tl-ar{width:fit-content;max-width:100%;padding:9px 16px!important;font-size:.84rem!important}.tl-lo{display:none!important}}
 @media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.6vw,4.4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-sub{max-width:46rem}}
 @media (min-width:1700px){.tl-wrap{max-width:1780px;padding-left:40px;padding-right:40px}.tl-h1{max-width:1700px;font-size:4.9rem}.tl-sub{max-width:54rem;font-size:1.15rem}}
 @media (max-width:640px){.tl-hero,.tl-hero *{text-align:left}.tl-h1{margin:16px 0 0;max-width:none}.tl-h1 span{text-wrap:wrap}.tl-sub{margin:14px 0 0;text-wrap:pretty;font-size:.78rem!important;line-height:1.5}.tl-chips{justify-content:flex-start}.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 26px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(246,241,214,.55);max-width:19rem}}
@@ -446,7 +447,7 @@ function Pricing() {
           time. You pay in {pricing.code}, securely via Razorpay, tax at checkout.
         </span>
       </p>
-      <p className="mt-4 max-w-2xl lg:max-w-6xl rounded-xl border border-border bg-card/60 px-4 py-3 text-sm text-card-foreground">
+      <p className="tl-ar mt-4 max-w-2xl lg:max-w-6xl rounded-xl border border-border bg-card/60 px-4 py-3 text-sm text-card-foreground">
         <strong>Auto-renewal:</strong> every paid pack is a monthly subscription. By paying, you
         authorise an automatic charge of the same amount every month on the same date until you
         cancel. Cancel anytime from your account — you keep access until the end of the paid month.
@@ -464,7 +465,7 @@ function Pricing() {
 
 
       {festival && hasFestivalPrice(pricing, "job_hunt") ? (
-        <p className="mt-6 w-fit rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
+        <p className="tl-lo mt-6 w-fit rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
           <strong>{festival.title} - Save up to {savingPercent(pricing, "job_hunt", "month", true)}%.</strong> Starter Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "starter", "month", true))}/month, Job Hunt Pack is{" "}
           {formatAmount(pricing, amountFor(pricing, "job_hunt", "month", true))}/month and Career Pro Pack is{" "}
