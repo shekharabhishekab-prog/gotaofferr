@@ -429,7 +429,7 @@ function Pricing() {
         </h1>
       </section>
       <div className="tl-pw">
-      <p className="mt-4 max-w-2xl text-muted-foreground">
+      <p className="mt-4 max-w-2xl lg:max-w-6xl text-muted-foreground">
         Plans are priced by how many tailored applications you send — and whether you want the AI to
         find the jobs for you too. Try it free, upgrade only while you're actively applying, cancel
         any time. Prices shown in {pricing.code} for your region; payment is processed securely by
@@ -437,7 +437,7 @@ function Pricing() {
         cards, bank transfers (ACH, SEPA, CHAPS, SWIFT) and local methods like Trustly, GiroPay and
         SofortPay are supported, alongside UPI, netbanking and wallets in India.
       </p>
-      <p className="mt-4 max-w-2xl rounded-xl border border-border bg-card/60 px-4 py-3 text-sm text-card-foreground">
+      <p className="mt-4 max-w-2xl lg:max-w-6xl rounded-xl border border-border bg-card/60 px-4 py-3 text-sm text-card-foreground">
         <strong>Auto-renewal:</strong> every paid pack is a monthly subscription. By paying, you
         authorise an automatic charge of the same amount every month on the same date until you
         cancel. Cancel anytime from your account — you keep access until the end of the paid month.
