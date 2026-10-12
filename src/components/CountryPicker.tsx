@@ -7,7 +7,10 @@ export function CountryPicker({ value, onChange }: { value?: string; onChange: (
   const [text, setText] = useState(countryName(value));
   const [open, setOpen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
-  useEffect(() => setText(countryName(value)), [value]);
+  // Do not overwrite what the user is typing when the IP prefill arrives late.
+  useEffect(() => {
+    if (!open) setText(countryName(value));
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     const close = (e: MouseEvent) => {
       if (box.current && !box.current.contains(e.target as Node)) {
