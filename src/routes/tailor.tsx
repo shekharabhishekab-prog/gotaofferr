@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { ResumeTailor } from "@/components/ResumeTailor";
@@ -101,7 +102,7 @@ const TL_CSS = `
 @media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.6vw,4.4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-sub{max-width:46rem}}
 @media (min-width:1280px){.tl-wrap{max-width:1480px;padding-left:32px;padding-right:32px}}
 @media (min-width:1700px){.tl-wrap{max-width:1780px;padding-left:40px;padding-right:40px}.tl-h1{max-width:1700px;font-size:4.9rem}.tl-sub{max-width:54rem;font-size:1.15rem}}
-@media (max-width:640px){.tl-hero,.tl-hero *{text-align:left}.tl-h1{margin:16px 0 0;max-width:none}.tl-h1 span{text-wrap:wrap}.tl-sub{margin:14px 0 0;text-wrap:pretty;font-size:.78rem!important;line-height:1.5}.tl-chips{justify-content:flex-start}.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 26px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(246,241,214,.55);max-width:19rem}}
+@media (max-width:640px){.tl-hero,.tl-hero *{text-align:left}.tl-h1{margin:16px 0 0;max-width:none}.tl-h1 span{text-wrap:wrap}.tl-sub{margin:14px 0 0;text-wrap:pretty;font-size:.78rem!important;line-height:1.5}.tl-chips{justify-content:flex-start}.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:wrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 26px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(246,241,214,.55);max-width:19rem}}
 .tl{overflow-x:clip}.tl-grid>*{min-width:0}.tl-drop{overflow:hidden;max-width:100%}.tl-drop span{max-width:100%;overflow-wrap:anywhere;word-break:break-word}.tl textarea,.tl input{max-width:100%;min-width:0}
 @media (prefers-reduced-motion:reduce){.tl-ins-fill{animation:none}.tl-ins-card:hover,.tl-chip:hover{transform:none}.tl-sticker:hover,.tl-drop:hover svg,.tl button.rounded-full:hover,#result,#result .bg-hero{animation:none}.tl-chips i,.tl-card,.tl button.rounded-full{transition:none}.tl-card:hover,.tl button.rounded-full:hover{transform:none}.tl-rise{animation:none;opacity:1;transform:none}.tl-grid>*{animation:none}}
 .tl-br{display:flex;flex-direction:column;align-items:center;padding:34px 16px 6px}
@@ -133,14 +134,14 @@ const TL_CSS = `
 @media (min-width:761px){
 .tl-br{display:none}
 .tl-gap{display:block;position:relative;overflow:hidden;margin:0 0 20px;padding:0}
-.tl-bw{white-space:nowrap;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;font-size:clamp(3rem,8.4vw,8.2rem);line-height:.98;color:var(--cream);margin-left:-8%}
+.tl-bw{white-space:nowrap;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;font-size:clamp(3rem,8.4vw,8.2rem);line-height:.98;color:var(--cream);margin-left:0;width:max-content;will-change:transform}
 .tl-bw b{color:var(--y);display:inline-block}
 .tl-bw.out{color:transparent;-webkit-text-stroke:2px var(--cream)}
 .tl-gchips{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:18px 0;padding:0 20px}
 .tl-gchip{font-family:ui-monospace,Menlo,monospace;font-weight:800;text-transform:uppercase;font-size:1rem;padding:11px 16px;border:2px solid var(--cream);border-radius:999px;transition:transform .2s}
 .tl-gchip.y{background:var(--y);color:#000;border-color:var(--y)}
 .tl-gchip:hover{transform:translateY(-3px) rotate(-1.5deg)}
-@supports (animation-timeline:view()){.tl-bw{animation:tl-bwl linear both;animation-timeline:view();animation-range:entry 0% exit 100%}.tl-bw.out{animation-name:tl-bwr}@keyframes tl-bwl{from{transform:translateX(24%)}to{transform:translateX(-24%)}}@keyframes tl-bwr{from{transform:translateX(-24%)}to{transform:translateX(24%)}}.tl-gchip{animation:tl-pop linear backwards;animation-timeline:view();animation-range:entry 0% entry 60%}.tl-gchip:nth-child(2){animation-range:entry 5% entry 65%}.tl-gchip:nth-child(3){animation-range:entry 10% entry 70%}.tl-gchip:nth-child(4){animation-range:entry 15% entry 75%}.tl-seo2 h2,.tl-seo2 .tl-lead,.tl-more{animation:tl-up linear backwards;animation-timeline:view();animation-range:entry 0% entry 50%}@keyframes tl-pop{from{opacity:0;transform:translateY(26px) scale(.85)}to{opacity:1;transform:none}}}
+@supports (animation-timeline:view()){.tl-gchip{animation:tl-pop linear backwards;animation-timeline:view();animation-range:entry 0% entry 60%}.tl-gchip:nth-child(2){animation-range:entry 5% entry 65%}.tl-gchip:nth-child(3){animation-range:entry 10% entry 70%}.tl-gchip:nth-child(4){animation-range:entry 15% entry 75%}.tl-seo2 h2,.tl-seo2 .tl-lead,.tl-more{animation:tl-up linear backwards;animation-timeline:view();animation-range:entry 0% entry 50%}@keyframes tl-pop{from{opacity:0;transform:translateY(26px) scale(.85)}to{opacity:1;transform:none}}}
 .tl-seo2 h2{font-size:clamp(2.4rem,4.6vw,5rem);line-height:.98}
 .tl-seo2 h2 mark{padding:.02em .2em;transform:rotate(-1.5deg);box-shadow:7px 7px 0 rgba(255,255,255,.9);transition:transform .25s}
 .tl-seo2 h2:hover mark{transform:rotate(0) scale(1.03)}
@@ -150,6 +151,28 @@ const TL_CSS = `
 `;
 
 function TailorPage() {
+  useEffect(() => {
+    const rows = Array.from(document.querySelectorAll<HTMLElement>(".tl-bw"));
+    if (!rows.length || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let raf = 0;
+    const tick = () => {
+      raf = 0;
+      const vh = window.innerHeight;
+      rows.forEach((el, i) => {
+        const host = el.parentElement as HTMLElement;
+        const r = host.getBoundingClientRect();
+        const p = Math.min(1, Math.max(0, (vh - r.top) / (vh + r.height)));
+        const travel = Math.max(0, el.scrollWidth - host.clientWidth);
+        const x = i % 2 === 0 ? -travel + p * travel : -p * travel;
+        el.style.transform = "translate3d(" + x.toFixed(1) + "px,0,0)";
+      });
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    tick();
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => { window.removeEventListener("scroll", on); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
+  }, []);
   return (
     <main className="tlp bg-background">
       <style>{TL_CSS}</style>
@@ -170,14 +193,14 @@ function TailorPage() {
       <ResumeTailor />
 
       <section aria-hidden className="tl-gap">
-        <div className="tl-bw">One column <b>+</b> Real text <b>+</b> Real months <b>+</b> One column <b>+</b> Real text <b>+</b> Real months <b>+</b></div>
+        <div className="tl-bw">One column <b>+</b> Real text <b>+</b> Real months <b>+</b> One column <b>+</b> Real text <b>+</b> Real months <b>+</b> One column <b>+</b> Real text <b>+</b> Real months <b>+</b></div>
         <div className="tl-gchips">
           <span className="tl-gchip">&#10003; one column</span>
           <span className="tl-gchip y">&#10003; real text</span>
           <span className="tl-gchip">&#10003; no fake skills</span>
           <span className="tl-gchip y">! gaps stay gaps</span>
         </div>
-        <div className="tl-bw out">No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b> No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b></div>
+        <div className="tl-bw out">No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b> No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b> No tables <b>+</b> No text boxes <b>+</b> No pictures <b>+</b></div>
       </section>
 
       <div className="tl-br">
