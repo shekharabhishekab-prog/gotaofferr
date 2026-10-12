@@ -113,7 +113,7 @@ const AB_CSS = `
 .ab-end p{max-width:46rem;margin:0;color:rgba(246,241,214,.6);font-size:.9rem;line-height:1.6}
 .ab-cta{display:inline-block;background:var(--y);color:#000;font-weight:800;border-radius:999px;padding:14px 28px;text-decoration:none;transition:transform .2s}
 .ab-cta:hover{transform:translateY(-3px) rotate(-1deg)}
-@media (min-width:900px){.ab-h1{max-width:1440px;font-size:clamp(2.6rem,4.8vw,4.6rem)}.ab-h1 span{display:inline}.ab-h1 span+span{margin-left:.25em}.ab-h1{white-space:nowrap}}
+@media (min-width:900px){.ab-h1{max-width:1700px;font-size:clamp(2.2rem,4.1vw,4.6rem)}.ab-h1 span{display:inline}.ab-h1 span+span{margin-left:.25em}.ab-h1{white-space:nowrap}}
 @media (min-width:1500px){.abp.site-container{max-width:1780px;width:min(1780px,calc(100% - 2rem));padding-left:40px;padding-right:40px}}
 @media (max-width:1000px){.ab-stats,.ab-gets{grid-template-columns:repeat(2,minmax(0,1fr))}.ab-story{grid-template-columns:minmax(0,1fr)}.ab-tabs{flex-direction:row;overflow-x:auto;padding-bottom:4px}.ab-tab{flex:0 0 auto;padding:12px 16px}.ab-tab:hover{transform:none}}
 @media (max-width:640px){.ab-hero,.ab-hero *{text-align:left}.ab-hero{padding:30px 14px 22px}.ab-h1{margin:16px 0 0;max-width:none}.ab-sub{margin:14px 0 0;font-size:.95rem}.ab-sec{padding-top:52px}.ab-stats,.ab-gets{grid-template-columns:minmax(0,1fr)}.ab-stage{padding:28px 22px;min-height:0}.ab-big{font-size:7rem}.ab-stage p{font-size:1rem}.ab-calc{padding:24px 20px}.ab-row{grid-template-columns:minmax(0,1fr) 90px;gap:6px 10px}.ab-row .lbl{grid-column:1/-1}.ab-coco{grid-template-columns:minmax(0,1fr);padding:26px 22px;gap:22px}.ab-cat{width:120px;height:120px;font-size:60px}.ab-mq-in span{font-size:1rem;padding:10px 0}.ab-end{flex-direction:column;align-items:flex-start}}
@@ -133,7 +133,7 @@ const CHAPTERS = [
   },
   {
     t: "One master resume",
-    e: "master",
+    e: "resume",
     p: "GotaOfferr closes that gap. You keep one master resume. We rebuild it for each specific company and role, complete with a cover letter, a match score, and the keywords you're missing.",
   },
   {
