@@ -280,6 +280,7 @@ const PR_CSS = `
 .tl-pr .tl-cmp .rounded-xl{border-radius:18px;transition:transform .2s,border-color .2s}
 .tl-pr .tl-cmp .rounded-xl:hover{transform:translateY(-3px)}
 @media (max-width:640px){.tl-pr .tl-pw{padding:0 14px 48px}}
+@media (min-width:1500px){.tl-pr .tl-pw{max-width:1780px;padding-left:40px;padding-right:40px}.tl-pr .tl-pw>p{max-width:1500px}}
 @media (prefers-reduced-motion:reduce){.tl-pr .tl-plan,.tl-pr .tl-plan:hover{transition:none;transform:none}}
 `;
 
