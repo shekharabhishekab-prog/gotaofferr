@@ -52,6 +52,7 @@ const AB_CSS = `
 .ab-js .ab-rv{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
 .ab-js .ab-rv.ab-in{opacity:1;transform:none}
 .ab-sec{padding:76px 0 8px}
+.ab-mq+.ab-sec,.ab-sec:first-of-type{padding-top:84px}
 .ab-eyebrow{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;color:var(--y);letter-spacing:.04em}
 .ab-h2{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:1;letter-spacing:-.01em;font-size:clamp(1.9rem,4.4vw,3.2rem);margin:10px 0 0}
 .ab-h2 mark{background:var(--y);color:#000;padding:0 .12em;display:inline-block;transform:rotate(-1deg);line-height:1}
@@ -208,40 +209,6 @@ function useReveal(root: React.RefObject<HTMLElement | null>) {
   }, [root]);
 }
 
-function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
-  const ref = useRef<HTMLElement | null>(null);
-  const [v, setV] = useState(to);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !("IntersectionObserver" in window)) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    setV(0);
-    let raf = 0;
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      const t0 = performance.now();
-      const step = (t: number) => {
-        const k = Math.min(1, (t - t0) / 1100);
-        setV(Math.round(to * (1 - Math.pow(1 - k, 3))));
-        if (k < 1) raf = requestAnimationFrame(step);
-      };
-      raf = requestAnimationFrame(step);
-    });
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      cancelAnimationFrame(raf);
-    };
-  }, [to]);
-  return (
-    <b ref={ref}>
-      {v}
-      {suffix}
-    </b>
-  );
-}
-
 function About() {
   const root = useRef<HTMLElement | null>(null);
   useReveal(root);
@@ -278,12 +245,12 @@ function About() {
         <span className="ab-mono ab-rise" style={{ ["--d" as string]: "0s" }}>
           ( about gotaofferr, the short story )
         </span>
-        <h1 className="ab-h1" aria-label="About GotaOfferr. We got tired of rewriting the same resume.">
+        <h1 className="ab-h1" aria-label="About GotaOfferr. Built by people who hate rewriting resumes.">
           <span className="ab-rise" style={{ ["--d" as string]: ".06s" }}>
-            We got tired of <mark>rewriting</mark>
+            Built by people who hate <mark>rewriting</mark>
           </span>
           <span className="ab-rise" style={{ ["--d" as string]: ".16s" }}>
-            the same <em className="ab-cur">resume.</em>
+            <em className="ab-cur">resumes.</em>
           </span>
         </h1>
         <p className="ab-sub ab-rise" style={{ ["--d" as string]: ".26s" }}>
@@ -301,25 +268,6 @@ function About() {
               </span>
             ))}
           </div>
-        </div>
-      </div>
-
-      <div className="ab-stats">
-        <div className="ab-stat ab-rv">
-          <CountUp to={11} />
-          <span>job markets with country-aware resume formatting</span>
-        </div>
-        <div className="ab-stat ab-rv">
-          <CountUp to={4} />
-          <span>tools: tailor, job finder, resume builder and ATS checker</span>
-        </div>
-        <div className="ab-stat ab-rv">
-          <CountUp to={1} />
-          <span>master resume is all you need to keep</span>
-        </div>
-        <div className="ab-stat ab-rv">
-          <CountUp to={0} />
-          <span>fake skills added to your resume, ever</span>
         </div>
       </div>
 
