@@ -187,7 +187,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
   FR: { label: "France", rules: ["One-page CV for most candidates, two for senior profiles. Amounts in EUR (€).", "Keep French qualification names as written, list language levels, and use factual, restrained wording."] },
   NL: { label: "Netherlands", rules: [...COMMON_NO_PHOTO, "Two-page CV, direct and factual tone, amounts in EUR (€), include language levels."] },
   SG: { label: "Singapore", rules: ["Two-page resume. Amounts in SGD ($). Note work-pass status only if the source resume states it.", "Highlight regional (APAC/SEA) scope where the source supports it."] },
-  ZA: { label: "South Africa", rules: ["Two to three page CV, British spelling, amounts in ZAR (R). Keep qualification names as written."] },
+  ZA: { label: "South Africa", rules: ["Two-page CV, three pages at most for senior profiles. British spelling, amounts in ZAR (R). Keep qualification names as written. Never add an ID number."] },
 };
 
 /** Region defaults: used when a country has no rules of its own. Country entries above override these. */
@@ -195,7 +195,7 @@ const REGION_RULES: Record<string, string[]> = {
   Europe: ["Two-page CV at most, factual and restrained wording, DD/MM/YYYY or Mon YYYY dates.", "Keep qualification names as written and list language levels when the source has them.", "Do not add a photo or personal data unless the source resume already includes them."],
   "North America": [...COMMON_NO_PHOTO, "One page for most candidates, two for senior ones. Results first, no personal details."],
   "South America": ["Two-page CV, clear and factual. Keep qualification names as written and list language levels (Spanish, Portuguese, English) when the source has them.", "Do not add a photo or personal data unless the source resume already includes them."],
-  Africa: ["Two to three page CV, British-style spelling, clear and factual. Keep qualification names as written.", "Do not add a photo or personal data unless the source resume already includes them."],
+  Africa: ["Two-page CV at most, British-style spelling, clear and factual. Keep qualification names as written.", "Do not add a photo or personal data unless the source resume already includes them."],
   Asia: ["Two-page resume, clear and keyword-rich. Keep qualification names as written.", "Do not add a photo or personal data unless the source resume already includes them."],
   Australia: [...COMMON_NO_PHOTO, "Two to three pages, Australian/NZ spelling, warm confident tone.", 'Referees: keep a final "Referees" section only if the source resume already lists referees, exactly as given. If it lists none, do not add a Referees section or an "available on request" line. Never invent names, titles or contact details.'],
 };
