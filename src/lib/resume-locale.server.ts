@@ -112,6 +112,16 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
       "Keep degree classifications as written (for example, 2:1) and use UK job-title conventions.",
     ],
   },
+  IL: {
+    label: "Israel",
+    rules: [
+      ...COMMON_NO_PHOTO,
+      'US-style resume, called a "Resume". One page for under 10 years of experience, two pages at most.',
+      "Contact items (each its own line): full name, city, phone with +972, professional email, LinkedIn.",
+      "Mon YYYY - Mon YYYY date ranges. Lead with impact and metrics. No objective statement, no references line.",
+      "Military or national service goes under Experience or a short line only if the source resume already lists it. Never invent it.",
+    ],
+  },
   IE: { label: "Ireland", rules: [...COMMON_NO_PHOTO, "CV format, up to two pages, British/Irish spelling, amounts in EUR (€)."] },
   IN: {
     label: "India",
