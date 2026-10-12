@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PasswordInput } from "@/components/PasswordInput";
 import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
 import { supabase } from "@/integrations/supabase/client";
+import { signOutOtherSessions } from "@/lib/session.functions";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -157,6 +158,7 @@ function AuthPage() {
     const { error } = await supabase.auth.updateUser({ password: resetPassword });
     setBusy(false);
     if (error) return toast.error(error.message || "Could not update your password.");
+    await signOutOtherSessions().catch(() => undefined);
     toast.success("Password updated. You're signed in.");
     navigate({ to: next, replace: true });
   }
