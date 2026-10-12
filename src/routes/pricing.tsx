@@ -243,7 +243,7 @@ const PR_CSS = `
 .tl-pr .tl-cmp{border-color:rgba(255,214,0,.14)!important;margin-top:70px!important}
 .tl-hero{padding-bottom:26px!important}
 }
-@media (max-width:899px){.tl-pm-short{display:none!important}.tl-pm-xs{display:inline;font-size:.88rem;line-height:1.55}.tl-lo{display:none!important}.tl-pr .tl-pw>p.tl-ar{background:transparent!important;border-color:rgba(255,255,255,.12)!important;color:rgba(246,241,214,.6)!important;font-size:.72rem!important;line-height:1.5;padding:9px 12px!important;margin-top:12px!important}.tl-pr .tl-pw>p.tl-ar strong{color:rgba(246,241,214,.85)}}
+@media (max-width:899px){.tl-pm-short{display:none!important}.tl-pm-xs.tl-pm-xs{display:inline;font-size:.88rem;line-height:1.55}.tl-lo{display:none!important}.tl-pr .tl-pw>p.tl-ar{background:transparent!important;border-color:rgba(255,255,255,.12)!important;color:rgba(246,241,214,.6)!important;font-size:.72rem!important;line-height:1.5;padding:9px 12px!important;margin-top:12px!important}.tl-pr .tl-pw>p.tl-ar strong{color:rgba(246,241,214,.85)}}
 .tl-pm-xs{display:none}
 @media (min-width:900px){.tl-pm-full{display:none!important}.tl-pm-short{display:inline!important;font-size:1rem!important}.tl-h1 span{display:inline}.tl-h1 span+span{margin-left:.25em}.tl-ar{width:fit-content;max-width:100%;padding:9px 16px!important;font-size:.84rem!important}.tl-lo{display:none!important}}
 @media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.6vw,4.4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-sub{max-width:46rem}}
