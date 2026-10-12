@@ -122,10 +122,10 @@ function ResumeBuilderPage() {
           <span className="tl-rise" style={{ ["--d" as string]: ".16s" }}>without the <em className="tl-cur">cold sweat.</em></span>
         </h1>
         <p className="tl-sub tl-rise" style={{ ["--d" as string]: ".3s" }}>
-          No resume yet? Write what you did in plain words, like you would tell a friend over coffee. Pick the Indian or the international format, and AI turns your notes into clean, recruiter-ready lines.
+          No resume yet? Write what you did in plain words, like you would tell a friend over coffee. Pick your country, and AI turns your notes into clean, recruiter-ready lines.
         </p>
         <div className="tl-chips tl-rise" style={{ ["--d" as string]: ".38s" }} aria-hidden>
-          <i>ATS-safe ✅</i><i>India or international 🌍</i><i>Plain words in ✍️</i>
+          <i>ATS-safe ✅</i><i>Any country 🌍</i><i>Plain words in ✍️</i>
         </div>
       </section>
       <div className="tl">
@@ -140,12 +140,10 @@ function ResumeBuilderPage() {
           in a single-column format that applicant tracking systems read reliably.
         </p>
         <h3>
-          Indian or international format
+          Your country, your format
         </h3>
         <p className="tl-lead">
-          Pick the format that fits where you are applying. The international format is short and
-          achievement-led. The Indian format keeps the personal and academic details that Indian
-          recruiters expect. Applying to a specific country? Read our resume format guides for{" "}
+          Choose the country you are applying in. The builder follows that country's resume format and spelling. Applying to a specific country? Read our resume format guides for{" "}
           <a style={{ color: "var(--y)" }} href="/guides/india-resume-format">
             India
           </a>
