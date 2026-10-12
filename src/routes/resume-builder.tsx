@@ -59,6 +59,7 @@ const RB_CSS = `
 .tl-rise{opacity:0;transform:translateY(.6em);animation:tl-rise .6s cubic-bezier(.2,.8,.2,1) var(--d,0s) forwards}
 @keyframes tl-rise{to{opacity:1;transform:none}}
 .tl-chips i{transition:transform .2s}
+.tlp .grid>*{min-width:0}
 .tl-chips i:nth-child(odd){transform:rotate(-1.5deg)}
 .tl-chips i:nth-child(even){transform:rotate(1.5deg)}
 .tl-chips i:hover{transform:rotate(0) scale(1.08);background:rgba(255,214,0,.12)}
