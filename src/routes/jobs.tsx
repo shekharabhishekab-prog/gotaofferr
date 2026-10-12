@@ -70,7 +70,7 @@ const JB_CSS = `
 @media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.6vw,4.4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-sub{max-width:46rem}}
 @media (min-width:1700px){.tl-wrap{max-width:1780px;padding-left:40px;padding-right:40px}.tl-h1{max-width:1700px;font-size:4.9rem}.tl-sub{max-width:54rem;font-size:1.15rem}}
 @media (max-width:640px){.tl-hero,.tl-hero *{text-align:left}.tl-h1{margin:16px 0 0;max-width:none}.tl-h1 span{text-wrap:wrap}.tl-sub{margin:14px 0 0;text-wrap:pretty;font-size:.78rem!important;line-height:1.5}.tl-chips{justify-content:flex-start}.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 26px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(246,241,214,.55);max-width:19rem}}
-.tl-seo2{max-width:1100px;margin:0 auto;padding:56px 0 20px;color:rgba(246,241,214,.72)}
+.tl-seo2{max-width:none;margin:0;padding:56px 0 20px;color:rgba(246,241,214,.72)}
 .tl-seo2 h2{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:1;letter-spacing:-.01em;font-size:clamp(1.7rem,4.2vw,2.8rem);color:var(--cream);margin:0;text-wrap:balance}
 .tl-seo2 h2 mark{background:var(--y);color:#000;padding:0 .12em;display:inline-block;transform:rotate(-1deg);line-height:1}
 .tl-seo2 .tl-lead{margin:18px 0 0;font-size:1.02rem;line-height:1.7;max-width:46rem;overflow-wrap:anywhere}
@@ -83,8 +83,9 @@ const JB_CSS = `
 .tl-more a:hover{background:var(--y);color:#000}
 @media (min-width:1100px){.tl-gets{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:640px){.tl-gets{grid-template-columns:minmax(0,1fr)}.tl-seo2{padding-top:40px}}
-@media (min-width:900px){.tl-hero{padding:22px 20px 14px}.tl-sticker{margin-bottom:8px}.tl-h1{margin-top:10px;font-size:clamp(2.2rem,3.6vw,3.2rem)}.tl-sub{margin-top:10px;font-size:.95rem}.tl-hero+*{margin-top:0}}
-@media (min-width:1700px){.tl-h1{font-size:3.6rem}}
+@media (min-width:900px){.tl-hero{padding:20px 20px 10px}.tl-sticker{margin-bottom:8px}.tl-h1{margin-top:8px;font-size:clamp(2.6rem,4.2vw,4rem)}.tl-sub{margin-top:10px;font-size:1.02rem}}
+@media (min-width:1100px){.tl-sub{max-width:none;white-space:nowrap}.tl-seo2 .tl-lead{max-width:72rem}}
+@media (min-width:1500px){.tlp.site-container{max-width:1780px;padding-left:40px;padding-right:40px}}
 `;
 
 export const Route = createFileRoute("/jobs")({
