@@ -171,6 +171,7 @@ const FQ_CSS = `
 @media (max-width:640px){.tl-fq{padding:4px 14px 24px}.tl-fq .tl-q{padding:0 14px}}
 @media (min-width:900px){.tl-fq{max-width:1180px}.tl-aclist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;align-items:start}}
 @media (min-width:1280px){.tl-fq{max-width:1320px}}
+@media (min-width:1500px){.tl-fq{max-width:1780px;padding-left:40px;padding-right:40px}.tl-aclist{column-gap:24px}}
 `;
 
 function Faq() {
