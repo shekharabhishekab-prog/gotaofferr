@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { TurnstileWidget, resetTurnstile } from "@/components/TurnstileWidget";
 import { useSession } from "@/hooks/useSession";
-import { assistResumeField, polishResumeDraft } from "@/lib/resume-builder.functions";
+import { CountryPicker } from "@/components/CountryPicker";
+import { assistResumeField, getDetectedCountry, polishResumeDraft } from "@/lib/resume-builder.functions";
 import { getBuilderUsage, spendBuilderResume } from "@/lib/builder-usage.functions";
 import { saveBuilderResume } from "@/lib/builder-saves.functions";
 import { UsageUpsell } from "@/components/UsageUpsell";
@@ -37,6 +38,7 @@ export function ResumeBuilder() {
   const polish = useServerFn(polishResumeDraft);
   const assist = useServerFn(assistResumeField);
   const loadUsage = useServerFn(getBuilderUsage);
+  const detectCountryFn = useServerFn(getDetectedCountry);
   const saveResume = useServerFn(saveBuilderResume);
   const [saving, setSaving] = useState(false);
   const spendResume = useServerFn(spendBuilderResume);
@@ -52,6 +54,13 @@ export function ResumeBuilder() {
   const [downloading, setDownloading] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [busyField, setBusyField] = useState<string | null>(null);
+
+  // Prefill the visible country field from the visitor's IP country. The user can change it.
+  useEffect(() => {
+    void detectCountryFn({}).then((r) => {
+      if (r.country) setDraft((prev) => (prev.country ? prev : { ...prev, country: r.country! }));
+    }).catch(() => undefined);
+  }, [detectCountryFn]);
 
   function set<K extends keyof ResumeDraft>(key: K, value: ResumeDraft[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }));
@@ -178,7 +187,7 @@ export function ResumeBuilder() {
           <button
             key={key}
             type="button"
-            onClick={() => set("template", key)}
+            onClick={() => { set("template", key); if (key === "india") set("country", "IN"); }}
             aria-pressed={draft.template === key}
             className={`rounded-xl border p-6 text-left transition-colors ${
               draft.template === key
@@ -191,6 +200,10 @@ export function ResumeBuilder() {
           </button>
         ))}
       </section>
+
+      <div className="mt-8 max-w-md">
+        <CountryPicker value={draft.country} onChange={(c) => set("country", c)} />
+      </div>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         {/* ---------------- Form ---------------- */}
