@@ -254,7 +254,7 @@ function About() {
           </span>
         </h1>
         <p className="ab-sub ab-rise" style={{ ["--d" as string]: ".26s" }}>
-          GotaOfferr was built for job seekers tired of manually rewriting the same resume for every company they apply to.
+          GotaOfferr was built for job seekers tired of waiting for replies that never come.
         </p>
       </section>
 
