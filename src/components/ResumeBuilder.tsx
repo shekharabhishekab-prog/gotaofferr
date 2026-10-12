@@ -19,18 +19,11 @@ import type { AssistKind } from "@/lib/resume-assist-schema";
 import {
   emptyDraft,
   resumeDraftSchema,
-  templateLabels,
   type PolishedResume,
   type ResumeDraft,
-  type ResumeTemplate,
 } from "@/lib/resume-builder-schema";
 
 
-const TEMPLATE_BLURB: Record<ResumeTemplate, string> = {
-  india: "Indian recruiters and portals like Naukri. Education stays prominent, two pages are fine, and personal details are allowed.",
-  international:
-    "US, UK, EU, Canada, Australia and Gulf employers on Greenhouse or Workday. No photo, no date of birth, outcome-first bullets.",
-};
 
 export function ResumeBuilder() {
   const { session } = useSession();
@@ -58,7 +51,7 @@ export function ResumeBuilder() {
   // Prefill the visible country field from the visitor's IP country. The user can change it.
   useEffect(() => {
     void detectCountryFn({}).then((r) => {
-      if (r.country) setDraft((prev) => (prev.country ? prev : { ...prev, country: r.country! }));
+      if (r.country) setDraft((prev) => (prev.country ? prev : { ...prev, country: r.country!, template: r.country === "IN" ? "india" : "international" }));
     }).catch(() => undefined);
   }, [detectCountryFn]);
 
@@ -177,39 +170,19 @@ export function ResumeBuilder() {
     }
   }
 
-  const isIndia = draft.template === "india";
+  const isIndia = draft.country === "IN";
 
   return (
     <div className="site-container pb-24">
-      {/* Template picker */}
-      <section className="mt-10 grid gap-4 md:grid-cols-2">
-        {(Object.keys(templateLabels) as ResumeTemplate[]).map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => { set("template", key); if (key === "india") set("country", "IN"); }}
-            aria-pressed={draft.template === key}
-            className={`rounded-xl border p-6 text-left transition-colors ${
-              draft.template === key
-                ? "border-primary bg-primary/10"
-                : "border-border/60 bg-card hover:border-primary/50"
-            }`}
-          >
-            <h2 className="font-display text-lg font-bold text-foreground">{templateLabels[key]}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{TEMPLATE_BLURB[key]}</p>
-          </button>
-        ))}
-      </section>
-
-      <div className="mt-8 max-w-md">
-        <CountryPicker value={draft.country} onChange={(c) => set("country", c)} />
-      </div>
-
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         {/* ---------------- Form ---------------- */}
         <div className="space-y-4">
+          <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 shadow-lg sm:p-5" data-testid="country-step">
+            <p className="mb-3 inline-block rounded-full bg-primary px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-foreground">Step 1 · Pick your country first</p>
+              <CountryPicker value={draft.country} onChange={(c) => setDraft((prev) => ({ ...prev, country: c, template: c === "IN" ? "india" : "international" }))} />
+          </div>
           <p className="text-xs text-muted-foreground">
-            Sections are collapsed to keep this short. Open one, write rough notes, and use
+            Step 2: sections are collapsed to keep this short. Open one, write rough notes, and use
             <span className="mx-1 font-semibold text-primary">Improve with AI</span>
             on any field.
           </p>
@@ -523,23 +496,12 @@ export function ResumeBuilder() {
               <Input value={draft.languages} onChange={(e) => set("languages", e.target.value)} />
             </Field>
 
-            {isIndia ? (
-              <>
-                <Field label="Date of birth (optional)">
-                  <Input value={draft.dateOfBirth} onChange={(e) => set("dateOfBirth", e.target.value)} />
-                </Field>
-                <Field label="Father's name (optional)">
-                  <Input value={draft.fatherName} onChange={(e) => set("fatherName", e.target.value)} />
-                </Field>
-              </>
-            ) : (
-              <Field label="Work authorisation" full hint="Example: Open to relocation, eligible for UAE employment visa.">
-                <Input
-                  value={draft.workAuthorization}
-                  onChange={(e) => set("workAuthorization", e.target.value)}
-                />
-              </Field>
-            )}
+            <Field label="Work authorisation" full hint="Example: Open to relocation, eligible for UAE employment visa.">
+              <Input
+                value={draft.workAuthorization}
+                onChange={(e) => set("workAuthorization", e.target.value)}
+              />
+            </Field>
           </Section>
         </div>
 
