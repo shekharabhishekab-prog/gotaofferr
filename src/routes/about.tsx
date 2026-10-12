@@ -245,9 +245,9 @@ function About() {
         <span className="ab-mono ab-rise" style={{ ["--d" as string]: "0s" }}>
           ( about gotaofferr, the short story )
         </span>
-        <h1 className="ab-h1" aria-label="About GotaOfferr. Built by people who hate rewriting resumes.">
+        <h1 className="ab-h1" aria-label="About GotaOfferr. Built for people who hate rewriting resumes.">
           <span className="ab-rise" style={{ ["--d" as string]: ".06s" }}>
-            Built by people who hate <mark>rewriting</mark>
+            Built for people who hate <mark>rewriting</mark>
           </span>
           <span className="ab-rise" style={{ ["--d" as string]: ".16s" }}>
             <em className="ab-cur">resumes.</em>
