@@ -174,15 +174,15 @@ export function ResumeBuilder() {
 
   return (
     <div className="site-container pb-24">
-      <div className="mt-8 max-w-md">
-        <CountryPicker value={draft.country} onChange={(c) => setDraft((prev) => ({ ...prev, country: c, template: c === "IN" ? "india" : "international" }))} />
-      </div>
-
-      <div className="mt-10 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
         {/* ---------------- Form ---------------- */}
         <div className="space-y-4">
+          <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 shadow-lg sm:p-5" data-testid="country-step">
+            <p className="mb-3 inline-block rounded-full bg-primary px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-foreground">Step 1 · Pick your country first</p>
+              <CountryPicker value={draft.country} onChange={(c) => setDraft((prev) => ({ ...prev, country: c, template: c === "IN" ? "india" : "international" }))} />
+          </div>
           <p className="text-xs text-muted-foreground">
-            Sections are collapsed to keep this short. Open one, write rough notes, and use
+            Step 2: sections are collapsed to keep this short. Open one, write rough notes, and use
             <span className="mx-1 font-semibold text-primary">Improve with AI</span>
             on any field.
           </p>
