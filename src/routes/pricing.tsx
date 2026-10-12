@@ -443,7 +443,7 @@ function Pricing() {
     <main className="tlp tl-pr bg-background">
       <style>{PR_CSS}</style>
       <section className="tl-hero">
-        <span className="tl-sticker" aria-hidden>Cheaper than one coffee a week 🐾 (Coco approved)</span>
+        <span className="tl-sticker" aria-hidden>Less than a coffee a day 🐾 (Coco approved)</span>
         <span className="tl-mono tl-rise" style={{ ["--d" as string]: "0s" }}>( pricing, free to start, cancel any time )</span>
         <h1 className="tl-h1" aria-label="Pricing. Pay only while you are applying.">
           <span className="tl-rise" style={{ ["--d" as string]: ".06s" }}><mark>Pricing</mark> that is kind</span>
