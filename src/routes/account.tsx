@@ -49,6 +49,7 @@ import {
   updateProfile,
 } from "@/lib/account.functions";
 import { checkIsAdmin } from "@/lib/admin.functions";
+import { signOutOtherSessions } from "@/lib/session.functions";
 import { getBuilderUsage } from "@/lib/builder-usage.functions";
 import { getAlertUsage, getJobSearchUsage } from "@/lib/jobs.functions";
 import { getInterviewStatus } from "@/lib/interview.functions";
@@ -250,6 +251,7 @@ function Account() {
     const { error } = await supabase.auth.updateUser({ password: otpNewPassword });
     setSavingOtpPassword(false);
     if (error) return toast.error(error.message || "Could not update your password.");
+    await signOutOtherSessions().catch(() => undefined);
     setOtpNewPassword("");
     setOtpConfirmPassword("");
     setOtpCode("");
