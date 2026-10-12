@@ -20,7 +20,7 @@ export function CountryPicker({ value, onChange }: { value?: string; onChange: (
   }, [value]);
   const q = text.trim().toLowerCase();
   const picked = countryName(value).toLowerCase() === q;
-  const hits = (q && !picked ? BUILDER_COUNTRIES.filter(([, n]) => n.toLowerCase().includes(q)) : BUILDER_COUNTRIES).slice(0, 6);
+  const hits = (q && !picked ? BUILDER_COUNTRIES.filter(([, n]) => n.toLowerCase().includes(q)) : BUILDER_COUNTRIES).slice(0, 8);
   return (
     <div ref={box} className="relative" data-testid="country-picker">
       <label htmlFor="builder-country" className="text-sm font-semibold text-foreground">
