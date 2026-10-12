@@ -5,7 +5,7 @@ import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowUpRight, Bell, Briefcase, Loader2, Search, Sparkles } from "lucide-react";
+import { ArrowUpRight, Bell, Briefcase, Loader2, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +46,31 @@ import {
   TIMEZONES,
   type JobListing,
 } from "@/lib/jobs-schema";
+
+const JB_CSS = `
+@font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-display:swap}
+.tlp{--y:#ffd600;--cream:#f6f1d6;background:#000;color:var(--cream)}
+.tl-hero{position:relative;padding:44px 20px 40px;text-align:center;background:radial-gradient(55% 60% at 50% 0%,rgba(255,214,0,.14),transparent 72%)}
+.tl-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:linear-gradient(#000 20%,transparent);mask-image:linear-gradient(#000 20%,transparent)}
+.tl-hero>*{position:relative}
+.tl-hero,.tl-hero *{text-align:center}.tl-mono,.tl-sub{display:block;text-wrap:balance}.tl-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;letter-spacing:.04em;color:var(--y)}
+.tl-h1{margin:16px auto 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.95;letter-spacing:-.015em;font-size:clamp(2.3rem,7vw,4.6rem);max-width:15em}
+.tl-h1 span{display:block}
+.tl-h1 mark{background:var(--y);color:#000;padding:0 .12em;display:inline-block;transform:rotate(-1deg);line-height:1}
+.tl-cur{font-family:"HPInst",Georgia,serif;font-style:italic;text-transform:none;color:var(--y);font-weight:400;font-size:1.06em;line-height:.9;vertical-align:baseline;letter-spacing:-.01em}
+.tl-sub{max-width:34rem;margin:18px auto 0;font-size:1.05rem;line-height:1.5;color:rgba(246,241,214,.72)}
+.tl-rise{opacity:0;transform:translateY(.6em);animation:tl-rise .6s cubic-bezier(.2,.8,.2,1) var(--d,0s) forwards}
+@keyframes tl-rise{to{opacity:1;transform:none}}
+.tl-cur{display:inline-block;transition:transform .3s}
+.tl-h1:hover .tl-cur{transform:rotate(-2deg) scale(1.04)}
+.tl-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#000;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 #000,0 0 0 2px var(--y);transition:transform .25s}
+.tl-sticker:hover{animation:tl-wig .55s}
+@keyframes tl-wig{25%{transform:rotate(-8deg) scale(1.08)}60%{transform:rotate(6deg) scale(1.08)}100%{transform:rotate(-2deg)}}
+@keyframes tl-wig2{25%{transform:translateY(-3px) rotate(-1.2deg)}60%{transform:translateY(-3px) rotate(1.2deg)}100%{transform:translateY(-3px) rotate(0)}}
+@media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.6vw,4.4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-sub{max-width:46rem}}
+@media (min-width:1700px){.tl-wrap{max-width:1780px;padding-left:40px;padding-right:40px}.tl-h1{max-width:1700px;font-size:4.9rem}.tl-sub{max-width:54rem;font-size:1.15rem}}
+@media (max-width:640px){.tl-hero,.tl-hero *{text-align:left}.tl-h1{margin:16px 0 0;max-width:none}.tl-h1 span{text-wrap:wrap}.tl-sub{margin:14px 0 0;text-wrap:pretty;font-size:.78rem!important;line-height:1.5}.tl-chips{justify-content:flex-start}.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 26px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(246,241,214,.55);max-width:19rem}}
+`;
 
 export const Route = createFileRoute("/jobs")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -377,15 +402,22 @@ function Jobs() {
   const eyebrow = !session ? "Job finder" : nextPackName === "Starter Pack" ? "Free plan" : nextPackName;
 
   return (
-    <main className="site-container py-14 sm:py-20">
-      <div className="flex items-center gap-2 text-sm font-medium text-primary">
-        <Sparkles className="size-4" /> {eyebrow}
-      </div>
-      <h1 className="mt-3 font-display text-4xl font-bold text-foreground">AI job finder</h1>
-      <p className="mt-3 max-w-2xl text-muted-foreground">
-        Type the role you want and your filters once. We search across job boards and hand you one clean
-        list — click any job to apply on the company's own page.
-      </p>
+    <main className="tlp site-container pb-14 pt-6 sm:pb-20">
+      <style>{JB_CSS}</style>
+      <section className="tl-hero">
+        <span className="tl-sticker" aria-hidden>One clean list, zero tab chaos 🐾 (Coco approved)</span>
+        <span className="tl-mono tl-rise" style={{ ["--d" as string]: "0s" }}>
+          ( {eyebrow.toLowerCase()}, ai job finder, apply on the company's own page )
+        </span>
+        <h1 className="tl-h1" aria-label="AI job finder. Jobs found while you drink your coffee.">
+          <span className="tl-rise" style={{ ["--d" as string]: ".06s" }}><mark>Jobs</mark> found while</span>
+          <span className="tl-rise" style={{ ["--d" as string]: ".16s" }}>you drink your <em className="tl-cur">coffee.</em></span>
+        </h1>
+        <p className="tl-sub tl-rise" style={{ ["--d" as string]: ".26s" }}>
+          Type the role you want and your filters once. We search across job boards and hand you one clean
+          list. Click any job to apply on the company's own page.
+        </p>
+      </section>
 
       {!session && anonUsed && !jobs ? (
         <div className="mt-10 rounded-2xl border border-border bg-card p-8">
@@ -420,8 +452,7 @@ function Jobs() {
           ) : null}
 
           <form onSubmit={onSearch} className="mt-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
-            {!session ? <TurnstileWidget onToken={setCaptchaToken} className="mb-3 flex justify-center" /> : null}
-            <div className="grid gap-5 sm:grid-cols-2">
+                        <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <Label htmlFor="role">Job role</Label>
                 <Input
@@ -521,6 +552,7 @@ function Jobs() {
             </div>
 
 
+            {!session ? <TurnstileWidget onToken={setCaptchaToken} className="mt-5 flex justify-start" /> : null}
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
               <label className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Switch checked={remoteOnly} onCheckedChange={setRemoteOnly} />
