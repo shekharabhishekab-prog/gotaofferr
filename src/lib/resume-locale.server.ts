@@ -47,7 +47,7 @@ export function detectCountry(): string | null {
 }
 
 const COMMON_NO_PHOTO = [
-  "Do not include a photo, date of birth, age, gender, marital status, nationality or religion. Recruiters discard resumes carrying them.",
+  "Do not include a photo, date of birth, age, gender, marital status, nationality or religion. Employers in this market do not expect them.",
 ];
 
 /**
@@ -74,7 +74,7 @@ const GULF_RULES = (currency: string): string[] => [
 
 /** SEA resumes run longer and denser than a US resume. */
 const SEA_RULES = (currency: string): string[] => [
-  ...COMMON_NO_PHOTO,
+  "Keep a photo, date of birth, nationality or marital status ONLY if the source resume already states them. Never add or invent them. Leave out ID numbers (IC, KTP, CCCD) and religion.",
   `A4, formal and comprehensive structure. More detail is acceptable than a US resume. Amounts in ${currency} or USD, exactly as the source states them.`,
   "Keep skills and keyword density high; parsers in this region lean hard on keyword matching.",
   "State relocation willingness and target cities plainly when the source resume mentions them; never invent work-pass status.",
@@ -133,6 +133,14 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
       "Do not add photo, date of birth, father's name or marital status unless the source resume already has them.",
     ],
   },
+  JP: {
+    label: "Japan",
+    rules: [
+      "If the employer supplies its own form or portal (a rirekisho, the standard personal-history form, or an entry form), that form is separate and is filled in by the applicant. Here write the work-history document (shokumu keirekisho): reverse-chronological, each employer with role, period, duties and measurable results.",
+      "Keep a photo, gender, date of birth or age ONLY if the source resume already states them. Never add or invent them.",
+      "Keep qualification and company names exactly as the source writes them. Amounts in JPY (¥) only where the source states them.",
+    ],
+  },
   AE: { label: "United Arab Emirates", rules: [...GULF_RULES("AED")] },
   SA: { label: "Saudi Arabia", rules: [...GULF_RULES("SAR")] },
   QA: { label: "Qatar", rules: [...GULF_RULES("QAR")] },
@@ -153,7 +161,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
       "Warmer, more conversational tone than a US or UK resume: confident and plain-spoken, never aggressive self-promotion.",
       'Add a short "What I Bring" block (3-4 plain lines about working style and strengths) only when the source resume supports those claims.',
       "State visa or sponsorship status plainly and by its specific name (for example, Subclass 482) when the source resume states it.",
-      'Referees: if the source resume lists referees, keep them as a final "Referees" section exactly as given. If it lists none, add a final additional section titled "Referees" with the single item "Referees available on request". Never invent names, titles or contact details.',
+      'Referees: keep a final "Referees" section only if the source resume already lists referees, exactly as given. If it lists none, do not add a Referees section or an "available on request" line. Never invent names, titles or contact details.',
     ],
   },
   NZ: {
@@ -163,7 +171,7 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
       "Two-page CV, Australian/NZ spelling, amounts in NZD ($).",
       "Warm, conversational and confident tone rather than aggressive self-promotion.",
       'Add a short "What I Bring" block only when the source resume supports it, and name visa/work-rights status specifically when stated.',
-      'Referees: if the source resume lists referees, keep them as a final "Referees" section exactly as given. If it lists none, add a final additional section titled "Referees" with the single item "Referees available on request". Never invent names, titles or contact details.',
+      'Referees: keep a final "Referees" section only if the source resume already lists referees, exactly as given. If it lists none, do not add a Referees section or an "available on request" line. Never invent names, titles or contact details.',
     ],
   },
 
@@ -189,7 +197,7 @@ const REGION_RULES: Record<string, string[]> = {
   "South America": ["Two-page CV, clear and factual. Keep qualification names as written and list language levels (Spanish, Portuguese, English) when the source has them.", "Do not add a photo or personal data unless the source resume already includes them."],
   Africa: ["Two to three page CV, British-style spelling, clear and factual. Keep qualification names as written.", "Do not add a photo or personal data unless the source resume already includes them."],
   Asia: ["Two-page resume, clear and keyword-rich. Keep qualification names as written.", "Do not add a photo or personal data unless the source resume already includes them."],
-  Australia: [...COMMON_NO_PHOTO, "Two to three pages, Australian/NZ spelling, warm confident tone.", 'Referees: if the source resume lists referees, keep them as a final "Referees" section exactly as given. If it lists none, add a final additional section titled "Referees" with the single item "Referees available on request". Never invent names, titles or contact details.'],
+  Australia: [...COMMON_NO_PHOTO, "Two to three pages, Australian/NZ spelling, warm confident tone.", 'Referees: keep a final "Referees" section only if the source resume already lists referees, exactly as given. If it lists none, do not add a Referees section or an "available on request" line. Never invent names, titles or contact details.'],
 };
 
 /**
