@@ -2,6 +2,8 @@ import { PROMPT_GUARD } from "./prompt-guard";
 import { formatLetterParagraphs } from "./letter-format";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
 
+const AI_CALL_TIMEOUT_MS = 75_000;
+
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 import { computeAtsReadiness } from "./ats-score.server";
 import { tailoredResumeSchema, type TailorInput, type TailoredResume } from "./tailor-schema";
@@ -18,7 +20,7 @@ import {
 // Time budgets (ms). One tailor is several AI calls in a row; when the first ones are slow we
 // stop stacking more so the request never runs into the platform time limit.
 const REPAIR_BUDGET_MS = 40_000;
-const RETRY_BUDGET_MS = 40_000;
+const RETRY_BUDGET_MS = 100_000;
 const SLOW_MSG = "This one is taking longer than usual \u23F3 Please try again in a moment.";
 
 export async function runTailor(
@@ -76,7 +78,7 @@ async function runTailorOnce(data: TailorInput, country: string | null | undefin
   const market = resumeMarket(detectedJobCountry);
   const letterRules = coverLetterRules(detectedJobCountry);
   const withLetterDate = <T extends { coverLetter: string }>(r0: T): T => {
-    const r = applyTruthFixes(r0);
+    const r = withRefereesLine(applyTruthFixes(r0), detectedJobCountry);
     const text = (r.coverLetter ?? "").trim();
     if (!text) return r;
     return { ...r, coverLetter: `${letterDateLine(jobCountry)}\n\n${text}` };
@@ -110,7 +112,7 @@ PHASE 2 — WRITE THE TAILORED RESUME. Rules:
 - DEPTH IS MANDATORY. This must read like a detailed senior recruiter-grade resume, not a one-page summary. Never compress the source. If the source resume is long, the output must be equally long or longer.
 - NEVER PAD. The bullet-count and length targets below apply only where the source resume has enough real material. If a role has 3 duties in the source, output 3 bullets, not 7. Do not add duties, tasks or responsibilities the source does not show just to reach a count; a short honest resume beats a long invented one.
 - Bullet counts per role: current/most recent role 7-10 bullets; each earlier role 5-7 bullets; the oldest or shortest role at least 4. Never fewer than 4 bullets for any role that has material in the source.
-- Keep EVERY concrete detail the source gives: named clients, partner organisations, brands, campaign names, event names, programme names, tool names, budgets, currencies, percentages, follower counts, team sizes, timeframes, platforms, handles, portfolio links. Losing a specific number or a named partner is a failure.
+- Keep EVERY concrete detail the source gives: named clients, partner organisations, brands, campaign names, event names, programme names, tool names, budgets (converted as the CROSS-COUNTRY MONEY rule says when it applies), currencies, percentages, follower counts, team sizes, timeframes, platforms, handles, portfolio links. Losing a specific number or a named partner is a failure.
 - experience[].context: one short factual line describing the employer or the scope (for example "National NGO, artisan livelihoods" or "D2C footwear e-commerce brand") ONLY when the source resume itself states it (use its own words, never invent or generalise an employer description), otherwise null.
 - Preserve every factual and meaningful section from the original resume. Do not remove roles, projects, education, certifications, awards, languages, volunteer work, publications, training, or other qualifications just because they are less relevant to the target role.
 - Preserve every employer, job title, project, credential, institution, date, and contact detail from the source. You may reorder bullets within an entry, but every original entry must remain represented in the result.
@@ -143,8 +145,8 @@ PHASE 3 — SOUND LIKE A HUMAN WROTE IT. A hiring manager must never suspect AI.
   - scoreBreakdown: keywordMatch (0-40, share of the job description's hard skills, tools and requirements appearing verbatim), titleAlignment (0-15, how close the candidate's real title and seniority are to the posted title), formatting (0-20, parseability, deducting for tables, columns, graphics or non-standard headings in the SOURCE resume), experienceRelevance (0-15, how directly the real history maps to the required years and domain), quantifiedImpact (0-10, density of bullets carrying real metrics).
   - consistencyFlags: plain-language notes on date-math errors or conflicting numbers found in the SOURCE resume (for example "Resume says 5 years of experience, but the listed dates add up to 3 years and 4 months; the conservative figure was used"). Empty array when the source is clean. Never silently fix a conflict by inventing history: use the conservative, defensible number and flag it here.
   - regionAdaptations: what you changed for the hiring market (spelling convention, currency treatment, page length, personal information added or removed, visa or notice-period statement). Empty array for a same-country application with no changes.
-  - fitWarning: if the candidate is a genuinely poor fit (major skill gaps or a clear seniority mismatch), say so in one honest sentence instead of force-fitting. Otherwise null.
-  - matchedKeywords / missingKeywords: keywords from the job description present or absent in the candidate's background. missingKeywords are only ones the candidate could truthfully add if they genuinely have that experience.
+  - fitWarning: if the candidate is a genuinely poor fit (major skill gaps or a clear seniority mismatch), say so honestly instead of force-fitting. Otherwise null. Write it in plain, simple English for an ordinary job seeker, not for a recruiter: 1 or 2 short sentences, everyday words, no jargon or formal phrases (no words like "extensive", "familiarity", "proficiency", "exposure", "demonstrated"). Say what is strong, then what the job needs that the resume does not show. Example: "Your social media skills are strong, but this role in Australia needs driving and local farming knowledge. Your resume does not show these." Name only things that are really in the job post or the resume.
+  - matchedKeywords / missingKeywords: keywords from the job description present or absent in the candidate's background. missingKeywords are only ones the candidate could truthfully add if they genuinely have that experience. A keyword is missing only when the activity is truly absent from the source resume: if the source shows the same activity in different words (content calendar = content planning, newsletters = email marketing), count it as present, not missing.
   - tips: 3-5 short, actionable coaching suggestions the candidate can act on themselves. Never suggest fabricating anything.
   - atsScore: integer 0-100 estimating how ATS-friendly and parseable the generated resume is. It must be 95 or higher because the output uses a single-column layout, standard fonts, clear section labels, and strong keyword alignment. If you are not confident it exceeds 95, return 95.
   - FINAL COMPLETENESS AUDIT (do this before returning): walk the source resume line by line and confirm every employer, role, date range, client name, partner organisation, event, tool, number, link and section appears somewhere in your output. Restore anything missing. Then confirm each role meets its minimum bullet count and add back detail from the source if it does not.
@@ -168,7 +170,7 @@ PHASE 3.5 — SURVIVE GREENHOUSE / WORKDAY / LEVER RESUME PARSING. These ATS pro
 - experience[].company must be the employer's FULL legal or trading name exactly as the source resume writes it (for example "All India Artisans and Craftworkers Welfare Association (AIACA)"). Never abbreviate, never truncate, never merge the employer name into the role title.
 - experience[].role must be only the job title (for example "Communication Manager"). Do not append the employer, brand, parentheses or a tagline to it; employer context belongs in company and context.
 - dates: copy each role's dates exactly as the source gives them. Use "Mon YYYY – Mon YYYY" or "Mon YYYY – Present" only when the source shows those months and that end date. If the source gives only years (for example 2022-2025), output "2022 – 2025" and never add a month. Never turn a finished end date into "Present", and never invent a start month, end month or end date. No seasons, no "Ongoing".
-- CURRENCY IS A FACT: reproduce every money figure in the exact currency and symbol the source resume uses, and never attach a currency to a number the source left unlabelled. You may only add an approximate equivalent in brackets when the cross-border rules below explicitly allow it, and the original figure must still be there.
+- CURRENCY IS A FACT: reproduce every money figure in the exact currency and symbol the source resume uses, and never attach a currency to a number the source left unlabelled. The ONLY exception is a CROSS-COUNTRY MONEY rule below: when it is present, convert the source-currency figures as it says and write just the converted value, marked approximate (approx. or ~), with no original beside it. On a same-country application never convert.
 - Do not restate the same achievement in more than one section. Key Achievements, Experience bullets and any Additional section must not duplicate each other's wording; parsers score repeated blocks as keyword stuffing.
 - contacts: one entry per item (location, phone, email, LinkedIn, portfolio). Skip an item entirely rather than repeating the same URL under two labels.
 - Spell out an acronym once with the full term beside it (for example "Search Engine Optimisation (SEO)") so both forms are indexed.
@@ -204,14 +206,36 @@ ${data.resume}`;
     const tOnce = Date.now();
     const { output } = await generateText({
       model: gateway("google/gemini-3.6-flash"),
+      // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
+      abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
+      maxRetries: 1,
       output: Output.object({ schema: tailoredResumeSchema }),
       prompt,
       maxOutputTokens: 16000,
     });
     let result = output;
+    // Gaps list only: drop a "missing" keyword when every word of it already appears in the source resume.
+    // This never adds anything to the resume itself.
+    try {
+      const stem = (w: string) => w.toLowerCase().replace(/[^a-z0-9]/g, "").replace(/(ing|ers|er|ed|es|s)$/, "");
+      const src = new Set((data.resume.toLowerCase().match(/[a-z0-9]+/g) ?? []).map(stem));
+      const mk = (result as any).missingKeywords;
+      if (Array.isArray(mk)) {
+        const kept = mk.filter((k: unknown) => {
+          const words = String(k).toLowerCase().match(/[a-z0-9]+/g) ?? [];
+          const sig = words.filter((w) => w.length > 2).map(stem).filter(Boolean);
+          return !(sig.length > 0 && sig.every((w) => src.has(w)));
+        });
+        (result as any).missingKeywords = kept;
+      }
+    } catch { /* keep the model's list */ }
 
     // Never ship a draft that silently dropped facts from the default resume.
-    const { findMissingFacts } = await import("./resume-facts.server");
+    const { findMissingFacts: findMissingRaw } = await import("./resume-facts.server");
+    // When the cross-country money rule converts currencies, the original money figure is meant to disappear.
+    const convertsMoney0 = crossBorder.some((r) => r.includes("CROSS-COUNTRY MONEY"));
+    const isMoneyFact0 = (f: string) => /[₹$€£¥]|\b(INR|USD|EUR|GBP|AUD|CAD|NZD|SGD|AED|JPY|CNY|BRL|Rs\.?|lakh|lakhs|crore|crores|cr)\b/i.test(f);
+    const findMissingFacts = (src: string, r: any) => findMissingRaw(src, r).filter((f: string) => !(convertsMoney0 && isMoneyFact0(f)));
     let missing = findMissingFacts(data.resume, result);
     // The repair pass doubles the wait, so only pay for it when the draft is
     // genuinely thin or dropped several real facts, not for cosmetic gaps.
@@ -254,7 +278,9 @@ ${data.resume}`;
     // Last line of defence: a numeric fact from the source that the model or the
     // guard dropped goes back as the candidate's own source line, in the right role.
     try {
-      const miss = findMissingFacts(data.resume, result).filter((f) => /\d/.test(f));
+      const convertsMoney = crossBorder.some((r) => r.includes("CROSS-COUNTRY MONEY"));
+      const isMoneyFact = (f: string) => /[₹$€£¥]|\b(INR|USD|EUR|GBP|AUD|CAD|NZD|SGD|AED|JPY|CNY|BRL|Rs\.?|lakh|lakhs|crore|crores|cr)\b/i.test(f);
+      const miss = findMissingFacts(data.resume, result).filter((f) => /\d/.test(f) && !(convertsMoney && isMoneyFact(f)));
       if (miss.length && result.experience?.length) {
         const lines = data.resume.split(/\r?\n/);
         const roleOf = (idx: number) => {
@@ -359,6 +385,17 @@ ${data.resume}`;
     }
     if ((error as Error)?.name === "QualityError" || (error as any)?.issues) throw error;
     console.error("[tailor] failed:", (error as Error)?.name, String((error as Error)?.message ?? error).slice(0, 300));
+    // A provider-side failure (server error, retries exhausted, API call error) must hand over to the next model in the chain,
+    // not end the run. The wording matches the router's overloaded check. Quality rules are not touched.
+    {
+      const pe: any = error;
+      const pst = pe?.statusCode ?? pe?.lastError?.statusCode ?? pe?.cause?.statusCode ?? pe?.status;
+      const pname = String(pe?.name ?? "");
+      if (pname.includes("RetryError") || pname.includes("APICallError") || (typeof pst === "number" && pst >= 500)) {
+        console.warn(`[tailor] provider error handed to next model: ${pname} status=${pst ?? "-"}`);
+        throw new Error(`overloaded: provider error ${pname} ${pst ?? ""}`);
+      }
+    }
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
     throw new Error(aiGatewayErrorMessage(error));
   }
@@ -395,6 +432,9 @@ async function refillLetter(
     const { guardLetter } = await import("./truth-guard.server");
     const { text } = await generateText({
       model: gateway("google/gemini-3.6-flash"),
+      // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
+      abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
+      maxRetries: 1,
       maxOutputTokens: 1500,
       prompt: `${PROMPT_GUARD}
 Write a cover letter for ${data.company || "the company"} for the job below. Tone: ${data.tone || "confident and professional"}.
@@ -431,6 +471,9 @@ async function repairDepth(
   try {
     const { output } = await generateText({
       model: gateway("google/gemini-3.6-flash"),
+      // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
+      abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
+      maxRetries: 1,
       output: Output.object({ schema: tailoredResumeSchema }),
       maxOutputTokens: 16000,
       prompt: `${basePrompt}
@@ -661,6 +704,25 @@ export function applyTruthFixes<T>(r: T): T {
     return { ...any, consistencyFlags: [...flags, note] } as T;
   } catch (e) {
     console.error("[truth-fix] failed", e);
+    return r;
+  }
+}
+
+
+
+/**
+ * Australia and New Zealand resumes carry a referees section. We never invent referees: when the
+ * resume has no referees/references section, add one plain line. Real referees from the source stay as they are.
+ */
+export function withRefereesLine<T>(r: T, country: string | null | undefined): T {
+  try {
+    const c = (country ?? "").toUpperCase();
+    if (c !== "AU" && c !== "NZ") return r;
+    const sections = (r as unknown as { additionalSections?: Array<{ title: string; items: string[] }> }).additionalSections;
+    if (!Array.isArray(sections)) return r;
+    if (sections.some((x) => /referee|reference/i.test(x?.title ?? ""))) return r;
+    return { ...r, additionalSections: [...sections, { title: "Referees", items: ["Referees available on request"] }] } as T;
+  } catch {
     return r;
   }
 }

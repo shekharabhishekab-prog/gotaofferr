@@ -106,6 +106,7 @@ export function ResumeTailor() {
   const { session, loading: sessionLoading } = useSession();
   const { isSubscribed, tier, loading: subLoading } = useSubscription();
   const [showUp, setShowUp] = useState(false);
+  const [resultTab, setResultTab] = useState("resume");
 
   const [usage, setUsage] = useState<Usage | null>(null);
 
@@ -132,6 +133,8 @@ export function ResumeTailor() {
   const [downloading, setDownloading] = useState<"resume" | "cover" | null>(null);
   const [result, setResult] = useState<TailoredResume | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const runId = useRef(0);
+  const [slow, setSlow] = useState<0 | 1 | 2>(0);
 
   // Logged-out ("anonymous") one-free-rewrite state
   const [anonUsed, setAnonUsed] = useState(false);
@@ -202,11 +205,15 @@ export function ResumeTailor() {
     if (resume.trim().length < 30) return toast.error("Add your current resume first.");
     if (jobDescription.trim().length < 20) return toast.error("Paste the job description.");
     if (jobDescription.trim().length > 30000) return toast.error("That JD is doing too much 😄 Keep the key responsibilities and requirements, and paste again.");
+    const myRun = ++runId.current;
     setLoading(true);
     setResult(null);
+    setSlow(0);
     setStage("upload");
     timers.current.forEach(clearTimeout);
     timers.current = [
+      setTimeout(() => setSlow(1), 45000),
+      setTimeout(() => setSlow(2), 120000),
       setTimeout(() => setStage("analyze"), 700),
       setTimeout(() => setStage("rewrite"), 3500),
       setTimeout(() => setStage("format"), 11000),
@@ -232,6 +239,7 @@ export function ResumeTailor() {
         // Tokens are single-use — clear and re-issue after every attempt.
         setCaptchaToken(null);
         resetTurnstile();
+        if (myRun !== runId.current) return;
         timers.current.forEach(clearTimeout);
         setStage("done");
         setResult(out.result);
@@ -255,6 +263,7 @@ export function ResumeTailor() {
           },
         );
 
+        if (myRun !== runId.current) return;
         timers.current.forEach(clearTimeout);
         setStage("done");
         setResult(out.result);
@@ -263,6 +272,7 @@ export function ResumeTailor() {
       toast.success("Your tailored resume is ready");
       setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth" }), 100);
     } catch (e) {
+      if (myRun !== runId.current) return;
       timers.current.forEach(clearTimeout);
       if (!session) {
         setCaptchaToken(null);
@@ -279,8 +289,11 @@ export function ResumeTailor() {
       }
       toast.error(message);
     } finally {
-      setLoading(false);
-      setQueueNote(null);
+      if (myRun === runId.current) {
+        setLoading(false);
+        setQueueNote(null);
+        setSlow(0);
+      }
     }
   }
 
@@ -464,7 +477,7 @@ export function ResumeTailor() {
                 {loading ? "Rebuilding your resume…" : "Rebuild resume + cover letter — free"}
               </Button>
               <p className="mt-3 text-center text-xs text-muted-foreground">
-                No account needed for your first rewrite. ~15 seconds, quicker than chai.
+                No account needed for your first rewrite. ~30 seconds, quicker than coffee.
               </p>
             </div>
           )
@@ -509,7 +522,7 @@ export function ResumeTailor() {
                   ? tier === "career_pro"
                     ? "199 rewrites included per month"
                     : "129 rewrites included per month"
-                  : "Takes ~15 seconds. Chai can wait."}
+                  : "Takes ~30 seconds. Coffee can wait."}
               </p>
             )}
 
@@ -525,6 +538,30 @@ export function ResumeTailor() {
               {queueNote}
             </div>
           )}
+          {slow === 1 && (
+            <div data-testid="slow-note" className="mb-3 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-[13px] leading-snug text-foreground">
+              ☕ The servers sneaked out for coffee. Your resume is still cooking, hang tight.
+            </div>
+          )}
+          {slow === 2 && (
+            <div data-testid="slow-stuck" className="mb-3 rounded-lg border border-primary/50 bg-primary/10 px-3 py-3 text-[13px] leading-snug text-foreground">
+              <p className="text-sm font-bold">
+                Okay, this one is <span className="font-serif italic text-primary">taking its sweet time</span> 🐌
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Our AI went for coffee and forgot to come back. Coco is judging the servers. Your resume is safe, and a stuck rebuild does not use up a rewrite.
+              </p>
+              {session ? (
+                <Button type="button" variant="ink" size="sm" className="mt-2" onClick={() => onGenerate()}>
+                  Try again 🔁
+                </Button>
+              ) : (
+                <p className="mt-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  Refresh the page and give it another go.
+                </p>
+              )}
+            </div>
+          )}
           <TailorProgress stage={stage} />
           <ResultSkeleton />
         </div>
@@ -535,11 +572,23 @@ export function ResumeTailor() {
         <div id="result" className="mt-12 scroll-mt-8">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="flex size-14 flex-col items-center justify-center rounded-xl bg-hero text-foreground">
-                <span className="font-display text-lg leading-none font-bold">
-                  {Math.round(result.matchScore)}
-                </span>
-                <span className="text-[9px] tracking-wide uppercase opacity-80">match</span>
+              <div className={`${resultTab === "insights" ? "hidden" : "flex"} items-center gap-6 pl-4`}>
+                <div className="relative">
+                  <div data-testid="score-ats" className="relative flex h-[76px] w-[76px] flex-col items-center justify-center rounded-xl bg-primary text-black">
+                    <span className="font-display text-2xl leading-none font-bold">
+                      {Math.round(result.atsScore)}
+                    </span>
+                    <span className="text-[11px] leading-none font-bold">/100</span>
+                    <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">ATS</span>
+                  </div>
+                </div>
+                <div data-testid="score-match" className="flex h-16 w-16 flex-col items-center justify-center rounded-xl border border-primary/40 text-foreground">
+                  <span className="font-display text-lg leading-none font-bold text-primary">
+                    {Math.round(result.matchScore)}
+                  </span>
+                  <span className="text-[10px] leading-none font-bold">/100</span>
+                  <span className="mt-0.5 text-[8px] font-bold tracking-wide uppercase opacity-80">Match</span>
+                </div>
               </div>
               <div>
                 <h2 className="text-xl font-bold">Tailored for {company || "this role"}</h2>
@@ -565,7 +614,7 @@ export function ResumeTailor() {
 
           </div>
 
-          <Tabs defaultValue="resume">
+          <Tabs value={resultTab} onValueChange={setResultTab}>
             <TabsList>
               <TabsTrigger value="resume">Resume</TabsTrigger>
               <TabsTrigger value="cover">Cover letter</TabsTrigger>
@@ -729,7 +778,16 @@ export function ResumeTailor() {
             <TabsContent value="insights">
               <div className="tl-ins grid gap-4 md:grid-cols-2">
                 <Card className="tl-ins-hero md:col-span-2">
-                  <div className="tl-ins-score">{Math.round(result.matchScore)}</div>
+                  <div className="flex shrink-0 items-center gap-5 pl-2">
+                    <div className="relative text-center">
+                      <div className="tl-ins-score relative">{Math.round(result.atsScore)}<small>/100</small></div>
+                      <p className="relative mt-1 text-[10px] font-bold tracking-wider uppercase">ATS score</p>
+                    </div>
+                    <div className="origin-left scale-75 text-center opacity-90">
+                      <div className="tl-ins-score">{Math.round(result.matchScore)}<small>/100</small></div>
+                      <p className="mt-1 text-[10px] font-bold tracking-wider uppercase">Match score</p>
+                    </div>
+                  </div>
                   <div>
                     <p className="tl-ins-verdict">
                       {result.matchScore >= 80
@@ -740,7 +798,9 @@ export function ResumeTailor() {
                             ? "A stretch role. Honest gaps below."
                             : "Big stretch. Read the gaps first."}
                     </p>
-                    <p className="tl-ins-sub">Your match, explained. No fluff, no fake skills.</p>
+                    <p className="tl-ins-sub">
+                      Match score: how well you fit this job. ATS score: how cleanly a robot can read your resume. No fluff, no fake skills.
+                    </p>
                   </div>
                 </Card>
                 {result.fitWarning && (
@@ -753,7 +813,7 @@ export function ResumeTailor() {
                 )}
                 {result.scoreBreakdown && (
                   <Card className="tl-ins-card md:col-span-2">
-                    <h4 className="tl-ins-h">How the {Math.round(result.matchScore)} was built</h4>
+                    <h4 className="tl-ins-h">How the {Math.round(result.matchScore)}/100 was built</h4>
                     <div className="space-y-3">
                       {[
                         { label: "Keyword match", emoji: "🔑", value: result.scoreBreakdown.keywordMatch, max: 40 },

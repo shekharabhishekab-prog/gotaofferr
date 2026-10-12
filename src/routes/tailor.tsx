@@ -78,7 +78,7 @@ const TL_CSS = `
 #result .bg-hero{animation:tl-pop .7s cubic-bezier(.3,1.6,.5,1) .15s backwards}
 @keyframes tl-up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}@keyframes tl-pop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
 .tl-ins-hero{display:flex;align-items:center;gap:18px;padding:20px 22px;border:1px solid rgba(255,214,0,.5);border-radius:22px;background:linear-gradient(135deg,rgba(255,214,0,.16),rgba(255,214,0,.03))}
-.tl-ins-score{flex:none;width:76px;height:76px;border-radius:20px;background:var(--y);color:#000;font-family:var(--font-display,inherit);font-weight:800;font-size:2.4rem;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg);box-shadow:4px 4px 0 #000,0 0 0 2px var(--y)}
+.tl-ins-score small{display:block;font-size:.8rem;line-height:1;font-weight:800;opacity:.8}.tl-ins-score{flex-direction:column !important;flex:none;width:76px;height:76px;border-radius:20px;background:var(--y);color:#000;font-family:var(--font-display,inherit);font-weight:800;font-size:2.4rem;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg);box-shadow:4px 4px 0 #000,0 0 0 2px var(--y)}
 .tl-ins-verdict{font-family:var(--font-display,inherit);font-weight:700;font-size:1.35rem;line-height:1.15}
 .tl-ins-sub{margin-top:4px;font-size:.85rem;color:rgba(246,241,214,.65)}
 .tl-ins-card{background:linear-gradient(160deg,rgba(255,214,0,.06),rgba(255,255,255,.012));border:1px solid rgba(255,214,0,.3);border-radius:20px;padding:22px;box-shadow:none;transition:transform .2s,border-color .2s}
@@ -155,7 +155,7 @@ function TailorPage() {
       <style>{TL_CSS}</style>
       <section className="tl-hero">
         <span className="tl-sticker" aria-hidden>Coco approved 🐾 (our kitten)</span>
-        <span className="tl-mono tl-rise" style={{ ["--d" as string]: "0s" }}>( resume tailor, ~15 seconds, no fake skills )</span>
+        <span className="tl-mono tl-rise" style={{ ["--d" as string]: "0s" }}>( resume tailor, ~30 seconds, no fake skills )</span>
         <h1 className="tl-h1" aria-label="Tailored paperwork so good, even you would hire yourself.">
           <span className="tl-rise" style={{ ["--d" as string]: ".06s" }}><mark>Tailored</mark> paperwork so good,</span>
           <span className="tl-rise" style={{ ["--d" as string]: ".16s" }}>even YOU would <em className="tl-cur">hire yourself.</em></span>
