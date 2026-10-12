@@ -94,7 +94,7 @@ const JB_CSS = `
 @media (min-width:900px){.tl-hero{padding:20px 20px 10px}.tl-sticker{margin-bottom:8px}.tl-h1{margin-top:8px;font-size:clamp(2.6rem,4.2vw,4rem)}.tl-sub{margin-top:10px;font-size:1.02rem}}
 @media (min-width:900px){.tl-h1 span{display:inline}.tl-h1 span+span{margin-left:.25em}}
 @media (min-width:1100px){.tl-sub{max-width:none;white-space:nowrap;font-size:min(1.02rem,1.1vw)}.tl-seo2 .tl-lead{max-width:72rem}}
-@media (min-width:1500px){.tlp.site-container{max-width:1660px;padding-left:40px;padding-right:40px}}
+@media (min-width:1500px){.tlp.site-container{max-width:1780px;width:min(1780px,calc(100% - 2rem));padding-left:40px;padding-right:40px}}
 `;
 
 export const Route = createFileRoute("/jobs")({
