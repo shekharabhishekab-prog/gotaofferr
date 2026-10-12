@@ -83,3 +83,11 @@ export const polishResumeDraft = createServerFn({ method: "POST" })
     }
     return polished;
   });
+
+
+
+/** IP country (Cloudflare header) used only to PREFILL the visible country field. */
+export const getDetectedCountry = createServerFn({ method: "GET" }).handler(async () => {
+  const { detectCountry } = await import("./resume-locale.server");
+  return { country: detectCountry() };
+});

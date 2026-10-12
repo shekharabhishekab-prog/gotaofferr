@@ -104,7 +104,8 @@ export async function polishDraft(
   // No job description here, so the format follows where the user is (IP country).
   // If the country is unknown, fall back to the template the user picked.
   const { detectCountry, resumeMarket } = await import("./resume-locale.server");
-  const country = detectCountry();
+  // The visible country field wins. Otherwise IP, then the India template means India.
+  const country = draft.country?.toUpperCase() || detectCountry() || (draft.template === "india" ? "IN" : null);
   const market = country ? resumeMarket(country) : null;
   const formatLabel = market ? market.label : draft.template === "india" ? "Indian national" : "international";
   const formatRules = market ? market.rules : TEMPLATE_RULES[draft.template];

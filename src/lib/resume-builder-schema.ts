@@ -38,6 +38,8 @@ export const builderProjectSchema = z.object({
 export const resumeDraftSchema = z
   .object({
     template: z.enum(resumeTemplates).default("international"),
+    /** Two-letter country the resume is written for. Prefilled from IP, always user-editable. */
+    country: z.string().regex(/^[A-Za-z]{2}$/).optional(),
     fullName: z.string().trim().min(2).max(120),
     targetRole: line(120),
     email: line(160),

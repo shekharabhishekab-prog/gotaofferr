@@ -112,6 +112,16 @@ const MARKETS: Record<string, { label: string; rules: string[] }> = {
       "Keep degree classifications as written (for example, 2:1) and use UK job-title conventions.",
     ],
   },
+  IL: {
+    label: "Israel",
+    rules: [
+      ...COMMON_NO_PHOTO,
+      'US-style resume, called a "Resume". One page for under 10 years of experience, two pages at most.',
+      "Contact items (each its own line): full name, city, phone with +972, professional email, LinkedIn.",
+      "Mon YYYY - Mon YYYY date ranges. Lead with impact and metrics. No objective statement, no references line.",
+      "Military or national service goes under Experience or a short line only if the source resume already lists it. Never invent it.",
+    ],
+  },
   IE: { label: "Ireland", rules: [...COMMON_NO_PHOTO, "CV format, up to two pages, British/Irish spelling, amounts in EUR (€)."] },
   IN: {
     label: "India",
@@ -182,12 +192,30 @@ const REGION_RULES: Record<string, string[]> = {
   Australia: [...COMMON_NO_PHOTO, "Two to three pages, Australian/NZ spelling, warm confident tone.", 'Referees: if the source resume lists referees, keep them as a final "Referees" section exactly as given. If it lists none, add a final additional section titled "Referees" with the single item "Referees available on request". Never invent names, titles or contact details.'],
 };
 
+/**
+ * Resume conventions follow the hiring culture, not strict geography. The shared
+ * region table (admin stats) stays geographic; these overrides only apply here.
+ */
+const RESUME_REGION_OVERRIDE: Record<string, string> = {
+  CY: "Europe", // EU member, Europass-style CVs
+  TR: "Europe", GE: "Europe", AM: "Europe", AZ: "Europe", // European-style CVs
+  KZ: "Europe", // Russian-style CV conventions
+  GL: "Europe", // Danish/European conventions
+  MT: "Europe", XK: "Europe",
+};
+
+/** Egypt and the Levant read CVs the Gulf way: personal block, formal tone. Value is the currency. */
+const MENA_GULF_STYLE: Record<string, string> = { EG: "EGP", JO: "JOD", LB: "LBP", IQ: "IQD" };
+
 /** Prompt-ready market rules for a country code. */
 export function resumeMarket(country: string | null): ResumeMarket {
   const code = country?.toUpperCase() ?? null;
   const match = code ? MARKETS[code] : undefined;
   if (match) return { country: code, label: match.label, rules: [...match.rules, ...CURRENCY_TRUTH] };
-  const regionRules = code ? REGION_RULES[regionForCountry(code)] : undefined;
+  const mena = code ? MENA_GULF_STYLE[code] : undefined;
+  if (code && mena) return { country: code, label: COUNTRY_INFO[code]?.name ?? code, rules: [...GULF_RULES(mena), ...CURRENCY_TRUTH] };
+  const resumeRegion = code ? (RESUME_REGION_OVERRIDE[code] ?? regionForCountry(code)) : null;
+  const regionRules = resumeRegion ? REGION_RULES[resumeRegion] : undefined;
   if (regionRules) return { country: code, label: `the hiring market (${COUNTRY_INFO[code!]?.name ?? code})`, rules: [...regionRules, ...CURRENCY_TRUTH] };
   return {
     country: code,
