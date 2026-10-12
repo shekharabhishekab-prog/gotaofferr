@@ -280,6 +280,8 @@ const PR_CSS = `
 .tl-pr .tl-cmp .rounded-xl{border-radius:18px;transition:transform .2s,border-color .2s}
 .tl-pr .tl-cmp .rounded-xl:hover{transform:translateY(-3px)}
 @media (max-width:640px){.tl-pr .tl-pw{padding:0 14px 48px}}
+.tl-pm-short{display:none}
+@media (max-width:899px){.tl-pm-full{display:none}.tl-pm-short{display:inline;font-size:.86rem;line-height:1.55}}
 @media (min-width:1500px){.tl-pr .tl-pw{max-width:1780px;padding-left:40px;padding-right:40px}}
 @media (min-width:900px){.tl-pr .tl-pw>p{max-width:none!important;width:100%;margin-top:16px}.tl-pr .tl-pw>p:first-child{font-size:1.05rem;line-height:1.65}}
 @media (prefers-reduced-motion:reduce){.tl-pr .tl-plan,.tl-pr .tl-plan:hover{transition:none;transform:none}}
@@ -432,12 +434,17 @@ function Pricing() {
       </section>
       <div className="tl-pw">
       <p className="mt-4 max-w-2xl lg:max-w-6xl text-muted-foreground">
+        <span className="tl-pm-full">
         Plans are priced by how many tailored applications you send — and whether you want the AI to
         find the jobs for you too. Try it free, upgrade only while you're actively applying, cancel
         any time. Prices shown in {pricing.code} for your region; payment is processed securely by
         Razorpay and charged in {pricing.code}, with taxes calculated at checkout. International
         cards, bank transfers (ACH, SEPA, CHAPS, SWIFT) and local methods like Trustly, GiroPay and
-        SofortPay are supported, alongside UPI, netbanking and wallets in India.
+        SofortPay are supported, alongside UPI, netbanking and wallets in India.</span>
+        <span className="tl-pm-short">
+          Priced by how many tailored resumes you send. Try free, upgrade only while you apply, cancel any
+          time. You pay in {pricing.code}, securely via Razorpay, tax at checkout.
+        </span>
       </p>
       <p className="mt-4 max-w-2xl lg:max-w-6xl rounded-xl border border-border bg-card/60 px-4 py-3 text-sm text-card-foreground">
         <strong>Auto-renewal:</strong> every paid pack is a monthly subscription. By paying, you
