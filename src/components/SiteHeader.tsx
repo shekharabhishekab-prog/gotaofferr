@@ -45,7 +45,7 @@ export function SiteHeader() {
         </Link>
 
 
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex">
           {nav.map((item) => (
             <Link
               key={item.to}
@@ -58,7 +58,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           {!loading && session ? (
             <Button variant="ghost" size="sm" asChild>
               <Link to="/account">
@@ -81,7 +81,7 @@ export function SiteHeader() {
         <button
           type="button"
           aria-label="Toggle menu"
-          className="text-foreground md:hidden"
+          className="text-foreground lg:hidden"
           onClick={() => setOpen((v) => !v)}
         >
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -89,7 +89,7 @@ export function SiteHeader() {
       </div>
 
       {open ? (
-        <div className="border-t border-border/60 bg-background md:hidden">
+        <div className="border-t border-border/60 bg-background lg:hidden">
           <nav className="site-container flex flex-col gap-1 py-3">
             {nav.map((item) => (
               <Link
