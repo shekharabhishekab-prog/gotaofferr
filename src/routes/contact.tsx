@@ -98,6 +98,8 @@ const CT_CSS = `
 .tl-seo2 h2:hover mark{transform:rotate(0) scale(1.03)}
 .tl-seo2 h2:after{content:"";display:block;width:min(100%,520px);height:6px;margin-top:20px;border-radius:9px;background:linear-gradient(90deg,var(--y),rgba(255,214,0,0))}
 @media (prefers-reduced-motion:reduce){.tl-bw,.tl-gchip,.tl-seo2 h2,.tl-seo2 .tl-lead,.tl-more{animation:none}.tl-gchip:hover{transform:none}}
+.tl-sub-d{display:none}
+@media (min-width:900px){.tl-sub-m{display:none}.tl-sub-d{display:inline}}
 .tl-ct{max-width:1100px;margin:0 auto;padding:10px 20px 20px;display:grid;gap:22px;grid-template-columns:1fr 340px}
 .tl-ct form,.tl-ct aside{background:linear-gradient(160deg,rgba(255,214,0,.07),rgba(255,255,255,.015));border:1px solid rgba(255,214,0,.35);border-radius:22px;padding:24px;transition:transform .25s,border-color .25s}
 .tl-ct form:hover,.tl-ct aside:hover{border-color:rgba(255,214,0,.65)}
@@ -126,7 +128,8 @@ function Contact() {
           <span className="tl-rise" style={{ ["--d" as string]: ".16s" }}>faster than <em className="tl-cur">your last recruiter.</em></span>
         </h1>
         <p className="tl-sub tl-rise" style={{ ["--d" as string]: ".3s" }}>
-          Questions, feedback, or a resume that did not parse the way you expected? Tell us about it over coffee (virtual one is fine).
+          <span className="tl-sub-m">Questions, feedback, or a resume that did not parse the way you expected? Tell us about it over coffee (virtual one is fine).</span>
+          <span className="tl-sub-d">Questions, feedback or a stuck resume? Tell us, over coffee.</span>
         </p>
       </section>
 
