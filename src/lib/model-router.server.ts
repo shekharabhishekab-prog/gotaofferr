@@ -35,9 +35,7 @@ function proChain(): string[] {
   return [
     "gemini-3.6-flash",
     "gemini-3-flash-preview",
-    "gemini-3.5-flash",
     "gemini-3.8-flash",
-    "gemini-3.7-flash",
     "gemini-2.5-flash",
     "gemini-2.5-flash-lite",
   ];
@@ -109,15 +107,22 @@ export function limitMessage(_tier: RoutingTier): string {
   return "Too many job hunters, one very tired AI. Give it a few minutes - this one wasn't counted.";
 }
 
+const BAD_UNTIL = new Map<string, number>();
+
 /** Try each model in the tier's chain; move on only for quota errors. */
 export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: string) => Promise<T>): Promise<T> {
-  const chain = chainForTier(tier);
+  const full = chainForTier(tier);
+  // A model that just failed (overload, timeout, cap) is skipped for 3 minutes so the next user does not wait through it again.
+  const now = Date.now();
+  const live = full.filter((id) => (BAD_UNTIL.get(id) ?? 0) <= now);
+  const chain = live.length > 0 ? live : full;
   let last: unknown = null;
   for (const modelId of chain) {
     try {
       return await fn(modelId);
     } catch (error) {
       if (!isQuotaError(error)) throw error;
+      BAD_UNTIL.set(modelId, Date.now() + 180_000);
       console.warn(`[ai-fallback] ${modelId} out of quota, tier=${tier}`);
       last = error;
     }
