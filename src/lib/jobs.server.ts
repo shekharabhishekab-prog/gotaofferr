@@ -602,6 +602,10 @@ ${JSON.stringify(items)}`;
     }
     // Clean-results guard: no list pages, social posts, other-state ads, or listings whose own text never names the place.
     if (isJunkListing(job.title, job.url)) continue;
+    if (placeTokens.length && OTHER_CITIES.test(`${job.title} ${job.company}`)) {
+      const oc = (`${job.title} ${job.company}`.match(OTHER_CITIES) ?? [""])[0];
+      if (!mentionsLocation(oc, placeTokens) && !(nearTokens.length > 0 && mentionsLocation(oc, nearTokens))) continue;
+    }
     if (placeTokens.length && !(input.remoteOnly && /remote/i.test(`${job.workMode} ${job.location}`))) {
       const cand = byUrl.get(job.url);
       const head = `${job.title} ${cand?.title ?? ""} ${(cand?.description ?? "").slice(0, 200)} ${job.url}`;
@@ -701,6 +705,7 @@ function widerPlaces(location?: string): string[] {
 /** "... in Santa Monica, CA" / "... at Dehradun": a title that names its own place (case matters). */
 const TITLE_OTHER_PLACE = /\b(?:in|at)\s+[A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)?(?:,\s*[A-Z][A-Za-z]+)?\s*(?:\.\.\.|$|for\b)/;
 
+const OTHER_CITIES = /\b(hamburg|munich|münchen|munchen|frankfurt|cologne|köln|stuttgart|düsseldorf|dusseldorf|leipzig|dresden|hannover|nuremberg|dehradun|panchkula|chandigarh|mohali|thodupuzha|idukki|pune|mumbai|bengaluru|bangalore|hyderabad|chennai|kolkata|jaipur|lucknow|ahmedabad|gurgaon|gurugram|noida|ghaziabad|faridabad|delhi|new york|los angeles|chicago|houston|austin|seattle|boston|london|toronto|melbourne|brisbane|perth|adelaide|sydney|dubai)\b/i;
 const SOCIAL_HOST = /^(?:www\.|m\.)?(?:instagram|facebook|fb|x|twitter|threads|tiktok|youtube|pinterest|reddit|quora)\.(?:com|net|me)$/i;
 /** List pages ("18 jobs", "32 roles"), social posts, and US "City, ST 12345" ads. */
 function isJunkListing(title: string, url: string): boolean {
@@ -710,6 +715,8 @@ function isJunkListing(title: string, url: string): boolean {
   if (/\b\d+\s+(?:[\w&+-]+\s+){0,4}(?:jobs?|roles?|vacancies|stellen\w*)\b/i.test(title)) return true;
   if (/\bjobs?\s*(?:&|and)\s*stellen/i.test(title)) return true;
   if (/,\s*[A-Z]{2}\s+\d{5}\b/.test(title)) return true;
+  if (/\bjobs\s+in\b|^\s*stellenangebote\b|\bjobs\s*$|\bquereinsteiger\b|\bjob\s+opening\b/i.test(title)) return true;
+  if (/\b(intern|internship|praktikum|praktikant\w*|werkstudent\w*|trainee|volontariat)\b/i.test(title)) return true;
   return false;
 }
 
