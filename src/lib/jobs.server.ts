@@ -83,6 +83,7 @@ const COUNTRY_ALIASES: Record<string, string[]> = {
   bangladesh: ["bangladesh", "dhaka", ".bd/"],
   "sri lanka": ["sri lanka", "colombo", ".lk/"],
   nepal: ["nepal", "kathmandu", ".np/"],
+  "himachal pradesh": ["himachal", "shimla", "solan", "kullu", "manali", "mandi", "dharamshala", "dharamsala", "kangra", "baddi", "una"],
   "texas": ["texas", ", tx", "austin", "dallas", "houston", "san antonio", "fort worth", "plano"],
   "california": ["california", ", ca", "san francisco", "los angeles", "san diego", "san jose", "oakland", "sacramento", "palo alto", "mountain view", "sunnyvale", "irvine"],
   "new york": ["new york", ", ny", "new york city", "brooklyn", "manhattan", "buffalo", "albany"],
@@ -142,6 +143,7 @@ const NEARBY_PLACES: Record<string, string[]> = {
   "bengaluru": ["bangalore", "mysore", "mysuru", "karnataka"],
   "mumbai": ["navi mumbai", "thane", "pune", "maharashtra"],
   "delhi": ["gurgaon", "gurugram", "noida", "faridabad", "ghaziabad", "new delhi"],
+  "shimla": ["himachal", "solan", "kullu", "manali", "mandi", "dharamshala", "kangra", "baddi"],
   "singapore": ["johor", "johor bahru"],
   "sydney": ["new south wales", "nsw", "parramatta", "newcastle"],
   "melbourne": ["victoria", "geelong"],
@@ -665,6 +667,35 @@ ${JSON.stringify(items)}`;
 
 
 const MIN_RESULTS = 7;
+const WIDEN_TARGET = 10;
+
+const REGION_OF: [RegExp, string][] = [
+  [/\bshimla\b/i, "Himachal Pradesh"],
+];
+const COUNTRY_NAME_OF: [RegExp, string][] = [
+  [/\b(india|delhi|mumbai|bengaluru|bangalore|hyderabad|chennai|pune|kolkata|gurgaon|gurugram|noida|ahmedabad|jaipur|shimla|chandigarh|kochi|indore|lucknow)\b/i, "India"],
+  [/\b(united states|usa|new york|california|texas|chicago|seattle|boston|austin|san francisco|los angeles)\b/i, "United States"],
+  [/\b(united kingdom|uk|england|london|manchester|scotland|birmingham|leeds)\b/i, "United Kingdom"],
+  [/\b(germany|berlin|munich|hamburg|frankfurt)\b/i, "Germany"],
+  [/\b(canada|toronto|vancouver|montreal|ottawa|calgary)\b/i, "Canada"],
+  [/\b(australia|sydney|melbourne|brisbane|perth)\b/i, "Australia"],
+  [/\b(dubai|abu dhabi|uae|united arab emirates)\b/i, "United Arab Emirates"],
+];
+
+/** Broader places to try, nearest first. Empty when the search is already country-wide. */
+function widerPlaces(location?: string): string[] {
+  const loc = location ?? "";
+  if (!loc || /worldwide|anywhere|remote/i.test(loc)) return [];
+  const out: string[] = [];
+  for (const [re, name] of REGION_OF) if (re.test(loc)) out.push(name);
+  for (const [re, name] of COUNTRY_NAME_OF) {
+    if (re.test(loc)) {
+      if (normalizeText(loc).trim() !== name.toLowerCase()) out.push(name);
+      break;
+    }
+  }
+  return out;
+}
 
 /** Titles that are list/salary pages, not one opening. */
 /** "... in Santa Monica, CA" / "... at Dehradun": a title that names its own place (case matters). */
@@ -747,11 +778,40 @@ export async function searchJobListings(
   console.info(`[jobs] tier=${tier} firecrawl_jobs=${jobs.length}`);
   if (jobs.length >= MIN_RESULTS) return jobs;
 
+  // Thin place: widen step by step (region, then rest of the country). Wider results always come after the searched place.
+  if (jobs.length < MIN_RESULTS && jobs.length < 60 && (await src.mayUseFirecrawl(tier))) {
+    const steps = widerPlaces(input.location);
+    const seenUrl = new Set(jobs.map((j) => normalizeUrl(j.url)));
+    const seenId = new Set(jobs.map((j) => `${j.title}|${j.company}`.toLowerCase().replace(/\s+/g, " ").trim()));
+    for (const wider of steps) {
+      if (jobs.length >= WIDEN_TARGET) break;
+      try {
+        const more = await searchViaFirecrawl({ ...input, location: wider }, buildQueries({ ...input, location: wider }, firecrawlGroups({ ...input, location: wider }, tier).slice(0, 2)));
+        const { countCall } = await import("./model-router.server");
+        await countCall("firecrawl-search");
+        const add = more.filter((j) => {
+          const id = `${j.title}|${j.company}`.toLowerCase().replace(/\s+/g, " ").trim();
+          if (seenUrl.has(normalizeUrl(j.url)) || seenId.has(id)) return false;
+          seenUrl.add(normalizeUrl(j.url));
+          seenId.add(id);
+          return true;
+        });
+        add.sort((x, y) => (x.match === y.match ? 0 : x.match === "exact" ? -1 : 1));
+        jobs = [...jobs, ...add].slice(0, Math.max(WIDEN_TARGET, jobs.length));
+        console.info(`[jobs] widened to ${wider}: +${add.length} total=${jobs.length}`);
+      } catch (error) {
+        console.warn("[jobs] widen failed: " + String((error as any)?.message ?? error));
+        break;
+      }
+    }
+    if (jobs.length >= MIN_RESULTS) return jobs;
+  }
+
   if (!adzunaCountry) {
     if (jobs.length > 0) return jobs;
     const { userError } = await import("./safe-error.server");
-    if (src.isUnsupportedPlace(input.location)) throw userError(src.UNSUPPORTED_PLACE_MESSAGE);
-    throw userError("Job sources for this place are refreshing. Please try again in a few minutes.");
+    // No source serves this place right now: the approved friendly message.
+    throw userError(src.UNSUPPORTED_PLACE_MESSAGE);
   }
 
   try {
