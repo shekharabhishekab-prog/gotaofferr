@@ -5,11 +5,18 @@ import { Button } from "@/components/ui/button";
 import { ProfileView } from "@/components/ProfileView";
 import { Counter, endBeforeStart, Field, fieldClass as field, ListEditor, newId } from "@/components/ListEditor";
 import {
+  fmtMonth,
   fmtRange,
+  LANG_LEVELS,
   makeSlug,
   PROJECT_TYPES,
   safeUrl,
+  type ProfileCert,
   type ProfileEducation,
+  type ProfileHonor,
+  type ProfileLanguage,
+  type ProfileVolunteer,
+  type ProfileWebsite,
   type ProfileExperience,
   type ProfileProject,
   type ProjectType,
@@ -41,6 +48,12 @@ const LOC_TYPES = ["", "On-site", "Hybrid", "Remote"];
 
 const emptyExp = (): ProfileExperience => ({ id: newId(), role: "", org: "", empType: "", location: "", locType: "", start: "", end: "", current: false, description: "" });
 const emptyEdu = (): ProfileEducation => ({ id: newId(), school: "", degree: "", field: "", start: "", end: "", grade: "", activities: "", description: "" });
+const emptyLang = (): ProfileLanguage => ({ id: newId(), name: "", level: "Professional working" });
+const emptyCert = (): ProfileCert => ({ id: newId(), name: "", issuer: "", issued: "", expires: "", credentialId: "", url: "" });
+const emptyVol = (): ProfileVolunteer => ({ id: newId(), org: "", role: "", cause: "", start: "", end: "", description: "" });
+const emptyHonor = (): ProfileHonor => ({ id: newId(), title: "", issuer: "", date: "", description: "" });
+const PRONOUNS = ["", "she/her", "he/him", "they/them"];
+const WORK_TYPES = ["On-site", "Hybrid", "Remote"];
 const emptyProj = (): ProfileProject => ({
   id: newId(), name: "", type: "Software", role: "", status: "Completed", start: "", end: "", associated: "", summary: "", contribution: "", tools: [], links: [], collaborators: "",
 });
@@ -61,6 +74,19 @@ function NewProfilePage() {
   const [skillIn, setSkillIn] = useState("");
   const [showSkills, setShowSkills] = useState(true);
   const [indexable, setIndexable] = useState(false);
+  const [pronouns, setPronouns] = useState("");
+  const [websites, setWebsites] = useState<ProfileWebsite[]>([]);
+  const [otw, setOtw] = useState(false);
+  const [otwTitles, setOtwTitles] = useState("");
+  const [otwTypes, setOtwTypes] = useState<string[]>([]);
+  const [langs, setLangs] = useState<ProfileLanguage[]>([]);
+  const [showLangs, setShowLangs] = useState(true);
+  const [certs, setCerts] = useState<ProfileCert[]>([]);
+  const [showCerts, setShowCerts] = useState(true);
+  const [vols, setVols] = useState<ProfileVolunteer[]>([]);
+  const [showVols, setShowVols] = useState(true);
+  const [honors, setHonors] = useState<ProfileHonor[]>([]);
+  const [showHonors, setShowHonors] = useState(true);
 
   const addSkill = () => {
     const parts = skillIn.split(",").map((s) => s.trim().slice(0, 40)).filter(Boolean);
@@ -82,10 +108,17 @@ function NewProfilePage() {
       education: showEdu ? edu : [],
       projects: showProj ? proj : [],
       skills: showSkills ? skills : [],
+      languages: showLangs ? langs : [],
+      certs: showCerts ? certs : [],
+      volunteer: showVols ? vols : [],
+      honors: showHonors ? honors : [],
+      pronouns,
+      websites: websites.filter((w) => w.url.trim() && safeUrl(w.url)),
+      openToWork: otw ? { titles: otwTitles.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 5), workTypes: otwTypes, visibleTo: "everyone" } : null,
       jobs: [],
       indexable,
     }),
-    [name, headline, location, about, showAbout, exp, showExp, edu, showEdu, proj, showProj, skills, showSkills, indexable],
+    [pronouns, websites, otw, otwTitles, otwTypes, langs, showLangs, certs, showCerts, vols, showVols, honors, showHonors, name, headline, location, about, showAbout, exp, showExp, edu, showEdu, proj, showProj, skills, showSkills, indexable],
   );
 
   return (
@@ -110,6 +143,44 @@ function NewProfilePage() {
             <Field label="City and country only" hint="No street address. It is never shown.">
               <input className={field} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Pune, India" maxLength={80} />
             </Field>
+            <Field label="Pronouns">
+              <select className={field} value={pronouns} onChange={(e) => setPronouns(e.target.value)}>
+                {PRONOUNS.map((o) => <option key={o} value={o}>{o || "Not set"}</option>)}
+              </select>
+            </Field>
+            <p className="mt-3 text-sm font-semibold text-foreground">Websites (up to 3)</p>
+            <p className="text-xs text-muted-foreground">Portfolio, blog or company site. Email and phone are never shown.</p>
+            {websites.map((w, i) => (
+              <div key={i} className="mt-2 flex gap-2">
+                <input className={field + " !mt-0 w-28"} placeholder="Label" value={w.label} maxLength={30} onChange={(e) => setWebsites(websites.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
+                <input className={field + " !mt-0"} placeholder="https://" value={w.url} maxLength={300} onChange={(e) => setWebsites(websites.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)))} />
+                <Button type="button" size="sm" variant="outline" aria-label="Remove website" onClick={() => setWebsites(websites.filter((_, j) => j !== i))}>X</Button>
+              </div>
+            ))}
+            {websites.length < 3 ? (
+              <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => setWebsites([...websites, { label: "", url: "" }])}>
+                Add website
+              </Button>
+            ) : null}
+            <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <input type="checkbox" checked={otw} onChange={(e) => setOtw(e.target.checked)} className="h-4 w-4 accent-[#f7d000]" />
+              Open to work
+            </label>
+            {otw ? (
+              <div className="mt-2">
+                <Field label="Job titles (up to 5, comma separated)">
+                  <input className={field} value={otwTitles} maxLength={200} onChange={(e) => setOtwTitles(e.target.value)} />
+                </Field>
+                <div className="mt-2 flex flex-wrap gap-4 text-sm text-foreground">
+                  {WORK_TYPES.map((w) => (
+                    <label key={w} className="flex items-center gap-2">
+                      <input type="checkbox" className="h-4 w-4 accent-[#f7d000]" checked={otwTypes.includes(w)} onChange={(e) => setOtwTypes(e.target.checked ? [...otwTypes, w] : otwTypes.filter((x) => x !== w))} />
+                      {w}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="rounded-xl border border-border/60 bg-card p-5">
@@ -245,6 +316,94 @@ function NewProfilePage() {
                     Add link
                   </Button>
                 ) : null}
+              </>
+            )}
+          />
+
+          <ListEditor<ProfileCert>
+            title="Licenses and certifications"
+            items={certs}
+            onChange={setCerts}
+            show={showCerts}
+            onShow={setShowCerts}
+            empty={emptyCert}
+            addLabel="Add certification"
+            summary={(c) => ({ title: c.name || "Certification", sub: [c.issuer, c.issued && fmtMonth(c.issued)].filter(Boolean).join(" | ") })}
+            validate={(c) =>
+              !c.name.trim() ? "Add the certification name." : !c.issuer.trim() ? "Add who issued it."
+              : endBeforeStart(c.issued, c.expires) ? "Expiry cannot be before the issue date."
+              : c.url.trim() && !safeUrl(c.url) ? "The credential link is not a valid web address." : null
+            }
+            form={(d, set) => (
+              <>
+                <Field label="Name" required><input className={field} value={d.name} maxLength={120} onChange={(e) => set({ name: e.target.value })} /></Field>
+                <Field label="Issuing organization" required><input className={field} value={d.issuer} maxLength={120} onChange={(e) => set({ issuer: e.target.value })} /></Field>
+                <Field label="Issue date"><input type="month" className={field} value={d.issued} onChange={(e) => set({ issued: e.target.value })} /></Field>
+                <Field label="Expiry date"><input type="month" className={field} value={d.expires} onChange={(e) => set({ expires: e.target.value })} /></Field>
+                <Field label="Credential ID"><input className={field} value={d.credentialId} maxLength={80} onChange={(e) => set({ credentialId: e.target.value })} /></Field>
+                <Field label="Credential link"><input className={field} value={d.url} maxLength={300} placeholder="https://" onChange={(e) => set({ url: e.target.value })} /></Field>
+              </>
+            )}
+          />
+
+          <ListEditor<ProfileVolunteer>
+            title="Volunteering"
+            items={vols}
+            onChange={setVols}
+            show={showVols}
+            onShow={setShowVols}
+            empty={emptyVol}
+            addLabel="Add volunteering"
+            summary={(v) => ({ title: v.role || "Role", sub: [v.org, v.cause].filter(Boolean).join(" | ") })}
+            validate={(v) => (!v.org.trim() ? "Add the organization." : !v.role.trim() ? "Add your role." : endBeforeStart(v.start, v.end) ? "End date cannot be before the start date." : null)}
+            form={(d, set) => (
+              <>
+                <Field label="Organization" required><input className={field} value={d.org} maxLength={120} onChange={(e) => set({ org: e.target.value })} /></Field>
+                <Field label="Role" required><input className={field} value={d.role} maxLength={100} onChange={(e) => set({ role: e.target.value })} /></Field>
+                <Field label="Cause"><input className={field} value={d.cause} maxLength={60} placeholder="Education, Environment..." onChange={(e) => set({ cause: e.target.value })} /></Field>
+                <Field label="Start"><input type="month" className={field} value={d.start} onChange={(e) => set({ start: e.target.value })} /></Field>
+                <Field label="End (leave empty if ongoing)"><input type="month" className={field} value={d.end} onChange={(e) => set({ end: e.target.value })} /></Field>
+                <Field label="Description"><textarea className={field} rows={3} value={d.description} maxLength={2000} onChange={(e) => set({ description: e.target.value })} /></Field>
+              </>
+            )}
+          />
+
+          <ListEditor<ProfileHonor>
+            title="Honors and awards"
+            items={honors}
+            onChange={setHonors}
+            show={showHonors}
+            onShow={setShowHonors}
+            empty={emptyHonor}
+            addLabel="Add award"
+            summary={(h) => ({ title: h.title || "Award", sub: [h.issuer, h.date && fmtMonth(h.date)].filter(Boolean).join(" | ") })}
+            validate={(h) => (!h.title.trim() ? "Add the award title." : null)}
+            form={(d, set) => (
+              <>
+                <Field label="Title" required><input className={field} value={d.title} maxLength={120} onChange={(e) => set({ title: e.target.value })} /></Field>
+                <Field label="Issued by"><input className={field} value={d.issuer} maxLength={120} onChange={(e) => set({ issuer: e.target.value })} /></Field>
+                <Field label="Date"><input type="month" className={field} value={d.date} onChange={(e) => set({ date: e.target.value })} /></Field>
+                <Field label="Description"><textarea className={field} rows={3} value={d.description} maxLength={2000} onChange={(e) => set({ description: e.target.value })} /></Field>
+              </>
+            )}
+          />
+
+          <ListEditor<ProfileLanguage>
+            title="Languages"
+            items={langs}
+            onChange={setLangs}
+            show={showLangs}
+            onShow={setShowLangs}
+            empty={emptyLang}
+            addLabel="Add language"
+            summary={(l) => ({ title: l.name || "Language", sub: l.level })}
+            validate={(l) => (!l.name.trim() ? "Add the language." : null)}
+            form={(d, set) => (
+              <>
+                <Field label="Language" required><input className={field} value={d.name} maxLength={50} onChange={(e) => set({ name: e.target.value })} /></Field>
+                <Field label="Proficiency" required>
+                  <select className={field} value={d.level} onChange={(e) => set({ level: e.target.value })}>{LANG_LEVELS.map((o) => <option key={o}>{o}</option>)}</select>
+                </Field>
               </>
             )}
           />
