@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import { initials, type PublicProfile } from "@/lib/profile-types";
+import { fmtRange, initials, safeUrl, type PublicProfile } from "@/lib/profile-types";
 
 function SectionTitle({ children }: { children: string }) {
   return <h2 className="font-display text-sm font-bold uppercase tracking-widest text-primary">{children}</h2>;
@@ -82,17 +82,82 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
               <SectionTitle>Experience</SectionTitle>
               <div className="mt-4 space-y-6">
                 {p.experience.map((e) => (
-                  <div key={`${e.org}-${e.role}`}>
+                  <div key={e.id}>
                     <p className="font-semibold text-foreground">{e.role}</p>
                     <p className="text-sm text-muted-foreground">
-                      {e.org} - {e.dates}
+                      {[e.org, e.empType].filter(Boolean).join(" - ")}
                     </p>
-                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                      {e.bullets.map((b) => (
-                        <li key={b}>{b}</li>
-                      ))}
-                    </ul>
+                    <p className="text-xs text-muted-foreground">
+                      {[fmtRange(e.start, e.end, e.current), [e.location, e.locType].filter(Boolean).join(", ")]
+                        .filter(Boolean)
+                        .join(" | ")}
+                    </p>
+                    {e.description ? (
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                        {e.description.split("\n").filter((l) => l.trim()).map((l, i) => (
+                          <li key={i}>{l.trim()}</li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {p.projects.length ? (
+            <section className="rounded-xl border border-border/60 bg-card p-6">
+              <SectionTitle>Projects</SectionTitle>
+              <div className="mt-4 space-y-6">
+                {p.projects.map((pr) => (
+                  <article key={pr.id} className="border-l-2 border-primary/60 pl-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-semibold text-foreground">{pr.name}</h3>
+                      <span className="rounded-full border border-primary/40 px-2 py-0.5 text-[11px] text-foreground">{pr.type}</span>
+                      <span className="rounded-full border border-border/60 px-2 py-0.5 text-[11px] text-muted-foreground">{pr.status}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {[pr.role, pr.associated, fmtRange(pr.start, pr.end, pr.status === "Ongoing", "Ongoing")]
+                        .filter(Boolean)
+                        .join(" | ")}
+                    </p>
+                    {pr.summary ? <p className="mt-2 text-sm text-muted-foreground">{pr.summary}</p> : null}
+                    {pr.contribution ? (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        <span className="font-semibold text-foreground">My part: </span>
+                        {pr.contribution}
+                      </p>
+                    ) : null}
+                    {pr.collaborators ? (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        <span className="font-semibold text-foreground">With: </span>
+                        {pr.collaborators}
+                      </p>
+                    ) : null}
+                    {pr.tools.length ? (
+                      <ul className="mt-2 flex flex-wrap gap-2">
+                        {pr.tools.map((s) => (
+                          <li key={s} className="rounded-full border border-border/60 px-2.5 py-0.5 text-xs text-foreground">
+                            {s}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {pr.links.length ? (
+                      <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                        {pr.links.map((l, i) => {
+                          const href = safeUrl(l.url);
+                          return href ? (
+                            <li key={i}>
+                              <a href={href} target="_blank" rel="noopener noreferrer nofollow ugc" className="text-primary underline underline-offset-2">
+                                {l.label || "Link"}
+                              </a>
+                            </li>
+                          ) : null;
+                        })}
+                      </ul>
+                    ) : null}
+                  </article>
                 ))}
               </div>
             </section>
@@ -101,13 +166,16 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
           {p.education.length ? (
             <section className="rounded-xl border border-border/60 bg-card p-6">
               <SectionTitle>Education</SectionTitle>
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-4 space-y-4">
                 {p.education.map((e) => (
-                  <li key={`${e.school}-${e.degree}`}>
+                  <li key={e.id}>
                     <p className="font-semibold text-foreground">{e.school}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {e.degree} - {e.dates}
+                    <p className="text-sm text-muted-foreground">{[e.degree, e.field].filter(Boolean).join(", ")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[fmtRange(e.start, e.end, false), e.grade && `Grade: ${e.grade}`].filter(Boolean).join(" | ")}
                     </p>
+                    {e.activities ? <p className="mt-1 text-sm text-muted-foreground">Activities: {e.activities}</p> : null}
+                    {e.description ? <p className="mt-1 text-sm text-muted-foreground">{e.description}</p> : null}
                   </li>
                 ))}
               </ul>
@@ -120,8 +188,13 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
             <div className="rounded-xl border border-border/60 bg-card p-6">
               <SectionTitle>{isPerson ? "Skills" : "Focus"}</SectionTitle>
               <ul className="mt-4 flex flex-wrap gap-2">
-                {p.skills.map((s) => (
-                  <li key={s} className="rounded-full border border-primary/40 px-3 py-1 text-xs text-foreground">
+                {p.skills.map((s, i) => (
+                  <li
+                    key={s}
+                    className={`rounded-full border px-3 py-1 text-xs text-foreground ${
+                      i < 3 && isPerson ? "border-primary bg-primary/10 font-semibold" : "border-primary/40"
+                    }`}
+                  >
                     {s}
                   </li>
                 ))}
