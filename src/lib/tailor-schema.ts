@@ -44,6 +44,8 @@ export const tailoredResumeSchema = z.object({
   coverLetter: z.string(),
   matchedKeywords: z.array(z.string()),
   missingKeywords: z.array(z.string()),
+  /** Activities a stated role clearly implies. Shown apart from the gaps; never written into the resume. */
+  impliedKeywords: z.array(z.object({ keyword: z.string(), evidence: z.string() })).optional(),
   matchScore: z.number(),
   /**
    * Weighted breakdown behind matchScore so the score is auditable instead of
