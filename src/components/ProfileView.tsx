@@ -66,7 +66,7 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
         <p className="mb-4 rounded-lg border border-primary/40 bg-primary/5 px-4 py-2 text-xs text-muted-foreground">{banner}</p>
       ) : null}
 
-      <div className={`grid gap-6 ${compact ? "" : "xl:grid-cols-[minmax(0,1fr)_21rem]"}`}>
+      <div className={`grid grid-cols-1 gap-6 ${compact ? "" : "xl:grid-cols-[minmax(0,1fr)_21rem]"}`}>
         <div className="min-w-0 space-y-4">
           {/* Top card */}
           <header className="overflow-hidden rounded-xl border border-border/60 bg-card">
