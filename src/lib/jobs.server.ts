@@ -745,7 +745,17 @@ export async function searchAlertListings(input: JobSearchInput, visitorCountry?
  * while credits comfortably remain), Adzuna second when Firecrawl is not allowed,
  * fails, runs out or returns too few. Always aims for at least MIN_RESULTS.
  */
+const MAX_RESULTS = 21;
+
+/** Shows at most MAX_RESULTS (the list is already ordered: place, then nearby; exact role first). */
 export async function searchJobListings(
+  input: JobSearchInput,
+  opts: { tier?: "free" | "starter" | "job_hunt" | "career_pro"; country?: string | null } = {},
+): Promise<JobListing[]> {
+  return (await searchJobListingsUncapped(input, opts)).slice(0, MAX_RESULTS);
+}
+
+async function searchJobListingsUncapped(
   input: JobSearchInput,
   opts: { tier?: "free" | "starter" | "job_hunt" | "career_pro"; country?: string | null } = {},
 ): Promise<JobListing[]> {
