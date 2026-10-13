@@ -18,6 +18,12 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
       baseURL: "https://api.cerebras.ai/v1",
       supportsStructuredOutputs: true,
       apiKey: cbKey,
+      // Cerebras normally answers in 4-15s. After 20s hand over to the Gemini models instead of making the user wait.
+      fetch: async (input: any, init?: any) => {
+        const short = AbortSignal.timeout(20_000);
+        const sig = init?.signal ? AbortSignal.any([init.signal, short]) : short;
+        return fetch(input, { ...init, signal: sig });
+      },
     });
     const cbId = forceModel.slice("cerebras:".length);
     const cbWrapped = ((_modelId: string) => cb(cbId)) as typeof cb;
