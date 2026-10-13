@@ -63,7 +63,7 @@ function ProfilePage() {
     <main className="site-container py-10 sm:py-16">
       {p.demo ? (
         <p className="mb-6 rounded-lg border border-primary/40 bg-primary/5 px-4 py-2 text-xs text-muted-foreground">
-          Preview demo. Made-up person and not shown on Google.
+          Preview demo. Made-up content, not shown on Google.
         </p>
       ) : null}
 
