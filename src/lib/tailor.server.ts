@@ -147,7 +147,7 @@ PHASE 3 — SOUND LIKE A HUMAN WROTE IT. A hiring manager must never suspect AI.
   - consistencyFlags: plain-language notes on date-math errors or conflicting numbers found in the SOURCE resume (for example "Resume says 5 years of experience, but the listed dates add up to 3 years and 4 months; the conservative figure was used"). Empty array when the source is clean. Never silently fix a conflict by inventing history: use the conservative, defensible number and flag it here.
   - regionAdaptations: what you changed for the hiring market (spelling convention, currency treatment, page length, personal information added or removed, visa or notice-period statement). Empty array for a same-country application with no changes.
   - fitWarning: if the candidate is a genuinely poor fit (major skill gaps or a clear seniority mismatch), say so honestly instead of force-fitting. Otherwise null. Write it in plain, simple English for an ordinary job seeker, not for a recruiter: 1 or 2 short sentences, everyday words, no jargon or formal phrases (no words like "extensive", "familiarity", "proficiency", "exposure", "demonstrated"). Say what is strong, then what the job needs that the resume does not show. Example: "Your social media skills are strong, but this role in Australia needs driving and local farming knowledge. Your resume does not show these." Name only things that are really in the job post or the resume.
-  - matchedKeywords / missingKeywords: keywords from the job description present or absent in the candidate's background. missingKeywords are only ones the candidate could truthfully add if they genuinely have that experience. A keyword is missing only when the activity is truly absent from the source resume: if the source shows the same activity in different words (content calendar = content planning, newsletters = email marketing), count it as present, not missing.
+  - matchedKeywords / missingKeywords: keywords from the job description present or absent in the candidate's background. missingKeywords are only ones the candidate could truthfully add if they genuinely have that experience. A keyword is missing only when the activity is truly absent from the source resume: if the source shows the same activity in different words (content calendar = content planning, newsletters = email marketing), count it as present, not missing. IMPLIED KEYWORDS: if a job keyword is an activity that is a normal, core part of a role, title or bullet the resume clearly states (for example a content creator does shoots and short-form video; a data analyst cleans data and builds reports; an accountant reconciles accounts), do NOT put it in missingKeywords. Put it in impliedKeywords as an object with keyword and evidence, where evidence is the exact resume line or job title that shows the role. Never use impliedKeywords for named tools, platforms, software, certifications, degrees, years of experience, numbers, industries, or brand or employer types (for example Fashion, Lifestyle, Brand Ambassador): those stay in missingKeywords when the resume does not state them. Never write an implied keyword into the resume or the cover letter.
   - tips: 3-5 short, actionable coaching suggestions the candidate can act on themselves. Never suggest fabricating anything.
   - atsScore: integer 0-100 estimating how ATS-friendly and parseable the generated resume is. It must be 95 or higher because the output uses a single-column layout, standard fonts, clear section labels, and strong keyword alignment. If you are not confident it exceeds 95, return 95.
   - FINAL COMPLETENESS AUDIT (do this before returning): walk the source resume line by line and confirm every employer, role, date range, client name, partner organisation, event, tool, number, link and section appears somewhere in your output. Restore anything missing. Then confirm each role meets its minimum bullet count and add back detail from the source if it does not.
@@ -230,6 +230,33 @@ ${data.resume}`;
         (result as any).missingKeywords = kept;
       }
     } catch { /* keep the model's list */ }
+
+    // Implied keywords: shown apart from the gaps, never written into the resume or letter. The truth guard below
+    // still sees them as "missing", so it keeps them out of the resume exactly as before.
+    let impliedOut: { keyword: string; evidence: string }[] = [];
+    try {
+      const stem2 = (w: string) => w.toLowerCase().replace(/[^a-z0-9]/g, "").replace(/(ing|ers|er|ed|es|s)$/, "");
+      const srcWords = new Set((data.resume.toLowerCase().match(/[a-z0-9]+/g) ?? []).map(stem2));
+      const raw = (result as any).impliedKeywords;
+      const blocked = /\d|certif|licen[cs]e|degree|bachelor|master|mba|phd|diploma|\byears?\b/i;
+      if (Array.isArray(raw)) {
+        for (const it of raw.slice(0, 8)) {
+          const kw = String(it?.keyword ?? "").trim();
+          const ev = String(it?.evidence ?? "").trim();
+          if (!kw || !ev || blocked.test(kw)) continue;
+          const evWords = (ev.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((w) => w.length > 2).map(stem2);
+          // The evidence must really come from the resume.
+          if (evWords.length < 2 || evWords.filter((w) => srcWords.has(w)).length / evWords.length < 0.8) continue;
+          if (impliedOut.some((x) => x.keyword.toLowerCase() === kw.toLowerCase())) continue;
+          impliedOut.push({ keyword: kw, evidence: ev.slice(0, 160) });
+        }
+      }
+      const mk2: string[] = Array.isArray((result as any).missingKeywords) ? (result as any).missingKeywords : [];
+      for (const it of impliedOut) {
+        if (!mk2.some((k) => String(k).toLowerCase() === it.keyword.toLowerCase())) mk2.push(it.keyword);
+      }
+      (result as any).missingKeywords = mk2;
+    } catch { impliedOut = []; }
 
     // Never ship a draft that silently dropped facts from the default resume.
     const { findMissingFacts: findMissingRaw } = await import("./resume-facts.server");
@@ -366,6 +393,10 @@ ${data.resume}`;
     }
     return withLetterDate(humanize({
       ...result,
+      missingKeywords: ((result as any).missingKeywords ?? []).filter(
+        (k: unknown) => !impliedOut.some((x) => x.keyword.toLowerCase() === String(k).toLowerCase()),
+      ),
+      impliedKeywords: impliedOut,
       scoreBreakdown: counted ? counted.breakdown : result.scoreBreakdown,
       matchScore: counted
         ? counted.score
