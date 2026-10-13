@@ -81,8 +81,19 @@ const NOT_AVAILABLE =
 
 export class SourceUnavailableError extends UserFacingError {}
 
-export function adzunaCountryFor(location: string | undefined, visitorIso?: string | null): string | null {
+/** True for places the Adzuna backup cannot cover (Gulf, Japan, Korea). */
+export function isUnsupportedPlace(location: string | undefined): boolean {
+  return NOT_AVAILABLE.test(location ?? "");
+}
+
+/** Shown for those places only when Firecrawl could not serve the search and there is no backup. */
+export const UNSUPPORTED_PLACE_MESSAGE =
+  "Plot twist: our job robots haven't landed in this part of the world yet 🛸🙈 Nothing to show right now. Try another country, we're working on it.";
+
+/** allowUnsupported: live search lets Firecrawl try first; alerts (Adzuna only) keep the upfront stop. */
+export function adzunaCountryFor(location: string | undefined, visitorIso?: string | null, allowUnsupported = false): string | null {
   const loc = location ?? "";
+  if (NOT_AVAILABLE.test(loc) && allowUnsupported) return null;
   if (NOT_AVAILABLE.test(loc)) throw new SourceUnavailableError("Job search is not available in this country yet. We are working on it.");
   for (const [re, code] of PLACE_TO_COUNTRY) if (re.test(loc)) return code;
   if (!loc || /worldwide|anywhere|remote/i.test(loc)) {
