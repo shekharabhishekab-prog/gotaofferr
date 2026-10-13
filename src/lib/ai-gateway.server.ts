@@ -29,9 +29,12 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
           try { body = (await res.clone().text()).slice(0, 300); } catch { /* ignore */ }
           console.warn(`[cerebras] 429 ${body}`);
           (globalThis as any).__cb429 = body;
+          // Retry only when Cerebras says a short wait is enough; a per-minute limit needs a longer wait, so hand over to Gemini at once.
           const ra = Number(res.headers.get("retry-after"));
-          await new Promise((r) => setTimeout(r, Number.isFinite(ra) && ra > 0 && ra <= 5 ? ra * 1000 : 1500));
-          res = await fetch(input, { ...init, signal: sig });
+          if (Number.isFinite(ra) && ra > 0 && ra <= 5) {
+            await new Promise((r) => setTimeout(r, ra * 1000));
+            res = await fetch(input, { ...init, signal: sig });
+          }
         }
         return res;
       },
