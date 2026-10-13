@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
+import { NetworkHeader, isNetworkPath } from "@/components/NetworkHeader";
 import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -36,6 +37,7 @@ export function SiteHeader() {
     navigate({ to: "/auth", search: { redirect: undefined }, replace: true });
   }
 
+  if (isNetworkPath(pathname)) return <NetworkHeader />;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur">
