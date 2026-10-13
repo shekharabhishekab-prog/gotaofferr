@@ -712,8 +712,8 @@ export async function searchJobListings(
 ): Promise<JobListing[]> {
   const tier = opts.tier ?? "free";
   const src = await import("./job-sources.server");
-  // Gulf / Japan / Korea: clear "not available yet" before anything is spent.
-  const adzunaCountry = src.adzunaCountryFor(input.location, opts.country);
+  // Gulf / Japan / Korea: Firecrawl may serve them. No Adzuna backup there, so the friendly "not available" answer comes only if Firecrawl cannot.
+  const adzunaCountry = src.adzunaCountryFor(input.location, opts.country, true);
 
   let jobs: JobListing[] = [];
   let firstError: unknown = null;
@@ -734,6 +734,7 @@ export async function searchJobListings(
   if (!adzunaCountry) {
     if (jobs.length > 0) return jobs;
     const { userError } = await import("./safe-error.server");
+    if (src.isUnsupportedPlace(input.location)) throw userError(src.UNSUPPORTED_PLACE_MESSAGE);
     throw userError("Job sources for this place are refreshing. Please try again in a few minutes.");
   }
 
