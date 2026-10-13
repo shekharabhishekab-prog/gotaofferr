@@ -125,6 +125,7 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
     try {
       const out = await fn(modelId);
       (globalThis as any).__cbDebug = cbDebug;
+      (globalThis as any).__cbModel = modelId; // TEMP DEBUG
       console.log(`[ai-time] ${modelId} ok ${((Date.now() - t0) / 1000).toFixed(1)}s tier=${tier}`);
       return out;
     } catch (error) {
