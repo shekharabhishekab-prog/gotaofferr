@@ -619,6 +619,14 @@ ${JSON.stringify(items)}`;
       if (outUrls.has(urlKey)) continue;
       const isExact = titleMatchesRole(c.title, input.role);
       if (!isExact && roleOverlap(c.title, input.role) < 0.5) continue;
+      // Top-up must still be a real opening in the searched place: no salary/"jobs in" list pages, no lower rung, no other city.
+      if (SAFETY_NET_JUNK.test(c.title) || STALE_PATTERNS.test(`${c.title} ${c.description}`)) continue;
+      if (isBelowRequestedSeniority(c.title, input.role)) continue;
+      if (placeTokens.length) {
+        const inPlace = mentionsLocation(candidateText(c), placeTokens);
+        const isNearby = nearTokens.length > 0 && (nearbyUrls.has(c.url) || mentionsLocation(candidateText(c), nearTokens));
+        if (!inPlace && !isNearby) continue;
+      }
       const cleanTitle = c.title.split(/\s+[-|–—]\s+/)[0]?.trim() || c.title;
       const company = c.title.split(/\s+[-|–—]\s+/)[1]?.trim() || c.source;
       outUrls.add(urlKey);
@@ -655,6 +663,9 @@ ${JSON.stringify(items)}`;
 
 
 const MIN_RESULTS = 7;
+
+/** Titles that are list/salary pages, not one opening. */
+const SAFETY_NET_JUNK = /\bjobs?\s+in\b|\bsalar(?:y|ies)\b|\b(?:\d+\+?\s+)?jobs?\s*\(|\b20(?:2[6-9])\b/i;
 
 /** Which board groups to query: fewer for Free (saves Firecrawl credits). */
 function firecrawlGroups(input: JobSearchInput, tier: string): number[] {
