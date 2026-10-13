@@ -1,6 +1,7 @@
 import { friendlyMessage } from "@/lib/friendly-error";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
+import { PostedJobs } from "@/components/PostedJobs";
 import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
 import { useServerFn } from "@tanstack/react-start";
@@ -443,6 +444,7 @@ function Jobs() {
           list. Click any job to apply on the company's own page.
         </p>
       </section>
+      <PostedJobs />
 
       {!session && anonUsed && !jobs ? (
         <div className="mt-10 rounded-2xl border border-border bg-card p-8">
