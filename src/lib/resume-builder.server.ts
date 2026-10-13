@@ -137,6 +137,8 @@ ${draftToText(draft)}`;
       output: Output.object({ schema: polishedResumeSchema }),
       prompt,
       maxOutputTokens: 8000,
+      abortSignal: AbortSignal.timeout(40_000),
+      maxRetries: 0,
     }));
     return stripPlaceholders(output, draft);
   } catch (error) {
