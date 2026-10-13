@@ -80,6 +80,8 @@ ${setupText(s)}`;
         output: Output.object({ schema: questionsSchema }),
         prompt,
         maxOutputTokens: 1500,
+        abortSignal: AbortSignal.timeout(40_000),
+        maxRetries: 0,
       }),
     );
     return output.questions.map((q) => q.trim());
@@ -112,6 +114,8 @@ ${answers}`;
         output: Output.object({ schema: feedbackSchema }),
         prompt,
         maxOutputTokens: 3500,
+        abortSignal: AbortSignal.timeout(40_000),
+        maxRetries: 0,
       }),
     );
     return output;
