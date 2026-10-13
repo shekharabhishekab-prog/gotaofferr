@@ -155,7 +155,22 @@ export const changePassword = createServerFn({ method: "POST" })
       const { safeError } = await import("@/lib/safe-error.server");
       throw safeError("changePassword", error, "Could not update your password right now.");
     }
-    return { ok: true };
+
+    // Sign every OTHER device out (and the temporary check session made above), keep this one.
+    // A failure here must not undo the password change, so it is only logged.
+    let othersSignedOut = false;
+    try {
+      const { getRequest } = await import("@tanstack/react-start/server");
+      const jwt = getRequest()?.headers.get("authorization")?.replace(/^Bearer /, "");
+      if (jwt) {
+        const { error: outErr } = await supabaseAdmin.auth.admin.signOut(jwt, "others");
+        othersSignedOut = !outErr;
+        if (outErr) console.error("[changePassword] sign-out of other sessions failed");
+      }
+    } catch {
+      console.error("[changePassword] sign-out of other sessions failed");
+    }
+    return { ok: true, othersSignedOut };
   });
 
 

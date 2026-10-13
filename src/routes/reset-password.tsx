@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/PasswordInput";
 import { supabase } from "@/integrations/supabase/client";
+import { signOutOtherSessions } from "@/lib/session.functions";
 import { passwordProblem } from "@/lib/password";
 
 export const Route = createFileRoute("/reset-password")({
@@ -68,6 +69,7 @@ function ResetPasswordPage() {
           : "That reset link has expired. Please request a new one.",
       );
     }
+    await signOutOtherSessions().catch(() => undefined);
     toast.success("Password updated. You're signed in.");
     navigate({ to: "/tailor", replace: true });
   }
