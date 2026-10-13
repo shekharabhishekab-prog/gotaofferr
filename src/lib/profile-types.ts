@@ -113,7 +113,7 @@ export const DEMO_PROFILES: Record<string, PublicProfile> = {
     headline: "Digital marketing studio for small businesses",
     location: "Pune, India",
     about:
-      "We help small businesses get found on Google and keep customers coming back with email. Small team, clear reports, no jargon.",
+      "We help small businesses get found on Google and keep customers coming back with email. Clear reports and no jargon.",
     experience: [],
     education: [],
     skills: ["SEO", "Email marketing", "Content", "Paid ads"],
