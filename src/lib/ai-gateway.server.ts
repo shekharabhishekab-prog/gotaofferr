@@ -9,6 +9,21 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel?: string) {
   const geminiKey = process.env.GEMINI_API_KEY;
 
+  // Cerebras (OpenAI-compatible). Used only when the router asks for it and the key exists.
+  if (forceModel?.startsWith("cerebras:")) {
+    const cbKey = process.env.CEREBRAS_API_KEY;
+    if (!cbKey) throw new Error("503 cerebras key not configured");
+    const cb = createOpenAICompatible({
+      name: "cerebras",
+      baseURL: "https://api.cerebras.ai/v1",
+      supportsStructuredOutputs: true,
+      apiKey: cbKey,
+    });
+    const cbId = forceModel.slice("cerebras:".length);
+    const cbWrapped = ((_modelId: string) => cb(cbId)) as typeof cb;
+    return Object.assign(cbWrapped, cb);
+  }
+
   if (!geminiKey) {
     return createOpenAICompatible({
       name: "lovable",
