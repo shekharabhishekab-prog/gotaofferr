@@ -51,7 +51,32 @@ export type ProfileVolunteer = { id: string; org: string; role: string; cause: s
 export type ProfileHonor = { id: string; title: string; issuer: string; date: string; description: string };
 export type ProfileWebsite = { label: string; url: string };
 export type OpenToWork = { titles: string[]; workTypes: string[]; visibleTo: "everyone" | "recruiters" };
-export type ProfileJob = { id: string; title: string; location: string; type: string; posted: string };
+export const COMPANY_SIZES = ["0-1", "2-10", "11-50", "51-200", "201-500", "501-1,000", "1,001-5,000", "5,001-10,000", "10,001+"];
+export const ORG_TYPES = ["Privately held", "Public company", "Nonprofit", "Partnership", "Government agency", "Educational institution", "Community or club", "Self-employed"];
+export type OrgLocation = { id: string; city: string; region: string; country: string; hq: boolean };
+export type OrgInfo = {
+  website: string;
+  industry: string;
+  size: string;
+  orgType: string;
+  founded: string;
+  buttons: ProfileWebsite[]; // custom call-to-action buttons, up to 3
+  locations: OrgLocation[];
+};
+export type JobSalary = { min: number; max: number; currency: string; period: "hour" | "month" | "year" };
+export type ProfileJob = {
+  id: string;
+  title: string;
+  location: string;
+  type: string; // Full time, Part time, Contract, Temporary, Internship, Volunteer, Other
+  posted: string; // human text for the list, e.g. "2 days ago"
+  workplace?: "On-site" | "Hybrid" | "Remote";
+  description?: string;
+  skills?: string[];
+  salary?: JobSalary; // shown by default; the employer must switch it off on purpose
+  applyUrl?: string; // external application link or mailto:
+  datePosted?: string; // YYYY-MM-DD, used for JSON-LD
+};
 
 export type PublicProfile = {
   slug: string;
@@ -71,6 +96,7 @@ export type PublicProfile = {
   pronouns?: string;
   websites?: ProfileWebsite[]; // public links only; email and phone are never part of a profile
   openToWork?: OpenToWork | null;
+  org?: OrgInfo; // company and organization pages only
   jobs: ProfileJob[]; // only meaningful for company/organization
   indexable: boolean; // false = noindex
   demo?: boolean;
@@ -214,12 +240,85 @@ export const DEMO_PROFILES: Record<string, PublicProfile> = {
     experience: [],
     education: [],
     projects: [],
+    org: {
+      website: "https://brightleaf.example.com",
+      industry: "Marketing and advertising",
+      size: "11-50",
+      orgType: "Privately held",
+      founded: "2018",
+      buttons: [{ label: "Visit website", url: "https://brightleaf.example.com" }],
+      locations: [
+        { id: "l1", city: "Pune", region: "Maharashtra", country: "India", hq: true },
+        { id: "l2", city: "Mumbai", region: "Maharashtra", country: "India", hq: false },
+      ],
+    },
     skills: ["SEO", "Email marketing", "Content", "Paid ads"],
     jobs: [
-      { id: "j1", title: "SEO Executive", location: "Pune, India", type: "Full time", posted: "2 days ago" },
-      { id: "j2", title: "Content Writer", location: "Remote, India", type: "Part time", posted: "1 week ago" },
+      {
+        id: "j1",
+        title: "SEO Executive",
+        location: "Pune, India",
+        type: "Full time",
+        posted: "2 days ago",
+        workplace: "Hybrid",
+        description:
+          "Run SEO for 6 to 8 small business websites.\nFix page titles, speed and broken links.\nWrite and publish two blog posts a week.\nSend a plain monthly traffic report to each client.\n\nYou should know: Google Search Console, basic HTML, Excel.\nBenefits: 24 paid leave days, coffee on us, learning budget.",
+        skills: ["SEO", "Google Search Console", "Excel", "Content writing"],
+        salary: { min: 300000, max: 480000, currency: "INR", period: "year" },
+        applyUrl: "https://brightleaf.example.com/careers/seo-executive",
+        datePosted: "2026-10-12",
+      },
+      {
+        id: "j2",
+        title: "Content Writer",
+        location: "Remote, India",
+        type: "Part time",
+        posted: "1 week ago",
+        workplace: "Remote",
+        description: "Write four blog posts a month for small business clients.\nResearch topics and keep a simple style.\nEdit your own work before sending.",
+        skills: ["Content writing", "SEO basics"],
+        applyUrl: "mailto:jobs@brightleaf.example.com",
+        datePosted: "2026-10-07",
+      },
     ],
     indexable: false,
     demo: true,
   },
 };
+
+/** Find a demo job and the company that posted it. */
+export function findDemoJob(id: string): { job: ProfileJob; company: PublicProfile } | null {
+  for (const c of Object.values(DEMO_PROFILES)) {
+    const job = c.jobs.find((j) => j.id === id);
+    if (job) return { job, company: c };
+  }
+  return null;
+}
+
+const EMP_TYPE_LD: Record<string, string> = {
+  "Full time": "FULL_TIME", "Part time": "PART_TIME", Contract: "CONTRACTOR", Temporary: "TEMPORARY", Internship: "INTERN", Volunteer: "VOLUNTEER", Other: "OTHER",
+};
+
+/** schema.org JobPosting. Pay is only included when the employer chose to show it. */
+export function jobJsonLd(job: ProfileJob, company: PublicProfile, url: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: job.title,
+    description: (job.description || job.title).replace(/\n/g, "<br>"),
+    datePosted: job.datePosted,
+    employmentType: EMP_TYPE_LD[job.type] ?? "OTHER",
+    hiringOrganization: { "@type": "Organization", name: company.name, sameAs: company.org?.website },
+    jobLocationType: job.workplace === "Remote" ? "TELECOMMUTE" : undefined,
+    jobLocation: job.workplace === "Remote" ? undefined : { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: job.location } },
+    applicantLocationRequirements: job.workplace === "Remote" ? { "@type": "Country", name: job.location.replace(/^Remote,\s*/, "") } : undefined,
+    baseSalary: job.salary
+      ? {
+          "@type": "MonetaryAmount",
+          currency: job.salary.currency,
+          value: { "@type": "QuantitativeValue", minValue: job.salary.min, maxValue: job.salary.max, unitText: job.salary.period.toUpperCase() },
+        }
+      : undefined,
+    url,
+  };
+}
