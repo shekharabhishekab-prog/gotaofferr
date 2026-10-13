@@ -83,6 +83,7 @@ ${setupText(s)}`;
         abortSignal: AbortSignal.timeout(40_000),
         maxRetries: 0,
       }),
+      { cerebrasFirst: true },
     );
     return output.questions.map((q) => q.trim());
   } catch (error) {
@@ -117,6 +118,7 @@ ${answers}`;
         abortSignal: AbortSignal.timeout(40_000),
         maxRetries: 0,
       }),
+      { cerebrasFirst: true },
     );
     return output;
   } catch (error) {
