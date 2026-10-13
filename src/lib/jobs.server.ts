@@ -600,6 +600,13 @@ ${JSON.stringify(items)}`;
         (mentionsLocation(job.location ?? "", nearTokens) || nearbyUrls.has(job.url));
       if (!remoteOk && !matchesPlace && !matchesNearby) continue;
     }
+    // Clean-results guard: no list pages, social posts, other-state ads, or listings whose own text never names the place.
+    if (isJunkListing(job.title, job.url)) continue;
+    if (placeTokens.length && !(input.remoteOnly && /remote/i.test(`${job.workMode} ${job.location}`))) {
+      const cand = byUrl.get(job.url);
+      const head = `${job.title} ${cand?.title ?? ""} ${(cand?.description ?? "").slice(0, 200)} ${job.url}`;
+      if (!mentionsLocation(head, placeTokens) && !(nearTokens.length > 0 && mentionsLocation(head, nearTokens))) continue;
+    }
     const urlKey = normalizeUrl(job.url);
     const identity = `${job.title}|${job.company}`.toLowerCase().replace(/\s+/g, " ").trim();
     if (outUrls.has(urlKey) || outIdentity.has(identity)) continue;
@@ -622,6 +629,7 @@ ${JSON.stringify(items)}`;
       const isExact = titleMatchesRole(c.title, input.role);
       if (!isExact && roleOverlap(c.title, input.role) < 0.5) continue;
       // Top-up must still be a real opening in the searched place: no salary/"jobs in" list pages, no lower rung, no other city.
+      if (isJunkListing(c.title, c.url)) continue;
       if (SAFETY_NET_JUNK.test(c.title) || STALE_PATTERNS.test(`${c.title} ${c.description}`)) continue;
       if (isBelowRequestedSeniority(c.title, input.role)) continue;
       if (placeTokens.length) {
@@ -692,6 +700,18 @@ function widerPlaces(location?: string): string[] {
 /** Titles that are list/salary pages, not one opening. */
 /** "... in Santa Monica, CA" / "... at Dehradun": a title that names its own place (case matters). */
 const TITLE_OTHER_PLACE = /\b(?:in|at)\s+[A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)?(?:,\s*[A-Z][A-Za-z]+)?\s*(?:\.\.\.|$|for\b)/;
+
+const SOCIAL_HOST = /^(?:www\.|m\.)?(?:instagram|facebook|fb|x|twitter|threads|tiktok|youtube|pinterest|reddit|quora)\.(?:com|net|me)$/i;
+/** List pages ("18 jobs", "32 roles"), social posts, and US "City, ST 12345" ads. */
+function isJunkListing(title: string, url: string): boolean {
+  let host = "";
+  try { host = new URL(url).hostname; } catch { /* ignore */ }
+  if (SOCIAL_HOST.test(host)) return true;
+  if (/\b\d+\s+(?:[\w&+-]+\s+){0,4}(?:jobs?|roles?|vacancies|stellen\w*)\b/i.test(title)) return true;
+  if (/\bjobs?\s*(?:&|and)\s*stellen/i.test(title)) return true;
+  if (/,\s*[A-Z]{2}\s+\d{5}\b/.test(title)) return true;
+  return false;
+}
 
 const SAFETY_NET_JUNK = /\bjobs?\s+in\b|\bsalar(?:y|ies)\b|\b(?:\d+\+?\s+)?jobs?\s*\(|\b20(?:2[6-9])\b/i;
 
