@@ -83,7 +83,7 @@ const COUNTRY_ALIASES: Record<string, string[]> = {
   bangladesh: ["bangladesh", "dhaka", ".bd/"],
   "sri lanka": ["sri lanka", "colombo", ".lk/"],
   nepal: ["nepal", "kathmandu", ".np/"],
-  "himachal pradesh": ["himachal", "shimla", "solan", "kullu", "manali", "mandi", "dharamshala", "dharamsala", "kangra", "baddi", "una"],
+  "delhi ncr": ["delhi", "ncr", "gurgaon", "gurugram", "noida", "ghaziabad", "faridabad"],
   "texas": ["texas", ", tx", "austin", "dallas", "houston", "san antonio", "fort worth", "plano"],
   "california": ["california", ", ca", "san francisco", "los angeles", "san diego", "san jose", "oakland", "sacramento", "palo alto", "mountain view", "sunnyvale", "irvine"],
   "new york": ["new york", ", ny", "new york city", "brooklyn", "manhattan", "buffalo", "albany"],
@@ -669,32 +669,24 @@ ${JSON.stringify(items)}`;
 const MIN_RESULTS = 7;
 const WIDEN_TARGET = 10;
 
-const REGION_OF: [RegExp, string][] = [
-  [/\bshimla\b/i, "Himachal Pradesh"],
-];
-const COUNTRY_NAME_OF: [RegExp, string][] = [
-  [/\b(india|delhi|mumbai|bengaluru|bangalore|hyderabad|chennai|pune|kolkata|gurgaon|gurugram|noida|ahmedabad|jaipur|shimla|chandigarh|kochi|indore|lucknow)\b/i, "India"],
-  [/\b(united states|usa|new york|california|texas|chicago|seattle|boston|austin|san francisco|los angeles)\b/i, "United States"],
-  [/\b(united kingdom|uk|england|london|manchester|scotland|birmingham|leeds)\b/i, "United Kingdom"],
-  [/\b(germany|berlin|munich|hamburg|frankfurt)\b/i, "Germany"],
-  [/\b(canada|toronto|vancouver|montreal|ottawa|calgary)\b/i, "Canada"],
-  [/\b(australia|sydney|melbourne|brisbane|perth)\b/i, "Australia"],
-  [/\b(dubai|abu dhabi|uae|united arab emirates)\b/i, "United Arab Emirates"],
-];
+/** Nearby, commutable cities to pull in as fill (a few tens of km). Never far cities of the same country. */
+const NEAR_CITIES: Record<string, string[]> = {
+  "berlin": ["Potsdam"],
+  "delhi": ["Gurgaon", "Noida", "Ghaziabad", "Faridabad"],
+  "new delhi": ["Gurgaon", "Noida", "Ghaziabad", "Faridabad"],
+  "shimla": ["Solan"],
+  "sydney": ["Parramatta", "Wollongong"],
+  "melbourne": ["Geelong"],
+  "mumbai": ["Navi Mumbai", "Thane"],
+  "bangalore": ["Bengaluru"],
+  "london": ["Croydon", "Watford"],
+  "dubai": ["Sharjah", "Abu Dhabi"],
+};
 
-/** Broader places to try, nearest first. Empty when the search is already country-wide. */
+/** Nearby places to try, closest first. Empty for country-wide or wide-region searches. */
 function widerPlaces(location?: string): string[] {
-  const loc = location ?? "";
-  if (!loc || /worldwide|anywhere|remote/i.test(loc)) return [];
-  const out: string[] = [];
-  for (const [re, name] of REGION_OF) if (re.test(loc)) out.push(name);
-  for (const [re, name] of COUNTRY_NAME_OF) {
-    if (re.test(loc)) {
-      if (normalizeText(loc).trim() !== name.toLowerCase()) out.push(name);
-      break;
-    }
-  }
-  return out;
+  const norm = normalizeText(location ?? "").trim();
+  return (NEAR_CITIES[norm] ?? []).slice(0, 2);
 }
 
 /** Titles that are list/salary pages, not one opening. */
@@ -778,7 +770,7 @@ export async function searchJobListings(
   console.info(`[jobs] tier=${tier} firecrawl_jobs=${jobs.length}`);
   if (jobs.length >= MIN_RESULTS) return jobs;
 
-  // Thin place: widen step by step (region, then rest of the country). Wider results always come after the searched place.
+  // Thin place: add nearby commutable cities only (never far cities or the rest of the country). Nearby results always come after the searched place.
   if (jobs.length < MIN_RESULTS && jobs.length < 60 && (await src.mayUseFirecrawl(tier))) {
     const steps = widerPlaces(input.location);
     const seenUrl = new Set(jobs.map((j) => normalizeUrl(j.url)));
