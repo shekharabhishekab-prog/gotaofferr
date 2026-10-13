@@ -138,7 +138,7 @@ function NewProfilePage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-[1500px] px-3 py-8 sm:px-6 sm:py-12">
+    <main className="mx-auto w-full max-w-[1500px] overflow-x-clip px-3 py-8 sm:px-6 sm:py-12">
       <p className="text-xs uppercase tracking-widest text-primary">Public profile</p>
       <h1 className="mt-2 font-display text-3xl font-bold text-foreground sm:text-5xl">Make my public profile</h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
