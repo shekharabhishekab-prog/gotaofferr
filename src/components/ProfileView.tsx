@@ -61,7 +61,7 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
   const others = Object.values(DEMO_PROFILES).filter((x) => x.slug !== p.slug);
 
   return (
-    <main className={compact ? "w-full" : "mx-auto w-full max-w-[1400px] px-3 py-6 sm:px-6 sm:py-10"}>
+    <main className={compact ? "w-full overflow-x-clip" : "mx-auto w-full max-w-[1400px] overflow-x-clip px-3 py-6 sm:px-6 sm:py-10"}>
       {banner ? (
         <p className="mb-4 rounded-lg border border-primary/40 bg-primary/5 px-4 py-2 text-xs text-muted-foreground">{banner}</p>
       ) : null}
@@ -165,7 +165,7 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
 
           {!isPerson && p.org ? (
             <section className="rounded-xl border border-border/60 bg-card p-5 sm:p-6">
-              <SectionTitle>Company details</SectionTitle>
+              <SectionTitle noEdit>{p.kind === "organization" ? "Organization details" : "Company details"}</SectionTitle>
               <dl className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
                 {[
                   ["Website", p.org.website],
