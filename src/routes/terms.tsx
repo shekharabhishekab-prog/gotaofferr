@@ -139,10 +139,12 @@ function Terms() {
           </p>
           <p>
             <strong>Repeated failed payments.</strong> If payments fail again and again on an
-            account, we may pause new purchases on it for 2 hours, then for 2 days, then for 3
-            days. After several rounds we may block new purchases for good on that account and the
-            network address it uses. Free features keep working. Existing renewals follow the retry
-            rules above.
+            account (3 failed attempts in a short time), we pause new purchases on it. The first
+            pause is 15 minutes. Each further round pauses for longer: 30 minutes, 1 hour, 1 day,
+            then several days, up to 30 days, and 15 more days for each round after that. We never
+            ban an account for good, and a successful payment clears the count. After 30 quiet
+            days the count starts again. Free features keep working. Existing renewals follow the
+            retry rules above.
           </p>
           <h3 className="pt-2 text-lg font-semibold text-foreground">
             Upgrades, renewal and cancellation
