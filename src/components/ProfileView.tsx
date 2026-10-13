@@ -16,18 +16,18 @@ function PencilButton({ section }: { section: string }) {
       aria-label={`Edit ${section}`}
       title={`Edit ${section}`}
       onClick={() => onEdit(section)}
-      className="shrink-0 rounded-full border border-border/60 p-1.5 text-muted-foreground hover:border-primary hover:text-primary"
+      className="shrink-0 rounded-full border border-border/60 bg-card p-1.5 text-muted-foreground hover:border-primary hover:text-primary"
     >
       <Pencil className="size-3.5" aria-hidden="true" />
     </button>
   );
 }
 
-function SectionTitle({ children }: { children: string }) {
+function SectionTitle({ children, noEdit }: { children: string; noEdit?: boolean }) {
   return (
     <div className="flex items-start justify-between gap-2">
       <h2 className="font-display text-lg font-bold text-foreground">{children}</h2>
-      <PencilButton section={children} />
+      {noEdit ? null : <PencilButton section={children} />}
     </div>
   );
 }
@@ -72,7 +72,7 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
           <header className="overflow-hidden rounded-xl border border-border/60 bg-card">
             <Cover tall={!isPerson} />
             <div className="relative px-5 pb-5 sm:px-8 sm:pb-7">
-              <div className="absolute right-3 top-3 sm:right-5 sm:top-4"><PencilButton section="Headline" /></div>
+              <div className="absolute right-3 top-20 sm:right-5 sm:top-24"><PencilButton section="Headline" /></div>
               <div
                 aria-hidden="true"
                 className={`-mt-14 flex h-28 w-28 items-center justify-center border-4 border-card bg-primary font-display text-4xl font-bold text-primary-foreground sm:-mt-16 sm:h-32 sm:w-32 ${
@@ -436,7 +436,7 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
           ) : null}
           {others.length ? (
             <div className={card}>
-              <SectionTitle>{isPerson ? "More profiles for you" : "Pages people also view"}</SectionTitle>
+              <SectionTitle noEdit>{isPerson ? "More profiles for you" : "Pages people also view"}</SectionTitle>
               <ul className="mt-3 space-y-3">
                 {others.map((o) => (
                   <li key={o.slug} className="flex items-center gap-3">
