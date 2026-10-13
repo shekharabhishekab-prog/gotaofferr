@@ -140,3 +140,19 @@ export async function sealLegacyRows(sb: any, budget = 35): Promise<{ profiles: 
   }
   return done;
 }
+
+
+/**
+ * Searchable "fingerprint" of an email address: HMAC-SHA256 of the lower-cased address
+ * with a key derived from the server secret. Same address always gives the same value, so
+ * rows can be matched and de-duplicated while the address itself is stored encrypted.
+ * It cannot be reversed without the server key.
+ */
+export async function emailFingerprint(email: string): Promise<string> {
+  const secret = process.env["RESUME_ENCRYPTION_KEY"];
+  if (!secret) throw new Error("RESUME_ENCRYPTION_KEY is not configured");
+  const raw = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`email-fingerprint:${secret}`));
+  const key = await crypto.subtle.importKey("raw", raw, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(email.trim().toLowerCase()));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
