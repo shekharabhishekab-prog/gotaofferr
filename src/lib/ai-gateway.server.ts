@@ -22,7 +22,18 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
       fetch: async (input: any, init?: any) => {
         const short = AbortSignal.timeout(20_000);
         const sig = init?.signal ? AbortSignal.any([init.signal, short]) : short;
-        return fetch(input, { ...init, signal: sig });
+        let res = await fetch(input, { ...init, signal: sig });
+        if (res.status === 429) {
+          // Rate limit: read why, wait a moment and try once more before handing over to Gemini.
+          let body = "";
+          try { body = (await res.clone().text()).slice(0, 300); } catch { /* ignore */ }
+          console.warn(`[cerebras] 429 ${body}`);
+          (globalThis as any).__cb429 = body;
+          const ra = Number(res.headers.get("retry-after"));
+          await new Promise((r) => setTimeout(r, Number.isFinite(ra) && ra > 0 && ra <= 5 ? ra * 1000 : 1500));
+          res = await fetch(input, { ...init, signal: sig });
+        }
+        return res;
       },
     });
     const cbId = forceModel.slice("cerebras:".length);
