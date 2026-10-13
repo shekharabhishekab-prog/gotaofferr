@@ -246,3 +246,29 @@ export const getMonthCards = createServerFn({ method: "GET" })
     record = await computeMonth(month);
     return { month, current, months, record };
   });
+
+/** Owner-only list of people who left an email on the free try without signing up (decrypted for the owner). */
+export const getMarketingEmails = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context as AdminCtx);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { safeError } = await import("./safe-error.server");
+    const { decryptText } = await import("@/lib/field-crypto.server");
+    const all: any[] = [];
+    for (let offset = 0; offset < 100000; offset += 1000) {
+      const { data, error } = await supabaseAdmin
+        .from("captured_emails")
+        .select("id,email,source,created_at")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(offset, offset + 999);
+      if (error) throw safeError("admin-marketing", error, "Could not load marketing emails. Please try again.");
+      all.push(...(data ?? []));
+      if ((data ?? []).length < 1000) break;
+    }
+    const rows = await Promise.all(
+      all.map(async (r) => ({ email: await decryptText(r.email), source: String(r.source ?? ""), createdAt: (r.created_at as string | null) ?? null })),
+    );
+    return { rows: rows.filter((r) => r.email) };
+  });
