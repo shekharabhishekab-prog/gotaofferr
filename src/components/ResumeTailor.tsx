@@ -866,6 +866,21 @@ export function ResumeTailor() {
                       </span>
                     ))}
                   </div>
+                  {(result.impliedKeywords ?? []).length > 0 ? (
+                    <div className="mt-4">
+                      <h4 className="tl-ins-h">Probably true, add if yes</h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(result.impliedKeywords ?? []).map((k) => (
+                          <span key={k.keyword} className="tl-chip" title={"From your resume: " + k.evidence}>
+                            {k.keyword}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Your resume suggests you do this already. If it is true, add it to your Skills and one bullet. We did not add it for you.
+                      </p>
+                    </div>
+                  ) : null}
                   {result.atsTopFix ? (
                     <p className="mt-3 text-sm text-muted-foreground">Top fix: {result.atsTopFix}</p>
                   ) : null}
