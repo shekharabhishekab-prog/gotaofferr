@@ -90,6 +90,10 @@ function JobPage() {
                 <a href={href} target="_blank" rel="noopener noreferrer nofollow">Apply now</a>
               </Button>
             ) : null}
+            <Button asChild variant="outline" className="mt-3 w-full">
+              <Link to="/tailor">Tailor my resume to this job</Link>
+            </Button>
+            <p className="mt-2 text-xs text-muted-foreground">Opens the resume tailor. Paste this job's description there.</p>
           </div>
           <div className="rounded-xl border border-border/60 bg-card p-6">
             <h2 className="font-display text-sm font-bold uppercase tracking-widest text-primary">About {company.name}</h2>
