@@ -156,6 +156,7 @@ export const cocoSpeak = createServerFn({ method: "POST" })
         const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
           method: "POST",
           headers: { "content-type": "application/json", "x-goog-api-key": key },
+          signal: AbortSignal.timeout(15_000),
           body: JSON.stringify({
             contents: [{ parts: [{ text: "Voice: a sweet, bright, soft little girl, warm and smiling, calm steady pace. Say exactly this line and nothing else: " + data.text }] }],
             generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: data.voice } } } },
