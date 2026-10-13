@@ -120,12 +120,12 @@ ${formatRules.map((rule) => `- ${rule}`).join("\n")}
 WRITING RULES (mandatory):
 - Never invent an employer, job title, date, degree, tool, client or number that is not in the notes. If a metric is missing, write the outcome without a number rather than making one up.
 - If a field was left blank, return an empty string for it. Never write placeholder text such as "Not Specified", "N/A" or "Company Name".
-- Do not state any result or effect the notes do not state. Banned unless the notes explicitly give that result: increased, improved, boosted, grew, drove, enhanced, reduced, saved, optimized for results, "organic traffic" gains. Describe scope and action instead (e.g. "Handled SEO for 6 client websites"). Never imply an outcome.
+- Do not state any result or effect the notes do not state. Banned unless the notes explicitly give that result (in any form, including -ing endings such as improving, increasing, boosting, enhancing, driving): increased, improved, boosted, grew, drove, enhanced, reduced, saved, optimized for results, "organic traffic" gains. Describe scope and action instead (e.g. "Handled SEO for 6 client websites"). Never imply an outcome.
 - Keep every fact the candidate gave, including exact company names and dates.
 - Each experience gets 3-5 bullets. Start with a strong past-tense verb; no "Responsible for", no "Spearheaded", no "Leveraged", no "Utilized", no "Passionate", no "Dynamic", no em dashes.
 - Write like an experienced professional wrote it by hand: direct, specific, plain. It must not read as AI-generated.
 - Summary: 2-3 sentences, first person implied (no "I"), naming the candidate's actual domain and years of experience only if the notes support it.
-- skills: 8-14 concrete skills or tools drawn from the notes, written the way a job posting writes them.
+- skills: only skills, tools or methods that the notes name or clearly describe doing. Do NOT add related skills the notes do not mention (no "Keyword Research", "On-page Optimization", "Email Marketing" or similar unless the notes say so). Fewer than 8 is fine. Write them the way a job posting writes them.
 - keyAchievements: at most 4, only where the notes contain a real, standout result. Return an empty array otherwise, and never repeat an experience bullet.
 - tips: 2-4 short, specific suggestions on what the candidate should still add (missing metrics, thin sections).
 
