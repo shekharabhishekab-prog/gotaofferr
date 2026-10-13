@@ -172,7 +172,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" })
       if (active) activeSubs += 1;
     }
     // Known QA accounts remain in records and activity totals, but not this ratio.
-    const knownQaEmails = new Set(["itsabhi9646@gmail.com", "mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com", "mailboss+qafree@mail.instinct.com", "rrak2832@gmail.com"]);
+    const knownQaEmails = new Set(["itsabhi9646@gmail.com", "mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com", "mailboss+qafree@mail.instinct.com", "rrak2832@gmail.com", "contact@gotaofferr.com"]);
     const shareUsers = users.filter((u) => !knownQaEmails.has((u.email ?? "").trim().toLowerCase()));
     const shareEntitledUsers = shareUsers.filter((u) => {
       const sub = firstSub.get(u.id);
