@@ -1,7 +1,5 @@
-import { generateText, Output } from "ai";
 
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
-import { jobListingsSchema, type JobListing, type JobSearchInput } from "./jobs-schema";
+import { type JobListing, type JobSearchInput } from "./jobs-schema";
 
 const FIRECRAWL_GATEWAY = "https://connector-gateway.lovable.dev/firecrawl/v2";
 
@@ -535,11 +533,7 @@ async function searchViaFirecrawl(input: JobSearchInput, queries: string[]): Pro
   ];
 
 
-  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const gateway = createLovableAiGatewayProvider(key);
-
-  const prompt = `You are a job-search assistant. Below are raw web search results for someone looking for a "${input.role}" role.
+  const buildPrompt = (items: typeof shortlist) => `You are a job-search assistant. Below are raw web search results for someone looking for a "${input.role}" role.
 
 User filters:
 - Location: ${input.location || "any"}
@@ -567,19 +561,19 @@ Rules:
 - Be generous: return EVERY qualifying listing you can, up to 45 — all exact matches first, then related roles. Returning too few is worse than including a borderline one.
 
 RESULTS:
-${JSON.stringify(shortlist)}`;
+${JSON.stringify(items)}`;
 
 
+  // Free AI chain (Groq, then a separate Gemini key). Chunks of 10 keep each call small. If every layer is
+  // out or fails, output stays empty and the plain-results top-up below fills the list.
   let output: { jobs?: JobListing[] } | undefined;
-  try {
-    ({ output } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
-      model: gateway(modelId),
-      output: Output.object({ schema: jobListingsSchema }),
-      prompt,
-    })));
-  } catch (error) {
-    const { aiGatewayErrorMessage } = await import("./ai-errors.server");
-    throw new Error(aiGatewayErrorMessage(error));
+  {
+    const { cleanJobListings } = await import("./job-ai-chain.server");
+    const chunks: (typeof shortlist)[] = [];
+    for (let i = 0; i < shortlist.length; i += 10) chunks.push(shortlist.slice(i, i + 10));
+    const results = await Promise.all(chunks.map((c) => cleanJobListings(buildPrompt(c)).catch(() => null)));
+    console.info(`[jobs] ai chunks=${chunks.length} answered=${results.filter(Boolean).length}`);
+    output = { jobs: results.flatMap((r) => r?.jobs ?? []) };
   }
 
   const allowed = new Set(shortlist.map((c) => c.url));
