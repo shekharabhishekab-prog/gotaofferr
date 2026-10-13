@@ -762,6 +762,7 @@ async function adzunaPipeline(input: JobSearchInput, country: string, jobs: JobL
     if (seen.has(normalizeUrl(j.url))) continue;
     const id = `${j.title}|${j.company}`.toLowerCase();
     if (identity.has(id)) continue;
+    if (isJunkListing(j.title, j.url)) continue;
     if (isBelowRequestedSeniority(j.title, input.role)) continue;
     const exact = titleMatchesRole(j.title, input.role);
     // Exact role first, then adjacent roles; never unrelated ones.
