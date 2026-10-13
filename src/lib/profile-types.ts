@@ -44,6 +44,13 @@ export type ProfileProject = {
   links: ProfileLink[]; // repo, live demo, paper, case study
   collaborators: string; // plain names, no accounts needed
 };
+export type ProfileLanguage = { id: string; name: string; level: string };
+export const LANG_LEVELS = ["Elementary", "Limited working", "Professional working", "Full professional", "Native or bilingual"];
+export type ProfileCert = { id: string; name: string; issuer: string; issued: string; expires: string; credentialId: string; url: string };
+export type ProfileVolunteer = { id: string; org: string; role: string; cause: string; start: string; end: string; description: string };
+export type ProfileHonor = { id: string; title: string; issuer: string; date: string; description: string };
+export type ProfileWebsite = { label: string; url: string };
+export type OpenToWork = { titles: string[]; workTypes: string[]; visibleTo: "everyone" | "recruiters" };
 export type ProfileJob = { id: string; title: string; location: string; type: string; posted: string };
 
 export type PublicProfile = {
@@ -57,6 +64,13 @@ export type PublicProfile = {
   education: ProfileEducation[];
   skills: string[]; // first 3 are shown as featured
   projects: ProfileProject[];
+  languages?: ProfileLanguage[];
+  certs?: ProfileCert[];
+  volunteer?: ProfileVolunteer[];
+  honors?: ProfileHonor[];
+  pronouns?: string;
+  websites?: ProfileWebsite[]; // public links only; email and phone are never part of a profile
+  openToWork?: OpenToWork | null;
   jobs: ProfileJob[]; // only meaningful for company/organization
   indexable: boolean; // false = noindex
   demo?: boolean;
