@@ -32,6 +32,11 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
       try {
         const body = typeof init?.body === "string" ? JSON.parse(init.body) : null;
         const model = body?.model as string | undefined;
+        // The first lite model gets a shorter wait (25s) so the last lite model still has time to answer. The last one keeps the full 40s.
+        if (model === "gemini-3.5-flash-lite") {
+          const short = AbortSignal.timeout(25_000);
+          init = { ...init, signal: init?.signal ? AbortSignal.any([init.signal, short]) : short };
+        }
         if (model) {
           const { countCall } = await import("./model-router.server");
           if (!(await countCall(model))) {
