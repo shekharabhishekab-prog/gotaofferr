@@ -106,8 +106,8 @@ export async function decryptSearchFields<T extends Record<string, any> | null |
  * Seals any rows still holding plain text (rows written before this shipped, and
  * names the signup trigger writes in plain). Safe to run any number of times. Each run does at most 35 updates (the Worker allows about 50 outbound calls per request), so large backlogs clear over a few runs.
  */
-export async function sealLegacyRows(sb: any, budget = 35): Promise<{ profiles: number; alerts: number; searches: number }> {
-  const done = { profiles: 0, alerts: 0, searches: 0 };
+export async function sealLegacyRows(sb: any, budget = 35): Promise<{ profiles: number; alerts: number; searches: number; captured: number; subscriptions: number }> {
+  const done = { profiles: 0, alerts: 0, searches: 0, captured: 0, subscriptions: 0 };
 
   const { data: ps } = await sb.from("profiles").select("id, full_name").not("full_name", "is", null).not("full_name", "like", "enc1:%").limit(Math.max(1, budget));
   for (const p of ps ?? []) {
@@ -138,5 +138,58 @@ export async function sealLegacyRows(sb: any, budget = 35): Promise<{ profiles: 
     if (!error) done.searches += 1;
     if (budget <= 0) return done;
   }
+
+  // Marketing-captured emails still in plain text (needs the email_hash column; skipped quietly until it exists).
+  {
+    const { data: cs, error: ce } = await sb
+      .from("captured_emails")
+      .select("id, email, source")
+      .is("email_hash", null)
+      .not("email", "like", "enc1:%")
+      .limit(Math.max(1, budget));
+    if (!ce) {
+      for (const c of cs ?? []) {
+        const hash = await emailFingerprint(c.email);
+        budget -= 1;
+        // A sealed twin may exist from a capture made after the switch: then the plain row is a pure duplicate.
+        const { data: twin } = await sb.from("captured_emails").select("id").eq("email_hash", hash).eq("source", c.source).maybeSingle();
+        if (twin) {
+          const { error } = await sb.from("captured_emails").delete().eq("id", c.id).eq("email", c.email);
+          if (!error) done.captured += 1;
+        } else {
+          const { error } = await sb.from("captured_emails").update({ email: await encryptText(c.email), email_hash: hash }).eq("id", c.id).eq("email", c.email);
+          if (!error) done.captured += 1;
+        }
+        if (budget <= 0) return done;
+      }
+    }
+  }
+
+  // Razorpay customer id (never read back by the app, only stored).
+  {
+    const { data: ss2 } = await sb.from("subscriptions").select("id, stripe_customer_id").not("stripe_customer_id", "like", "enc1:%").neq("stripe_customer_id", "").limit(Math.max(1, budget));
+    for (const r of ss2 ?? []) {
+      const { error } = await sb.from("subscriptions").update({ stripe_customer_id: await encryptText(r.stripe_customer_id) }).eq("id", r.id).eq("stripe_customer_id", r.stripe_customer_id);
+      budget -= 1;
+      if (!error) done.subscriptions += 1;
+      if (budget <= 0) return done;
+    }
+  }
   return done;
+}
+
+
+/**
+ * Searchable "fingerprint" of an email address: HMAC-SHA256 of the lower-cased address
+ * with a key derived from the server secret. Same address always gives the same value, so
+ * rows can be matched and de-duplicated while the address itself is stored encrypted.
+ * It cannot be reversed without the server key.
+ */
+export async function emailFingerprint(email: string): Promise<string> {
+  const secret = process.env["RESUME_ENCRYPTION_KEY"];
+  if (!secret) throw new Error("RESUME_ENCRYPTION_KEY is not configured");
+  const raw = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`email-fingerprint:${secret}`));
+  const key = await crypto.subtle.importKey("raw", raw, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(email.trim().toLowerCase()));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }

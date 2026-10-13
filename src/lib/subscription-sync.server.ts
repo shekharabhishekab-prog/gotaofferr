@@ -34,6 +34,18 @@ function iso(seconds?: number | null): string | null {
   return seconds ? new Date(seconds * 1000).toISOString() : null;
 }
 
+/** The Razorpay customer id is stored sealed (it is never read back). Never blocks a payment: on any problem it logs and stores as before. */
+async function sealCustomerId(id: string): Promise<string> {
+  if (!id) return id;
+  try {
+    const { encryptText } = await import('@/lib/field-crypto.server');
+    return (await encryptText(id)) ?? id;
+  } catch {
+    console.error('[subscriptions] could not seal customer id, storing as before');
+    return id;
+  }
+}
+
 /** Upserts one subscription row from a Razorpay subscription entity. */
 export async function upsertRazorpaySubscriptionRow(
   subscription: any,
@@ -52,7 +64,7 @@ export async function upsertRazorpaySubscriptionRow(
     {
       user_id: userId,
       stripe_subscription_id: subscription.id,
-      stripe_customer_id: subscription.customer_id ?? '',
+      stripe_customer_id: await sealCustomerId(subscription.customer_id ?? ''),
       product_id: subscription.plan_id ?? '',
       price_id: lookupKey,
       status: normaliseStatus(subscription.status),

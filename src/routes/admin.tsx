@@ -30,8 +30,9 @@ import { AdminMfaGate } from "@/components/AdminMfaGate";
 import { RouteError } from "@/components/RouteError";
 import { RouteNotFound } from "@/components/RouteNotFound";
 import { useSession } from "@/hooks/useSession";
-import { checkIsAdmin, getAdminDashboard, getMonthCards } from "@/lib/admin.functions";
+import { checkIsAdmin, getAdminDashboard, getMarketingEmails, getMonthCards } from "@/lib/admin.functions";
 import { REGIONS } from "@/lib/region";
+import { toast } from "@/lib/toast";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -98,6 +99,8 @@ function AdminPage() {
   const monthFn = useServerFn(getMonthCards);
   const isAdminFn = useServerFn(checkIsAdmin);
   const dashboardFn = useServerFn(getAdminDashboard);
+  const marketingFn = useServerFn(getMarketingEmails);
+  const [exportingMarketing, setExportingMarketing] = useState(false);
 
   const adminQuery = useQuery({
     queryKey: ["admin-check", user?.id],
@@ -231,6 +234,34 @@ function AdminPage() {
             <p className="mt-2 text-xs text-muted-foreground">Region comes from the connection country at first sign-in, so someone on a VPN may show a different region than where they really are. Accounts made before this was tracked count as India.</p>
           </div>
 
+          <div className="mt-6 flex items-center justify-between gap-3 rounded-xl border border-border p-4">
+            <p className="text-sm text-muted-foreground">
+              Marketing emails: people who left an email on the free try without signing up.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={exportingMarketing}
+              onClick={async () => {
+                setExportingMarketing(true);
+                try {
+                  const res = await marketingFn({});
+                  downloadCsv(
+                    `gotaofferr-marketing-emails-${stamp()}.csv`,
+                    ["email", "source", "captured_at"],
+                    res.rows.map((r) => [r.email, r.source, r.createdAt]),
+                  );
+                } catch {
+                  toast.error("Could not export marketing emails. Please try again.");
+                } finally {
+                  setExportingMarketing(false);
+                }
+              }}
+            >
+              {exportingMarketing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              Marketing emails CSV
+            </Button>
+          </div>
           <Tabs defaultValue="users" className="mt-10">
             <TabsList>
               <TabsTrigger value="users">Users</TabsTrigger>

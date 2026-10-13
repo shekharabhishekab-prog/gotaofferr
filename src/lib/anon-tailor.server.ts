@@ -131,7 +131,21 @@ export async function saveCapturedEmail(
   deviceHash: string | null,
 ): Promise<void> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const plain = email.toLowerCase();
+  // Preferred: address stored encrypted, matched by its fingerprint (needs the email_hash column).
+  try {
+    const { encryptText, emailFingerprint } = await import("@/lib/field-crypto.server");
+    const email_hash = await emailFingerprint(plain);
+    const { error } = await supabaseAdmin
+      .from("captured_emails")
+      .upsert({ email: await encryptText(plain), email_hash, source, device_hash: deviceHash } as any, { onConflict: "email_hash,source" });
+    if (!error) return;
+    console.error("captured email (sealed) write failed, using fallback");
+  } catch {
+    console.error("captured email (sealed) write unavailable, using fallback");
+  }
+  // Fallback until the email_hash column exists: the old plain write, so capture never breaks.
   await supabaseAdmin
     .from("captured_emails")
-    .upsert({ email: email.toLowerCase(), source, device_hash: deviceHash }, { onConflict: "email,source" });
+    .upsert({ email: plain, source, device_hash: deviceHash }, { onConflict: "email,source" });
 }
