@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 
+import { DEMO_PROFILES } from "@/lib/profile-types";
 import { useSession } from "@/hooks/useSession";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,6 +14,27 @@ export function isNetworkPath(pathname: string) {
 }
 
 const item = "flex min-w-0 flex-col items-center gap-0.5 px-1 py-1 text-[10px] sm:min-w-[4.5rem] sm:px-2 sm:text-xs";
+
+const TRY = ["seo executive", "content writer", "marketing", "volunteer"];
+
+type Hit =
+  | { key: string; title: string; sub: string; tag: string; to: "/p/$slug"; params: { slug: string } }
+  | { key: string; title: string; sub: string; tag: string; to: "/j/$id"; params: { id: string } };
+
+function searchDemo(term: string): Hit[] {
+  const out: Hit[] = [];
+  for (const p of Object.values(DEMO_PROFILES)) {
+    if (`${p.name} ${p.headline}`.toLowerCase().includes(term)) {
+      out.push({ key: p.slug, title: p.name, sub: p.headline, tag: p.kind === "individual" ? "P" : p.kind === "company" ? "C" : "O", to: "/p/$slug", params: { slug: p.slug } });
+    }
+    for (const j of p.jobs) {
+      if (`${j.title} ${p.name} ${j.type} ${(j.skills || []).join(" ")}`.toLowerCase().includes(term)) {
+        out.push({ key: j.id, title: j.title, sub: `${p.name} - ${j.location}`, tag: "J", to: "/j/$id", params: { id: j.id } });
+      }
+    }
+  }
+  return out.slice(0, 6);
+}
 
 function Soon({ icon: Icon, label }: { icon: typeof Home; label: string }) {
   return (
@@ -26,6 +48,10 @@ function Soon({ icon: Icon, label }: { icon: typeof Home; label: string }) {
 export function NetworkHeader() {
   const { session, loading } = useSession();
   const [open, setOpen] = useState(false);
+  const [sOpen, setSOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const term = q.trim().toLowerCase();
+  const results = term ? searchDemo(term) : [];
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -43,15 +69,66 @@ export function NetworkHeader() {
         <Link to="/" className="shrink-0 text-lg font-bold tracking-tight text-foreground sm:text-xl" aria-label="gotaofferr home">
           gotaofferr
         </Link>
-        <div className="relative hidden max-w-xs flex-1 md:block">
+        <div
+          className="relative hidden max-w-xs flex-1 md:block"
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setSOpen(false);
+          }}
+        >
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <input
             type="search"
-            disabled
-            aria-label="Search (arrives with the network update)"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onFocus={() => setSOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setSOpen(false);
+            }}
+            aria-label="Search people, companies and jobs"
             placeholder="Search people, companies, jobs"
-            className="w-full rounded-full border border-border/60 bg-card py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/70 disabled:cursor-not-allowed"
+            className="w-full rounded-full border border-border/60 bg-card py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/70"
           />
+          {sOpen ? (
+            <div className="absolute left-0 top-full z-50 mt-2 w-[26rem] max-w-[90vw] rounded-xl border border-border/60 bg-card p-3 text-sm shadow-xl">
+              {term ? (
+                <>
+                  <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-widest text-primary">Results</p>
+                  {results.length ? (
+                    <ul>
+                      {results.map((r) => (
+                        <li key={r.key}>
+                          <Link to={r.to} params={r.params} onClick={() => setSOpen(false)} className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-muted">
+                            <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{r.tag}</span>
+                            <span className="min-w-0">
+                              <span className="block truncate text-foreground">{r.title}</span>
+                              <span className="block truncate text-xs text-muted-foreground">{r.sub}</span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="px-2 py-2 text-muted-foreground">No demo match. Real search arrives with the network update.</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-widest text-primary">Try searching for</p>
+                  <ul>
+                    {TRY.map((t) => (
+                      <li key={t}>
+                        <button type="button" onClick={() => setQ(t)} className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-foreground hover:bg-muted">
+                          <Search className="size-4 text-muted-foreground" aria-hidden="true" />
+                          {t}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              <p className="mt-2 border-t border-border/60 px-2 pt-2 text-xs text-muted-foreground">Demo search. It only finds the demo pages and jobs.</p>
+            </div>
+          ) : null}
         </div>
         <nav aria-label="Network" className="ml-auto flex items-center">
           <Link to="/" className={`${item} text-muted-foreground hover:text-foreground`}>
