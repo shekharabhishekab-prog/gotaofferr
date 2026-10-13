@@ -122,7 +122,7 @@ function NewProfilePage() {
   );
 
   return (
-    <main className="site-container py-10 sm:py-16">
+    <main className="mx-auto w-full max-w-[1500px] px-3 py-8 sm:px-6 sm:py-12">
       <p className="text-xs uppercase tracking-widest text-primary">Public profile</p>
       <h1 className="mt-2 font-display text-3xl font-bold text-foreground sm:text-5xl">Make my public profile</h1>
       <p className="mt-3 max-w-2xl text-muted-foreground">
@@ -130,7 +130,7 @@ function NewProfilePage() {
         you press Publish, and you can delete it any time.
       </p>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)]">
         <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
           <div className="rounded-xl border border-border/60 bg-card p-5">
             <Field label="Full name" required>
@@ -450,7 +450,7 @@ function NewProfilePage() {
         </form>
 
         <div className="min-w-0 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
-          <ProfileView profile={profile} banner="Live preview. Only you can see this." />
+          <ProfileView compact profile={profile} banner="Live preview. Only you can see this." />
         </div>
       </div>
     </main>
