@@ -80,6 +80,8 @@ export async function assistField(data: AssistInput): Promise<string> {
       system: instruction(data),
       prompt: data.text,
       maxOutputTokens: 1200,
+      abortSignal: AbortSignal.timeout(40_000),
+      maxRetries: 0,
     }));
     const cleaned = tidy(text ?? "", data.kind);
     if (!cleaned) throw new Error("The rewrite came back empty. Please try again.");
