@@ -62,6 +62,16 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
           <Button type="button" disabled title="Follow arrives with the network update">
             Follow
           </Button>
+          {!isPerson && p.org
+            ? p.org.buttons.slice(0, 3).map((b, i) => {
+                const href = safeUrl(b.url);
+                return href ? (
+                  <Button key={i} asChild variant="outline">
+                    <a href={href} target="_blank" rel="noopener noreferrer nofollow ugc">{b.label || "Visit website"}</a>
+                  </Button>
+                ) : null;
+              })
+            : null}
           {isPerson ? (
             <Button type="button" variant="outline" disabled title="Connect arrives with the network update">
               Connect
@@ -77,6 +87,53 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.about}</p>
           </section>
 
+          {!isPerson && p.org ? (
+            <section className="rounded-xl border border-border/60 bg-card p-6">
+              <SectionTitle>Company details</SectionTitle>
+              <dl className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+                {[
+                  ["Website", p.org.website],
+                  ["Industry", p.org.industry],
+                  ["Size", p.org.size && `${p.org.size} people`],
+                  ["Type", p.org.orgType],
+                  ["Founded", p.org.founded],
+                  ["Headquarters", (p.org.locations.find((l) => l.hq) && [p.org.locations.find((l) => l.hq)!.city, p.org.locations.find((l) => l.hq)!.country].filter(Boolean).join(", ")) || ""],
+                ]
+                  .filter(([, val]) => val)
+                  .map(([k, val]) => {
+                    const href = k === "Website" ? safeUrl(String(val)) : null;
+                    return (
+                      <div key={k as string}>
+                        <dt className="text-xs uppercase tracking-widest text-muted-foreground">{k}</dt>
+                        <dd className="mt-0.5 break-words text-foreground">
+                          {href ? (
+                            <a href={href} target="_blank" rel="noopener noreferrer nofollow ugc" className="text-primary underline underline-offset-2">
+                              {String(val).replace(/^https?:\/\//, "")}
+                            </a>
+                          ) : (
+                            val
+                          )}
+                        </dd>
+                      </div>
+                    );
+                  })}
+              </dl>
+              {p.org.locations.length > 1 ? (
+                <div className="mt-5">
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground">Locations</p>
+                  <ul className="mt-2 space-y-1 text-sm text-foreground">
+                    {p.org.locations.map((l) => (
+                      <li key={l.id}>
+                        {[l.city, l.region, l.country].filter(Boolean).join(", ")}
+                        {l.hq ? <span className="ml-2 rounded-full border border-primary/40 px-2 py-0.5 text-[11px]">Headquarters</span> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </section>
+          ) : null}
+
           {!isPerson ? (
             <section className="rounded-xl border border-border/60 bg-card p-6">
               <SectionTitle>Open roles</SectionTitle>
@@ -85,7 +142,9 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
                   {p.jobs.map((j) => (
                     <li key={j.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
                       <div>
-                        <p className="font-semibold text-foreground">{j.title}</p>
+                        <Link to="/j/$id" params={{ id: j.id }} className="font-semibold text-foreground underline-offset-2 hover:underline">
+                          {j.title}
+                        </Link>
                         <p className="text-xs text-muted-foreground">
                           {j.location} - {j.type}
                         </p>
@@ -266,7 +325,7 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
         <aside className="space-y-8">
           {p.skills.length ? (
             <div className="rounded-xl border border-border/60 bg-card p-6">
-              <SectionTitle>{isPerson ? "Skills" : "Focus"}</SectionTitle>
+              <SectionTitle>{isPerson ? "Skills" : "Specialties"}</SectionTitle>
               <ul className="mt-4 flex flex-wrap gap-2">
                 {p.skills.map((s, i) => (
                   <li
