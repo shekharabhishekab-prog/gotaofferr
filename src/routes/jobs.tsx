@@ -256,7 +256,7 @@ function Jobs() {
       .then((res) => {
         if (!live || !res.alert) return;
         const a = res.alert;
-        setRole((r) => r || a.role);
+        setRole((r) => r || (a.role ?? ""));
         setLocation((l) => l || (a.location ?? ""));
         setRemoteOnly(a.remote_only);
         setExperience((e) => e || (a.experience ?? ""));

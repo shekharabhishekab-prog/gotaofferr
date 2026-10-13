@@ -1,7 +1,5 @@
-import { generateText, Output } from "ai";
 
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
-import { jobListingsSchema, type JobListing, type JobSearchInput } from "./jobs-schema";
+import { type JobListing, type JobSearchInput } from "./jobs-schema";
 
 const FIRECRAWL_GATEWAY = "https://connector-gateway.lovable.dev/firecrawl/v2";
 
@@ -85,6 +83,7 @@ const COUNTRY_ALIASES: Record<string, string[]> = {
   bangladesh: ["bangladesh", "dhaka", ".bd/"],
   "sri lanka": ["sri lanka", "colombo", ".lk/"],
   nepal: ["nepal", "kathmandu", ".np/"],
+  "delhi ncr": ["delhi", "ncr", "gurgaon", "gurugram", "noida", "ghaziabad", "faridabad"],
   "texas": ["texas", ", tx", "austin", "dallas", "houston", "san antonio", "fort worth", "plano"],
   "california": ["california", ", ca", "san francisco", "los angeles", "san diego", "san jose", "oakland", "sacramento", "palo alto", "mountain view", "sunnyvale", "irvine"],
   "new york": ["new york", ", ny", "new york city", "brooklyn", "manhattan", "buffalo", "albany"],
@@ -144,6 +143,7 @@ const NEARBY_PLACES: Record<string, string[]> = {
   "bengaluru": ["bangalore", "mysore", "mysuru", "karnataka"],
   "mumbai": ["navi mumbai", "thane", "pune", "maharashtra"],
   "delhi": ["gurgaon", "gurugram", "noida", "faridabad", "ghaziabad", "new delhi"],
+  "shimla": ["himachal", "solan", "kullu", "manali", "mandi", "dharamshala", "kangra", "baddi"],
   "singapore": ["johor", "johor bahru"],
   "sydney": ["new south wales", "nsw", "parramatta", "newcastle"],
   "melbourne": ["victoria", "geelong"],
@@ -535,11 +535,7 @@ async function searchViaFirecrawl(input: JobSearchInput, queries: string[]): Pro
   ];
 
 
-  const key = (process.env.LOVABLE_API_KEY || (process.env.GEMINI_API_KEY ? "gemini-direct" : undefined));
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  const gateway = createLovableAiGatewayProvider(key);
-
-  const prompt = `You are a job-search assistant. Below are raw web search results for someone looking for a "${input.role}" role.
+  const buildPrompt = (items: typeof shortlist) => `You are a job-search assistant. Below are raw web search results for someone looking for a "${input.role}" role.
 
 User filters:
 - Location: ${input.location || "any"}
@@ -567,19 +563,19 @@ Rules:
 - Be generous: return EVERY qualifying listing you can, up to 45 — all exact matches first, then related roles. Returning too few is worse than including a borderline one.
 
 RESULTS:
-${JSON.stringify(shortlist)}`;
+${JSON.stringify(items)}`;
 
 
+  // Free AI chain (Groq, then a separate Gemini key). Chunks of 10 keep each call small. If every layer is
+  // out or fails, output stays empty and the plain-results top-up below fills the list.
   let output: { jobs?: JobListing[] } | undefined;
-  try {
-    ({ output } = await (await import("./model-router.server")).runWithModelChain("free", (modelId) => generateText({
-      model: gateway(modelId),
-      output: Output.object({ schema: jobListingsSchema }),
-      prompt,
-    })));
-  } catch (error) {
-    const { aiGatewayErrorMessage } = await import("./ai-errors.server");
-    throw new Error(aiGatewayErrorMessage(error));
+  {
+    const { cleanJobListings } = await import("./job-ai-chain.server");
+    const chunks: (typeof shortlist)[] = [];
+    for (let i = 0; i < shortlist.length; i += 10) chunks.push(shortlist.slice(i, i + 10));
+    const results = await Promise.all(chunks.map((c) => cleanJobListings(buildPrompt(c)).catch(() => null)));
+    console.info(`[jobs] ai chunks=${chunks.length} answered=${results.filter(Boolean).length}`);
+    output = { jobs: results.flatMap((r) => r?.jobs ?? []) };
   }
 
   const allowed = new Set(shortlist.map((c) => c.url));
@@ -604,6 +600,17 @@ ${JSON.stringify(shortlist)}`;
         (mentionsLocation(job.location ?? "", nearTokens) || nearbyUrls.has(job.url));
       if (!remoteOk && !matchesPlace && !matchesNearby) continue;
     }
+    // Clean-results guard: no list pages, social posts, other-state ads, or listings whose own text never names the place.
+    if (isJunkListing(job.title, job.url)) continue;
+    if (placeTokens.length && OTHER_CITIES.test(`${job.title} ${job.company}`)) {
+      const oc = (`${job.title} ${job.company}`.match(OTHER_CITIES) ?? [""])[0];
+      if (!mentionsLocation(oc, placeTokens) && !(nearTokens.length > 0 && mentionsLocation(oc, nearTokens))) continue;
+    }
+    if (placeTokens.length && !(input.remoteOnly && /remote/i.test(`${job.workMode} ${job.location}`))) {
+      const cand = byUrl.get(job.url);
+      const head = `${job.title} ${cand?.title ?? ""} ${(cand?.description ?? "").slice(0, 200)} ${job.url}`;
+      if (!mentionsLocation(head, placeTokens) && !(nearTokens.length > 0 && mentionsLocation(head, nearTokens))) continue;
+    }
     const urlKey = normalizeUrl(job.url);
     const identity = `${job.title}|${job.company}`.toLowerCase().replace(/\s+/g, " ").trim();
     if (outUrls.has(urlKey) || outIdentity.has(identity)) continue;
@@ -625,6 +632,17 @@ ${JSON.stringify(shortlist)}`;
       if (outUrls.has(urlKey)) continue;
       const isExact = titleMatchesRole(c.title, input.role);
       if (!isExact && roleOverlap(c.title, input.role) < 0.5) continue;
+      // Top-up must still be a real opening in the searched place: no salary/"jobs in" list pages, no lower rung, no other city.
+      if (isJunkListing(c.title, c.url)) continue;
+      if (SAFETY_NET_JUNK.test(c.title) || STALE_PATTERNS.test(`${c.title} ${c.description}`)) continue;
+      if (isBelowRequestedSeniority(c.title, input.role)) continue;
+      if (placeTokens.length) {
+        // The place must show in the title or the start of the snippet (not buried in a long list), and a title naming another place is out.
+        const inPlace = mentionsLocation(`${c.title} ${c.description.slice(0, 200)}`, placeTokens);
+        if (!mentionsLocation(c.title, placeTokens) && TITLE_OTHER_PLACE.test(c.title)) continue;
+        const isNearby = nearTokens.length > 0 && (nearbyUrls.has(c.url) || mentionsLocation(candidateText(c), nearTokens));
+        if (!inPlace && !isNearby) continue;
+      }
       const cleanTitle = c.title.split(/\s+[-|–—]\s+/)[0]?.trim() || c.title;
       const company = c.title.split(/\s+[-|–—]\s+/)[1]?.trim() || c.source;
       outUrls.add(urlKey);
@@ -650,7 +668,16 @@ ${JSON.stringify(shortlist)}`;
   // Searched place first, nearby areas strictly after; within each, exact role matches first.
   const tier = (j: JobListing) =>
     placeTokens.length && !mentionsLocation(j.location ?? "", placeTokens) && nearbyUrls.has(j.url) ? 1 : 0;
-  return live.sort((a, b) => {
+  const clean = live.filter((j) => {
+    if (isJunkListing(j.title, j.url)) return false;
+    if (/\bjobs?\b\s*$/i.test(j.title.trim())) return false;
+    if (placeTokens.length) {
+      const m = `${j.title} ${j.company}`.match(OTHER_CITIES);
+      if (m && !mentionsLocation(m[0], placeTokens) && !(nearTokens.length > 0 && mentionsLocation(m[0], nearTokens))) return false;
+    }
+    return true;
+  });
+  return clean.sort((a, b) => {
     if (tier(a) !== tier(b)) return tier(a) - tier(b);
     return a.match === b.match ? 0 : a.match === "exact" ? -1 : 1;
   });
@@ -661,6 +688,48 @@ ${JSON.stringify(shortlist)}`;
 
 
 const MIN_RESULTS = 7;
+const WIDEN_TARGET = 10;
+
+/** Nearby, commutable cities to pull in as fill (a few tens of km). Never far cities of the same country. */
+const NEAR_CITIES: Record<string, string[]> = {
+  "berlin": ["Potsdam"],
+  "delhi": ["Gurgaon", "Noida", "Ghaziabad", "Faridabad"],
+  "new delhi": ["Gurgaon", "Noida", "Ghaziabad", "Faridabad"],
+  "shimla": ["Solan"],
+  "sydney": ["Parramatta", "Wollongong"],
+  "melbourne": ["Geelong"],
+  "mumbai": ["Navi Mumbai", "Thane"],
+  "bangalore": ["Bengaluru"],
+  "london": ["Croydon", "Watford"],
+  "dubai": ["Sharjah", "Abu Dhabi"],
+};
+
+/** Nearby places to try, closest first. Empty for country-wide or wide-region searches. */
+function widerPlaces(location?: string): string[] {
+  const norm = normalizeText(location ?? "").trim();
+  return (NEAR_CITIES[norm] ?? []).slice(0, 2);
+}
+
+/** Titles that are list/salary pages, not one opening. */
+/** "... in Santa Monica, CA" / "... at Dehradun": a title that names its own place (case matters). */
+const TITLE_OTHER_PLACE = /\b(?:in|at)\s+[A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)?(?:,\s*[A-Z][A-Za-z]+)?\s*(?:\.\.\.|$|for\b)/;
+
+const OTHER_CITIES = /\b(hamburg|munich|münchen|munchen|frankfurt|cologne|köln|stuttgart|düsseldorf|dusseldorf|leipzig|dresden|hannover|nuremberg|dehradun|panchkula|chandigarh|mohali|thodupuzha|idukki|pune|mumbai|bengaluru|bangalore|hyderabad|chennai|kolkata|jaipur|lucknow|ahmedabad|gurgaon|gurugram|noida|ghaziabad|faridabad|delhi|new york|los angeles|chicago|houston|austin|seattle|boston|london|toronto|melbourne|brisbane|perth|adelaide|sydney|dubai)\b/i;
+const SOCIAL_HOST = /^(?:www\.|m\.)?(?:instagram|facebook|fb|x|twitter|threads|tiktok|youtube|pinterest|reddit|quora)\.(?:com|net|me)$/i;
+/** List pages ("18 jobs", "32 roles"), social posts, and US "City, ST 12345" ads. */
+function isJunkListing(title: string, url: string): boolean {
+  let host = "";
+  try { host = new URL(url).hostname; } catch { /* ignore */ }
+  if (SOCIAL_HOST.test(host)) return true;
+  if (/\b\d+\s+(?:[\w&+-]+\s+){0,4}(?:jobs?|roles?|vacancies|stellen\w*)\b/i.test(title)) return true;
+  if (/\bjobs?\s*(?:&|and)\s*stellen/i.test(title)) return true;
+  if (/,\s*[A-Z]{2}\s+\d{5}\b/.test(title)) return true;
+  if (/\bjobs\s+in\b|^\s*stellenangebote\b|\bjobs\s*$|\bquereinsteiger\b|\bjob\s+opening\b/i.test(title)) return true;
+  if (/\b(intern|internship|praktikum|praktikant\w*|werkstudent\w*|trainee|volontariat)\b/i.test(title)) return true;
+  return false;
+}
+
+const SAFETY_NET_JUNK = /\bjobs?\s+in\b|\bsalar(?:y|ies)\b|\b(?:\d+\+?\s+)?jobs?\s*\(|\b20(?:2[6-9])\b/i;
 
 /** Which board groups to query: fewer for Free (saves Firecrawl credits). */
 function firecrawlGroups(input: JobSearchInput, tier: string): number[] {
@@ -712,14 +781,24 @@ export async function searchAlertListings(input: JobSearchInput, visitorCountry?
  * while credits comfortably remain), Adzuna second when Firecrawl is not allowed,
  * fails, runs out or returns too few. Always aims for at least MIN_RESULTS.
  */
+const MAX_RESULTS = 21;
+
+/** Shows at most MAX_RESULTS (the list is already ordered: place, then nearby; exact role first). */
 export async function searchJobListings(
+  input: JobSearchInput,
+  opts: { tier?: "free" | "starter" | "job_hunt" | "career_pro"; country?: string | null } = {},
+): Promise<JobListing[]> {
+  return (await searchJobListingsUncapped(input, opts)).slice(0, MAX_RESULTS);
+}
+
+async function searchJobListingsUncapped(
   input: JobSearchInput,
   opts: { tier?: "free" | "starter" | "job_hunt" | "career_pro"; country?: string | null } = {},
 ): Promise<JobListing[]> {
   const tier = opts.tier ?? "free";
   const src = await import("./job-sources.server");
-  // Gulf / Japan / Korea: clear "not available yet" before anything is spent.
-  const adzunaCountry = src.adzunaCountryFor(input.location, opts.country);
+  // Gulf / Japan / Korea: Firecrawl may serve them. No Adzuna backup there, so the friendly "not available" answer comes only if Firecrawl cannot.
+  const adzunaCountry = src.adzunaCountryFor(input.location, opts.country, true);
 
   let jobs: JobListing[] = [];
   let firstError: unknown = null;
@@ -737,10 +816,40 @@ export async function searchJobListings(
   console.info(`[jobs] tier=${tier} firecrawl_jobs=${jobs.length}`);
   if (jobs.length >= MIN_RESULTS) return jobs;
 
+  // Thin place: add nearby commutable cities only (never far cities or the rest of the country). Nearby results always come after the searched place.
+  if (jobs.length < MIN_RESULTS && jobs.length < 60 && (await src.mayUseFirecrawl(tier))) {
+    const steps = widerPlaces(input.location);
+    const seenUrl = new Set(jobs.map((j) => normalizeUrl(j.url)));
+    const seenId = new Set(jobs.map((j) => `${j.title}|${j.company}`.toLowerCase().replace(/\s+/g, " ").trim()));
+    for (const wider of steps) {
+      if (jobs.length >= WIDEN_TARGET) break;
+      try {
+        const more = await searchViaFirecrawl({ ...input, location: wider }, buildQueries({ ...input, location: wider }, firecrawlGroups({ ...input, location: wider }, tier).slice(0, 2)));
+        const { countCall } = await import("./model-router.server");
+        await countCall("firecrawl-search");
+        const add = more.filter((j) => {
+          const id = `${j.title}|${j.company}`.toLowerCase().replace(/\s+/g, " ").trim();
+          if (seenUrl.has(normalizeUrl(j.url)) || seenId.has(id)) return false;
+          seenUrl.add(normalizeUrl(j.url));
+          seenId.add(id);
+          return true;
+        });
+        add.sort((x, y) => (x.match === y.match ? 0 : x.match === "exact" ? -1 : 1));
+        jobs = [...jobs, ...add].slice(0, Math.max(WIDEN_TARGET, jobs.length));
+        console.info(`[jobs] widened to ${wider}: +${add.length} total=${jobs.length}`);
+      } catch (error) {
+        console.warn("[jobs] widen failed: " + String((error as any)?.message ?? error));
+        break;
+      }
+    }
+    if (jobs.length >= MIN_RESULTS) return jobs;
+  }
+
   if (!adzunaCountry) {
     if (jobs.length > 0) return jobs;
     const { userError } = await import("./safe-error.server");
-    throw userError("Job sources for this place are refreshing. Please try again in a few minutes.");
+    // No source serves this place right now: the approved friendly message.
+    throw userError(src.UNSUPPORTED_PLACE_MESSAGE);
   }
 
   try {
