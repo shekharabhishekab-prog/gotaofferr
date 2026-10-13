@@ -118,9 +118,13 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
   const chain = live.length > 0 ? live : full;
   let last: unknown = null;
   for (const modelId of chain) {
+    const t0 = Date.now();
     try {
-      return await fn(modelId);
+      const out = await fn(modelId);
+      console.log(`[ai-time] ${modelId} ok ${((Date.now() - t0) / 1000).toFixed(1)}s tier=${tier}`);
+      return out;
     } catch (error) {
+      console.warn(`[ai-time] ${modelId} fail ${((Date.now() - t0) / 1000).toFixed(1)}s tier=${tier}`);
       if (!isQuotaError(error)) throw error;
       BAD_UNTIL.set(modelId, Date.now() + 180_000);
       console.warn(`[ai-fallback] ${modelId} out of quota, tier=${tier}`);
