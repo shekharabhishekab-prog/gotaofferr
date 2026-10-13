@@ -284,6 +284,45 @@ export const DEMO_PROFILES: Record<string, PublicProfile> = {
     indexable: false,
     demo: true,
   },
+  "demo-green-campus-club-q8d3": {
+    slug: "demo-green-campus-club-q8d3",
+    kind: "organization",
+    name: "Green Campus Club",
+    headline: "Student club for tree planting and clean-up drives",
+    location: "Pune, India",
+    about:
+      "We are students who plant trees and clean up lakes and campuses. Anyone can join. We run one drive every month and share what we did.",
+    experience: [],
+    education: [],
+    projects: [],
+    org: {
+      website: "https://greencampus.example.org",
+      industry: "Non-profit and community",
+      size: "11-50",
+      orgType: "Club",
+      founded: "2021",
+      buttons: [{ label: "Join the club", url: "https://greencampus.example.org/join" }],
+      locations: [{ id: "l1", city: "Pune", region: "Maharashtra", country: "India", hq: true }],
+    },
+    skills: ["Community drives", "Tree planting", "Awareness events"],
+    jobs: [
+      {
+        id: "j3",
+        title: "Drive Volunteer",
+        location: "Pune, India",
+        type: "Volunteer",
+        posted: "3 days ago",
+        workplace: "On-site",
+        description:
+          "Help run the monthly clean-up drive.\nBring people, set up the site, and count what we collect.\nNo pay. We give you a certificate and lunch.",
+        skills: ["Teamwork", "Event help"],
+        applyUrl: "mailto:join@greencampus.example.org",
+        datePosted: "2026-10-11",
+      },
+    ],
+    indexable: false,
+    demo: true,
+  },
 };
 
 /** Find a demo job and the company that posted it. */
