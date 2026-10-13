@@ -623,7 +623,9 @@ ${JSON.stringify(items)}`;
       if (SAFETY_NET_JUNK.test(c.title) || STALE_PATTERNS.test(`${c.title} ${c.description}`)) continue;
       if (isBelowRequestedSeniority(c.title, input.role)) continue;
       if (placeTokens.length) {
-        const inPlace = mentionsLocation(candidateText(c), placeTokens);
+        // The place must show in the title or the start of the snippet (not buried in a long list), and a title naming another place is out.
+        const inPlace = mentionsLocation(`${c.title} ${c.description.slice(0, 200)}`, placeTokens);
+        if (!mentionsLocation(c.title, placeTokens) && TITLE_OTHER_PLACE.test(c.title)) continue;
         const isNearby = nearTokens.length > 0 && (nearbyUrls.has(c.url) || mentionsLocation(candidateText(c), nearTokens));
         if (!inPlace && !isNearby) continue;
       }
@@ -665,6 +667,9 @@ ${JSON.stringify(items)}`;
 const MIN_RESULTS = 7;
 
 /** Titles that are list/salary pages, not one opening. */
+/** "... in Santa Monica, CA" / "... at Dehradun": a title that names its own place (case matters). */
+const TITLE_OTHER_PLACE = /\b(?:in|at)\s+[A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)?(?:,\s*[A-Z][A-Za-z]+)?\s*(?:\.\.\.|$|for\b)/;
+
 const SAFETY_NET_JUNK = /\bjobs?\s+in\b|\bsalar(?:y|ies)\b|\b(?:\d+\+?\s+)?jobs?\s*\(|\b20(?:2[6-9])\b/i;
 
 /** Which board groups to query: fewer for Free (saves Firecrawl credits). */
