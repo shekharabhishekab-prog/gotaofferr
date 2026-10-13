@@ -46,7 +46,8 @@ async function runTailorInner(
 ): Promise<TailoredResume> {
   const { runWithModelChain } = await import("./model-router.server");
   const startedAt = Date.now();
-  return runWithModelChain(tier, async (modelId) => {
+  (globalThis as any).__cbDebug = "";
+  const __r = await runWithModelChain(tier, async (modelId) => {
     // Pre-delivery validation: a flawed draft is regenerated once on the same model, never shipped as is.
     try {
       return await runTailorOnce(data, country, modelId, false);
@@ -58,6 +59,9 @@ async function runTailorInner(
       return runTailorOnce(data, country, modelId, true);
     }
   }, { cerebrasFirst: true });
+  // TEMP DEBUG (remove before merge)
+  if ((globalThis as any).__cbDebug) (__r as any).tips = [...(((__r as any).tips) ?? []), `DEBUG cerebras failed first: ${(globalThis as any).__cbDebug}`];
+  return __r;
 }
 
 async function runTailorOnce(data: TailorInput, country: string | null | undefined, modelId: string, final: boolean): Promise<TailoredResume> {
