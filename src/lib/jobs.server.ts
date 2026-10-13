@@ -170,6 +170,8 @@ function locationTokens(location: string): string[] {
     .split(/[,/|]+|\s+-\s+/)
     .map((p) => p.trim())
     .filter((p) => p.length > 2 && !/^(worldwide|anywhere|any|remote)$/.test(p));
+  // "Vancouver, Canada": only the city counts, never the whole country (proximity rule).
+  if (parts.length > 1 && !(parts[0] in COUNTRY_ALIASES)) return [parts[0], ...(COUNTRY_ALIASES[parts[0]] ?? [])];
   const expanded = new Set(parts);
   for (const part of parts) {
     for (const alias of COUNTRY_ALIASES[part] ?? []) expanded.add(alias);
@@ -706,7 +708,7 @@ const NEAR_CITIES: Record<string, string[]> = {
 
 /** Nearby places to try, closest first. Empty for country-wide or wide-region searches. */
 function widerPlaces(location?: string): string[] {
-  const norm = normalizeText(location ?? "").trim();
+  const norm = normalizeText((location ?? "").split(",")[0] ?? "").trim();
   return (NEAR_CITIES[norm] ?? []).slice(0, 2);
 }
 
@@ -714,7 +716,7 @@ function widerPlaces(location?: string): string[] {
 /** "... in Santa Monica, CA" / "... at Dehradun": a title that names its own place (case matters). */
 const TITLE_OTHER_PLACE = /\b(?:in|at)\s+[A-Z][A-Za-z.'-]+(?:\s+[A-Z][A-Za-z.'-]+)?(?:,\s*[A-Z][A-Za-z]+)?\s*(?:\.\.\.|$|for\b)/;
 
-const OTHER_CITIES = /\b(hamburg|munich|münchen|munchen|frankfurt|cologne|köln|stuttgart|düsseldorf|dusseldorf|leipzig|dresden|hannover|nuremberg|dehradun|panchkula|chandigarh|mohali|thodupuzha|idukki|pune|mumbai|bengaluru|bangalore|hyderabad|chennai|kolkata|jaipur|lucknow|ahmedabad|gurgaon|gurugram|noida|ghaziabad|faridabad|delhi|new york|los angeles|chicago|houston|austin|seattle|boston|london|toronto|melbourne|brisbane|perth|adelaide|sydney|dubai)\b/i;
+const OTHER_CITIES = /\b(hamburg|munich|münchen|munchen|frankfurt|cologne|köln|stuttgart|düsseldorf|dusseldorf|leipzig|dresden|hannover|nuremberg|dehradun|panchkula|chandigarh|mohali|thodupuzha|idukki|pune|mumbai|bengaluru|bangalore|hyderabad|chennai|kolkata|jaipur|lucknow|ahmedabad|gurgaon|gurugram|noida|ghaziabad|faridabad|delhi|new york|los angeles|chicago|houston|austin|seattle|boston|london|toronto|melbourne|brisbane|perth|adelaide|sydney|dubai|manila|durban|cape town|pretoria|singapore|kuala lumpur|bangkok|jakarta|hong kong|tokyo|osaka|seoul|busan|vancouver|calgary|montreal|ottawa|auckland|wellington|christchurch|abu dhabi|sharjah|doha|riyadh|guadalajara|monterrey|sao paulo|rio de janeiro|bogota|lagos|abuja|nairobi|manchester|birmingham|glasgow|edinburgh|dublin|paris|madrid|barcelona|amsterdam|belize)\b/i;
 const SOCIAL_HOST = /^(?:www\.|m\.)?(?:instagram|facebook|fb|x|twitter|threads|tiktok|youtube|pinterest|reddit|quora)\.(?:com|net|me)$/i;
 /** List pages ("18 jobs", "32 roles"), social posts, and US "City, ST 12345" ads. */
 function isJunkListing(title: string, url: string): boolean {
@@ -725,6 +727,11 @@ function isJunkListing(title: string, url: string): boolean {
   if (/\bjobs?\s*(?:&|and)\s*stellen/i.test(title)) return true;
   if (/,\s*[A-Z]{2}\s+\d{5}\b/.test(title)) return true;
   if (/\bjobs\s+in\b|^\s*stellenangebote\b|\bjobs\s*$|\bquereinsteiger\b|\bjob\s+opening\b/i.test(title)) return true;
+  if (/^\s*hire\s+(?:the\s+)?(?:best|top)\b/i.test(title)) return true;
+  if (/\bjobs?\s+in\b|\bjobs?\s*,\s*employment|\bjobs?\s+(?:at|near|opening|openings|board|search)\b|\bjobs\b\s+[A-Z][a-z]+\s*$/i.test(title)) return true;
+  if (/\bco-?op\b|\bstudent\b|\bapprentice\w*|\bgraduate\s+(?:program|scheme)\b/i.test(title)) return true;
+  if (/(?:^|\.)(?:freelancer|fiverr|peopleperhour)\.com$/i.test(host)) return true;
+  if (/(?:^|\.)upwork\.com$/i.test(host) && /\/(?:hire|freelance-jobs)\b/i.test(url)) return true;
   if (/\b(intern|internship|praktikum|praktikant\w*|werkstudent\w*|trainee|volontariat)\b/i.test(title)) return true;
   return false;
 }
