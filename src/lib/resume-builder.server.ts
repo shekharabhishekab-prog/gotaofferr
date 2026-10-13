@@ -139,7 +139,7 @@ ${draftToText(draft)}`;
       maxOutputTokens: 8000,
       abortSignal: AbortSignal.timeout(40_000),
       maxRetries: 0,
-    }));
+    }), { cerebrasFirst: true });
     return stripPlaceholders(output, draft);
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
