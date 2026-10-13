@@ -120,6 +120,7 @@ ${formatRules.map((rule) => `- ${rule}`).join("\n")}
 WRITING RULES (mandatory):
 - Never invent an employer, job title, date, degree, tool, client or number that is not in the notes. If a metric is missing, write the outcome without a number rather than making one up.
 - If a field was left blank, return an empty string for it. Never write placeholder text such as "Not Specified", "N/A" or "Company Name".
+- Do not state any result or effect the notes do not state. Banned unless the notes explicitly give that result: increased, improved, boosted, grew, drove, enhanced, reduced, saved, optimized for results, "organic traffic" gains. Describe scope and action instead (e.g. "Handled SEO for 6 client websites"). Never imply an outcome.
 - Keep every fact the candidate gave, including exact company names and dates.
 - Each experience gets 3-5 bullets. Start with a strong past-tense verb; no "Responsible for", no "Spearheaded", no "Leveraged", no "Utilized", no "Passionate", no "Dynamic", no em dashes.
 - Write like an experienced professional wrote it by hand: direct, specific, plain. It must not read as AI-generated.
