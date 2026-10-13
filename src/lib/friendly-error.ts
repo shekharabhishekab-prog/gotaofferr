@@ -7,6 +7,8 @@
 const HAS_EMOJI = /\p{Extended_Pictographic}/u;
 
 const RULES: Array<[RegExp, string]> = [
+  [/not available in this country/i,
+    "Job search is not available in this country yet 🌍 We are working on it."],
   [/network|fetch|offline|timeout|timed out|failed to load|load failed|connection|ECONN/i,
     "The internet took a coffee break ☕ Check your connection and try once more."],
   [/too many|rate limit|slow down|wait a (few )?minute|wait a few/i,
