@@ -60,7 +60,7 @@ async function runTailorInner(
     }
   }, { cerebrasFirst: true });
   // TEMP DEBUG (remove before merge)
-  if ((globalThis as any).__cbDebug) (__r as any).tips = [...(((__r as any).tips) ?? []), `DEBUG cerebras failed first: ${(globalThis as any).__cbDebug}`];
+  if ((globalThis as any).__cbDebug) (__r as any).tips = [...(((__r as any).tips) ?? []), `DEBUG cerebras failed first: ${(globalThis as any).__cbDebug} | 429body: ${(globalThis as any).__cb429 ?? ""}`];
   return __r;
 }
 
