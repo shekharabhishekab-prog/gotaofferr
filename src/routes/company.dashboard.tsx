@@ -32,7 +32,7 @@ function Dashboard() {
         Preview demo. Made-up company and zero numbers. Only company and organization pages get this dashboard. Personal profiles cannot post jobs.
       </p>
       <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <aside className={`${card} h-fit`}>
+        <aside className={`${card} h-fit min-w-0`}>
           <div className="flex items-center gap-3">
             <span aria-hidden="true" className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary font-display text-lg font-bold text-primary-foreground">{initials(c.name)}</span>
             <div className="min-w-0">
