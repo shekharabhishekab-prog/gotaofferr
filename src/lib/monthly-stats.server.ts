@@ -15,6 +15,7 @@ export type MonthCards = {
   builderDownloads: number;
   alerts: number;
   atsChecks?: number; // logged-in ATS score checks only; guest checks are never stored, so not counted. Missing in months locked before this existed.
+  aiInterviews?: number; // AI interviews started (interview_log). Missing in months locked before this existed.
   subscriptionsStarted: number; // all subscription records (dashboard card)
   paidSubscriptionsStarted: number; // only records that are active/paid (year-end report)
   subscriberSharePercent: number;
@@ -90,7 +91,7 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
   const to = new Date(monthRange(sorted[sorted.length - 1]).end).toISOString();
   const ranged = (table: string) =>
     allRows(() => supabaseAdmin.from(table).select("id,user_id,created_at").gte("created_at", from).lt("created_at", to).order("id"));
-  const [authUsers, subs, usage, searches, builders, alerts, atsLog] = await Promise.all([
+  const [authUsers, subs, usage, searches, builders, alerts, atsLog, interviewLog] = await Promise.all([
     loadAuthUsers(supabaseAdmin),
     allRows(() => supabaseAdmin.from("subscriptions").select("id,user_id,price_id,status,current_period_end,cancel_at_period_end,created_at").eq("environment", getStripeEnvironment()).order("id")),
     ranged("tailor_usage_log"),
@@ -98,11 +99,12 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
     ranged("builder_uses"),
     ranged("job_alerts"),
     ranged("ats_check_log"),
+    ranged("interview_log"),
   ]);
   const regionOf = new Map<string, string>();
   for (const u of authUsers) regionOf.set(u.id, userRegion(u));
   // Never counted in any admin number: owner access account and test accounts.
-  const qa = new Set(["itsabhi9646@gmail.com", "mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com", "mailboss+qafree@mail.instinct.com", "rrak2832@gmail.com"]);
+  const qa = new Set(["itsabhi9646@gmail.com", "mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com", "mailboss+qafree@mail.instinct.com", "rrak2832@gmail.com", "contact@gotaofferr.com"]);
   const excludedIds = new Set(authUsers.filter((u) => qa.has(String(u.email ?? "").trim().toLowerCase())).map((u) => u.id));
   const firstSub = new Map<string, any>();
   for (const s of subs) if (!firstSub.has(s.user_id)) firstSub.set(s.user_id, s);
@@ -161,6 +163,7 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
         builderDownloads: builders.filter(inMonth).filter(keep).length,
         alerts: alerts.filter(inMonth).filter(keep).length,
         atsChecks: atsLog.filter(inMonth).filter(keep).length,
+        aiInterviews: interviewLog.filter(inMonth).filter(keep).length,
         subscriptionsStarted: started.length,
         paidSubscriptionsStarted: paidStarted.length,
         // Share is a point-in-time number: it is the share at the moment of counting.

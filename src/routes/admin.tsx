@@ -114,6 +114,8 @@ function AdminPage() {
     queryKey: ["admin-dashboard"],
     queryFn: () => dashboardFn({}),
     enabled: isAdmin && adminQuery.data?.mfaVerified === true,
+    // Near-live: users and subscriptions lists refresh every 5 seconds while the tab is visible.
+    refetchInterval: 5_000,
   });
 
   const cardsQuery = useQuery({
@@ -195,18 +197,19 @@ function AdminPage() {
           </div>
           {cards?.record ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Stat label="Total users" value={cards.record.cards.users} icon={<Users className="h-4 w-4" />} />
               <Stat label="Total tailored resumes" value={cards.record.cards.rewrites} icon={<BarChart3 className="h-4 w-4" />} />
               <Stat label="Total resume builder uses" value={cards.record.cards.builderDownloads} icon={<BarChart3 className="h-4 w-4" />} />
               <Stat label="Total ATS score checks (logged-in only, guests not counted)" value={cards.record.cards.atsChecks ?? 0} icon={<BarChart3 className="h-4 w-4" />} />
-              <Stat label="Total job alerts" value={cards.record.cards.alerts} icon={<BarChart3 className="h-4 w-4" />} />
               <Stat label="Total job searches" value={cards.record.cards.searches} icon={<BarChart3 className="h-4 w-4" />} />
-              <Stat label="Total users" value={cards.record.cards.users} icon={<Users className="h-4 w-4" />} />
+              <Stat label="Total AI interviews" value={cards.record.cards.aiInterviews ?? 0} icon={<BarChart3 className="h-4 w-4" />} />
+              <Stat label="Total job alerts" value={cards.record.cards.alerts} icon={<BarChart3 className="h-4 w-4" />} />
               <Stat label="Total active subscriptions" value={cards.record.cards.activeSubscriptions ?? 0} icon={<CreditCard className="h-4 w-4" />} />
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">{cardsQuery.isLoading ? "Loading month numbers..." : "No saved numbers for this month."}</p>
           )}
-          <p className="mt-3 text-sm text-muted-foreground">Each number counts only the chosen month (India time). The current month grows live and starts again from 0 on the 1st. A finished month is locked at about 22:30 IST on its last day. Counts are recorded activity; builder counts are download attempts. Test and owner accounts (5) are left out of every number. Active subscriptions include plans cancelled but still paid up to the period end.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Each number counts only the chosen month (India time). The current month grows live and starts again from 0 on the 1st. A finished month is locked at about 22:30 IST on its last day. Counts are recorded activity; builder counts are download attempts. Test and owner accounts (6) are left out of every number. Active subscriptions include plans cancelled but still paid up to the period end.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
