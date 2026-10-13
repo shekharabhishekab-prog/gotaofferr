@@ -1,10 +1,35 @@
 import { Link } from "@tanstack/react-router";
+import { Pencil } from "lucide-react";
+import { createContext, useContext } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DEMO_PROFILES, fmtMonth, fmtRange, initials, safeUrl, type PublicProfile } from "@/lib/profile-types";
 
+const EditCtx = createContext<((section: string) => void) | undefined>(undefined);
+
+function PencilButton({ section }: { section: string }) {
+  const onEdit = useContext(EditCtx);
+  if (!onEdit) return null;
+  return (
+    <button
+      type="button"
+      aria-label={`Edit ${section}`}
+      title={`Edit ${section}`}
+      onClick={() => onEdit(section)}
+      className="shrink-0 rounded-full border border-border/60 p-1.5 text-muted-foreground hover:border-primary hover:text-primary"
+    >
+      <Pencil className="size-3.5" aria-hidden="true" />
+    </button>
+  );
+}
+
 function SectionTitle({ children }: { children: string }) {
-  return <h2 className="font-display text-lg font-bold text-foreground">{children}</h2>;
+  return (
+    <div className="flex items-start justify-between gap-2">
+      <h2 className="font-display text-lg font-bold text-foreground">{children}</h2>
+      <PencilButton section={children} />
+    </div>
+  );
 }
 
 const card = "rounded-xl border border-border/60 bg-card p-5 sm:p-6";
@@ -22,7 +47,15 @@ function Cover({ tall }: { tall?: boolean }) {
   );
 }
 
-export function ProfileView({ profile: p, banner, compact }: { profile: PublicProfile; banner?: string; compact?: boolean }) {
+export function ProfileView(props: { profile: PublicProfile; banner?: string; compact?: boolean; onEdit?: (section: string) => void }) {
+  return (
+    <EditCtx.Provider value={props.onEdit}>
+      <ProfileViewInner profile={props.profile} banner={props.banner} compact={props.compact} />
+    </EditCtx.Provider>
+  );
+}
+
+function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProfile; banner?: string; compact?: boolean }) {
   const isPerson = p.kind === "individual";
   const hq = p.org?.locations.find((l) => l.hq);
   const others = Object.values(DEMO_PROFILES).filter((x) => x.slug !== p.slug);
@@ -39,6 +72,7 @@ export function ProfileView({ profile: p, banner, compact }: { profile: PublicPr
           <header className="overflow-hidden rounded-xl border border-border/60 bg-card">
             <Cover tall={!isPerson} />
             <div className="relative px-5 pb-5 sm:px-8 sm:pb-7">
+              <div className="absolute right-3 top-3 sm:right-5 sm:top-4"><PencilButton section="Headline" /></div>
               <div
                 aria-hidden="true"
                 className={`-mt-14 flex h-28 w-28 items-center justify-center border-4 border-card bg-primary font-display text-4xl font-bold text-primary-foreground sm:-mt-16 sm:h-32 sm:w-32 ${
