@@ -668,7 +668,16 @@ ${JSON.stringify(items)}`;
   // Searched place first, nearby areas strictly after; within each, exact role matches first.
   const tier = (j: JobListing) =>
     placeTokens.length && !mentionsLocation(j.location ?? "", placeTokens) && nearbyUrls.has(j.url) ? 1 : 0;
-  return live.sort((a, b) => {
+  const clean = live.filter((j) => {
+    if (isJunkListing(j.title, j.url)) return false;
+    if (/\bjobs?\b\s*$/i.test(j.title.trim())) return false;
+    if (placeTokens.length) {
+      const m = `${j.title} ${j.company}`.match(OTHER_CITIES);
+      if (m && !mentionsLocation(m[0], placeTokens) && !(nearTokens.length > 0 && mentionsLocation(m[0], nearTokens))) return false;
+    }
+    return true;
+  });
+  return clean.sort((a, b) => {
     if (tier(a) !== tier(b)) return tier(a) - tier(b);
     return a.match === b.match ? 0 : a.match === "exact" ? -1 : 1;
   });
