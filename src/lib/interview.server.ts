@@ -85,6 +85,7 @@ ${setupText(s)}`;
       }),
       { cerebrasFirst: true },
     );
+    (globalThis as any).__qModel = (globalThis as any).__cbModel; // TEMP DEBUG
     return output.questions.map((q) => q.trim());
   } catch (error) {
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
@@ -120,7 +121,7 @@ ${answers}`;
       }),
       { cerebrasFirst: true },
     );
-    return output;
+    return { ...output, summary: `${output.summary} [DEBUG q=${(globalThis as any).__qModel} fb=${(globalThis as any).__cbModel}]` }; // TEMP DEBUG
   } catch (error) {
     const { aiGatewayErrorMessage } = await import("./ai-errors.server");
     throw new Error(aiGatewayErrorMessage(error));
