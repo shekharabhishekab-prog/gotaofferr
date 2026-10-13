@@ -119,6 +119,7 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
   const live = full.filter((id) => (BAD_UNTIL.get(id) ?? 0) <= now);
   const chain = live.length > 0 ? live : full;
   let last: unknown = null;
+  let cbDebug = "";
   for (const modelId of chain) {
     const t0 = Date.now();
     try {
@@ -127,6 +128,7 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
       return out;
     } catch (error) {
       console.warn(`[ai-time] ${modelId} fail ${((Date.now() - t0) / 1000).toFixed(1)}s tier=${tier}`);
+      if (modelId === CEREBRAS_MODEL) cbDebug = `${(error as Error)?.name}: ${String((error as Error)?.message ?? error).slice(0, 300)}`;
       // Any Cerebras failure hands over to the Gemini chain. Gemini models keep the old rule (only quota/overload moves on).
       if (modelId !== CEREBRAS_MODEL && !isQuotaError(error)) throw error;
       BAD_UNTIL.set(modelId, Date.now() + 180_000);
@@ -135,6 +137,7 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
     }
   }
   void last;
-  throw new Error(limitMessage(tier));
+  // TEMP DEBUG (preview only, remove before merge): show why Cerebras failed.
+  throw new Error(limitMessage(tier) + (cbDebug ? ` [DEBUG cerebras: ${cbDebug}]` : ""));
 }
 
