@@ -140,7 +140,9 @@ ${draftToText(draft)}`;
       abortSignal: AbortSignal.timeout(40_000),
       maxRetries: 0,
     }), { cerebrasFirst: true });
-    return stripPlaceholders(output, draft);
+    const __r = stripPlaceholders(output, draft);
+    try { (__r as any).tips = [...((__r as any).tips ?? []), `[DEBUG model: ${(globalThis as any).__cbModel}]`]; } catch {} // TEMP DEBUG
+    return __r;
   } catch (error) {
     if (NoObjectGeneratedError.isInstance(error)) {
       try {
