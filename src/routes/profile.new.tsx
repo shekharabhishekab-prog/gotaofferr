@@ -121,6 +121,22 @@ function NewProfilePage() {
     [pronouns, websites, otw, otwTitles, otwTypes, langs, showLangs, certs, showCerts, vols, showVols, honors, showHonors, name, headline, location, about, showAbout, exp, showExp, edu, showEdu, proj, showProj, skills, showSkills, indexable],
   );
 
+  const jumpTo = (title: string) => {
+    const root = document.querySelector("form");
+    if (!root) return;
+    let card: HTMLElement | null = root.querySelector(`section[aria-label="${title}"]`);
+    if (!card) {
+      const hit = [...root.querySelectorAll("label,p,span")].find((n) => (n.textContent || "").trim().startsWith(title));
+      card = (hit?.closest("div.rounded-xl, section") as HTMLElement | null) ?? null;
+    }
+    if (!card) return;
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.add("ring-2", "ring-primary");
+    window.setTimeout(() => card?.classList.remove("ring-2", "ring-primary"), 1800);
+    const first = card.querySelector<HTMLElement>("input,textarea,select,button");
+    window.setTimeout(() => first?.focus({ preventScroll: true }), 350);
+  };
+
   return (
     <main className="mx-auto w-full max-w-[1500px] px-3 py-8 sm:px-6 sm:py-12">
       <p className="text-xs uppercase tracking-widest text-primary">Public profile</p>
@@ -450,7 +466,7 @@ function NewProfilePage() {
         </form>
 
         <div className="min-w-0 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
-          <ProfileView compact profile={profile} banner="Live preview. Only you can see this." />
+          <ProfileView compact onEdit={jumpTo} profile={profile} banner="Live preview. Only you can see this." />
         </div>
       </div>
     </main>
