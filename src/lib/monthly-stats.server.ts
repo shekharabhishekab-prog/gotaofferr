@@ -104,7 +104,7 @@ export async function computeMonths(yms: string[]): Promise<MonthRecord[]> {
   const regionOf = new Map<string, string>();
   for (const u of authUsers) regionOf.set(u.id, userRegion(u));
   // Never counted in any admin number: owner access account and test accounts.
-  const qa = new Set(["itsabhi9646@gmail.com", "mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com", "mailboss+qafree@mail.instinct.com", "rrak2832@gmail.com"]);
+  const qa = new Set(["itsabhi9646@gmail.com", "mailboss@mail.instinct.com", "mailboss+gotaqa1@mail.instinct.com", "mailboss+qafree@mail.instinct.com", "rrak2832@gmail.com", "contact@gotaofferr.com"]);
   const excludedIds = new Set(authUsers.filter((u) => qa.has(String(u.email ?? "").trim().toLowerCase())).map((u) => u.id));
   const firstSub = new Map<string, any>();
   for (const s of subs) if (!firstSub.has(s.user_id)) firstSub.set(s.user_id, s);
