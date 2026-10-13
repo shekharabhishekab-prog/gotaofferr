@@ -114,6 +114,8 @@ function AdminPage() {
     queryKey: ["admin-dashboard"],
     queryFn: () => dashboardFn({}),
     enabled: isAdmin && adminQuery.data?.mfaVerified === true,
+    // Near-live: users and subscriptions lists refresh every 5 seconds while the tab is visible.
+    refetchInterval: 5_000,
   });
 
   const cardsQuery = useQuery({
