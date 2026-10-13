@@ -108,8 +108,12 @@ export function limitMessage(_tier: RoutingTier): string {
 const BAD_UNTIL = new Map<string, number>();
 
 /** Try each model in the tier's chain; move on only for quota errors. */
-export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: string) => Promise<T>): Promise<T> {
-  const full = chainForTier(tier);
+export const CEREBRAS_MODEL = "cerebras:gpt-oss-120b";
+
+export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: string) => Promise<T>, opts?: { cerebrasFirst?: boolean }): Promise<T> {
+  // Cerebras goes first only when asked for and only when its key exists; otherwise the Gemini chain runs exactly as before.
+  const withCerebras = !!opts?.cerebrasFirst && !!process.env.CEREBRAS_API_KEY;
+  const full = withCerebras ? [CEREBRAS_MODEL, ...chainForTier(tier)] : chainForTier(tier);
   // A model that just failed (overload, timeout, cap) is skipped for 3 minutes so the next user does not wait through it again.
   const now = Date.now();
   const live = full.filter((id) => (BAD_UNTIL.get(id) ?? 0) <= now);
@@ -123,7 +127,8 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
       return out;
     } catch (error) {
       console.warn(`[ai-time] ${modelId} fail ${((Date.now() - t0) / 1000).toFixed(1)}s tier=${tier}`);
-      if (!isQuotaError(error)) throw error;
+      // Any Cerebras failure hands over to the Gemini chain. Gemini models keep the old rule (only quota/overload moves on).
+      if (modelId !== CEREBRAS_MODEL && !isQuotaError(error)) throw error;
       BAD_UNTIL.set(modelId, Date.now() + 180_000);
       console.warn(`[ai-fallback] ${modelId} out of quota, tier=${tier}`);
       last = error;
