@@ -154,7 +154,7 @@ async function callLayer(layer: Layer, prompt: string): Promise<{ jobs: JobListi
       headers: { "content-type": "application/json", "x-goog-api-key": key },
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: body }] }],
-        generationConfig: { temperature: 0, maxOutputTokens: MAX_OUT, responseMimeType: "application/json" },
+        generationConfig: { temperature: 0, maxOutputTokens: MAX_OUT, responseMimeType: "application/json", responseJsonSchema: STRICT_SCHEMA.schema },
       }),
       signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
     });
