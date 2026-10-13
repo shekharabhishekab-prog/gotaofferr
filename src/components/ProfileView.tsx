@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
-import { fmtRange, initials, safeUrl, type PublicProfile } from "@/lib/profile-types";
+import { fmtMonth, fmtRange, initials, safeUrl, type PublicProfile } from "@/lib/profile-types";
 
 function SectionTitle({ children }: { children: string }) {
   return <h2 className="font-display text-sm font-bold uppercase tracking-widest text-primary">{children}</h2>;
@@ -31,9 +31,32 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
           <p className="text-xs uppercase tracking-widest text-muted-foreground">
             {p.kind === "individual" ? "Professional" : p.kind === "company" ? "Company" : "Organization"}
           </p>
-          <h1 className="mt-1 break-words font-display text-3xl font-bold text-foreground sm:text-4xl">{p.name}</h1>
+          <h1 className="mt-1 break-words font-display text-3xl font-bold text-foreground sm:text-4xl">
+            {p.name}
+            {p.pronouns ? <span className="ml-2 text-base font-normal text-muted-foreground">({p.pronouns})</span> : null}
+          </h1>
           <p className="mt-1 text-foreground/90">{p.headline}</p>
           <p className="mt-1 text-sm text-muted-foreground">{p.location}</p>
+          {p.openToWork ? (
+            <p className="mt-2 inline-block rounded-full border border-primary bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
+              Open to work{p.openToWork.titles.length ? `: ${p.openToWork.titles.join(", ")}` : ""}
+              {p.openToWork.workTypes.length ? ` (${p.openToWork.workTypes.join(", ")})` : ""}
+            </p>
+          ) : null}
+          {p.websites && p.websites.length ? (
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              {p.websites.map((w, i) => {
+                const href = safeUrl(w.url);
+                return href ? (
+                  <li key={i}>
+                    <a href={href} target="_blank" rel="noopener noreferrer nofollow ugc" className="text-primary underline underline-offset-2">
+                      {w.label || "Website"}
+                    </a>
+                  </li>
+                ) : null;
+              })}
+            </ul>
+          ) : null}
         </div>
         <div className="flex flex-wrap gap-3 sm:flex-col">
           <Button type="button" disabled title="Follow arrives with the network update">
@@ -181,6 +204,63 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
               </ul>
             </section>
           ) : null}
+          {p.certs && p.certs.length ? (
+            <section className="rounded-xl border border-border/60 bg-card p-6">
+              <SectionTitle>Licenses and certifications</SectionTitle>
+              <ul className="mt-4 space-y-3">
+                {p.certs.map((c) => {
+                  const href = c.url ? safeUrl(c.url) : null;
+                  return (
+                    <li key={c.id}>
+                      <p className="font-semibold text-foreground">{c.name}</p>
+                      <p className="text-sm text-muted-foreground">{c.issuer}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {[c.issued && `Issued ${fmtMonth(c.issued)}`, c.expires && `Expires ${fmtMonth(c.expires)}`, c.credentialId && `ID ${c.credentialId}`]
+                          .filter(Boolean)
+                          .join(" | ")}
+                      </p>
+                      {href ? (
+                        <a href={href} target="_blank" rel="noopener noreferrer nofollow ugc" className="text-sm text-primary underline underline-offset-2">
+                          Show credential
+                        </a>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
+
+          {p.volunteer && p.volunteer.length ? (
+            <section className="rounded-xl border border-border/60 bg-card p-6">
+              <SectionTitle>Volunteering</SectionTitle>
+              <ul className="mt-4 space-y-3">
+                {p.volunteer.map((x) => (
+                  <li key={x.id}>
+                    <p className="font-semibold text-foreground">{x.role}</p>
+                    <p className="text-sm text-muted-foreground">{[x.org, x.cause].filter(Boolean).join(" - ")}</p>
+                    <p className="text-xs text-muted-foreground">{fmtRange(x.start, x.end, !x.end && !!x.start)}</p>
+                    {x.description ? <p className="mt-1 text-sm text-muted-foreground">{x.description}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {p.honors && p.honors.length ? (
+            <section className="rounded-xl border border-border/60 bg-card p-6">
+              <SectionTitle>Honors and awards</SectionTitle>
+              <ul className="mt-4 space-y-3">
+                {p.honors.map((h) => (
+                  <li key={h.id}>
+                    <p className="font-semibold text-foreground">{h.title}</p>
+                    <p className="text-sm text-muted-foreground">{[h.issuer, h.date && fmtMonth(h.date)].filter(Boolean).join(" | ")}</p>
+                    {h.description ? <p className="mt-1 text-sm text-muted-foreground">{h.description}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </div>
 
         <aside className="space-y-8">
@@ -196,6 +276,19 @@ export function ProfileView({ profile: p, banner }: { profile: PublicProfile; ba
                     }`}
                   >
                     {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {p.languages && p.languages.length ? (
+            <div className="rounded-xl border border-border/60 bg-card p-6">
+              <SectionTitle>Languages</SectionTitle>
+              <ul className="mt-4 space-y-2 text-sm">
+                {p.languages.map((l) => (
+                  <li key={l.id}>
+                    <span className="font-semibold text-foreground">{l.name}</span>
+                    <span className="block text-xs text-muted-foreground">{l.level}</span>
                   </li>
                 ))}
               </ul>
