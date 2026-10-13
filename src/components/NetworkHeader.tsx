@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 /** Header for network pages (profiles, companies, network jobs). Our colors, LinkedIn-style order. */
 export function isNetworkPath(pathname: string) {
-  return pathname.startsWith("/p/") || pathname.startsWith("/profile/") || pathname.startsWith("/company/") || pathname.startsWith("/j/");
+  return pathname === "/network" || pathname.startsWith("/p/") || pathname.startsWith("/profile/") || pathname.startsWith("/company/") || pathname.startsWith("/j/");
 }
 
 const item = "flex min-w-0 flex-col items-center gap-0.5 px-1 py-1 text-[10px] sm:min-w-[4.5rem] sm:px-2 sm:text-xs";
@@ -58,7 +58,10 @@ export function NetworkHeader() {
             <Home className="size-5" aria-hidden="true" />
             <span>Home</span>
           </Link>
-          <Soon icon={Users} label="Network" />
+          <Link to="/network" className={`${item} text-muted-foreground hover:text-foreground`}>
+            <Users className="size-5" aria-hidden="true" />
+            <span>Network</span>
+          </Link>
           <Link to="/jobs" className={`${item} text-muted-foreground hover:text-foreground`}>
             <Briefcase className="size-5" aria-hidden="true" />
             <span>Jobs</span>
