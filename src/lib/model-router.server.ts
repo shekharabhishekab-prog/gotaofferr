@@ -32,20 +32,14 @@ const FREE_CHAIN = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
 // Strong models (~20/day each on the free tier). Order set after the 2026-10-09 quality test: fast and reliable first, slow or often-overloaded last.
 // The 20/day lite buffer comes last in this list, then the two 500/day lite models from FREE_CHAIN.
 function proChain(): string[] {
-  return [
-    "gemini-3.6-flash",
-    "gemini-3-flash-preview",
-    "gemini-3.8-flash",
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-  ];
+  return ["gemini-2.5-flash"];
 }
 
 export function chainForTier(tier: RoutingTier): string[] {
   // Career Pro only gets the full-quality models. Free, Starter and Job Hunt use the lower models.
   // Career Pro tries the strong models first; when their daily limits run out it switches to
   // the lower models (never "come back tomorrow"). Output on those is tuned to match.
-  return tier === "career_pro" ? [...proChain(), ...FREE_CHAIN] : FREE_CHAIN;
+  return proChain();
 }
 
 export function isQuotaError(error: unknown): boolean {
