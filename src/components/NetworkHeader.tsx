@@ -12,7 +12,7 @@ export function isNetworkPath(pathname: string) {
   return pathname.startsWith("/p/") || pathname.startsWith("/profile/") || pathname.startsWith("/company/") || pathname.startsWith("/j/");
 }
 
-const item = "flex min-w-[3.25rem] flex-col items-center gap-0.5 px-2 py-1 text-[11px] sm:min-w-[4.5rem] sm:text-xs";
+const item = "flex min-w-0 flex-col items-center gap-0.5 px-1 py-1 text-[10px] sm:min-w-[4.5rem] sm:px-2 sm:text-xs";
 
 function Soon({ icon: Icon, label }: { icon: typeof Home; label: string }) {
   return (
@@ -39,7 +39,7 @@ export function NetworkHeader() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-[1400px] items-center gap-2 px-3 py-1.5 sm:gap-4 sm:px-6">
+      <div className="mx-auto flex w-full max-w-[1400px] items-center gap-1 px-2 py-1.5 sm:gap-4 sm:px-6">
         <Link to="/" className="shrink-0 text-lg font-bold tracking-tight text-foreground sm:text-xl" aria-label="gotaofferr home">
           gotaofferr
         </Link>
