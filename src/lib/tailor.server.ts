@@ -2,7 +2,8 @@ import { PROMPT_GUARD } from "./prompt-guard";
 import { formatLetterParagraphs } from "./letter-format";
 import { generateText, Output, NoObjectGeneratedError } from "ai";
 
-const AI_CALL_TIMEOUT_MS = 75_000;
+// Fail fast: a slow or silent model hands over to the next one instead of burning minutes.
+const AI_CALL_TIMEOUT_MS = 40_000;
 
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 import { computeAtsReadiness } from "./ats-score.server";
@@ -208,7 +209,7 @@ ${data.resume}`;
       model: gateway("google/gemini-3.6-flash"),
       // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
       abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
-      maxRetries: 1,
+      maxRetries: 0,
       output: Output.object({ schema: tailoredResumeSchema }),
       prompt,
       maxOutputTokens: 16000,
@@ -391,7 +392,7 @@ ${data.resume}`;
       const pe: any = error;
       const pst = pe?.statusCode ?? pe?.lastError?.statusCode ?? pe?.cause?.statusCode ?? pe?.status;
       const pname = String(pe?.name ?? "");
-      if (pname.includes("RetryError") || pname.includes("APICallError") || (typeof pst === "number" && pst >= 500)) {
+      if (pname.includes("RetryError") || pname.includes("APICallError") || pname.includes("Timeout") || pname.includes("Abort") || (typeof pst === "number" && pst >= 500)) {
         console.warn(`[tailor] provider error handed to next model: ${pname} status=${pst ?? "-"}`);
         throw new Error(`overloaded: provider error ${pname} ${pst ?? ""}`);
       }
@@ -434,7 +435,7 @@ async function refillLetter(
       model: gateway("google/gemini-3.6-flash"),
       // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
       abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
-      maxRetries: 1,
+      maxRetries: 0,
       maxOutputTokens: 1500,
       prompt: `${PROMPT_GUARD}
 Write a cover letter for ${data.company || "the company"} for the job below. Tone: ${data.tone || "confident and professional"}.
@@ -473,7 +474,7 @@ async function repairDepth(
       model: gateway("google/gemini-3.6-flash"),
       // A silent or slow answer must not hang the user: stop waiting and let the model chain move on.
       abortSignal: AbortSignal.timeout(AI_CALL_TIMEOUT_MS),
-      maxRetries: 1,
+      maxRetries: 0,
       output: Output.object({ schema: tailoredResumeSchema }),
       maxOutputTokens: 16000,
       prompt: `${basePrompt}
