@@ -209,7 +209,7 @@ function AdminPage() {
           ) : (
             <p className="text-sm text-muted-foreground">{cardsQuery.isLoading ? "Loading month numbers..." : "No saved numbers for this month."}</p>
           )}
-          <p className="mt-3 text-sm text-muted-foreground">Each number counts only the chosen month (India time). The current month grows live and starts again from 0 on the 1st. A finished month is locked at about 22:30 IST on its last day. Counts are recorded activity; builder counts are download attempts. Test and owner accounts (5) are left out of every number. Active subscriptions include plans cancelled but still paid up to the period end.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Each number counts only the chosen month (India time). The current month grows live and starts again from 0 on the 1st. A finished month is locked at about 22:30 IST on its last day. Counts are recorded activity; builder counts are download attempts. Test and owner accounts (6) are left out of every number. Active subscriptions include plans cancelled but still paid up to the period end.</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(d.planBreakdown).map(([plan, count]) => (
