@@ -886,7 +886,7 @@ const AI_CSS = `
 .ai-wrap{max-width:1100px;margin:0 auto;padding:0 20px}
 @media (min-width:1200px){.ai-wrap{max-width:min(1680px,94vw);padding:0 24px}.ai-tile{min-height:340px}.ai-coco.fx-wander{--w:150px}}
 .ai-hero .ai-wrap{position:relative}
-.ai-hero-coco{display:none}
+.ai-coco,.ai-cvid,.ai-coco-tile img,.ai-hero-coco,.ai-hero-coco img{filter:grayscale(1)}.ai-hero-coco{display:none}
 @media (min-width:1340px){.ai-hero-coco{display:block;position:absolute;right:20px;top:-20px;animation:ai-bob 3.2s ease-in-out infinite}}
 @keyframes ai-bob{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-14px) rotate(1.5deg)}}
 
