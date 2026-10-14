@@ -167,21 +167,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             { rel: "dns-prefetch", href: "https://www.google-analytics.com" },
           ]
         : []),
+      ...(ADSENSE_CLIENT
+        ? [
+            {
+              rel: "preconnect",
+              href: "https://pagead2.googlesyndication.com",
+              crossOrigin: "anonymous" as const,
+            },
+          ]
+        : []),
     ],
     scripts: [
-      // AdSense site-verification snippet: must be in the server-rendered <head> so Google's Verify can see it.
-      // Paid members: pause ad requests before AdSense loads (tier remembered from the last visit).
-      // Ads by plan, decided BEFORE the AdSense script exists: a paid plan remembered on this device never loads
-      // the script at all (no ad request, no flash). A signed-in visitor whose plan is not known yet stays paused
-      // until AdPolicy confirms the plan. Everyone else (guests, free) loads ads as before.
+      // AdSense by plan, decided BEFORE any ad script exists. This inline script only
+      // sets flags - it never loads adsbygoogle.js. The script itself is injected later
+      // by <DeferredThirdParty /> (idle / first interaction) so 220KB+ of ad code stays
+      // off the critical path. A paid plan remembered on this device sets __gtAdsSkip so
+      // the deferred loader skips ads entirely (no ad request, no flash). A signed-in
+      // visitor whose plan is not known yet stays paused until AdPolicy confirms the plan.
       ...(ADSENSE_CLIENT
         ? [
             {
               children:
                 'window.adsbygoogle=window.adsbygoogle||[];(function(){var t=null,s=false;try{t=localStorage.getItem("gt_tier");for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"){s=true}}}catch(e){}'
-                + 'if(t&&t!=="free"){window.adsbygoogle.pauseAdRequests=1;return}'
-                + 'if(s){window.adsbygoogle.pauseAdRequests=1}'
-                + 'var e=document.createElement("script");e.async=true;e.crossOrigin="anonymous";e.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + ADSENSE_CLIENT + '";document.head.appendChild(e)})()',
+                + 'if(t&&t!=="free"){window.adsbygoogle.pauseAdRequests=1;window.__gtAdsSkip=1;return}'
+                + 'if(s){window.adsbygoogle.pauseAdRequests=1}})()',
             },
           ]
         : []),
