@@ -37,7 +37,7 @@ export const Route = createFileRoute("/profile/new")({
 function Show({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 accent-[#f7d000]" />
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 accent-[#073f89]" />
       Show on my profile
     </label>
   );
@@ -179,7 +179,7 @@ function NewProfilePage() {
               </Button>
             ) : null}
             <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-foreground">
-              <input type="checkbox" checked={otw} onChange={(e) => setOtw(e.target.checked)} className="h-4 w-4 accent-[#f7d000]" />
+              <input type="checkbox" checked={otw} onChange={(e) => setOtw(e.target.checked)} className="h-4 w-4 accent-[#073f89]" />
               Open to work
             </label>
             {otw ? (
@@ -190,7 +190,7 @@ function NewProfilePage() {
                 <div className="mt-2 flex flex-wrap gap-4 text-sm text-foreground">
                   {WORK_TYPES.map((w) => (
                     <label key={w} className="flex items-center gap-2">
-                      <input type="checkbox" className="h-4 w-4 accent-[#f7d000]" checked={otwTypes.includes(w)} onChange={(e) => setOtwTypes(e.target.checked ? [...otwTypes, w] : otwTypes.filter((x) => x !== w))} />
+                      <input type="checkbox" className="h-4 w-4 accent-[#073f89]" checked={otwTypes.includes(w)} onChange={(e) => setOtwTypes(e.target.checked ? [...otwTypes, w] : otwTypes.filter((x) => x !== w))} />
                       {w}
                     </label>
                   ))}
@@ -235,7 +235,7 @@ function NewProfilePage() {
                 </Field>
                 <Field label="Start date" required><input type="month" className={field} value={d.start} onChange={(e) => set({ start: e.target.value })} /></Field>
                 <label className="mt-3 flex items-center gap-2 text-sm text-foreground">
-                  <input type="checkbox" checked={d.current} className="h-4 w-4 accent-[#f7d000]" onChange={(e) => set({ current: e.target.checked, end: e.target.checked ? "" : d.end })} />
+                  <input type="checkbox" checked={d.current} className="h-4 w-4 accent-[#073f89]" onChange={(e) => set({ current: e.target.checked, end: e.target.checked ? "" : d.end })} />
                   I currently work here
                 </label>
                 {!d.current ? <Field label="End date" required><input type="month" className={field} value={d.end} onChange={(e) => set({ end: e.target.value })} /></Field> : null}
@@ -452,7 +452,7 @@ function NewProfilePage() {
 
           <div className="rounded-xl border border-primary/40 bg-primary/5 p-5">
             <label className="flex items-start gap-2 text-sm text-foreground">
-              <input type="checkbox" checked={indexable} onChange={(e) => setIndexable(e.target.checked)} className="mt-1 h-4 w-4 accent-[#f7d000]" />
+              <input type="checkbox" checked={indexable} onChange={(e) => setIndexable(e.target.checked)} className="mt-1 h-4 w-4 accent-[#073f89]" />
               <span>
                 Let Google list my profile
                 <span className="block text-xs text-muted-foreground">Off by default. When off, only people with your link can see it.</span>
