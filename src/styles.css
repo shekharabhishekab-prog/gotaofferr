@@ -725,3 +725,6 @@ header.sticky a:not([class*="bg-primary"]) *{color:inherit!important}
 
 /* hero-dark-3 */
 .hp-hero .i3-pill,.hp-hero .i3-pill *,.hp-hero .hx-meta b,.hp-hero .hx-meta b *,.hp-hero .text-highlight{color:rgba(255,255,255,.92)!important}
+
+/* hero-dark-4 */
+.hp-hero .hp-chip-y,.hp-hero .hx-meta,.hp-hero .hx-meta *{color:rgba(255,255,255,.92)!important}
