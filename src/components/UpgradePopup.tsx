@@ -61,7 +61,7 @@ export function UpgradePopup({
               See {PLAN_LABEL[up]} plan →
             </Link>
           ) : null}
-          <button type="button" onClick={onClose} style={{ background: "transparent", color: "#073f89", border: "1px solid rgba(20,33,58,.35)", borderRadius: 999, padding: "11px 18px", cursor: "pointer" }}>
+          <button type="button" onClick={onClose} style={{ background: "transparent", color: "#073f89", border: "1px solid rgba(0,0,0,.35)", borderRadius: 999, padding: "11px 18px", cursor: "pointer" }}>
             Maybe later
           </button>
         </div>
