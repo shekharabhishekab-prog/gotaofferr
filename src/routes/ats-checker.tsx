@@ -693,7 +693,7 @@ const AK_CSS = `
 .ak-h1 mark{background:var(--y);color:#fffffd;padding:0 .12em;display:inline-block;transform:rotate(-1.5deg);animation:ak-wob 4s ease-in-out infinite}
 @keyframes ak-wob{50%{transform:rotate(1.2deg) translateY(-3px)}}
 .ak-out{color:transparent;-webkit-text-stroke:2px var(--cream)}
-.ak-sub{max-width:34rem;margin-top:22px;font-size:1.12rem;line-height:1.5;color:rgba(20,33,58,.72)}
+.ak-sub{max-width:34rem;margin-top:22px;font-size:1.12rem;line-height:1.5;color:rgba(0,0,0,.72)}
 .ak-cta{display:flex;align-items:center;gap:18px;margin-top:28px;flex-wrap:wrap}
 .ak-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--y);color:#fffffd;font-weight:700;border-radius:999px;padding:15px 28px;font-size:1rem;border:0;cursor:pointer;text-decoration:none;box-shadow:0 0 0 0 rgba(7,63,137,.5);transition:transform .2s;position:relative;isolation:isolate}
 .ak-btn:after{content:"";position:absolute;inset:0;border-radius:inherit;background:var(--y);z-index:-1;pointer-events:none;will-change:transform,opacity;animation:ak-ringx 2.6s ease-out infinite}
@@ -735,7 +735,7 @@ const AK_CSS = `
 .ak-dic{width:68px;height:68px;border-radius:50%;background:var(--y);color:#fffffd;display:grid;place-items:center}
 @keyframes ak-bob{50%{transform:translateY(-8px)}}
 .ak-dt{font-family:var(--font-display,inherit);font-weight:700;font-size:1.35rem;text-transform:uppercase;padding:0 16px;word-break:break-word}
-.ak-dh{font-size:.88rem;color:rgba(20,33,58,.6)}
+.ak-dh{font-size:.88rem;color:rgba(0,0,0,.6)}
 .ak-dbeam{position:absolute;left:0;right:0;top:0;height:3px;background:var(--y);box-shadow:0 0 24px 6px rgba(7,63,137,.7);opacity:0}
 .ak-drop.scan .ak-dbeam{opacity:1;animation:ak-dscan .9s ease-in-out infinite alternate}
 @keyframes ak-dscan{to{top:calc(100% - 3px)}}
@@ -745,7 +745,7 @@ const AK_CSS = `
 .ak-fields label span{font-family:ui-monospace,Menlo,monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--y)}
 .ak-fields input,.ak-fields textarea{width:100%;background:rgba(255,255,253,.6);border:1px solid rgba(7,63,137,.2);border-radius:12px;color:var(--cream);padding:13px 14px;font:inherit;font-size:.95rem;outline:none;transition:border-color .2s,box-shadow .2s}
 .ak-fields input:focus,.ak-fields textarea:focus{border-color:var(--y);box-shadow:0 0 0 3px rgba(7,63,137,.2)}
-.ak-fields input::placeholder,.ak-fields textarea::placeholder{color:rgba(20,33,58,.35)}
+.ak-fields input::placeholder,.ak-fields textarea::placeholder{color:rgba(0,0,0,.35)}
 .ak-grow{flex:1}.ak-grow textarea{flex:1;min-height:150px;resize:none}
 .ak-go{grid-column:1/-1;font-size:1.1rem;padding:18px}
 
@@ -795,7 +795,7 @@ const AK_CSS = `
 .ak-row .n{font-family:ui-monospace,Menlo,monospace;color:var(--y)}
 .ak-row h3{margin:0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;font-size:clamp(1.8rem,4.4vw,3.6rem);line-height:1}
 .ak-row h3.out{color:transparent;-webkit-text-stroke:1.5px var(--cream)}.ak-row h3.yel{color:var(--y)}
-.ak-row p{margin:0;color:rgba(20,33,58,.7);font-size:1.02rem;line-height:1.5}
+.ak-row p{margin:0;color:rgba(0,0,0,.7);font-size:1.02rem;line-height:1.5}
 .ak-end{padding:110px 0 120px;text-align:center}
 .ak-end h2{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;font-size:clamp(2.8rem,8vw,6.6rem);line-height:.95;margin:0 0 30px}
 .ak-end h2 span{color:var(--y)}
@@ -894,7 +894,7 @@ const AK_CSS = `
 .ak-res-top{justify-content:flex-start}.ak-tabs{margin-left:auto}
 .ak-idle{display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;min-height:240px;padding:16px}
 .ak-idle b{font-family:var(--font-display,inherit);font-weight:800;text-transform:uppercase;font-size:2.2rem;line-height:1;color:transparent;-webkit-text-stroke:1.5px var(--cream)}
-.ak-idle p{margin:0;color:rgba(20,33,58,.7);max-width:22rem}
+.ak-idle p{margin:0;color:rgba(0,0,0,.7);max-width:22rem}
 .ak-res.idle{background:transparent;color:var(--cream);border:2px dashed rgba(7,63,137,.45)}
 .ak-res.idle>*:not(.ak-idle){display:none}
 .ak-res.idle .ak-idle{display:flex}
