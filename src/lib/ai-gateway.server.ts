@@ -44,6 +44,35 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
     return Object.assign(cbWrapped, cb);
   }
 
+  // Claude (Anthropic OpenAI-compatible endpoint). Used only when the router asks for it and the key exists.
+  if (forceModel?.startsWith("claude:")) {
+    const clKey = process.env.ANTHROPIC_API_KEY;
+    if (!clKey) throw new Error("503 claude key not configured");
+    const cl = createOpenAICompatible({
+      name: "anthropic",
+      baseURL: "https://api.anthropic.com/v1",
+      // Anthropic's compat endpoint takes tools, not strict json_schema; the SDK sends the schema as a tool.
+      supportsStructuredOutputs: false,
+      apiKey: clKey,
+      headers: { "anthropic-version": "2023-06-01" },
+      fetch: async (input: any, init?: any) => {
+        // Haiku answers in seconds; after 25s hand over to the next model instead of making the user wait.
+        const short = AbortSignal.timeout(25_000);
+        const sig = init?.signal ? AbortSignal.any([init.signal, short]) : short;
+        // Anthropic requires max_tokens, which the SDK does not always send.
+        try {
+          const body = typeof init?.body === "string" ? JSON.parse(init.body) : null;
+          if (body && body.max_tokens == null && body.max_completion_tokens == null) body.max_tokens = 8192;
+          if (body) init = { ...init, body: JSON.stringify(body) };
+        } catch { /* keep the original body */ }
+        return fetch(input, { ...init, signal: sig });
+      },
+    });
+    const clId = forceModel.slice("claude:".length);
+    const clWrapped = ((_modelId: string) => cl(clId)) as typeof cl;
+    return Object.assign(clWrapped, cl);
+  }
+
   if (!geminiKey) {
     return createOpenAICompatible({
       name: "lovable",
@@ -92,3 +121,4 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, forceModel
     provider(override || modelId.replace(/^google\//, ""))) as typeof provider;
   return Object.assign(wrapped, provider);
 }
+
