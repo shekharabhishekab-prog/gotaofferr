@@ -695,3 +695,6 @@
 
 /* small-text-black */
 label,small,.tl-mono,.ivb-mono,.rl-tag,.sf-sub,.sf-sub a,.tx-n,.tl-gchip,.text-xs.text-primary,.text-sm.text-primary,a.underline,.hp em:not([class]),.hp b:not([class]),.tl-gchip,.jf-t{color:#000000 !important}
+
+/* small-text-black-2 */
+.ak-mono,.ak-pin,.ak-hint,.ak-quota,.ak-chip,.ai-mono,.ab-mono,.ab-eyebrow,.lbl,.ab-chip,main i,footer span:not(.sf-r):not(.sf-ft),main p a:not([class*=btn]),main span.text-primary:not([class*=bg-]),main a.font-semibold.text-primary,main p.text-xs{color:#000000 !important}
