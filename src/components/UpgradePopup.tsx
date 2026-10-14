@@ -41,11 +41,11 @@ export function UpgradePopup({
       aria-modal="true"
       aria-label="Upgrade for more"
       onClick={onClose}
-      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+      style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(255,255,253,.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ width: "100%", maxWidth: 420, background: "#0b0a08", color: "#f6f1d6", border: "2px solid #ffd600", borderRadius: 20, padding: "28px 24px", textAlign: "center", boxShadow: "0 0 60px -10px rgba(255,214,0,.35)" }}
+        style={{ width: "100%", maxWidth: 420, background: "#fffffd", color: "#073f89", border: "2px solid #073f89", borderRadius: 20, padding: "28px 24px", textAlign: "center", boxShadow: "0 0 60px -10px rgba(7,63,137,.35)" }}
       >
         <div style={{ fontSize: 44, lineHeight: 1 }}>🐾</div>
         <p style={{ margin: "14px 0 0", fontSize: "1.15rem", fontWeight: 800, lineHeight: 1.35 }}>{MEME[feature]}</p>
@@ -56,12 +56,12 @@ export function UpgradePopup({
           {up ? (
             <Link
               to="/pricing"
-              style={{ display: "block", background: "#ffd600", color: "#0b0a08", fontWeight: 900, borderRadius: 999, padding: "13px 18px", textDecoration: "none" }}
+              style={{ display: "block", background: "#073f89", color: "#fffffd", fontWeight: 900, borderRadius: 999, padding: "13px 18px", textDecoration: "none" }}
             >
               See {PLAN_LABEL[up]} plan →
             </Link>
           ) : null}
-          <button type="button" onClick={onClose} style={{ background: "transparent", color: "#f6f1d6", border: "1px solid rgba(246,241,214,.35)", borderRadius: 999, padding: "11px 18px", cursor: "pointer" }}>
+          <button type="button" onClick={onClose} style={{ background: "transparent", color: "#073f89", border: "1px solid rgba(0,0,0,.35)", borderRadius: 999, padding: "11px 18px", cursor: "pointer" }}>
             Maybe later
           </button>
         </div>
