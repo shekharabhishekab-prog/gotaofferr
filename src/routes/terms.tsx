@@ -3,17 +3,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms & Conditions — GotaOfferr" },
+      { title: "Terms & Conditions — Terbey" },
       {
         name: "description",
         content:
-          "The terms that govern your use of GotaOfferr: accounts, plans and billing, refunds, acceptable use, AI-generated content and liability.",
+          "The terms that govern your use of Terbey: accounts, plans and billing, refunds, acceptable use, AI-generated content and liability.",
       },
-      { property: "og:title", content: "Terms & Conditions — GotaOfferr" },
+      { property: "og:title", content: "Terms & Conditions — Terbey" },
       {
         property: "og:description",
         content:
-          "Read the GotaOfferr terms of service covering accounts, subscriptions, refunds, acceptable use and limits of liability.",
+          "Read the Terbey terms of service covering accounts, subscriptions, refunds, acceptable use and limits of liability.",
       },
       { property: "og:url", content: "https://gotaofferr.com/terms" },
     ],
@@ -32,11 +32,11 @@ function Terms() {
 
       <div className="mt-8 space-y-8 text-muted-foreground">
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-foreground">1. About GotaOfferr</h2>
+          <h2 className="text-xl font-semibold text-foreground">1. About Terbey</h2>
           <p>
-            GotaOfferr is a sole proprietorship business operated by <strong>AB24 SOLUTIONS</strong>
-            ("we", "us", or "our"), Delhi, India. These Terms govern your access to and use of the
-            GotaOfferr website and services (the "Service"). By creating an account, uploading a resume,
+            Terbey is a sole proprietorship business
+            ("we", "us", or "our"). These Terms govern your access to and use of the
+            Terbey website and services (the "Service"). By creating an account, uploading a resume,
             or purchasing a plan, you agree to these Terms. If you do not agree, please do not use the
             Service.
           </p>
@@ -45,7 +45,7 @@ function Terms() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">2. Agreement</h2>
           <p>
-            These Terms are a legally binding agreement between you and AB24 SOLUTIONS. They govern
+            These Terms are a legally binding agreement between you and Terbey. They govern
             your access to and use of the Service. By using the Service, you confirm that you have
             read, understood, and agree to be bound by these Terms and our{" "}
             <Link to="/privacy" className="underline hover:text-foreground">
@@ -56,7 +56,7 @@ function Terms() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-foreground">3. Who can use GotaOfferr</h2>
+          <h2 className="text-xl font-semibold text-foreground">3. Who can use Terbey</h2>
           <p>
             You must be at least 18 years old and able to enter into a binding contract. You are
             responsible for keeping your login credentials secure and for all activity under your
@@ -67,7 +67,7 @@ function Terms() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">4. What the Service does</h2>
           <p>
-            GotaOfferr rewrites the resume you provide against a job description you provide, writes
+            Terbey rewrites the resume you provide against a job description you provide, writes
             a matching cover letter, helps you build a resume from scratch with AI assistance, and
             can search public job listings and email you matching openings (a job alert sends up to 3
             emails, one every 3 days, then stops; to continue you set the alert again, which counts
@@ -184,7 +184,7 @@ function Terms() {
             <Link to="/account" className="underline hover:text-foreground">
               account page
             </Link>{" "}
-            (Subscription → Cancel), or by emailing contact@gotaofferr.com. Cancellation takes effect
+            (Subscription → Cancel), or by emailing contact@terbey.com. Cancellation takes effect
             immediately for future billing: no further charges are taken, the mandate stops, and you
             keep access until the end of the period you have already paid for, after which your account returns to the Free plan automatically. Cancelling part-way
             through a month does not create a pro-rata refund of that month.
@@ -193,7 +193,7 @@ function Terms() {
           <p>
             Because the Service delivers AI output immediately, payments are generally
             non-refundable. If you were charged in error, charged twice, or the Service failed to
-            produce any output for you, write to contact@gotaofferr.com within 7 days of the charge
+            produce any output for you, write to contact@terbey.com within 7 days of the charge
             and we will review and, where fair, refund to the original payment method within 5–10
             business days.
           </p>
@@ -240,7 +240,7 @@ function Terms() {
           <h2 className="text-xl font-semibold text-foreground">12. Governing law</h2>
           <p>
             These Terms are governed by the laws of India, and the courts of India will have
-            exclusive jurisdiction over any dispute. The proprietor of AB24 SOLUTIONS is Abhishek.
+            exclusive jurisdiction over any dispute. The proprietor of Terbey is Abhishek.
           </p>
         </section>
 
@@ -249,24 +249,20 @@ function Terms() {
           <p>
             We handle your personal data as described in our Privacy Policy, in line with India's
             Digital Personal Data Protection Act, 2023. To access, correct or delete your data, or to
-            raise a complaint, contact our Grievance Officer at contact@gotaofferr.com. We reply
+            raise a complaint, contact our Grievance Officer at contact@terbey.com. We reply
             within 30 days.
           </p>
           <p>
-            Questions about these Terms: contact@gotaofferr.com, or use the{" "}
+            Questions about these Terms: contact@terbey.com, or use the{" "}
             <Link to="/contact" className="underline hover:text-foreground">
               contact page
             </Link>
             .
-          </p>
-          <p>
-            <strong>Business:</strong> AB24 SOLUTIONS (GotaOfferr)
-            <br />
-            <strong>Location:</strong> Delhi, India
           </p>
         </section>
       </div>
     </main>
   );
 }
+
 

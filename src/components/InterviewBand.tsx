@@ -57,25 +57,25 @@ export function InterviewBand() {
 }
 
 const CSS = `
-.ivb-mono{font-family:ui-monospace,monospace;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:#073f89;margin:0 0 14px}
+.ivb-mono{font-family:ui-monospace,monospace;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:#ffd600;margin:0 0 14px}
 .ivb-grid{display:grid;gap:36px;align-items:center}
 @media(min-width:900px){.ivb-grid{grid-template-columns:1.15fr .85fr;gap:56px}}
 .ivb-h{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.98;letter-spacing:-.01em;font-size:2.3rem;margin:0;text-wrap:balance}
 @media(min-width:640px){.ivb-h{font-size:3.4rem}}
 @media(min-width:1024px){.ivb-h{font-size:4rem}}
-.ivb-it{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;text-transform:none;color:#073f89;letter-spacing:0;font-size:1.12em}
-.ivb-out{color:transparent;-webkit-text-stroke:1.5px #073f89}
-.ivb-mk{background:#073f89;color:#fffffd;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.ivb-sub{margin:22px 0 0;max-width:34rem;font-size:1.05rem;line-height:1.5;color:rgba(0,0,0,.75)}
-.ivb-cta{display:inline-flex;align-items:center;gap:10px;margin-top:26px;background:#073f89;color:#fffffd;font-weight:800;border-radius:999px;padding:15px 26px;text-decoration:none;font-size:1.02rem;transition:transform .2s}
+.ivb-it{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;text-transform:none;color:#ffd600;letter-spacing:0;font-size:1.12em}
+.ivb-out{color:transparent;-webkit-text-stroke:1.5px #f6f1d6}
+.ivb-mk{background:#ffd600;color:#0b0a08;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.ivb-sub{margin:22px 0 0;max-width:34rem;font-size:1.05rem;line-height:1.5;color:rgba(246,241,214,.75)}
+.ivb-cta{display:inline-flex;align-items:center;gap:10px;margin-top:26px;background:#ffd600;color:#0b0a08;font-weight:800;border-radius:999px;padding:15px 26px;text-decoration:none;font-size:1.02rem;transition:transform .2s}
 .ivb-cta:hover{transform:translateY(-3px) rotate(-1deg)}
-.ivb-chat{position:relative;display:flex;flex-direction:column;gap:12px;padding:26px 20px 20px;border:1px solid rgba(7,63,137,.35);border-radius:22px;background:rgba(7,63,137,.04)}
-.ivb-cat{position:absolute;top:-26px;right:18px;width:58px;height:58px;border-radius:50%;background:#073f89;display:flex;align-items:center;justify-content:center;font-size:32px;transform:rotate(8deg)}
+.ivb-chat{position:relative;display:flex;flex-direction:column;gap:12px;padding:26px 20px 20px;border:1px solid rgba(255,214,0,.35);border-radius:22px;background:rgba(255,214,0,.04)}
+.ivb-cat{position:absolute;top:-26px;right:18px;width:58px;height:58px;border-radius:50%;background:#ffd600;display:flex;align-items:center;justify-content:center;font-size:32px;transform:rotate(8deg)}
 .ivb-b{max-width:88%;padding:11px 15px;border-radius:16px;font-size:.95rem;line-height:1.35}
-.ivb-b1{background:#073f89;color:#fffffd;border-bottom-left-radius:4px;align-self:flex-start}
-.ivb-b2{border:1px solid rgba(0,0,0,.4);align-self:flex-end;border-bottom-right-radius:4px}
-.ivb-b3{background:#073f89;color:#fffffd;border-bottom-left-radius:4px;align-self:flex-start}
-.ivb-score{align-self:flex-end;margin-top:4px;background:#073f89;color:#fffffd;border-radius:14px;padding:8px 14px;font-size:.9rem}
+.ivb-b1{background:#f6f1d6;color:#0b0a08;border-bottom-left-radius:4px;align-self:flex-start}
+.ivb-b2{border:1px solid rgba(246,241,214,.4);align-self:flex-end;border-bottom-right-radius:4px}
+.ivb-b3{background:#f6f1d6;color:#0b0a08;border-bottom-left-radius:4px;align-self:flex-start}
+.ivb-score{align-self:flex-end;margin-top:4px;background:#ffd600;color:#0b0a08;border-radius:14px;padding:8px 14px;font-size:.9rem}
 .ivb-score b{font-size:1.6rem;margin-right:2px}.ivb-score span{opacity:.7;margin-left:6px}
 .ivb-h{transform:translate3d(0,calc(var(--ivp,0)*26px),0)}.ivb-chat{transform:translate3d(0,calc(var(--ivp,0)*-70px),0);will-change:transform}
 .ivb-cat{transform:translate3d(0,calc(var(--ivp,0)*60px),0) rotate(8deg)}

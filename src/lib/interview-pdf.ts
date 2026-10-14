@@ -17,7 +17,7 @@ export async function makeInterviewPdf(fb: Fb, questions: string[], answers: str
   const head = () => {
     d.setFillColor(0, 0, 0); d.rect(0, 0, W, 64, "F");
     d.setTextColor(255, 214, 0); d.setFont("helvetica", "bold"); d.setFontSize(18);
-    d.text("GOTAOFFERR  INTERVIEW FEEDBACK", M, 40);
+    d.text("TERBEY  INTERVIEW FEEDBACK", M, 40);
     d.setTextColor(0, 0, 0); y = 96;
   };
   const need = (h: number) => { if (y + h > 800) { d.addPage(); head(); } };
@@ -64,6 +64,6 @@ export async function makeInterviewPdf(fb: Fb, questions: string[], answers: str
     if (tip) para("Tip: " + tip, 9.5, false, [0, 0, 0], 12, 8);
   });
   y += 6;
-  para("AI coaching, not a verdict. Made in your browser by gotaofferr.com. Nothing was stored.", 9, false, [90, 90, 90], 0, 0);
-  d.save("gotaofferr-interview-feedback.pdf");
+  para("AI coaching, not a verdict. Made in your browser by terbey.com. Nothing was stored.", 9, false, [90, 90, 90], 0, 0);
+  d.save("terbey-interview-feedback.pdf");
 }

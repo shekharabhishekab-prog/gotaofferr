@@ -13,11 +13,11 @@ import {
 } from '@react-email/components'
 
 export const BRAND = {
-  name: 'GotaOfferr',
-  supportEmail: 'contact@gotaofferr.com',
+  name: 'Terbey',
+  supportEmail: 'contact@terbey.com',
   // Version the public URL so Gmail does not reuse its cached copy of an older email header.
-  logoUrl: 'https://gotaofferr.com/favicon.png?v=email-logo-20260801',
-  yellow: '#facc15',
+  logoUrl: 'https://terbey.com/favicon.png?v=email-logo-20261014',
+  yellow: '#073f89',
   black: '#0a0a0a',
   muted: '#55575d',
   faint: '#9b9b9b',
@@ -87,7 +87,7 @@ export const styles = {
   },
   button: {
     backgroundColor: BRAND.yellow,
-    color: BRAND.black,
+    color: '#fffffd',
     fontSize: '15px',
     fontWeight: 'bold' as const,
     borderRadius: '10px',
@@ -144,11 +144,11 @@ export const EmailLayout = ({
               src={BRAND.logoUrl}
               width="64"
               height="64"
-              alt="GotaOfferr GO logo"
+              alt="Terbey logo"
               style={styles.logo}
             />
             <Text style={styles.wordmark}>
-              Gota<span style={styles.wordmarkAccent}>Offerr</span>
+              Terbey
             </Text>
           </Section>
           <Text style={styles.tagline}>Find → Tailor → Apply</Text>
@@ -159,7 +159,7 @@ export const EmailLayout = ({
           <Section style={styles.hr} />
           <Text style={styles.footer}>
             {footerNote ? `${footerNote} ` : ''}
-            Sent by {BRAND.name} · gotaofferr.com · Need help? {BRAND.supportEmail}
+            Sent by {BRAND.name} · terbey.com · Need help? {BRAND.supportEmail}
           </Text>
         </Section>
       </Container>
