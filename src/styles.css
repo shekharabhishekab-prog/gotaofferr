@@ -789,3 +789,6 @@ header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
 .hdm-fill{color:rgba(7,63,137,.8)!important;-webkit-text-stroke:0!important}
 .hdm-ring{border:1.5px solid rgba(255,255,253,.38)!important}
 .hdm-dot{width:10px;height:10px;top:-5px}
+
+/* jm-white-2 */
+section.hp-hero div.i3-meta b,section.hp-hero div.i3-meta.i3-bl b{color:#fffffd!important;-webkit-text-fill-color:#fffffd!important}
