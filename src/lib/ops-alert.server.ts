@@ -29,15 +29,15 @@ export async function sendOpsAlert(kind: string, note?: unknown): Promise<void> 
       .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email]")
       .slice(0, 400);
 
-    const domain = process.env.RESEND_FROM_DOMAIN || "gotaofferr.com";
+    const domain = process.env.RESEND_FROM_DOMAIN || "notify.terbey.com";
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: `GotaOfferr alerts <noreply@${domain}>`,
+        from: `Terbey alerts <noreply@${domain}>`,
         to,
-        subject: `[gotaofferr alert] ${safeKind}`,
-        text: `Something needs a look on gotaofferr.com.\n\nWhat: ${safeKind}\nWhen: ${new Date().toISOString()}\nNote: ${text || "(no extra detail)"}\n\nMore alerts of this same kind are held back for 1 hour.\nLogs: Cloudflare dashboard > gotaofferr-copy > Observability.`,
+        subject: `[terbey alert] ${safeKind}`,
+        text: `Something needs a look on terbey.com.\n\nWhat: ${safeKind}\nWhen: ${new Date().toISOString()}\nNote: ${text || "(no extra detail)"}\n\nMore alerts of this same kind are held back for 1 hour.\nLogs: Cloudflare dashboard > gotaofferr-copy > Observability.`,
       }),
     });
   } catch (e) {

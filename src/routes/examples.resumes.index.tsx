@@ -9,10 +9,10 @@ import { resumeExamples } from "@/lib/resume-examples";
 
 const INITIAL_VISIBLE = 6;
 
-const TITLE = "ATS Resume Examples & Master Resume Guide | GotaOfferr";
+const TITLE = "ATS Resume Examples & Master Resume Guide | Terbey";
 const DESCRIPTION =
-  "Free ATS-optimized resume examples for software engineer, product manager, brand manager and marketing roles — plus resumes rebuilt with GotaOfferr.";
-const CANONICAL = "https://gotaofferr.com/examples/resumes";
+  "Free ATS-optimized resume examples for software engineer, product manager, brand manager and marketing roles — plus resumes rebuilt with Terbey.";
+const CANONICAL = "https://terbey.com/examples/resumes";
 
 export const Route = createFileRoute("/examples/resumes/")({
   head: () => ({
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/examples/resumes/")({
             "@type": "ListItem",
             position: index + 1,
             name: `${example.role} resume example`,
-            url: `https://gotaofferr.com/examples/resumes/${example.slug}`,
+            url: `https://terbey.com/examples/resumes/${example.slug}`,
           })),
         }),
       },
@@ -77,7 +77,7 @@ function ResumeExamplesIndex() {
         Before you tailor a resume to a specific job, you need one strong master version that an
         applicant tracking system can actually read. These examples show the exact section order,
         keyword placement, and bullet formulas that survive automated screening — copy the structure,
-        then let GotaOfferr rebuild it for each company you apply to.
+        then let Terbey rebuild it for each company you apply to.
       </p>
 
       <div className="relative mt-10 max-w-md">

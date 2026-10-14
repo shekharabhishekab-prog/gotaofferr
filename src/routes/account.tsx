@@ -63,21 +63,21 @@ import { FREE_MONTHLY_LIMIT, STARTER_MONTHLY_LIMIT, JOB_HUNT_MONTHLY_LIMIT, CARE
 export const Route = createFileRoute("/account")({
   head: () => ({
     meta: [
-      { title: "Your account — GotaOfferr" },
+      { title: "Your account — Terbey" },
       {
         name: "description",
         content:
-          "Manage your GotaOfferr account: track your plan and usage, update your profile, switch theme and get support.",
+          "Manage your Terbey account: track your plan and usage, update your profile, switch theme and get support.",
       },
-      { property: "og:title", content: "Your account — GotaOfferr" },
+      { property: "og:title", content: "Your account — Terbey" },
       {
         property: "og:description",
         content:
-          "Manage your GotaOfferr plan, usage, profile, appearance and support options in one place.",
+          "Manage your Terbey plan, usage, profile, appearance and support options in one place.",
       },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: "https://gotaofferr.com/account" }],
+    links: [{ rel: "canonical", href: "https://terbey.com/account" }],
   }),
   component: Account,
   errorComponent: RouteError,
@@ -271,7 +271,7 @@ function Account() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "gotaofferr-my-data.json";
+      a.download = "terbey-my-data.json";
       a.click();
       URL.revokeObjectURL(url);
       toast.success("Your data export has been downloaded.");
@@ -299,7 +299,7 @@ function Account() {
       toast.success("Your account and data have been deleted.");
       navigate({ to: "/", replace: true });
     } catch {
-      toast.error("Could not delete your account. Email contact@gotaofferr.com and we'll do it.");
+      toast.error("Could not delete your account. Email contact@terbey.com and we'll do it.");
     } finally {
       setDeleting(false);
     }
@@ -899,7 +899,7 @@ function Account() {
               <h2 className="font-display text-lg font-semibold text-card-foreground">Appearance</h2>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              GotaOfferr is designed dark-first. Light mode is available if you prefer it.
+              Terbey is designed dark-first. Light mode is available if you prefer it.
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {(
@@ -974,10 +974,10 @@ function Account() {
               <p className="mt-2 text-sm text-muted-foreground">
                 Or email{" "}
                 <a
-                  href="mailto:contact@gotaofferr.com"
+                  href="mailto:contact@terbey.com"
                   className="text-primary underline-offset-4 hover:underline"
                 >
-                  contact@gotaofferr.com
+                  contact@terbey.com
                 </a>
               </p>
               <Button className="mt-4" asChild>

@@ -11,7 +11,7 @@ import { getRequestHost } from "@tanstack/react-start/server";
 const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 /**
- * The Turnstile site key is registered for the production hostnames only, so
+ * The Turnstile site key is registered for the production hostnames (gotaofferr.com and terbey.com families), so
  * the widget never issues a token on localhost or preview builds. Enforcing
  * there would lock every logged-out visitor out of the tool, so the gate only
  * applies on the real domains.
@@ -23,7 +23,12 @@ function isEnforcedHost(): boolean {
   } catch {
     return false;
   }
-  return host === "gotaofferr.com" || host.endsWith(".gotaofferr.com");
+  return (
+    host === "gotaofferr.com" ||
+    host.endsWith(".gotaofferr.com") ||
+    host === "terbey.com" ||
+    host.endsWith(".terbey.com")
+  );
 }
 
 export async function verifyTurnstile(token: string | undefined, ip?: string): Promise<void> {

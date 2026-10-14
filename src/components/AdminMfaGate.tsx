@@ -101,7 +101,7 @@ export function AdminMfaGate({ children }: { children: React.ReactNode }) {
             <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive-foreground">
               <strong>Important:</strong> Save a backup of this 2FA setup in your password manager.
               If you lose your authenticator device, you can only regain admin access by contacting
-              support at <span className="font-medium">contact@gotaofferr.com</span>.
+              support at <span className="font-medium">contact@terbey.com</span>.
             </div>
             <Button className="mt-5 w-full" onClick={startEnroll} disabled={busy}>
               {busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : null} Set up authenticator

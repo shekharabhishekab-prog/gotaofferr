@@ -45,8 +45,8 @@ jobs:
         run: |
           STAMP=$(date -u +%Y-%m-%d)
           /usr/lib/postgresql/17/bin/pg_dump --no-owner --no-privileges \
-            --schema=public --schema=auth -Fc -f "gotaofferr-$STAMP.dump"
-          ls -l gotaofferr-*.dump
+            --schema=public --schema=auth -Fc -f "terbey-$STAMP.dump"
+          ls -l terbey-*.dump
           echo "STAMP=$STAMP" >> "$GITHUB_ENV"
       - name: Restore test into a throwaway database
         run: |
@@ -54,7 +54,7 @@ jobs:
           R="/usr/lib/postgresql/17/bin"
           PGSSLMODE=disable PGPASSWORD=restoretest $R/psql -h 127.0.0.1 -p 5433 -U postgres -c "create database restoretest" 
           PGSSLMODE=disable PGPASSWORD=restoretest $R/psql -h 127.0.0.1 -p 5433 -U postgres -d restoretest -c "create role anon; create role authenticated; create role service_role; create role supabase_auth_admin; create role authenticator;" || true
-          PGSSLMODE=disable PGPASSWORD=restoretest $R/pg_restore -h 127.0.0.1 -p 5433 -U postgres -d restoretest --no-owner --no-privileges "gotaofferr-$STAMP.dump" || echo "pg_restore reported warnings (checking data next)"
+          PGSSLMODE=disable PGPASSWORD=restoretest $R/pg_restore -h 127.0.0.1 -p 5433 -U postgres -d restoretest --no-owner --no-privileges "terbey-$STAMP.dump" || echo "pg_restore reported warnings (checking data next)"
           SRC_T=$($R/psql -Atc "select count(*) from information_schema.tables where table_schema='public'")
           DST_T=$(PGSSLMODE=disable PGPASSWORD=restoretest $R/psql -h 127.0.0.1 -p 5433 -U postgres -d restoretest -Atc "select count(*) from information_schema.tables where table_schema='public'")
           SRC_U=$($R/psql -Atc "select count(*) from auth.users")
@@ -65,6 +65,6 @@ jobs:
       - name: Keep the backup file (90 days)
         uses: actions/upload-artifact@v4
         with:
-          name: gotaofferr-db-backup-${{ env.STAMP }}
-          path: gotaofferr-*.dump
+          name: terbey-db-backup-${{ env.STAMP }}
+          path: terbey-*.dump
           retention-days: 90

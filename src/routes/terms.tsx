@@ -15,9 +15,9 @@ export const Route = createFileRoute("/terms")({
         content:
           "Read the Terbey terms of service covering accounts, subscriptions, refunds, acceptable use and limits of liability.",
       },
-      { property: "og:url", content: "https://gotaofferr.com/terms" },
+      { property: "og:url", content: "https://terbey.com/terms" },
     ],
-    links: [{ rel: "canonical", href: "https://gotaofferr.com/terms" }],
+    links: [{ rel: "canonical", href: "https://terbey.com/terms" }],
   }),
   component: Terms,
 });

@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/public/jobs/unsubscribe")({
         const msg = ok
           ? "Done. This job alert is stopped and you will get no more emails from it."
           : "This link is not valid.";
-        return new Response(`<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><body style="font-family:sans-serif;max-width:480px;margin:60px auto;padding:0 20px"><h2>GotaOfferr</h2><p>${msg}</p><p><a href="https://gotaofferr.com/jobs">Back to GotaOfferr</a></p>`, {
+        return new Response(`<!doctype html><meta name=viewport content="width=device-width,initial-scale=1"><body style="font-family:sans-serif;max-width:480px;margin:60px auto;padding:0 20px"><h2>Terbey</h2><p>${msg}</p><p><a href="https://terbey.com/jobs">Back to Terbey</a></p>`, {
           status: ok ? 200 : 400,
           headers: { "content-type": "text/html; charset=utf-8" },
         });

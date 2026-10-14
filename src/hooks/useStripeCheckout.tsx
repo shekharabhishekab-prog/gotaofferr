@@ -69,7 +69,7 @@ export function useStripeCheckout() {
         const rzp = new Razorpay({
           key: result.keyId,
           subscription_id: result.subscriptionId,
-          name: 'GotaOfferr',
+          name: 'Terbey',
           description: `${opts.title ?? 'Subscription'} — auto-renews monthly until you cancel`,
           image: `${window.location.origin}/favicon.png`,
           prefill: result.prefill,

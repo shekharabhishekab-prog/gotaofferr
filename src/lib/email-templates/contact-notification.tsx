@@ -29,7 +29,7 @@ const ContactNotificationEmail = ({ name, email, message }: Props) => (
 
 export const template = {
   component: ContactNotificationEmail,
-  subject: 'New contact form message — GotaOfferr',
+  subject: 'New contact form message — Terbey',
   displayName: 'Contact form notification (internal)',
   previewData: {
     name: 'Jane Doe',

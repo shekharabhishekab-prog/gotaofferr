@@ -1,6 +1,6 @@
-# Gotaofferr
+# Terbey
 
-AI resume and cover letter tailoring, plus job search. Site: https://gotaofferr.com
+AI resume and cover letter tailoring, plus job search. Site: https://terbey.com
 
 ## Stack
 - TanStack Start (React, TypeScript), deployed as a Cloudflare Worker

@@ -83,7 +83,7 @@ export const countryGuides: CountryGuide[] = [
       "Ran a AED 400,000-equivalent annual campaign budget across trade and digital, lifting assisted revenue 23%.",
     ],
     extras: [
-      "Add a one-line relocation and sponsorship statement under your name — GotaOfferr adds this automatically when it detects a cross-border application.",
+      "Add a one-line relocation and sponsorship statement under your name — Terbey adds this automatically when it detects a cross-border application.",
       "Keep Arabic language ability, if any, in the skills line; it is a genuine differentiator for client-facing roles.",
       "Attach a plain-text PDF. Gulf recruitment agencies frequently re-upload your CV into their own database, and designed layouts come out mangled.",
     ],
@@ -472,7 +472,7 @@ export const countryGuides: CountryGuide[] = [
       },
       {
         q: "How do I make my resume ATS-friendly for Naukri and LinkedIn?",
-        a: "Use a single-column PDF, standard headings, and repeat the exact keywords from the job description in your Core Skills and Experience bullets. GotaOfferr's match score and keyword gap features check this automatically when you tailor a resume to a posting.",
+        a: "Use a single-column PDF, standard headings, and repeat the exact keywords from the job description in your Core Skills and Experience bullets. Terbey's match score and keyword gap features check this automatically when you tailor a resume to a posting.",
       },
     ],
   },

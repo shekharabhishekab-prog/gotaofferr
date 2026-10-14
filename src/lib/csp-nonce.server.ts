@@ -19,7 +19,7 @@ type Als = {
   getStore: () => NonceStore | undefined;
 };
 
-const KEY = "__gotaofferr_csp_nonce_als__";
+const KEY = "__terbey_csp_nonce_als__";
 
 let initialised = false;
 

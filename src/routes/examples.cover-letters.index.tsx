@@ -6,10 +6,10 @@ import { RouteNotFound } from "@/components/RouteNotFound";
 import { Button } from "@/components/ui/button";
 import { coverLetterExamples } from "@/lib/cover-letter-examples";
 
-const TITLE = "Cover Letter Examples by Role: Short, ATS-Ready | GotaOfferr";
+const TITLE = "Cover Letter Examples by Role: Short, ATS-Ready | Terbey";
 const DESCRIPTION =
   "Cover letter examples for software engineers, freshers, business analysts, marketing and support roles — the structure, sample lines and clichés to cut.";
-const CANONICAL = "https://gotaofferr.com/examples/cover-letters";
+const CANONICAL = "https://terbey.com/examples/cover-letters";
 
 export const Route = createFileRoute("/examples/cover-letters/")({
   head: () => ({
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/examples/cover-letters/")({
             "@type": "ListItem",
             position: index + 1,
             name: `${example.role} cover letter example`,
-            url: `https://gotaofferr.com/examples/cover-letters/${example.slug}`,
+            url: `https://terbey.com/examples/cover-letters/${example.slug}`,
           })),
         }),
       },

@@ -136,8 +136,8 @@ export function CountryGuidePage({ guide }: { guide: CountryGuide }) {
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
           {domestic
-            ? "Upload your existing resume and paste the job description. GotaOfferr aligns your keywords with Naukri and LinkedIn, applies the modern Indian ATS format, and returns an ATS-ready PDF with a matching cover letter."
-            : `Upload your existing resume and paste the job description. GotaOfferr applies ${guide.country} conventions, adds the relocation and sponsorship line, and returns an ATS-ready PDF with a matching cover letter.`}
+            ? "Upload your existing resume and paste the job description. Terbey aligns your keywords with Naukri and LinkedIn, applies the modern Indian ATS format, and returns an ATS-ready PDF with a matching cover letter."
+            : `Upload your existing resume and paste the job description. Terbey applies ${guide.country} conventions, adds the relocation and sponsorship line, and returns an ATS-ready PDF with a matching cover letter.`}
         </p>
         <Button asChild size="lg" className="mt-6">
           <Link to="/tailor">
@@ -170,7 +170,7 @@ export function CountryGuidePage({ guide }: { guide: CountryGuide }) {
 }
 
 export function countryGuideHead(slug: string, guide: CountryGuide) {
-  const url = `https://gotaofferr.com/guides/${slug}`;
+  const url = `https://terbey.com/guides/${slug}`;
   return {
     meta: [
       { title: guide.metaTitle },
@@ -191,7 +191,7 @@ export function countryGuideHead(slug: string, guide: CountryGuide) {
           description: guide.metaDescription,
           image: [SITE_IMAGE],
           mainEntityOfPage: url,
-          author: { "@type": "Organization", name: "GotaOfferr" },
+          author: { "@type": "Organization", name: "Terbey" },
           publisher: SITE_PUBLISHER,
         }),
       },
@@ -213,7 +213,7 @@ export function countryGuideHead(slug: string, guide: CountryGuide) {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: "https://gotaofferr.com/" },
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://terbey.com/" },
             { "@type": "ListItem", position: 2, name: `${guide.country} resume format`, item: url },
           ],
         }),

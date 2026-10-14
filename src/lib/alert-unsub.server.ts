@@ -7,7 +7,7 @@ async function hmac(id: string): Promise<string> {
 }
 
 export async function alertUnsubscribeUrl(alertId: string): Promise<string> {
-  return `https://gotaofferr.com/api/public/jobs/unsubscribe?a=${alertId}&t=${await hmac(alertId)}`;
+  return `https://terbey.com/api/public/jobs/unsubscribe?a=${alertId}&t=${await hmac(alertId)}`;
 }
 
 export async function verifyAlertUnsubscribe(alertId: string, token: string): Promise<boolean> {

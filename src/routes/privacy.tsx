@@ -15,9 +15,9 @@ export const Route = createFileRoute("/privacy")({
         content:
           "Terbey privacy policy explains what data we collect, how we use it, and how we keep your resume and account information safe.",
       },
-      { property: "og:url", content: "https://gotaofferr.com/privacy" },
+      { property: "og:url", content: "https://terbey.com/privacy" },
     ],
-    links: [{ rel: "canonical", href: "https://gotaofferr.com/privacy" }],
+    links: [{ rel: "canonical", href: "https://terbey.com/privacy" }],
   }),
   component: Privacy,
 });

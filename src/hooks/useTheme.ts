@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export type ThemePreference = "dark" | "light" | "system";
 
-const STORAGE_KEY = "gotaofferr-theme";
+const STORAGE_KEY = "terbey-theme";
 
 function systemPrefersLight() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: light)").matches;

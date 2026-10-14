@@ -37,15 +37,15 @@ import { toast } from "@/lib/toast";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin dashboard — GotaOfferr" },
+      { title: "Admin dashboard — Terbey" },
       {
         name: "description",
-        content: "Internal GotaOfferr admin dashboard for users, subscriptions and usage.",
+        content: "Internal Terbey admin dashboard for users, subscriptions and usage.",
       },
-      { property: "og:title", content: "Admin dashboard — GotaOfferr" },
+      { property: "og:title", content: "Admin dashboard — Terbey" },
       {
         property: "og:description",
-        content: "Internal GotaOfferr admin dashboard for users, subscriptions and usage.",
+        content: "Internal Terbey admin dashboard for users, subscriptions and usage.",
       },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -141,7 +141,7 @@ function AdminPage() {
         <ShieldAlert className="h-10 w-10 text-muted-foreground" />
         <h1 className="text-2xl font-bold">Restricted area</h1>
         <p className="text-muted-foreground">
-          This dashboard is only available to GotaOfferr administrators.
+          This dashboard is only available to Terbey administrators.
         </p>
         <Button asChild>
           <Link to={user ? "/account" : "/auth"}>{user ? "Back to account" : "Sign in"}</Link>
@@ -250,7 +250,7 @@ function AdminPage() {
                 try {
                   const res = await marketingFn({});
                   downloadCsv(
-                    `gotaofferr-marketing-emails-${stamp()}.csv`,
+                    `terbey-marketing-emails-${stamp()}.csv`,
                     ["email", "source", "captured_at"],
                     res.rows.map((r) => [r.email, r.source, r.createdAt]),
                   );
@@ -281,7 +281,7 @@ function AdminPage() {
                   size="sm"
                   onClick={() =>
                     downloadCsv(
-                      `gotaofferr-all-users-${stamp()}.csv`,
+                      `terbey-all-users-${stamp()}.csv`,
                       [
                         "user_id",
                         "email",
@@ -362,7 +362,7 @@ function AdminPage() {
                   size="sm"
                   onClick={() =>
                     downloadCsv(
-                      `gotaofferr-paid-subscribers-${stamp()}.csv`,
+                      `terbey-paid-subscribers-${stamp()}.csv`,
                       [
                         "user_id",
                         "email",

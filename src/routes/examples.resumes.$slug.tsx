@@ -16,11 +16,11 @@ export const Route = createFileRoute("/examples/resumes/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) {
       return {
-        meta: [{ title: "Resume example not found — GotaOfferr" }, { name: "robots", content: "noindex" }],
+        meta: [{ title: "Resume example not found — Terbey" }, { name: "robots", content: "noindex" }],
       };
     }
     const { example } = loaderData;
-    const url = `https://gotaofferr.com/examples/resumes/${example.slug}`;
+    const url = `https://terbey.com/examples/resumes/${example.slug}`;
     return {
       meta: [
         { title: example.metaTitle },
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/examples/resumes/$slug")({
             description: example.metaDescription,
             image: [SITE_IMAGE],
             mainEntityOfPage: url,
-            author: { "@type": "Organization", name: "GotaOfferr" },
+            author: { "@type": "Organization", name: "Terbey" },
             publisher: SITE_PUBLISHER,
           }),
         },
@@ -51,12 +51,12 @@ export const Route = createFileRoute("/examples/resumes/$slug")({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://gotaofferr.com/" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://terbey.com/" },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Resume examples",
-                item: "https://gotaofferr.com/examples/resumes",
+                item: "https://terbey.com/examples/resumes",
               },
               { "@type": "ListItem", position: 3, name: `${example.role} resume example`, item: url },
             ],
@@ -160,7 +160,7 @@ function ResumeExamplePage() {
               Next: tailor it to a real job
             </h2>
             <p className="mt-3 text-sm text-muted-foreground">
-              Paste this master resume plus a job description and GotaOfferr rebuilds it for that exact
+              Paste this master resume plus a job description and Terbey rebuilds it for that exact
               role, with a matching cover letter.
             </p>
             <Button asChild className="mt-5 w-full">
