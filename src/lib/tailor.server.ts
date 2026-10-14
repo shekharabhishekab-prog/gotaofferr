@@ -58,7 +58,7 @@ async function runTailorInner(
       if (Date.now() - startedAt > RETRY_BUDGET_MS) throw new Error(SLOW_MSG);
       return runTailorOnce(data, country, modelId, true);
     }
-  }, { cerebrasFirst: true });
+  }, { claudeFirst: true, cerebrasFirst: true });
   // TEMP DEBUG (remove before merge)
   (__r as any).tips = [...(((__r as any).tips) ?? []), `[DEBUG model: ${(globalThis as any).__cbModel}]`]; // TEMP DEBUG
   if ((globalThis as any).__cbDebug) (__r as any).tips = [...(((__r as any).tips) ?? []), `DEBUG cerebras failed first: ${(globalThis as any).__cbDebug} | 429body: ${(globalThis as any).__cb429 ?? ""}`];
@@ -765,3 +765,4 @@ export function withRefereesLine<T>(r: T, country: string | null | undefined): T
     return r;
   }
 }
+
