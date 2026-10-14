@@ -109,17 +109,23 @@ const BAD_UNTIL = new Map<string, number>();
 
 /** Try each model in the tier's chain; move on only for quota errors. */
 export const CEREBRAS_MODEL = "cerebras:gpt-oss-120b";
+// Paid fallback (owner's own Anthropic credit): first in the chain when its key exists. Haiku 5.5 is ~0.2 US cents per Tailor run ($0.10/M in, $0.50/M out).
+export const CLAUDE_MODEL = "claude:claude-haiku-5-5";
 
-export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: string) => Promise<T>, opts?: { cerebrasFirst?: boolean }): Promise<T> {
+export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: string) => Promise<T>, opts?: { cerebrasFirst?: boolean; claudeFirst?: boolean }): Promise<T> {
   // Cerebras goes first only when asked for and only when its key exists; otherwise the Gemini chain runs exactly as before.
   const withCerebras = !!opts?.cerebrasFirst && !!process.env.CEREBRAS_API_KEY;
-  const full = withCerebras ? [CEREBRAS_MODEL, ...chainForTier(tier)] : chainForTier(tier);
+  // Chain order: Claude (paid, most reliable) -> Cerebras (free, fast) -> the free Gemini models. A provider only runs when its key exists.
+  const withClaude = !!opts?.claudeFirst && !!process.env.ANTHROPIC_API_KEY;
+  const full = [...(withClaude ? [CLAUDE_MODEL] : []), ...(withCerebras ? [CEREBRAS_MODEL] : []), ...chainForTier(tier)];
   // A model that just failed (overload, timeout, cap) is skipped for 3 minutes so the next user does not wait through it again.
   const now = Date.now();
   const live = full.filter((id) => (BAD_UNTIL.get(id) ?? 0) <= now);
   const chain = live.length > 0 ? live : full;
   let last: unknown = null;
   let cbDebug = "";
+  // TEMP DEBUG (preview only, remove before merge): why each model in the chain failed.
+  const chainDebug: string[] = [];
   for (const modelId of chain) {
     const t0 = Date.now();
     try {
@@ -131,17 +137,19 @@ export async function runWithModelChain<T>(tier: RoutingTier, fn: (modelId: stri
     } catch (error) {
       console.warn(`[ai-time] ${modelId} fail ${((Date.now() - t0) / 1000).toFixed(1)}s tier=${tier}`);
       if (modelId === CEREBRAS_MODEL) cbDebug = `${(error as Error)?.name}: ${String((error as Error)?.message ?? error).slice(0, 300)}`;
-      // Any Cerebras failure hands over to the Gemini chain. Gemini models keep the old rule (only quota/overload moves on).
-      if (modelId !== CEREBRAS_MODEL && !isQuotaError(error)) throw error;
+      chainDebug.push(`${modelId.replace("google/", "")}=${(error as Error)?.name ?? "err"}:${String((error as Error)?.message ?? error).slice(0, 120)}`);
+      // Any Claude or Cerebras failure hands over to the rest of the chain. Gemini models keep the old rule (only quota/overload moves on).
+      if (modelId !== CEREBRAS_MODEL && modelId !== CLAUDE_MODEL && !isQuotaError(error)) throw error;
       BAD_UNTIL.set(modelId, Date.now() + 180_000);
       console.warn(`[ai-fallback] ${modelId} out of quota, tier=${tier}`);
       last = error;
     }
   }
   void last;
-  // TEMP DEBUG (preview only, remove before merge): show why Cerebras failed.
-  throw new Error(limitMessage(tier) + (cbDebug ? ` [DEBUG cerebras: ${cbDebug}]` : ""));
+  // TEMP DEBUG (preview only, remove before merge): show why every model in the chain failed.
+  throw new Error(limitMessage(tier) + (chainDebug.length ? ` [DEBUG chain: ${chainDebug.join(" | ").slice(0, 900)}]` : ""));
 }
 
 
 // preview redeploy marker 1
+
