@@ -186,7 +186,7 @@ export async function sendYearlyReports(year: number): Promise<{ ok: boolean; re
   const m = await r2Get(markerKey);
   if (m.ok) return { ok: true, reason: "already-sent" };
   const files = await buildYearlyReports(year);
-  const domain = process.env.RESEND_FROM_DOMAIN || "gotaofferr.com";
+  const domain = process.env.RESEND_FROM_DOMAIN || "notify.terbey.com";
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },

@@ -29,7 +29,7 @@ export async function sendOpsAlert(kind: string, note?: unknown): Promise<void> 
       .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email]")
       .slice(0, 400);
 
-    const domain = process.env.RESEND_FROM_DOMAIN || "gotaofferr.com";
+    const domain = process.env.RESEND_FROM_DOMAIN || "notify.terbey.com";
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
