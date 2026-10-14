@@ -718,3 +718,7 @@ label,small,.tl-mono,.ivb-mono,.rl-tag,.sf-sub,.sf-sub a,.tx-n,.tl-gchip,.text-x
 .hp-hero .hx-meta,.hp-hero .hx-meta *,.hp-hero .pill-d,.hp-hero .hp-sub,.hp-hero .hp-sub *{color:rgba(255,255,255,.85)!important}
 header.sticky{--hs:clamp(0,calc((var(--hd,1) - .5)*6),1);color:rgb(calc((1 - var(--hs))*255),calc((1 - var(--hs))*255),calc((1 - var(--hs))*253))!important;background-image:linear-gradient(to bottom,rgba(calc(var(--hs)*255),calc(var(--hs)*255),calc(var(--hs)*253),calc(.55 + var(--hd,0)*.43)) 0,rgba(calc(var(--hs)*255),calc(var(--hs)*255),calc(var(--hs)*253),calc(.3 + var(--hd,0)*.4)) 55%,rgba(0,0,0,0) 100%)!important}
 header.sticky a:not([class*="bg-primary"]),header.sticky button:not([class*="bg-primary"]){color:inherit!important}
+
+/* hero-dark-2 */
+header.sticky{background-image:linear-gradient(to bottom,rgba(0,0,0,calc((1 - var(--hs))*(.55 + var(--hd,0)*.43))) 0,rgba(0,0,0,calc((1 - var(--hs))*(.3 + var(--hd,0)*.4))) 55%,rgba(0,0,0,0) 100%),linear-gradient(to bottom,rgba(255,255,253,calc(var(--hs)*(.55 + var(--hd,0)*.43))) 0,rgba(255,255,253,calc(var(--hs)*(.3 + var(--hd,0)*.4))) 55%,rgba(255,255,253,0) 100%)!important}
+header.sticky a:not([class*="bg-primary"]) *{color:inherit!important}
