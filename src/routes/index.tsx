@@ -581,7 +581,7 @@ const GI_CSS = `
 .i3-tag b{color:#073f89;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
 header.sticky,header.sticky>div{border-bottom-width:0!important;border-color:transparent!important}
-header.sticky{background-color:transparent!important;background-image:linear-gradient(to bottom,rgba(0,0,0,calc(.55 + var(--hd,0)*.43)) 0,rgba(0,0,0,calc(.3 + var(--hd,0)*.4)) 55%,rgba(7,63,137,0) 100%)!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
+header.sticky{background-color:transparent!important;background-image:linear-gradient(to bottom,rgba(255,255,253,calc(.55 + var(--hd,0)*.43)) 0,rgba(255,255,253,calc(.3 + var(--hd,0)*.4)) 55%,rgba(7,63,137,0) 100%)!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
 .hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(7,63,137,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
 @keyframes hx-ring{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(1.5)}}
@@ -591,7 +591,7 @@ header.sticky{background-color:transparent!important;background-image:linear-gra
 @media(max-width:639px){.hx-c1{left:4%;top:20%}.hx-c2{right:4%;top:14%}.hx-c3{left:6%;bottom:30%}}
 
 .hx-meta,.hx-m3{display:none!important}
-.hp-hero .i3-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) invert(1) opacity(.14)}@media(max-width:639px){.hp-hero .i3-vid{filter:grayscale(1) invert(1) opacity(.12)}}
+.hp-hero .i3-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05) brightness(.52)}@media(max-width:639px){.hp-hero .i3-vid{filter:grayscale(1) contrast(1.05) brightness(.4)}}
 .i3{margin:0;font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-.055em;line-height:.92;color:#073f89;font-size:clamp(2.9rem,14.2vw,5rem);display:flex;flex-direction:column;align-items:center;text-shadow:0 2px 30px rgba(7,63,137,.35)}
 .i3-l{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;column-gap:.14em;white-space:nowrap}
 .i3-y{background:var(--highlight,#073f89);color:#fffffd;padding:.0em .1em .02em;margin:.02em 0;text-shadow:none;display:inline-block;animation:i3-in .7s cubic-bezier(.2,.8,.2,1) both}
