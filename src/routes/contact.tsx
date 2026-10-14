@@ -211,7 +211,7 @@ function Contact() {
             <Twitter className="mt-0.5 size-5 shrink-0 text-primary" />
             <div>
               <h2 className="text-sm font-semibold text-card-foreground">Social</h2>
-              <p className="text-sm text-muted-foreground">@gotaofferr</p>
+              <p className="text-sm text-muted-foreground">@terbey</p>
             </div>
           </div>
         </aside>
