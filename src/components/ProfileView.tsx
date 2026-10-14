@@ -1,9 +1,35 @@
 import { Link } from "@tanstack/react-router";
 import { Pencil } from "lucide-react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { DEMO_PROFILES, fmtMonth, fmtRange, initials, safeUrl, type PublicProfile } from "@/lib/profile-types";
+
+function SuggestRow({ name, headline, kind, slug }: { name: string; headline: string; kind: string; slug?: string }) {
+  const [done, setDone] = useState(false);
+  const person = kind === "individual";
+  return (
+    <li className="flex items-start gap-3">
+      <span aria-hidden="true" className={`flex h-10 w-10 shrink-0 items-center justify-center bg-primary text-sm font-bold text-primary-foreground ${person ? "rounded-full" : "rounded-md"}`}>{initials(name)}</span>
+      <span className="min-w-0 flex-1">
+        {slug ? (
+          <Link to="/p/$slug" params={{ slug }} className="block truncate text-sm font-semibold text-foreground hover:underline">{name}</Link>
+        ) : (
+          <span className="block truncate text-sm font-semibold text-foreground">{name}</span>
+        )}
+        <span className="block truncate text-xs text-muted-foreground">{headline}</span>
+        <Button type="button" size="sm" variant="outline" className="mt-2 h-7 rounded-full px-3 text-xs" disabled={done} onClick={() => setDone(true)}>
+          {person ? (done ? "Pending" : "Connect") : done ? "Following" : "Follow"}
+        </Button>
+      </span>
+    </li>
+  );
+}
+
+const SAMPLE_PEOPLE = [
+  { name: "Neha Verma", headline: "Social media manager at BrightLeaf Media" },
+  { name: "Rohan Das", headline: "Web developer | React and Node" },
+];
 
 const EditCtx = createContext<((section: string) => void) | undefined>(undefined);
 
@@ -154,6 +180,20 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
               </nav>
             ) : null}
           </header>
+
+          {/* Highlights */}
+          {isPerson && p.experience[0] ? (
+            <section className={card} aria-label="Highlights">
+              <SectionTitle noEdit>Highlights</SectionTitle>
+              <p className="mt-3 text-sm text-foreground">
+                {p.experience[0].current ? "Working" : "Worked"} as {p.experience[0].role} at {p.experience[0].org}
+                {p.experience[0].start ? `, since ${fmtMonth(p.experience[0].start)}` : ""}.
+              </p>
+              <Button type="button" size="sm" variant="outline" className="mt-3 rounded-full" disabled>
+                Message
+              </Button>
+            </section>
+          ) : null}
 
           {/* About */}
           {p.about ? (
@@ -437,17 +477,13 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
           {others.length ? (
             <div className={card}>
               <SectionTitle noEdit>{isPerson ? "More profiles for you" : "Pages people also view"}</SectionTitle>
-              <ul className="mt-3 space-y-3">
+              <ul className="mt-3 space-y-4">
                 {others.map((o) => (
-                  <li key={o.slug} className="flex items-center gap-3">
-                    <span aria-hidden="true" className={`flex h-10 w-10 shrink-0 items-center justify-center bg-primary text-sm font-bold text-primary-foreground ${o.kind === "individual" ? "rounded-full" : "rounded-md"}`}>{initials(o.name)}</span>
-                    <span className="min-w-0">
-                      <Link to="/p/$slug" params={{ slug: o.slug }} className="block truncate text-sm font-semibold text-foreground hover:underline">{o.name}</Link>
-                      <span className="block truncate text-xs text-muted-foreground">{o.headline}</span>
-                    </span>
-                  </li>
+                  <SuggestRow key={o.slug} name={o.name} headline={o.headline} kind={o.kind} slug={o.slug} />
                 ))}
+                {isPerson ? SAMPLE_PEOPLE.map((x) => <SuggestRow key={x.name} name={x.name} headline={x.headline} kind="individual" />) : null}
               </ul>
+              <Link to="/network" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Show all</Link>
               <p className="mt-3 text-[11px] text-muted-foreground">Sample suggestions. Real ones arrive with the network update.</p>
             </div>
           ) : null}
