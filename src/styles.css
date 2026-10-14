@@ -793,3 +793,4 @@ header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
 /* jm-white-2 */
 section.hp-hero div.i3-meta b,section.hp-hero div.i3-meta.i3-bl b{color:#fffffd!important;-webkit-text-fill-color:#fffffd!important}
 /*job-black2*/.hp-stackcard .hp-job,.hp-stackcard .hp-job *{color:#000!important}
+/*score-white*/.ivb-score>*:first-child{color:#fffffd!important}
