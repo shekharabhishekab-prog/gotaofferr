@@ -121,7 +121,7 @@ function PostJob() {
                 <input className={field} value={skills} maxLength={300} onChange={(e) => setSkills(e.target.value)} />
               </Field>
               <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-foreground">
-                <input type="checkbox" className="h-4 w-4 accent-[#f7d000]" checked={showPay} onChange={(e) => setShowPay(e.target.checked)} />
+                <input type="checkbox" className="h-4 w-4 accent-[#073f89]" checked={showPay} onChange={(e) => setShowPay(e.target.checked)} />
                 Show the pay range (recommended)
               </label>
               {showPay ? (
@@ -141,8 +141,8 @@ function PostJob() {
             <>
               <p className="text-sm font-semibold text-foreground">How should people apply?</p>
               <div className="mt-2 flex flex-wrap gap-4 text-sm text-foreground">
-                <label className="flex items-center gap-2"><input type="radio" name="m" className="accent-[#f7d000]" checked={method === "link"} onChange={() => setMethod("link")} /> Your own link</label>
-                <label className="flex items-center gap-2"><input type="radio" name="m" className="accent-[#f7d000]" checked={method === "email"} onChange={() => setMethod("email")} /> Email</label>
+                <label className="flex items-center gap-2"><input type="radio" name="m" className="accent-[#073f89]" checked={method === "link"} onChange={() => setMethod("link")} /> Your own link</label>
+                <label className="flex items-center gap-2"><input type="radio" name="m" className="accent-[#073f89]" checked={method === "email"} onChange={() => setMethod("email")} /> Email</label>
                 <label className="flex items-center gap-2 text-muted-foreground"><input type="radio" disabled name="m" /> Apply here with a tailored resume (coming)</label>
               </div>
               <Field label={method === "link" ? "Application link" : "Application email"} required>
@@ -167,7 +167,7 @@ function PostJob() {
                     ) : null}
                     {q.type !== "Short text" ? (
                       <label className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                        <input type="checkbox" className="h-4 w-4 accent-[#f7d000]" checked={q.mustHave} onChange={(e) => setQs(qs.map((x, j) => (j === i ? { ...x, mustHave: e.target.checked } : x)))} />
+                        <input type="checkbox" className="h-4 w-4 accent-[#073f89]" checked={q.mustHave} onChange={(e) => setQs(qs.map((x, j) => (j === i ? { ...x, mustHave: e.target.checked } : x)))} />
                         Must-have (people who answer differently are told they do not match)
                       </label>
                     ) : null}
