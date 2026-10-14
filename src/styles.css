@@ -707,3 +707,6 @@ label,small,.tl-mono,.ivb-mono,.rl-tag,.sf-sub,.sf-sub a,.tx-n,.tl-gchip,.text-x
 
 /* ai-labels */
 .ai-lab,.ai-dt,.ai-dh,.ai-wrap label>span,.ai-wrap label span:not([class*=bg-]){color:#000000 !important}
+
+/* on-blue: text on solid blue is off-white */
+.tl-gchip.y,.ak-chip.y,.ak-pin.bad,.bg-primary,.bg-primary *{color:#fffffd !important}
