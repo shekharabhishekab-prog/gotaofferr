@@ -591,7 +591,7 @@ header.sticky :is(a,button):not([class*="bg-primary"]):hover{color:#0f172a!impor
 .hx-meta,.hx-m3{display:none!important}
 .hp-hero .i3-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05) brightness(.52)}@media(max-width:639px){.hp-hero .i3-vid{filter:grayscale(1) contrast(1.05) brightness(.4)}}
 .i3{margin:0;font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-.055em;line-height:.92;color:#0f172a;font-size:clamp(2.9rem,14.2vw,5rem);display:flex;flex-direction:column;align-items:center;text-shadow:none}
-@media(max-width:639px){.i3{font-size:clamp(2.05rem,10.6vw,3rem);line-height:.96;letter-spacing:-.045em}.hp-t-m{margin-top:.7rem!important}}
+@media(max-width:639px){.i3{font-size:clamp(2.4rem,13.8vw,3.4rem);line-height:.94;letter-spacing:-.05em}.hp-t-m{margin-top:.7rem!important}.hp-ctas{flex-direction:row!important;justify-content:center;align-items:flex-start;gap:.6rem;max-width:none!important}.hp-ctas .hp-btn{font-size:.82rem!important;height:42px!important;padding:0 .65rem!important}.hp-ctas .hp-btn svg{width:.85rem!important;height:.85rem!important}}
 .hmap-img{opacity:.11}@keyframes adraw{from{stroke-dashoffset:100}to{stroke-dashoffset:-100}}@keyframes ringp{0%{r:9;stroke-opacity:.45}75%{r:20;stroke-opacity:0}100%{r:20;stroke-opacity:0}}.hmap-arc path{stroke-dasharray:100;stroke-dashoffset:100;animation:adraw 11s linear infinite}.hmap-arc path:nth-of-type(2){animation-delay:1.3s}.hmap-arc path:nth-of-type(3){animation-delay:2.6s}.hmap-arc path:nth-of-type(4){animation-delay:3.9s}.hmap-arc path:nth-of-type(5){animation-delay:5.2s}.hmap-arc path:nth-of-type(6){animation-delay:6.5s}.hmap-arc path:nth-of-type(7){animation-delay:7.8s}.hmap-arc path:nth-of-type(8){animation-delay:9.1s}.hmap-arc circle:nth-of-type(even){animation:ringp 4.5s ease-out infinite}.hmap-arc circle:nth-of-type(4){animation-delay:0.6s}.hmap-arc circle:nth-of-type(6){animation-delay:1.2s}.hmap-arc circle:nth-of-type(8){animation-delay:1.8s}.hmap-arc circle:nth-of-type(10){animation-delay:2.4s}.hmap-arc circle:nth-of-type(12){animation-delay:3.0s}.hmap-arc circle:nth-of-type(14){animation-delay:3.6s}.hmap-arc circle:nth-of-type(16){animation-delay:4.2s}@media(max-width:639px){.hmap-img{opacity:.05}.hmap-arc{opacity:.6}.hmap-fit{transform:translateY(-70px) scale(.55);transform-box:fill-box;transform-origin:center}}@media(prefers-reduced-motion:reduce){.hmap-arc path,.hmap-arc circle{animation:none}}
 .i3-l{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;column-gap:.14em;white-space:nowrap}
 .i3-y{background:#073f89;color:#fff;padding:.02em .12em .06em;margin:.02em 0;border-radius:.1em;text-shadow:none;display:inline-block;animation:i3-in .7s cubic-bezier(.2,.8,.2,1) both}
@@ -1108,7 +1108,7 @@ function Index() {
               Works with resumes from Indeed, Naukri, Glassdoor and more
             </p>
 
-            <div className="hp-rise mx-auto mt-7 flex max-w-xs flex-col items-stretch gap-3 [animation-delay:240ms] sm:mt-8 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center">
+            <div className="hp-ctas hp-rise mx-auto mt-7 flex max-w-xs flex-col items-stretch gap-3 [animation-delay:240ms] sm:mt-8 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center">
               <span data-mag className="hp-mag inline-block">
                 <Button
                   asChild
