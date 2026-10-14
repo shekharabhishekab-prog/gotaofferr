@@ -704,3 +704,6 @@ label,small,.tl-mono,.ivb-mono,.rl-tag,.sf-sub,.sf-sub a,.tx-n,.tl-gchip,.text-x
 
 /* tab-i */
 .ab-tab i{color:inherit !important}
+
+/* ai-labels */
+.ai-lab,.ai-dt,.ai-dh,.ai-wrap label>span,.ai-wrap label span:not([class*=bg-]){color:#000000 !important}
