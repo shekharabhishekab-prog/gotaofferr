@@ -728,3 +728,14 @@ header.sticky a:not([class*="bg-primary"]) *{color:inherit!important}
 
 /* hero-dark-4 */
 .hp-hero .hp-chip-y,.hp-hero .hx-meta,.hp-hero .hx-meta *{color:rgba(255,255,255,.92)!important}
+
+/* how-dark */
+.hp-stackcard,.hp-stackcard h2,.hp-stackcard h3,.hp-stackcard p,.hp-stackcard .hp-kw,.hp-stackcard .hp-kw *{color:#fffffd!important}
+.hp-hero .hx-meta b{color:#fffffd!important}
+header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
+.sae-btn,.sae-btn *{color:#fffffd!important}
+
+/* emoji-white */
+.ab-cat,.ivb-cat{color:transparent!important;text-shadow:0 0 0 #fffffd!important}
+.ai-flem span{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:#073f89;color:transparent!important;text-shadow:0 0 0 #fffffd!important;font-size:1.7rem}
+#builder-country-list,#builder-country-list button,#builder-country-list li{color:#000!important}
