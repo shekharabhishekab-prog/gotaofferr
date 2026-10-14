@@ -102,7 +102,7 @@ const FQ_CSS = `
 .tl-h1 span{display:block}
 .tl-h1 mark{background:var(--y);color:#fffffd;padding:0 .12em;display:inline-block;transform:rotate(-1deg);line-height:1}
 .tl-cur{font-family:"HPInst",Georgia,serif;font-style:italic;text-transform:none;color:var(--y);font-weight:400;font-size:1.06em;line-height:.9;vertical-align:baseline;letter-spacing:-.01em}
-.tl-sub{max-width:34rem;margin:18px auto 0;font-size:1.05rem;line-height:1.5;color:rgba(20,33,58,.72)}
+.tl-sub{max-width:34rem;margin:18px auto 0;font-size:1.05rem;line-height:1.5;color:rgba(0,0,0,.72)}
 .tl-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:30px}
 .tl-chips i{font-style:normal;font-size:.78rem;border:1px solid rgba(7,63,137,.4);color:var(--y);border-radius:999px;padding:5px 12px}
 .tl-rise{opacity:0;transform:translateY(.6em);animation:tl-rise .6s cubic-bezier(.2,.8,.2,1) var(--d,0s) forwards}
@@ -123,7 +123,7 @@ const FQ_CSS = `
 @supports (animation-timeline:view()){.tl-grid>*{animation:tl-rise linear backwards;animation-timeline:view();animation-range:entry 0% entry 45%}}
 @media (min-width:900px){.tl-h1{max-width:1440px;font-size:clamp(2.6rem,4.6vw,4.4rem);white-space:nowrap}.tl-sub{max-width:46rem}.tl-sub{max-width:46rem}}
 @media (min-width:1700px){.tl-wrap{max-width:1780px;padding-left:40px;padding-right:40px}.tl-h1{max-width:1700px;font-size:4.9rem}.tl-sub{max-width:54rem;font-size:1.15rem}}
-@media (max-width:640px){.tl-hero,.tl-hero *{text-align:left}.tl-h1{margin:16px 0 0;max-width:none}.tl-h1 span{text-wrap:wrap}.tl-sub{margin:14px 0 0;text-wrap:pretty;font-size:.78rem!important;line-height:1.5}.tl-chips{justify-content:flex-start}.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 26px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(20,33,58,.55);max-width:19rem}}
+@media (max-width:640px){.tl-hero,.tl-hero *{text-align:left}.tl-h1{margin:16px 0 0;max-width:none}.tl-h1 span{text-wrap:wrap}.tl-sub{margin:14px 0 0;text-wrap:pretty;font-size:.78rem!important;line-height:1.5}.tl-chips{justify-content:flex-start}.tl-sticker,.tl-chips i:nth-child(n),.tl-sticker{transform:none}.tl-chips{gap:6px;flex-wrap:nowrap}.tl-chips i{font-size:.7rem;padding:4px 8px;white-space:nowrap}.tl-hero{padding-left:14px!important;padding-right:14px!important}.tl-mono{font-size:.66rem;letter-spacing:0}.tl-hero{padding:32px 16px 26px}.tl-wrap{padding-left:14px;padding-right:14px}.tl-h1{font-size:10.5vw;white-space:normal}.tl-h1 span{text-wrap:balance}.tl-sub{font-size:.86rem;line-height:1.5;color:rgba(0,0,0,.55);max-width:19rem}}
 .tl-br{display:flex;flex-direction:column;align-items:center;padding:34px 16px 6px}
 .tl-bl{display:block;width:1px;height:64px;background:linear-gradient(to bottom,transparent,var(--y))}
 .tl-bp{display:inline-flex;align-items:center;gap:8px;margin-top:8px;border:1px solid rgba(7,63,137,.18);background:rgba(255,255,253,.7);color:var(--y);border-radius:99px;padding:6px 16px;font-family:Georgia,"Times New Roman",serif;font-style:italic;font-size:1.15rem;text-decoration:none;transition:border-color .2s,transform .2s}
@@ -132,7 +132,7 @@ const FQ_CSS = `
 .tl-strip{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:22px auto 0;max-width:34rem}
 .tl-strip span{font-size:.78rem;border:1px solid rgba(7,63,137,.35);color:var(--cream);border-radius:99px;padding:5px 12px;background:rgba(7,63,137,.06)}
 .tl-strip span:nth-child(odd){transform:rotate(-1.5deg)}.tl-strip span:nth-child(even){transform:rotate(1.5deg);border-color:rgba(7,63,137,.25);background:transparent}
-.tl-seo2{max-width:1100px;margin:0 auto;padding:44px 20px 80px;color:rgba(20,33,58,.72)}
+.tl-seo2{max-width:1100px;margin:0 auto;padding:44px 20px 80px;color:rgba(0,0,0,.72)}
 .tl-seo2 h2{font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:1;letter-spacing:-.01em;font-size:clamp(1.7rem,4.2vw,2.8rem);color:var(--cream);margin:0;text-wrap:balance}
 .tl-seo2 h2 mark{background:var(--y);color:#fffffd;padding:0 .12em;display:inline-block;transform:rotate(-1deg);line-height:1}
 .tl-seo2 .tl-lead{margin:18px 0 0;font-size:1.02rem;line-height:1.7;max-width:46rem;overflow-wrap:anywhere}
@@ -152,7 +152,7 @@ const FQ_CSS = `
 .tl-br{display:none}
 @supports (animation-timeline:view()){.tl-bw{animation:tl-bwl linear both;animation-timeline:view();animation-range:entry 0% exit 100%}.tl-bw.out{animation-name:tl-bwr}@keyframes tl-bwl{from{transform:translateX(24%)}to{transform:translateX(-24%)}}@keyframes tl-bwr{from{transform:translateX(-24%)}to{transform:translateX(24%)}}.tl-gchip{animation:tl-pop linear backwards;animation-timeline:view();animation-range:entry 0% entry 60%}.tl-gchip:nth-child(2){animation-range:entry 5% entry 65%}.tl-gchip:nth-child(3){animation-range:entry 10% entry 70%}.tl-gchip:nth-child(4){animation-range:entry 15% entry 75%}.tl-seo2 h2,.tl-seo2 .tl-lead,.tl-more{animation:tl-up linear backwards;animation-timeline:view();animation-range:entry 0% entry 50%}@keyframes tl-pop{from{opacity:0;transform:translateY(26px) scale(.85)}to{opacity:1;transform:none}}}
 .tl-seo2 h2{font-size:clamp(2.4rem,4.6vw,5rem);line-height:.98}
-.tl-seo2 h2 mark{padding:.02em .2em;transform:rotate(-1.5deg);box-shadow:7px 7px 0 rgba(20,33,58,.9);transition:transform .25s}
+.tl-seo2 h2 mark{padding:.02em .2em;transform:rotate(-1.5deg);box-shadow:7px 7px 0 rgba(0,0,0,.9);transition:transform .25s}
 .tl-seo2 h2:hover mark{transform:rotate(0) scale(1.03)}
 .tl-seo2 h2:after{content:"";display:block;width:min(100%,520px);height:6px;margin-top:20px;border-radius:9px;background:linear-gradient(90deg,var(--y),rgba(7,63,137,0))}
 @media (prefers-reduced-motion:reduce){.tl-bw,.tl-gchip,.tl-seo2 h2,.tl-seo2 .tl-lead,.tl-more{animation:none}.tl-gchip:hover{transform:none}}
@@ -165,7 +165,7 @@ const FQ_CSS = `
 .tl-fq .tl-q button{font-weight:700;font-size:1.02rem;color:var(--cream)}
 .tl-fq .tl-q button:hover{text-decoration:none;color:var(--y)}
 .tl-fq .tl-q svg{color:var(--y)}
-.tl-fq .tl-a{color:rgba(20,33,58,.75);line-height:1.65}
+.tl-fq .tl-a{color:rgba(0,0,0,.75);line-height:1.65}
 .tl-fq .tl-go{border-radius:999px;background:var(--y);color:#fffffd;font-weight:700;padding:0 28px;margin-top:22px;transition:transform .2s}
 .tl-fq .tl-go:hover{transform:translateY(-3px) rotate(-1deg);background:var(--y)}
 @media (max-width:640px){.tl-fq{padding:4px 14px 24px}.tl-fq .tl-q{padding:0 14px}}
