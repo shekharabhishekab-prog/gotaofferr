@@ -782,3 +782,10 @@ header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
 .hdm-dot{position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%}
 @keyframes hdm-s{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.hdm-line,.hdm-row,.hdm-ring,.hdm-glow{animation:none}}
+
+/* hero-demos-2 */
+.hdm-line{stroke-width:1.8!important;filter:brightness(1.8)}
+.hdm-row{-webkit-text-stroke:1.5px rgba(255,255,253,.42)!important}
+.hdm-fill{color:rgba(7,63,137,.8)!important;-webkit-text-stroke:0!important}
+.hdm-ring{border:1.5px solid rgba(255,255,253,.38)!important}
+.hdm-dot{width:10px;height:10px;top:-5px}
