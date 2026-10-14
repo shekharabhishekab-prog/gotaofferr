@@ -710,3 +710,6 @@ label,small,.tl-mono,.ivb-mono,.rl-tag,.sf-sub,.sf-sub a,.tx-n,.tl-gchip,.text-x
 
 /* on-blue: text on solid blue is off-white */
 .tl-gchip.y,.ak-chip.y,.ak-pin.bad,.bg-primary,.bg-primary *{color:#fffffd !important}
+
+/* on-blue-2 */
+.bg-primary.text-primary-foreground,.bg-primary.font-display{color:#fffffd !important}
