@@ -795,3 +795,4 @@ section.hp-hero div.i3-meta b,section.hp-hero div.i3-meta.i3-bl b{color:#fffffd!
 /*job-black2*/.hp-stackcard .hp-job,.hp-stackcard .hp-job *{color:#000!important}
 /*score-white*/.ivb-score>*:first-child{color:#fffffd!important}
 /*score-white2*/.ivb-chat .ivb-score b,.ivb-chat .ivb-score>b:first-child{color:#fffffd!important;-webkit-text-fill-color:#fffffd!important}
+/*menu-dark*/header>div:nth-child(2) a.text-muted-foreground{color:#000!important}
