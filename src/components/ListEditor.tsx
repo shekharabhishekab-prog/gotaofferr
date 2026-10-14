@@ -67,7 +67,7 @@ export function ListEditor<T extends { id: string }>(p: Props<T>) {
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-foreground">{p.title}</p>
         <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          <input type="checkbox" checked={p.show} onChange={(e) => p.onShow(e.target.checked)} className="h-4 w-4 accent-[#f7d000]" />
+          <input type="checkbox" checked={p.show} onChange={(e) => p.onShow(e.target.checked)} className="h-4 w-4 accent-[#073f89]" />
           Show
         </label>
       </div>
