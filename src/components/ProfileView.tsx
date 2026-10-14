@@ -203,6 +203,41 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
             </section>
           ) : null}
 
+          {isPerson && p.slug.startsWith("demo-") ? (
+            <>
+              <section className={card} aria-label="Featured">
+                <SectionTitle>Featured</SectionTitle>
+                <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {[
+                    { t: "Email campaign case study", s: "Link - How open rates went from 18% to 31%" },
+                    { t: "SEO checklist for small shops", s: "Document - 6 pages" },
+                  ].map((f) => (
+                    <li key={f.t} className="overflow-hidden rounded-lg border border-border/60">
+                      <div aria-hidden="true" className="flex h-24 items-center justify-center bg-primary/10 text-2xl font-bold text-primary">{f.t.slice(0, 1)}</div>
+                      <div className="p-3">
+                        <p className="truncate text-sm font-semibold text-foreground">{f.t}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{f.s}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+              <section className={card} aria-label="Activity">
+                <SectionTitle>Activity</SectionTitle>
+                <p className="mt-1 text-xs text-primary">128 followers</p>
+                <ul className="mt-3 divide-y divide-border/60">
+                  {[
+                    "Posted: 3 small SEO fixes that moved a blog from page 4 to page 2.",
+                    "Commented on: Why plain subject lines beat clever ones.",
+                  ].map((a) => (
+                    <li key={a} className="py-3 text-sm text-foreground">{a}</li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted-foreground">Demo posts. Real posts arrive with the feed update.</p>
+              </section>
+            </>
+          ) : null}
+
           {!isPerson && p.org ? (
             <section className="rounded-xl border border-border/60 bg-card p-5 sm:p-6">
               <SectionTitle noEdit>{p.kind === "organization" ? "Organization details" : "Company details"}</SectionTitle>
@@ -442,7 +477,7 @@ function ProfileViewInner({ profile: p, banner, compact }: { profile: PublicProf
               {isPerson ? (
                 <ul className="mt-3 divide-y divide-border/60">
                   {p.skills.slice(0, 3).map((s) => (
-                    <li key={s} className="py-2 text-sm font-semibold text-foreground">{s}</li>
+                    <li key={s} className="py-2"><p className="text-sm font-semibold text-foreground">{s}</p>{p.slug.startsWith("demo-") ? <p className="mt-0.5 text-xs text-muted-foreground">Demo: endorsed by 12 connections</p> : null}</li>
                   ))}
                 </ul>
               ) : null}
