@@ -701,3 +701,6 @@ label,small,.tl-mono,.ivb-mono,.rl-tag,.sf-sub,.sf-sub a,.tx-n,.tl-gchip,.text-x
 
 /* blue-sparingly: former cream/white text is black; blue only where yellow was */
 .tl-rise,.tl-bw,.ak-ln,.d1,.ak-bw,.ak-h2,.ab-h2,.ab-rise,.ab-say,.ai-h2,.ai-cur,.sf-r,.sf-ft,.nx-a,.nx-suf,.jf-a,.hp-r,.hp-tlink,.font-display.text-4xl,.font-display.text-lg,.text-card-foreground,main h2,main h3,.flex.flex-1.items-center,.sr-only{color:#000000 !important}
+
+/* tab-i */
+.ab-tab i{color:inherit !important}
