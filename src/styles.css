@@ -811,3 +811,8 @@ p.text-\[11px\].text-muted-foreground{color:#000 !important}
 .tl-ins-score small{color:#fffffd !important}
 .tl-ins-h.tl-ins-h-gap,.tl-ins-warn .tl-ins-h{color:#073f89 !important}
 .tl-chip.tl-chip-no{color:#000 !important}
+
+/* layout-apply-btn: long external Apply buttons must not overflow narrow screens */
+@media (max-width: 640px) {
+  a.inline-flex.whitespace-nowrap[target="_blank"] { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: left; height: auto; min-height: 2.5rem; }
+}
