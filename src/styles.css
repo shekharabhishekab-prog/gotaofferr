@@ -739,3 +739,10 @@ header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
 .ab-cat,.ivb-cat{color:transparent!important;text-shadow:0 0 0 #fffffd!important}
 .ai-flem span{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:#073f89;color:transparent!important;text-shadow:0 0 0 #fffffd!important;font-size:1.7rem}
 #builder-country-list,#builder-country-list button,#builder-country-list li{color:#000!important}
+
+/* cards-white */
+.hp-stackcard h3 a,.hp-stackcard h3 a *,.hp-stackcard .hp-tlink{color:#fffffd!important}
+.hp-stackcard .hp-tlink:hover,.hp-stackcard h3 a:hover{color:#fffffd!important}
+.hp-stackcard .hp-btn{background:#fffffd!important;color:#073f89!important;border-color:#fffffd!important}
+.hp-stackcard .hp-btn *{color:#073f89!important}
+.hp-stackcard ::selection{background:#fffffd;color:#073f89}
