@@ -71,6 +71,18 @@ function SearchBody({ term, results, setQ, onPick }: { term: string; results: Hi
                 </>
               ) : (
                 <>
+                  <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-widest text-primary">Recent</p>
+                  <ul className="mb-2">
+                    <li>
+                      <Link to="/p/$slug" params={{ slug: "demo-riya-mehta-x7k2" }} onClick={() => onPick()} className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-muted">
+                        <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">P</span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-foreground">Riya Mehta</span>
+                          <span className="block truncate text-xs text-muted-foreground">Demo recent visit</span>
+                        </span>
+                      </Link>
+                    </li>
+                  </ul>
                   <p className="px-2 pb-1 text-xs font-semibold uppercase tracking-widest text-primary">Try searching for</p>
                   <ul>
                     {TRY.map((t) => (
