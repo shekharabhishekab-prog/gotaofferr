@@ -159,8 +159,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           ]
         : []),
 
-      { rel: "icon", href: "/brand/logo-symbol-square.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/brand/logo-symbol-square.png" },
+      // Versioned icon URLs: browsers (and Chrome's synced favicon DB) cache
+      // icons for weeks, so a plain swap leaves returning visitors on the old
+      // mark. Bumping ?v= forces a refetch; /favicon.ico now exists for the
+      // generic fallback fetch (it used to 404).
+      { rel: "icon", href: "/favicon.ico?v=2", sizes: "any" },
+      { rel: "icon", href: "/brand/logo-symbol-square.png?v=2", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/brand/logo-symbol-square.png?v=2" },
       ...(GA_ID
         ? [
             { rel: "preconnect", href: "https://www.googletagmanager.com" },
