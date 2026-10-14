@@ -491,6 +491,53 @@ function HeroVideo() {
   );
 }
 
+
+function HeroDemo() {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const v = Number(new URLSearchParams(window.location.search).get("bg"));
+    if (v >= 1 && v <= 3) setN(v);
+  }, []);
+  if (!n) return null;
+  const words = ["RESUME", "JOB", "OFFER", "TAILORED", "HIRED", "INTERVIEW"];
+  return (
+    <div aria-hidden className={`hdemo hdemo-${n} absolute inset-0 overflow-hidden bg-black`} style={{ zIndex: -15 }}>
+      {n === 1 && (
+        <svg className="hdm-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+          {Array.from({ length: 11 }, (_, i) => {
+            const y = 220 + i * 46;
+            const a = 40 + (i % 4) * 22;
+            let d = `M-800,${y} Q-600,${y - a} -400,${y}`;
+            for (let k = 0; k < 8; k++) d += ` T${-400 + (k + 1) * 400},${y}`;
+            return (
+              <path key={i} d={d} className="hdm-line" style={{ animationDuration: `${26 + i * 3}s`, animationDirection: i % 2 ? "reverse" : "normal", stroke: i === 5 ? "#073f89" : "#fffffd", opacity: i === 5 ? 1 : 0.14 + (i % 3) * 0.06 }} />
+            );
+          })}
+        </svg>
+      )}
+      {n === 2 && (
+        <div className="hdm-rows">
+          {[0, 1, 2, 3, 4, 5].map((r) => (
+            <div key={r} className={`hdm-row ${r % 2 ? "hdm-rr" : "hdm-rl"}${r === 2 ? " hdm-fill" : ""}`} style={{ animationDuration: `${70 + r * 14}s` }}>
+              {[0, 1, 2, 3].map((c) => words.map((w, i) => <span key={`${c}-${i}`}>{words[(i + r * 2) % words.length]}</span>))}
+            </div>
+          ))}
+        </div>
+      )}
+      {n === 3 && (
+        <div className="hdm-orb">
+          <div className="hdm-glow" />
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="hdm-ring" style={{ width: `${22 + i * 13}vmin`, height: `${22 + i * 13}vmin`, animationDuration: `${50 + i * 22}s`, animationDirection: i % 2 ? "reverse" : "normal" }}>
+              <span className="hdm-dot" style={{ background: i % 3 === 1 ? "#073f89" : "#fffffd" }} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const popTexts = ["92% match", "Cover letter ready", "Applied in 30 sec", "Resume tailored", "New match found", "ATS score 94"];
 function HeroPops() {
   useEffect(() => {
@@ -1077,6 +1124,7 @@ function Index() {
       {/* Hero */}
       <section data-hero className="hp-hero relative isolate overflow-hidden">
         {wide ? <HeroVideo /> : <HeroNedan />}
+        <HeroDemo />
         <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,transparent_0%,#000_88%)]" />
         <div aria-hidden className="hp-grid absolute inset-0 -z-10" />
         <div aria-hidden className="hp-cursor absolute inset-0 -z-10" />
