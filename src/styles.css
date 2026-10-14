@@ -692,3 +692,6 @@
 }
 
 
+
+/* small-text-black */
+label,small,.tl-mono,.ivb-mono,.rl-tag,.sf-sub,.sf-sub a,.tx-n,.tl-gchip,.text-xs.text-primary,.text-sm.text-primary,a.underline,.hp em:not([class]),.hp b:not([class]),.tl-gchip,.jf-t{color:#000000 !important}
