@@ -34,10 +34,10 @@ export async function sendOpsAlert(kind: string, note?: unknown): Promise<void> 
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: `GotaOfferr alerts <noreply@${domain}>`,
+        from: `Terbey alerts <noreply@${domain}>`,
         to,
-        subject: `[gotaofferr alert] ${safeKind}`,
-        text: `Something needs a look on gotaofferr.com.\n\nWhat: ${safeKind}\nWhen: ${new Date().toISOString()}\nNote: ${text || "(no extra detail)"}\n\nMore alerts of this same kind are held back for 1 hour.\nLogs: Cloudflare dashboard > gotaofferr-copy > Observability.`,
+        subject: `[terbey alert] ${safeKind}`,
+        text: `Something needs a look on terbey.com.\n\nWhat: ${safeKind}\nWhen: ${new Date().toISOString()}\nNote: ${text || "(no extra detail)"}\n\nMore alerts of this same kind are held back for 1 hour.\nLogs: Cloudflare dashboard > gotaofferr-copy > Observability.`,
       }),
     });
   } catch (e) {

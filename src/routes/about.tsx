@@ -16,9 +16,9 @@ export const Route = createFileRoute("/about")({
         content:
           "Terbey was built for job seekers tired of manually rewriting the same resume for every company they apply to.",
       },
-      { property: "og:url", content: "https://gotaofferr.com/about" },
+      { property: "og:url", content: "https://terbey.com/about" },
     ],
-    links: [{ rel: "canonical", href: "https://gotaofferr.com/about" }],
+    links: [{ rel: "canonical", href: "https://terbey.com/about" }],
   }),
   component: About,
 });

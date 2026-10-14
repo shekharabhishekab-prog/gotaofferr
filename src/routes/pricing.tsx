@@ -45,21 +45,21 @@ export const Route = createFileRoute("/pricing")({
   loader: () => getVisitorCountry(),
   head: () => ({
     meta: [
-      { title: "Pricing — GotaOfferr Resume Tailoring Plans" },
+      { title: "Pricing — Terbey Resume Tailoring Plans" },
       {
         name: "description",
         content:
           "Start tailoring resumes for free. Upgrade for more rewrites, cover letters, and match insights while job hunting.",
       },
-      { property: "og:title", content: "Pricing — GotaOfferr Resume Tailoring Plans" },
+      { property: "og:title", content: "Pricing — Terbey Resume Tailoring Plans" },
       {
         property: "og:description",
         content:
           "Start tailoring resumes for free. Upgrade for more rewrites, cover letters, and match insights while job hunting.",
       },
-      { property: "og:url", content: "https://gotaofferr.com/pricing" },
+      { property: "og:url", content: "https://terbey.com/pricing" },
     ],
-    links: [{ rel: "canonical", href: "https://gotaofferr.com/pricing" }],
+    links: [{ rel: "canonical", href: "https://terbey.com/pricing" }],
   }),
   component: Pricing,
 });

@@ -22,8 +22,8 @@ function sum(months: MonthRecord[], pick: (m: MonthRecord) => number) {
 }
 
 function totalsPdf(year: number, months: MonthRecord[]): Uint8Array {
-  const doc = new MiniPdf(`GotaOfferr ${year} totals`);
-  doc.title(`GotaOfferr - yearly totals ${year}`);
+  const doc = new MiniPdf(`Terbey ${year} totals`);
+  doc.title(`Terbey - yearly totals ${year}`);
   doc.p("Month by month. A month is a calendar month in India time. Finished months are locked numbers; the last row may be a month still running.");
   doc.h("Totals per month");
   doc.table(
@@ -110,8 +110,8 @@ export function insightLines(year: number, months: MonthRecord[]): { happened: s
 
 function insightPdf(year: number, months: MonthRecord[]): Uint8Array {
   const { happened, next } = insightLines(year, months);
-  const doc = new MiniPdf(`GotaOfferr ${year} insight`);
-  doc.title(`GotaOfferr - insight report ${year}`);
+  const doc = new MiniPdf(`Terbey ${year} insight`);
+  doc.title(`Terbey - insight report ${year}`);
   doc.p("Written by simple rules from the monthly numbers. No AI was used and no data was sent anywhere.");
   doc.h("What happened this year");
   for (const l of happened) doc.p(`- ${l}`);
@@ -142,16 +142,16 @@ async function loadDetails() {
 
 async function detailPdfs(year: number) {
   const { users, subs, nameOf, planLabel, byId } = await loadDetails();
-  const u = new MiniPdf(`GotaOfferr ${year} user details`);
-  u.title(`GotaOfferr - user details ${year}`);
+  const u = new MiniPdf(`Terbey ${year} user details`);
+  u.title(`Terbey - user details ${year}`);
   u.p(`${users.length} accounts. Private: contains names and emails.`);
   u.table(
     ["Name", "Email", "Region", "Joined", "Last sign-in"],
     [...users].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at))).map((x) => [nameOf(x.id), x.email, userRegion(x), istDate(x.created_at), istDate(x.last_sign_in_at)]),
     [18, 32, 14, 11, 12],
   );
-  const s = new MiniPdf(`GotaOfferr ${year} subscription details`);
-  s.title(`GotaOfferr - subscription details ${year}`);
+  const s = new MiniPdf(`Terbey ${year} subscription details`);
+  s.title(`Terbey - subscription details ${year}`);
   s.p(`${subs.length} subscription records. Private: contains names and emails.`);
   s.table(
     ["Name", "Email", "Plan", "Status", "Started", "Renews/ends"],
@@ -165,10 +165,10 @@ export async function buildYearlyReports(year: number): Promise<ReportFile[]> {
   const months = await monthsForYear(year);
   const d = await detailPdfs(year);
   return [
-    { filename: `gotaofferr-${year}-1-yearly-totals.pdf`, bytes: totalsPdf(year, months) },
-    { filename: `gotaofferr-${year}-2-insight-report.pdf`, bytes: insightPdf(year, months) },
-    { filename: `gotaofferr-${year}-3-user-details.pdf`, bytes: d.users },
-    { filename: `gotaofferr-${year}-4-subscription-details.pdf`, bytes: d.subs },
+    { filename: `terbey-${year}-1-yearly-totals.pdf`, bytes: totalsPdf(year, months) },
+    { filename: `terbey-${year}-2-insight-report.pdf`, bytes: insightPdf(year, months) },
+    { filename: `terbey-${year}-3-user-details.pdf`, bytes: d.users },
+    { filename: `terbey-${year}-4-subscription-details.pdf`, bytes: d.subs },
   ];
 }
 
@@ -191,9 +191,9 @@ export async function sendYearlyReports(year: number): Promise<{ ok: boolean; re
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: `GotaOfferr reports <noreply@${domain}>`,
+      from: `Terbey reports <noreply@${domain}>`,
       to: YEARLY_REPORT_TO,
-      subject: `GotaOfferr yearly report ${year}`,
+      subject: `Terbey yearly report ${year}`,
       text: `The four year-end PDFs for ${year} are attached: yearly totals, insight report, user details, subscription details.\n\nThese are not stored on our servers. Please save them to your Google Drive.`,
       attachments: files.map((f) => ({ filename: f.filename, content: b64(f.bytes) })),
     }),

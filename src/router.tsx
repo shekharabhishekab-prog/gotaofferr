@@ -10,7 +10,7 @@ import { routeTree } from "./routeTree.gen";
  */
 function ssrNonce(): string | undefined {
   if (typeof window !== "undefined") return undefined;
-  const als = (globalThis as Record<string, unknown>)["__gotaofferr_csp_nonce_als__"] as
+  const als = (globalThis as Record<string, unknown>)["__terbey_csp_nonce_als__"] as
     | { getStore?: () => { nonce: string; used: boolean } | undefined }
     | undefined;
   const store = als?.getStore?.();

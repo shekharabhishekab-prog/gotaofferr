@@ -26,9 +26,9 @@ export const Route = createFileRoute("/contact")({
         content:
           "Get in touch with Terbey about resume tailoring, feedback, bugs, or partnerships. Send us a message anytime.",
       },
-      { property: "og:url", content: "https://gotaofferr.com/contact" },
+      { property: "og:url", content: "https://terbey.com/contact" },
     ],
-    links: [{ rel: "canonical", href: "https://gotaofferr.com/contact" }],
+    links: [{ rel: "canonical", href: "https://terbey.com/contact" }],
   }),
   component: Contact,
 });
