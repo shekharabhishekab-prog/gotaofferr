@@ -806,3 +806,8 @@ p.text-\[11px\].text-muted-foreground{color:#000 !important}
 .ak-res .ak-meme{color:#fffffd !important}
 .ak-res .ak-meme .y{color:#073f89 !important}
 .ak-res .ak-ft.a{color:#fffffd !important}
+
+/* insights-fix */
+.tl-ins-score small{color:#fffffd !important}
+.tl-ins-h.tl-ins-h-gap,.tl-ins-warn .tl-ins-h{color:#073f89 !important}
+.tl-chip.tl-chip-no{color:#000 !important}
