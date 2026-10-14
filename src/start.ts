@@ -90,9 +90,9 @@ function securityHeaders(nonce?: string, hostname?: string): Record<string, stri
       "media-src 'self' blob:",
       "font-src 'self' data:",
       "worker-src 'self' blob:",
-      "child-src 'self' blob: https://*.razorpay.com https://challenges.cloudflare.com https://*.googlesyndication.com https://*.doubleclick.net",
-      "frame-src 'self' https://*.razorpay.com https://challenges.cloudflare.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google",
-      "connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://*.razorpay.com https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://us.i.posthog.com https://us-assets.i.posthog.com https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://adservice.google.com https://*.adtrafficquality.google",
+      "child-src 'self' blob: https://*.razorpay.com https://challenges.cloudflare.com https://*.googlesyndication.com https://*.doubleclick.net https://fundingchoicesmessages.google.com https://www.googletagmanager.com",
+      "frame-src 'self' https://*.razorpay.com https://challenges.cloudflare.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google https://fundingchoicesmessages.google.com https://www.googletagmanager.com",
+      "connect-src 'self' blob: data: https://*.supabase.co wss://*.supabase.co https://*.razorpay.com https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://us.i.posthog.com https://us-assets.i.posthog.com https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://adservice.google.com https://*.adtrafficquality.google https://fundingchoicesmessages.google.com",
       "upgrade-insecure-requests",
     ].join("; "),
 

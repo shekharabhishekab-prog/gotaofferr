@@ -1421,7 +1421,7 @@ function Index() {
         <div className="site-container">
           <div className="rl-head">
             <span className="rl-mono">( hiring, in motion )</span>
-            <p className="rl-say" aria-label="Real people. Real offers."><span aria-hidden className="rl-n rl-w">Real</span><span aria-hidden className="rl-sec">people.</span><span aria-hidden className="rl-aj">Real offers.</span></p>
+            <p className="rl-say"><span className="rl-n rl-w">Real</span><span className="rl-sec">people.</span><span className="rl-aj">Real offers.</span></p>
           </div>
           <div className="rl-grid mt-6 sm:mt-10">
             {reelTiles.map((n, k) => (

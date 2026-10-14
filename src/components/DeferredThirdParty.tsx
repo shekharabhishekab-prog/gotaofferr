@@ -100,10 +100,22 @@ export function DeferredThirdParty({
       if (import.meta.env.PROD) loadPostHog();
 
       if (adsenseClient) {
-        loadScript(
-          `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`,
-          { crossorigin: "anonymous" },
-        );
+        // The head bootstrap sets __gtAdsSkip when a paid plan is remembered on
+        // this device; double-check localStorage here so a stale flag cannot
+        // turn ads back on for a paying member.
+        let paid = Boolean((window as unknown as { __gtAdsSkip?: number }).__gtAdsSkip);
+        try {
+          const t = localStorage.getItem("gt_tier");
+          if (t && t !== "free") paid = true;
+        } catch {
+          /* private mode */
+        }
+        if (!paid) {
+          loadScript(
+            `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`,
+            { crossorigin: "anonymous" },
+          );
+        }
       }
     };
 
