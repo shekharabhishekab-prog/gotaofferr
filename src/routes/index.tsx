@@ -592,9 +592,9 @@ const GI_CSS = `
 .i3-tag b{color:#fffffd;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
 header.sticky,header.sticky>div{border-bottom-width:0!important;border-color:transparent!important}
-header.sticky{background-color:rgba(255,255,255,.92)!important;background-image:none!important;-webkit-backdrop-filter:blur(10px)!important;backdrop-filter:blur(10px)!important;box-shadow:0 1px 0 rgba(7,63,137,.08)!important}
-header.sticky :is(a,button){color:#334155!important}
-header.sticky :is(a,button):hover{color:#0f172a!important}
+header.sticky{color:#334155!important;background-color:rgba(255,255,255,.92)!important;background-image:none!important;-webkit-backdrop-filter:blur(10px)!important;backdrop-filter:blur(10px)!important;box-shadow:0 1px 0 rgba(7,63,137,.08)!important}
+header.sticky :is(a,button):not([class*="bg-primary"]){color:#334155!important}
+header.sticky :is(a,button):not([class*="bg-primary"]):hover{color:#0f172a!important}
 .hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(255,214,0,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
