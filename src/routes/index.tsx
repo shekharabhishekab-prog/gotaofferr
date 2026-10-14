@@ -581,7 +581,7 @@ const GI_CSS = `
 .i3-tag b{color:#fffffd;font-weight:600}
 @media(min-width:900px){.i3-tag{max-width:none;font-size:.7rem}}
 header.sticky,header.sticky>div{border-bottom-width:0!important;border-color:transparent!important}
-header.sticky{background-color:transparent!important;background-image:linear-gradient(to bottom,rgba(255,255,253,calc(.55 + var(--hd,0)*.43)) 0,rgba(255,255,253,calc(.3 + var(--hd,0)*.4)) 55%,rgba(7,63,137,0) 100%)!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
+header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1);background-color:transparent!important;background-image:linear-gradient(to bottom,rgba(0,0,0,calc((1 - var(--hs))*(.55 + var(--hd,0)*.43))) 0,rgba(0,0,0,calc((1 - var(--hs))*(.3 + var(--hd,0)*.4))) 55%,rgba(0,0,0,0) 100%),linear-gradient(to bottom,rgba(255,255,253,calc(var(--hs)*(.55 + var(--hd,0)*.43))) 0,rgba(255,255,253,calc(var(--hs)*(.3 + var(--hd,0)*.4))) 55%,rgba(255,255,253,0) 100%)!important;border-color:transparent!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
 .hx-ring{position:absolute;z-index:1;width:min(46vw,420px);aspect-ratio:1;border-radius:50%;border:3px solid rgba(7,63,137,.65);pointer-events:none;left:62%;top:18%;opacity:0;animation:hx-ring 6s .6s ease-out infinite}
 .hx-ring2{left:12%;top:58%;animation-delay:6.2s;width:min(30vw,260px)}
 @keyframes hx-ring{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(1.5)}}
@@ -1252,20 +1252,20 @@ function Index() {
                 "hp-btn mt-4 inline-flex items-center gap-2 rounded-full border border-highlight/50 px-4 py-2 text-xs uppercase tracking-[0.14em] text-highlight transition-colors hover:bg-highlight hover:text-highlight-foreground";
               return (
                 <div key={s.n} className="hp-stack" style={{ ["--i" as string]: i }}>
-                  <div data-p className="hp-stackcard relative overflow-hidden border border-primary/15 bg-background p-6 sm:p-14">
+                  <div data-p className="hp-stackcard relative overflow-hidden border border-white/15 bg-black p-6 sm:p-14">
                     <span aria-hidden className="hp-bignum">{s.n}</span>
                     <LazyVideo name={s.clip} className="hp-cardvid absolute inset-0 h-full w-full object-cover opacity-[0.34]" />
-                    <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-transparent" />
+                    <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-transparent" />
                     <Brackets />
                     <StepArt i={i} />
                     <div className="relative flex min-h-[15rem] flex-col justify-between sm:min-h-[26rem]">
-                      <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] text-foreground/60">
+                      <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] text-white/60">
                         <span>{s.n} /</span>
                         <span className="hp-hand text-xl normal-case tracking-normal text-highlight">{s.tag}</span>
                       </div>
                       <div>
                         <div aria-hidden className="hp-kw mb-4 overflow-hidden">
-                          <div className="animate-marquee flex w-max gap-6 text-xs uppercase tracking-[0.3em] text-foreground/30">
+                          <div className="animate-marquee flex w-max gap-6 text-xs uppercase tracking-[0.3em] text-white/30">
                             {[0, 1, 2, 3].map((k) => (
                               <span key={k} className="whitespace-nowrap">{s.tag} <span className="text-highlight/60">/</span> {s.title} <span className="text-highlight/60">/</span></span>
                             ))}
@@ -1280,7 +1280,7 @@ function Index() {
                             <Link to={i === 1 ? "/tailor" : i === 4 ? "/ai-interview" : "/resume-builder"} className={titleCls}>{titleIn}</Link>
                           )}
                         </h3>
-                        <p className="mt-3 hidden max-w-lg text-sm text-foreground/70 sm:block sm:text-base">{body}</p>
+                        <p className="mt-3 hidden max-w-lg text-sm text-white/70 sm:block sm:text-base">{body}</p>
                         {i === 0 ? (
                           <Link to="/jobs" search={{ alert: undefined }} className={ctaCls}>
                             {s.cta} <ArrowRight className="size-3.5" />
