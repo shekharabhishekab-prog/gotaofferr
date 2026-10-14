@@ -574,7 +574,7 @@ export function ResumeTailor() {
             <div className="flex items-center gap-3">
               <div className={`${resultTab === "insights" ? "hidden" : "flex"} items-center gap-6 pl-4`}>
                 <div className="relative">
-                  <div data-testid="score-ats" className="relative flex h-[76px] w-[76px] flex-col items-center justify-center rounded-xl bg-primary text-black">
+                  <div data-testid="score-ats" className="relative flex h-[76px] w-[76px] flex-col items-center justify-center rounded-xl bg-primary text-primary-foreground">
                     <span className="font-display text-2xl leading-none font-bold">
                       {Math.round(result.atsScore)}
                     </span>

@@ -16,10 +16,10 @@ export const Route = createFileRoute("/checkout/return")({
   }),
   head: () => ({
     meta: [
-      { title: "Payment complete — GotaOfferr" },
+      { title: "Payment complete — Terbey" },
       { name: "robots", content: "noindex, nofollow" },
       { name: "description", content: "Your payment was completed successfully. Start tailoring your resume." },
-      { property: "og:title", content: "Payment complete — GotaOfferr" },
+      { property: "og:title", content: "Payment complete — Terbey" },
       { property: "og:description", content: "Your payment was completed successfully. Start tailoring your resume." },
     ],
   }),

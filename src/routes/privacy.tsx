@@ -3,17 +3,17 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — GotaOfferr" },
+      { title: "Privacy Policy — Terbey" },
       {
         name: "description",
         content:
-          "GotaOfferr privacy policy explains what data we collect, how we use it, and how we keep your resume and account information safe.",
+          "Terbey privacy policy explains what data we collect, how we use it, and how we keep your resume and account information safe.",
       },
-      { property: "og:title", content: "Privacy Policy — GotaOfferr" },
+      { property: "og:title", content: "Privacy Policy — Terbey" },
       {
         property: "og:description",
         content:
-          "GotaOfferr privacy policy explains what data we collect, how we use it, and how we keep your resume and account information safe.",
+          "Terbey privacy policy explains what data we collect, how we use it, and how we keep your resume and account information safe.",
       },
       { property: "og:url", content: "https://gotaofferr.com/privacy" },
     ],
@@ -30,10 +30,9 @@ function Privacy() {
 
       <div className="mt-8 space-y-8 text-muted-foreground">
         <section className="space-y-4">
-          <h2 className="text-xl font-semibold text-foreground">1. About us and what GotaOfferr is</h2>
+          <h2 className="text-xl font-semibold text-foreground">1. About us and what Terbey is</h2>
           <p>
-            GotaOfferr is an AI-powered resume and cover-letter builder operated by{" "}
-            <strong>AB24 SOLUTIONS</strong>, a sole proprietorship business, Delhi, India. The proprietor is
+            Terbey is an AI-powered resume and cover-letter builder run as a sole proprietorship business. The proprietor is
             Abhishek.
           </p>
           <p>
@@ -221,7 +220,7 @@ function Privacy() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">9. International data transfers</h2>
           <p>
-            GotaOfferr uses cloud infrastructure, AI processing, payment and email providers that may
+            Terbey uses cloud infrastructure, AI processing, payment and email providers that may
             store or process data outside your country, including outside India. We remain
             responsible for your data as the data fiduciary, use providers under data-processing
             agreements, and do not transfer data to any jurisdiction restricted by the Indian
@@ -232,7 +231,7 @@ function Privacy() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">10. Children's data</h2>
           <p>
-            GotaOfferr is intended for job seekers aged 18 and over. We do not knowingly collect
+            Terbey is intended for job seekers aged 18 and over. We do not knowingly collect
             personal data from anyone under 18. If you believe a minor has created an account,
             email us and we will delete it.
           </p>
@@ -256,16 +255,14 @@ function Privacy() {
             sent to our Grievance Officer, who will respond within 30 days.
           </p>
           <p>
-            Grievance Officer: Abhishek — AB24 SOLUTIONS (GotaOfferr)
-            <br />
-            Location: Delhi, India
+            Grievance Officer: Abhishek
             <br />
             Email:{" "}
             <a
-              href="mailto:contact@gotaofferr.com"
+              href="mailto:contact@terbey.com"
               className="text-primary underline underline-offset-4 hover:text-foreground"
             >
-              contact@gotaofferr.com
+              contact@terbey.com
             </a>
           </p>
           <p>
@@ -286,19 +283,17 @@ function Privacy() {
           <p>
             If you have questions about this privacy policy, email us at{" "}
             <a
-              href="mailto:contact@gotaofferr.com"
+              href="mailto:contact@terbey.com"
               className="text-primary underline underline-offset-4 hover:text-foreground"
             >
-              contact@gotaofferr.com
+              contact@terbey.com
             </a>
             .
-          </p>
-          <p>
-            <strong>AB24 SOLUTIONS</strong> · Delhi, India
           </p>
         </section>
       </div>
     </main>
   );
 }
+
 

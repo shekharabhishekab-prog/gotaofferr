@@ -58,9 +58,9 @@ export const Route = createFileRoute("/ats-resume-checker")({
       { name: "description", content: DESCRIPTION },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: "https://gotaofferr.com/ats-resume-checker" },
+      { property: "og:url", content: "https://terbey.com/ats-resume-checker" },
     ],
-    links: [{ rel: "canonical", href: "https://gotaofferr.com/ats-resume-checker" }],
+    links: [{ rel: "canonical", href: "https://terbey.com/ats-resume-checker" }],
     scripts: [
       {
         type: "application/ld+json",

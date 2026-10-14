@@ -12,9 +12,9 @@ interface Props {
 
 const ContactConfirmationEmail = ({ name, message }: Props) => (
   <EmailLayout
-    preview="We received your message — GotaOfferr"
+    preview="We received your message — Terbey"
     heading="We got your message"
-    footerNote="You're receiving this because you contacted us through gotaofferr.com."
+    footerNote="You're receiving this because you contacted us through terbey.com."
   >
     <Text style={styles.text}>
       {name ? `Hi ${name},` : 'Hi there,'} thanks for reaching out to {BRAND.name}. Our
@@ -33,7 +33,7 @@ const ContactConfirmationEmail = ({ name, message }: Props) => (
 
 export const template = {
   component: ContactConfirmationEmail,
-  subject: 'We received your message — GotaOfferr',
+  subject: 'We received your message — Terbey',
   displayName: 'Contact form confirmation',
   previewData: { name: 'Jane', message: 'My resume did not parse correctly.' },
 } satisfies TemplateEntry

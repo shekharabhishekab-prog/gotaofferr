@@ -121,7 +121,7 @@ export async function sendDigestForAlert(
       experience: alert.experience,
       salaryRange: alert.salary_range,
       jobs: digest,
-      jobsUrl: "https://gotaofferr.com/jobs?alert=1",
+      jobsUrl: "https://terbey.com/jobs?alert=1",
       emailNumber: (alert.emails_sent ?? 0) + 1,
       unsubscribeUrl,
     },
