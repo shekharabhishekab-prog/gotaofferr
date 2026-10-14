@@ -761,3 +761,6 @@ header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
 
 /* tag-white */
 .hp-stackcard .hp-hand{color:#fffffd!important}
+
+/* jm-white */
+.i3-meta b,.i3-meta b *{color:#fffffd!important}
