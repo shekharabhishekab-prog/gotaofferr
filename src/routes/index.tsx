@@ -497,7 +497,7 @@ function HeroPops() {
     const root = document.documentElement;
     const upd = () => {
       const h = document.querySelector("[data-hero]") as HTMLElement | null;
-      const end = h ? h.offsetTop + h.offsetHeight - 80 : 600;
+      const end = h ? h.offsetTop + h.offsetHeight : 600;
       root.style.setProperty("--hd", String(Math.max(0, Math.min(1, window.scrollY / Math.max(end, 1)))));
     };
     upd();
@@ -1150,7 +1150,7 @@ function Index() {
 
       {/* Roles ticker */}
       <div className="overflow-hidden py-4" aria-hidden>
-        <div className="animate-marquee flex w-max gap-10 text-sm uppercase tracking-[0.2em] text-white/45">
+        <div className="animate-marquee flex w-max gap-10 text-sm uppercase tracking-[0.2em] text-black/70">
           {[...roles, ...roles].map((r, i) => (
             <span key={`${r}-${i}`} className="whitespace-nowrap">
               {r} <span className="ml-10 text-highlight/70">/</span>
