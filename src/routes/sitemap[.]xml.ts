@@ -43,6 +43,12 @@ const entries: SitemapEntry[] = [
     changefreq: "monthly",
     priority: "0.8",
   },
+  {
+    path: "/blog/why-resumes-get-rejected-by-ats",
+    lastmod: "2026-10-15",
+    changefreq: "monthly",
+    priority: "0.8",
+  },
 
   ...resumeExamples.map((example) => ({
     path: `/examples/resumes/${example.slug}`,

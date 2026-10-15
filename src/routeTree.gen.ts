@@ -14,8 +14,13 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AiCoverLetterGeneratorRouteImport } from './routes/ai-cover-letter-generator'
+import { Route as AiInterviewRouteImport } from './routes/ai-interview'
+import { Route as AtsCheckerRouteImport } from './routes/ats-checker'
 import { Route as AtsResumeCheckerRouteImport } from './routes/ats-resume-checker'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CocoCatDotwebpRouteImport } from './routes/coco-cat[.]webp'
+import { Route as CocoRoomDotmp4RouteImport } from './routes/coco-room[.]mp4'
+import { Route as CocoSpriteDotwebpRouteImport } from './routes/coco-sprite[.]webp'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
@@ -30,7 +35,9 @@ import { Route as TailorRouteImport } from './routes/tailor'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as BlogCanAiTailorMyResumeToAJobPostingRouteImport } from './routes/blog.can-ai-tailor-my-resume-to-a-job-posting'
 import { Route as BlogHowToCreateACustomResumeForAJobDescriptionRouteImport } from './routes/blog.how-to-create-a-custom-resume-for-a-job-description'
+import { Route as BlogWhyResumesGetRejectedByAtsRouteImport } from './routes/blog.why-resumes-get-rejected-by-ats'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout/return'
+import { Route as CocoClipNRouteImport } from './routes/coco-clip.$n'
 import { Route as GuidesAustraliaResumeFormatRouteImport } from './routes/guides.australia-resume-format'
 import { Route as GuidesCanadaResumeFormatRouteImport } from './routes/guides.canada-resume-format'
 import { Route as GuidesDubaiResumeFormatRouteImport } from './routes/guides.dubai-resume-format'
@@ -38,12 +45,17 @@ import { Route as GuidesGermanyResumeFormatRouteImport } from './routes/guides.g
 import { Route as GuidesIndiaResumeFormatRouteImport } from './routes/guides.india-resume-format'
 import { Route as GuidesSingaporeResumeFormatRouteImport } from './routes/guides.singapore-resume-format'
 import { Route as GuidesUkResumeFormatRouteImport } from './routes/guides.uk-resume-format'
+import { Route as MFileRouteImport } from './routes/m.$file'
 import { Route as ExamplesCoverLettersIndexRouteImport } from './routes/examples.cover-letters.index'
 import { Route as ExamplesCoverLettersSlugRouteImport } from './routes/examples.cover-letters.$slug'
 import { Route as ExamplesResumesIndexRouteImport } from './routes/examples.resumes.index'
 import { Route as ExamplesResumesSlugRouteImport } from './routes/examples.resumes.$slug'
+import { Route as ApiPublicJobsBackupRouteImport } from './routes/api/public/jobs/backup'
 import { Route as ApiPublicJobsDailyAlertsRouteImport } from './routes/api/public/jobs/daily-alerts'
+import { Route as ApiPublicJobsKeepaliveRouteImport } from './routes/api/public/jobs/keepalive'
+import { Route as ApiPublicJobsMonthlyLockRouteImport } from './routes/api/public/jobs/monthly-lock'
 import { Route as ApiPublicJobsUnsubscribeRouteImport } from './routes/api/public/jobs/unsubscribe'
+import { Route as ApiPublicJobsYearlyReportRouteImport } from './routes/api/public/jobs/yearly-report'
 import { Route as ApiPublicPaymentsRazorpayWebhookRouteImport } from './routes/api/public/payments/razorpay-webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -74,6 +86,16 @@ const AiCoverLetterGeneratorRoute = AiCoverLetterGeneratorRouteImport.update({
   path: '/ai-cover-letter-generator',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AiInterviewRoute = AiInterviewRouteImport.update({
+  id: '/ai-interview',
+  path: '/ai-interview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtsCheckerRoute = AtsCheckerRouteImport.update({
+  id: '/ats-checker',
+  path: '/ats-checker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtsResumeCheckerRoute = AtsResumeCheckerRouteImport.update({
   id: '/ats-resume-checker',
   path: '/ats-resume-checker',
@@ -82,6 +104,21 @@ const AtsResumeCheckerRoute = AtsResumeCheckerRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CocoCatDotwebpRoute = CocoCatDotwebpRouteImport.update({
+  id: '/coco-cat.webp',
+  path: '/coco-cat.webp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CocoRoomDotmp4Route = CocoRoomDotmp4RouteImport.update({
+  id: '/coco-room.mp4',
+  path: '/coco-room.mp4',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CocoSpriteDotwebpRoute = CocoSpriteDotwebpRouteImport.update({
+  id: '/coco-sprite.webp',
+  path: '/coco-sprite.webp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -156,9 +193,20 @@ const BlogHowToCreateACustomResumeForAJobDescriptionRoute =
     path: '/blog/how-to-create-a-custom-resume-for-a-job-description',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogWhyResumesGetRejectedByAtsRoute =
+  BlogWhyResumesGetRejectedByAtsRouteImport.update({
+    id: '/blog/why-resumes-get-rejected-by-ats',
+    path: '/blog/why-resumes-get-rejected-by-ats',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
   path: '/checkout/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CocoClipNRoute = CocoClipNRouteImport.update({
+  id: '/coco-clip/$n',
+  path: '/coco-clip/$n',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesAustraliaResumeFormatRoute =
@@ -200,6 +248,11 @@ const GuidesUkResumeFormatRoute = GuidesUkResumeFormatRouteImport.update({
   path: '/guides/uk-resume-format',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MFileRoute = MFileRouteImport.update({
+  id: '/m/$file',
+  path: '/m/$file',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExamplesCoverLettersIndexRoute =
   ExamplesCoverLettersIndexRouteImport.update({
     id: '/examples/cover-letters/',
@@ -222,16 +275,38 @@ const ExamplesResumesSlugRoute = ExamplesResumesSlugRouteImport.update({
   path: '/examples/resumes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsBackupRoute = ApiPublicJobsBackupRouteImport.update({
+  id: '/api/public/jobs/backup',
+  path: '/api/public/jobs/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicJobsDailyAlertsRoute =
   ApiPublicJobsDailyAlertsRouteImport.update({
     id: '/api/public/jobs/daily-alerts',
     path: '/api/public/jobs/daily-alerts',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicJobsKeepaliveRoute = ApiPublicJobsKeepaliveRouteImport.update({
+  id: '/api/public/jobs/keepalive',
+  path: '/api/public/jobs/keepalive',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicJobsMonthlyLockRoute =
+  ApiPublicJobsMonthlyLockRouteImport.update({
+    id: '/api/public/jobs/monthly-lock',
+    path: '/api/public/jobs/monthly-lock',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicJobsUnsubscribeRoute =
   ApiPublicJobsUnsubscribeRouteImport.update({
     id: '/api/public/jobs/unsubscribe',
     path: '/api/public/jobs/unsubscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicJobsYearlyReportRoute =
+  ApiPublicJobsYearlyReportRouteImport.update({
+    id: '/api/public/jobs/yearly-report',
+    path: '/api/public/jobs/yearly-report',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicPaymentsRazorpayWebhookRoute =
@@ -263,8 +338,13 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/ai-cover-letter-generator': typeof AiCoverLetterGeneratorRoute
+  '/ai-interview': typeof AiInterviewRoute
+  '/ats-checker': typeof AtsCheckerRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
+  '/coco-cat.webp': typeof CocoCatDotwebpRoute
+  '/coco-room.mp4': typeof CocoRoomDotmp4Route
+  '/coco-sprite.webp': typeof CocoSpriteDotwebpRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -279,7 +359,9 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/blog/can-ai-tailor-my-resume-to-a-job-posting': typeof BlogCanAiTailorMyResumeToAJobPostingRoute
   '/blog/how-to-create-a-custom-resume-for-a-job-description': typeof BlogHowToCreateACustomResumeForAJobDescriptionRoute
+  '/blog/why-resumes-get-rejected-by-ats': typeof BlogWhyResumesGetRejectedByAtsRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/coco-clip/$n': typeof CocoClipNRoute
   '/guides/australia-resume-format': typeof GuidesAustraliaResumeFormatRoute
   '/guides/canada-resume-format': typeof GuidesCanadaResumeFormatRoute
   '/guides/dubai-resume-format': typeof GuidesDubaiResumeFormatRoute
@@ -287,12 +369,17 @@ export interface FileRoutesByFullPath {
   '/guides/india-resume-format': typeof GuidesIndiaResumeFormatRoute
   '/guides/singapore-resume-format': typeof GuidesSingaporeResumeFormatRoute
   '/guides/uk-resume-format': typeof GuidesUkResumeFormatRoute
+  '/m/$file': typeof MFileRoute
   '/examples/cover-letters/$slug': typeof ExamplesCoverLettersSlugRoute
   '/examples/resumes/$slug': typeof ExamplesResumesSlugRoute
   '/examples/cover-letters/': typeof ExamplesCoverLettersIndexRoute
   '/examples/resumes/': typeof ExamplesResumesIndexRoute
+  '/api/public/jobs/backup': typeof ApiPublicJobsBackupRoute
   '/api/public/jobs/daily-alerts': typeof ApiPublicJobsDailyAlertsRoute
+  '/api/public/jobs/keepalive': typeof ApiPublicJobsKeepaliveRoute
+  '/api/public/jobs/monthly-lock': typeof ApiPublicJobsMonthlyLockRoute
   '/api/public/jobs/unsubscribe': typeof ApiPublicJobsUnsubscribeRoute
+  '/api/public/jobs/yearly-report': typeof ApiPublicJobsYearlyReportRoute
   '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -304,8 +391,13 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/ai-cover-letter-generator': typeof AiCoverLetterGeneratorRoute
+  '/ai-interview': typeof AiInterviewRoute
+  '/ats-checker': typeof AtsCheckerRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
+  '/coco-cat.webp': typeof CocoCatDotwebpRoute
+  '/coco-room.mp4': typeof CocoRoomDotmp4Route
+  '/coco-sprite.webp': typeof CocoSpriteDotwebpRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -320,7 +412,9 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/blog/can-ai-tailor-my-resume-to-a-job-posting': typeof BlogCanAiTailorMyResumeToAJobPostingRoute
   '/blog/how-to-create-a-custom-resume-for-a-job-description': typeof BlogHowToCreateACustomResumeForAJobDescriptionRoute
+  '/blog/why-resumes-get-rejected-by-ats': typeof BlogWhyResumesGetRejectedByAtsRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/coco-clip/$n': typeof CocoClipNRoute
   '/guides/australia-resume-format': typeof GuidesAustraliaResumeFormatRoute
   '/guides/canada-resume-format': typeof GuidesCanadaResumeFormatRoute
   '/guides/dubai-resume-format': typeof GuidesDubaiResumeFormatRoute
@@ -328,12 +422,17 @@ export interface FileRoutesByTo {
   '/guides/india-resume-format': typeof GuidesIndiaResumeFormatRoute
   '/guides/singapore-resume-format': typeof GuidesSingaporeResumeFormatRoute
   '/guides/uk-resume-format': typeof GuidesUkResumeFormatRoute
+  '/m/$file': typeof MFileRoute
   '/examples/cover-letters/$slug': typeof ExamplesCoverLettersSlugRoute
   '/examples/resumes/$slug': typeof ExamplesResumesSlugRoute
   '/examples/cover-letters': typeof ExamplesCoverLettersIndexRoute
   '/examples/resumes': typeof ExamplesResumesIndexRoute
+  '/api/public/jobs/backup': typeof ApiPublicJobsBackupRoute
   '/api/public/jobs/daily-alerts': typeof ApiPublicJobsDailyAlertsRoute
+  '/api/public/jobs/keepalive': typeof ApiPublicJobsKeepaliveRoute
+  '/api/public/jobs/monthly-lock': typeof ApiPublicJobsMonthlyLockRoute
   '/api/public/jobs/unsubscribe': typeof ApiPublicJobsUnsubscribeRoute
+  '/api/public/jobs/yearly-report': typeof ApiPublicJobsYearlyReportRoute
   '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -346,8 +445,13 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/ai-cover-letter-generator': typeof AiCoverLetterGeneratorRoute
+  '/ai-interview': typeof AiInterviewRoute
+  '/ats-checker': typeof AtsCheckerRoute
   '/ats-resume-checker': typeof AtsResumeCheckerRoute
   '/auth': typeof AuthRoute
+  '/coco-cat.webp': typeof CocoCatDotwebpRoute
+  '/coco-room.mp4': typeof CocoRoomDotmp4Route
+  '/coco-sprite.webp': typeof CocoSpriteDotwebpRoute
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -362,7 +466,9 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/blog/can-ai-tailor-my-resume-to-a-job-posting': typeof BlogCanAiTailorMyResumeToAJobPostingRoute
   '/blog/how-to-create-a-custom-resume-for-a-job-description': typeof BlogHowToCreateACustomResumeForAJobDescriptionRoute
+  '/blog/why-resumes-get-rejected-by-ats': typeof BlogWhyResumesGetRejectedByAtsRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/coco-clip/$n': typeof CocoClipNRoute
   '/guides/australia-resume-format': typeof GuidesAustraliaResumeFormatRoute
   '/guides/canada-resume-format': typeof GuidesCanadaResumeFormatRoute
   '/guides/dubai-resume-format': typeof GuidesDubaiResumeFormatRoute
@@ -370,12 +476,17 @@ export interface FileRoutesById {
   '/guides/india-resume-format': typeof GuidesIndiaResumeFormatRoute
   '/guides/singapore-resume-format': typeof GuidesSingaporeResumeFormatRoute
   '/guides/uk-resume-format': typeof GuidesUkResumeFormatRoute
+  '/m/$file': typeof MFileRoute
   '/examples/cover-letters/$slug': typeof ExamplesCoverLettersSlugRoute
   '/examples/resumes/$slug': typeof ExamplesResumesSlugRoute
   '/examples/cover-letters/': typeof ExamplesCoverLettersIndexRoute
   '/examples/resumes/': typeof ExamplesResumesIndexRoute
+  '/api/public/jobs/backup': typeof ApiPublicJobsBackupRoute
   '/api/public/jobs/daily-alerts': typeof ApiPublicJobsDailyAlertsRoute
+  '/api/public/jobs/keepalive': typeof ApiPublicJobsKeepaliveRoute
+  '/api/public/jobs/monthly-lock': typeof ApiPublicJobsMonthlyLockRoute
   '/api/public/jobs/unsubscribe': typeof ApiPublicJobsUnsubscribeRoute
+  '/api/public/jobs/yearly-report': typeof ApiPublicJobsYearlyReportRoute
   '/api/public/payments/razorpay-webhook': typeof ApiPublicPaymentsRazorpayWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -389,8 +500,13 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/ai-cover-letter-generator'
+    | '/ai-interview'
+    | '/ats-checker'
     | '/ats-resume-checker'
     | '/auth'
+    | '/coco-cat.webp'
+    | '/coco-room.mp4'
+    | '/coco-sprite.webp'
     | '/contact'
     | '/faq'
     | '/how-it-works'
@@ -405,7 +521,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/blog/can-ai-tailor-my-resume-to-a-job-posting'
     | '/blog/how-to-create-a-custom-resume-for-a-job-description'
+    | '/blog/why-resumes-get-rejected-by-ats'
     | '/checkout/return'
+    | '/coco-clip/$n'
     | '/guides/australia-resume-format'
     | '/guides/canada-resume-format'
     | '/guides/dubai-resume-format'
@@ -413,12 +531,17 @@ export interface FileRouteTypes {
     | '/guides/india-resume-format'
     | '/guides/singapore-resume-format'
     | '/guides/uk-resume-format'
+    | '/m/$file'
     | '/examples/cover-letters/$slug'
     | '/examples/resumes/$slug'
     | '/examples/cover-letters/'
     | '/examples/resumes/'
+    | '/api/public/jobs/backup'
     | '/api/public/jobs/daily-alerts'
+    | '/api/public/jobs/keepalive'
+    | '/api/public/jobs/monthly-lock'
     | '/api/public/jobs/unsubscribe'
+    | '/api/public/jobs/yearly-report'
     | '/api/public/payments/razorpay-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -430,8 +553,13 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/ai-cover-letter-generator'
+    | '/ai-interview'
+    | '/ats-checker'
     | '/ats-resume-checker'
     | '/auth'
+    | '/coco-cat.webp'
+    | '/coco-room.mp4'
+    | '/coco-sprite.webp'
     | '/contact'
     | '/faq'
     | '/how-it-works'
@@ -446,7 +574,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/blog/can-ai-tailor-my-resume-to-a-job-posting'
     | '/blog/how-to-create-a-custom-resume-for-a-job-description'
+    | '/blog/why-resumes-get-rejected-by-ats'
     | '/checkout/return'
+    | '/coco-clip/$n'
     | '/guides/australia-resume-format'
     | '/guides/canada-resume-format'
     | '/guides/dubai-resume-format'
@@ -454,12 +584,17 @@ export interface FileRouteTypes {
     | '/guides/india-resume-format'
     | '/guides/singapore-resume-format'
     | '/guides/uk-resume-format'
+    | '/m/$file'
     | '/examples/cover-letters/$slug'
     | '/examples/resumes/$slug'
     | '/examples/cover-letters'
     | '/examples/resumes'
+    | '/api/public/jobs/backup'
     | '/api/public/jobs/daily-alerts'
+    | '/api/public/jobs/keepalive'
+    | '/api/public/jobs/monthly-lock'
     | '/api/public/jobs/unsubscribe'
+    | '/api/public/jobs/yearly-report'
     | '/api/public/payments/razorpay-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -471,8 +606,13 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/ai-cover-letter-generator'
+    | '/ai-interview'
+    | '/ats-checker'
     | '/ats-resume-checker'
     | '/auth'
+    | '/coco-cat.webp'
+    | '/coco-room.mp4'
+    | '/coco-sprite.webp'
     | '/contact'
     | '/faq'
     | '/how-it-works'
@@ -487,7 +627,9 @@ export interface FileRouteTypes {
     | '/terms'
     | '/blog/can-ai-tailor-my-resume-to-a-job-posting'
     | '/blog/how-to-create-a-custom-resume-for-a-job-description'
+    | '/blog/why-resumes-get-rejected-by-ats'
     | '/checkout/return'
+    | '/coco-clip/$n'
     | '/guides/australia-resume-format'
     | '/guides/canada-resume-format'
     | '/guides/dubai-resume-format'
@@ -495,12 +637,17 @@ export interface FileRouteTypes {
     | '/guides/india-resume-format'
     | '/guides/singapore-resume-format'
     | '/guides/uk-resume-format'
+    | '/m/$file'
     | '/examples/cover-letters/$slug'
     | '/examples/resumes/$slug'
     | '/examples/cover-letters/'
     | '/examples/resumes/'
+    | '/api/public/jobs/backup'
     | '/api/public/jobs/daily-alerts'
+    | '/api/public/jobs/keepalive'
+    | '/api/public/jobs/monthly-lock'
     | '/api/public/jobs/unsubscribe'
+    | '/api/public/jobs/yearly-report'
     | '/api/public/payments/razorpay-webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -513,8 +660,13 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   AiCoverLetterGeneratorRoute: typeof AiCoverLetterGeneratorRoute
+  AiInterviewRoute: typeof AiInterviewRoute
+  AtsCheckerRoute: typeof AtsCheckerRoute
   AtsResumeCheckerRoute: typeof AtsResumeCheckerRoute
   AuthRoute: typeof AuthRoute
+  CocoCatDotwebpRoute: typeof CocoCatDotwebpRoute
+  CocoRoomDotmp4Route: typeof CocoRoomDotmp4Route
+  CocoSpriteDotwebpRoute: typeof CocoSpriteDotwebpRoute
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   HowItWorksRoute: typeof HowItWorksRoute
@@ -529,7 +681,9 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BlogCanAiTailorMyResumeToAJobPostingRoute: typeof BlogCanAiTailorMyResumeToAJobPostingRoute
   BlogHowToCreateACustomResumeForAJobDescriptionRoute: typeof BlogHowToCreateACustomResumeForAJobDescriptionRoute
+  BlogWhyResumesGetRejectedByAtsRoute: typeof BlogWhyResumesGetRejectedByAtsRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
+  CocoClipNRoute: typeof CocoClipNRoute
   GuidesAustraliaResumeFormatRoute: typeof GuidesAustraliaResumeFormatRoute
   GuidesCanadaResumeFormatRoute: typeof GuidesCanadaResumeFormatRoute
   GuidesDubaiResumeFormatRoute: typeof GuidesDubaiResumeFormatRoute
@@ -537,12 +691,17 @@ export interface RootRouteChildren {
   GuidesIndiaResumeFormatRoute: typeof GuidesIndiaResumeFormatRoute
   GuidesSingaporeResumeFormatRoute: typeof GuidesSingaporeResumeFormatRoute
   GuidesUkResumeFormatRoute: typeof GuidesUkResumeFormatRoute
+  MFileRoute: typeof MFileRoute
   ExamplesCoverLettersSlugRoute: typeof ExamplesCoverLettersSlugRoute
   ExamplesResumesSlugRoute: typeof ExamplesResumesSlugRoute
   ExamplesCoverLettersIndexRoute: typeof ExamplesCoverLettersIndexRoute
   ExamplesResumesIndexRoute: typeof ExamplesResumesIndexRoute
+  ApiPublicJobsBackupRoute: typeof ApiPublicJobsBackupRoute
   ApiPublicJobsDailyAlertsRoute: typeof ApiPublicJobsDailyAlertsRoute
+  ApiPublicJobsKeepaliveRoute: typeof ApiPublicJobsKeepaliveRoute
+  ApiPublicJobsMonthlyLockRoute: typeof ApiPublicJobsMonthlyLockRoute
   ApiPublicJobsUnsubscribeRoute: typeof ApiPublicJobsUnsubscribeRoute
+  ApiPublicJobsYearlyReportRoute: typeof ApiPublicJobsYearlyReportRoute
   ApiPublicPaymentsRazorpayWebhookRoute: typeof ApiPublicPaymentsRazorpayWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -586,6 +745,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AiCoverLetterGeneratorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ai-interview': {
+      id: '/ai-interview'
+      path: '/ai-interview'
+      fullPath: '/ai-interview'
+      preLoaderRoute: typeof AiInterviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ats-checker': {
+      id: '/ats-checker'
+      path: '/ats-checker'
+      fullPath: '/ats-checker'
+      preLoaderRoute: typeof AtsCheckerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ats-resume-checker': {
       id: '/ats-resume-checker'
       path: '/ats-resume-checker'
@@ -598,6 +771,27 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coco-cat.webp': {
+      id: '/coco-cat.webp'
+      path: '/coco-cat.webp'
+      fullPath: '/coco-cat.webp'
+      preLoaderRoute: typeof CocoCatDotwebpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coco-room.mp4': {
+      id: '/coco-room.mp4'
+      path: '/coco-room.mp4'
+      fullPath: '/coco-room.mp4'
+      preLoaderRoute: typeof CocoRoomDotmp4RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coco-sprite.webp': {
+      id: '/coco-sprite.webp'
+      path: '/coco-sprite.webp'
+      fullPath: '/coco-sprite.webp'
+      preLoaderRoute: typeof CocoSpriteDotwebpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -698,11 +892,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogHowToCreateACustomResumeForAJobDescriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/why-resumes-get-rejected-by-ats': {
+      id: '/blog/why-resumes-get-rejected-by-ats'
+      path: '/blog/why-resumes-get-rejected-by-ats'
+      fullPath: '/blog/why-resumes-get-rejected-by-ats'
+      preLoaderRoute: typeof BlogWhyResumesGetRejectedByAtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout/return': {
       id: '/checkout/return'
       path: '/checkout/return'
       fullPath: '/checkout/return'
       preLoaderRoute: typeof CheckoutReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coco-clip/$n': {
+      id: '/coco-clip/$n'
+      path: '/coco-clip/$n'
+      fullPath: '/coco-clip/$n'
+      preLoaderRoute: typeof CocoClipNRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guides/australia-resume-format': {
@@ -754,6 +962,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesUkResumeFormatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/m/$file': {
+      id: '/m/$file'
+      path: '/m/$file'
+      fullPath: '/m/$file'
+      preLoaderRoute: typeof MFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/examples/cover-letters/': {
       id: '/examples/cover-letters/'
       path: '/examples/cover-letters'
@@ -782,6 +997,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExamplesResumesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/backup': {
+      id: '/api/public/jobs/backup'
+      path: '/api/public/jobs/backup'
+      fullPath: '/api/public/jobs/backup'
+      preLoaderRoute: typeof ApiPublicJobsBackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/daily-alerts': {
       id: '/api/public/jobs/daily-alerts'
       path: '/api/public/jobs/daily-alerts'
@@ -789,11 +1011,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicJobsDailyAlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/keepalive': {
+      id: '/api/public/jobs/keepalive'
+      path: '/api/public/jobs/keepalive'
+      fullPath: '/api/public/jobs/keepalive'
+      preLoaderRoute: typeof ApiPublicJobsKeepaliveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/monthly-lock': {
+      id: '/api/public/jobs/monthly-lock'
+      path: '/api/public/jobs/monthly-lock'
+      fullPath: '/api/public/jobs/monthly-lock'
+      preLoaderRoute: typeof ApiPublicJobsMonthlyLockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/jobs/unsubscribe': {
       id: '/api/public/jobs/unsubscribe'
       path: '/api/public/jobs/unsubscribe'
       fullPath: '/api/public/jobs/unsubscribe'
       preLoaderRoute: typeof ApiPublicJobsUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/yearly-report': {
+      id: '/api/public/jobs/yearly-report'
+      path: '/api/public/jobs/yearly-report'
+      fullPath: '/api/public/jobs/yearly-report'
+      preLoaderRoute: typeof ApiPublicJobsYearlyReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/payments/razorpay-webhook': {
@@ -833,8 +1076,13 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   AiCoverLetterGeneratorRoute: AiCoverLetterGeneratorRoute,
+  AiInterviewRoute: AiInterviewRoute,
+  AtsCheckerRoute: AtsCheckerRoute,
   AtsResumeCheckerRoute: AtsResumeCheckerRoute,
   AuthRoute: AuthRoute,
+  CocoCatDotwebpRoute: CocoCatDotwebpRoute,
+  CocoRoomDotmp4Route: CocoRoomDotmp4Route,
+  CocoSpriteDotwebpRoute: CocoSpriteDotwebpRoute,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   HowItWorksRoute: HowItWorksRoute,
@@ -851,7 +1099,9 @@ const rootRouteChildren: RootRouteChildren = {
     BlogCanAiTailorMyResumeToAJobPostingRoute,
   BlogHowToCreateACustomResumeForAJobDescriptionRoute:
     BlogHowToCreateACustomResumeForAJobDescriptionRoute,
+  BlogWhyResumesGetRejectedByAtsRoute: BlogWhyResumesGetRejectedByAtsRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
+  CocoClipNRoute: CocoClipNRoute,
   GuidesAustraliaResumeFormatRoute: GuidesAustraliaResumeFormatRoute,
   GuidesCanadaResumeFormatRoute: GuidesCanadaResumeFormatRoute,
   GuidesDubaiResumeFormatRoute: GuidesDubaiResumeFormatRoute,
@@ -859,12 +1109,17 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesIndiaResumeFormatRoute: GuidesIndiaResumeFormatRoute,
   GuidesSingaporeResumeFormatRoute: GuidesSingaporeResumeFormatRoute,
   GuidesUkResumeFormatRoute: GuidesUkResumeFormatRoute,
+  MFileRoute: MFileRoute,
   ExamplesCoverLettersSlugRoute: ExamplesCoverLettersSlugRoute,
   ExamplesResumesSlugRoute: ExamplesResumesSlugRoute,
   ExamplesCoverLettersIndexRoute: ExamplesCoverLettersIndexRoute,
   ExamplesResumesIndexRoute: ExamplesResumesIndexRoute,
+  ApiPublicJobsBackupRoute: ApiPublicJobsBackupRoute,
   ApiPublicJobsDailyAlertsRoute: ApiPublicJobsDailyAlertsRoute,
+  ApiPublicJobsKeepaliveRoute: ApiPublicJobsKeepaliveRoute,
+  ApiPublicJobsMonthlyLockRoute: ApiPublicJobsMonthlyLockRoute,
   ApiPublicJobsUnsubscribeRoute: ApiPublicJobsUnsubscribeRoute,
+  ApiPublicJobsYearlyReportRoute: ApiPublicJobsYearlyReportRoute,
   ApiPublicPaymentsRazorpayWebhookRoute: ApiPublicPaymentsRazorpayWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
