@@ -18,8 +18,10 @@ export const Route = createFileRoute("/api/public/pronet/tailor")({
       OPTIONS: async ({ request }) => (await import("@/lib/pronet-public.server")).pronetOptions(request),
       POST: async ({ request }) => {
         const { pronetJson, pronetUsedRolling, pronetRecordUse } = await import("@/lib/pronet-public.server");
+        // Read the body once up front so the catch below can still see deviceId.
+        const rawBody = (await request.json().catch(() => ({}))) as Record<string, unknown>;
         try {
-          const body = inputSchema.parse(await request.json());
+          const body = inputSchema.parse(rawBody);
           const { clientIp, enforcePolicy } = await import("@/lib/rate-limit.server");
           const { hashValue, firstRunChoice, recordFirstRun } = await import("@/lib/anon-tailor.server");
           const ip = clientIp(request);
@@ -47,8 +49,7 @@ export const Route = createFileRoute("/api/public/pronet/tailor")({
           const msg = safeErrorMessage("pronet.tailor", error, "Could not tailor this resume. Please try again.");
           // Temporary debug hook (2026-10-15): dbg- devices see the real error so the
           // bridge-vs-engine failure can be pinned without worker log access. Redacted.
-          let dbgId = "";
-          try { dbgId = String((await request.clone().json())?.deviceId ?? ""); } catch { /* already consumed */ }
+          const dbgId = String(rawBody?.deviceId ?? "");
           if (dbgId.startsWith("dbg-")) {
             const raw = String((error as Error)?.stack || (error as Error)?.message || error);
             const clean = raw.replace(/AIza[\w-]{10,}|csk-[\w-]{10,}|eyJ[\w.-]{10,}|[0-9a-f]{32,}/gi, "[redacted]").slice(0, 400);
