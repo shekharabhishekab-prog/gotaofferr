@@ -11,7 +11,7 @@ const inputSchema = jobAlertInputSchema.extend({
 /**
  * ProNet "Alert me" bell - LinkedIn-style email alerts on the current search.
  * Anonymous (ProNet has no login): keyed by email, free-tier limit of 1 alert
- * per month (exactly terbey's ALERT_ATTEMPT_LIMIT.free), same 3-email cycle
+ * per month (ProNet-loose: 5, owner-approved 2026-10-15), same 3-email cycle
  * powered by the same digest engine and Adzuna source as terbey.com alerts.
  */
 export const Route = createFileRoute("/api/public/pronet/job-alert")({
@@ -42,7 +42,8 @@ export const Route = createFileRoute("/api/public/pronet/job-alert")({
             return pronetJson(request, { ok: true, stopped: true });
           }
 
-          // Free-tier monthly limit, exactly as terbey (ALERT_ATTEMPT_LIMIT.free = 1).
+          // ProNet-loose monthly limit (owner-approved 2026-10-15): 5 per email
+          // per month instead of terbey's free-tier 1, so testing never blocks.
           const { ALERT_ATTEMPT_LIMIT } = await import("@/lib/plans");
           const since = new Date();
           since.setUTCDate(1);
@@ -52,7 +53,7 @@ export const Route = createFileRoute("/api/public/pronet/job-alert")({
             .select("id", { count: "exact", head: true })
             .eq("email", emailEnc)
             .gte("created_at", since.toISOString());
-          if ((count ?? 0) >= ALERT_ATTEMPT_LIMIT.free) {
+          if ((count ?? 0) >= 5) {
             return pronetJson(request, {
               error: `You have used your free job alert for this month. Your count resets next month - terbey.com plans give up to ${ALERT_ATTEMPT_LIMIT.career_pro}.`,
               used: true,

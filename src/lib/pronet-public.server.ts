@@ -5,11 +5,12 @@
  * SAME terbey engines through these public endpoints instead of the signed-in
  * server functions. Rules that never bend:
  * - CORS is locked to the ProNet origin only.
- * - Usage limits EXACTLY match what a logged-out terbey.com visitor gets
- *   (owner's standing rule): one free job search per device, one free tailor
- *   per device, one AI interview per device per month, one job alert per
- *   email per month. Counters live in the same anonymous_tailor_uses table
- *   with the same prefixes terbey.com uses, so both sites share one limit.
+ * - Usage limits: ProNet has its OWN generous counters (owner-approved
+ *   2026-10-15 8:56 PM "Karva do" - testing should not hit limits): 50
+ *   searches, 25 tailors and 10 interviews per device (or IP) per rolling
+ *   24h, 5 job alerts per email per month. Counters live in the same
+ *   anonymous_tailor_uses table but with "pronet:"-prefixed keys, so
+ *   terbey.com's own one-shot anon counters stay untouched.
  * - No Turnstile here: the terbey sitekey only issues tokens on terbey
  *   domains, so abuse control is the per-IP rate limit + per-device caps.
  */
@@ -97,7 +98,28 @@ export async function pronetUsedThisMonth(prefix: string, id: PronetIdentity): P
 
 export async function pronetRecordUse(prefix: string, id: PronetIdentity): Promise<void> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  // One row PER USE (unique suffix), so rolling-window counts work; the
+  // "pronet:" prefix + suffix never collide with terbey.com's exact-key lookups.
+  const suffix = ":" + crypto.randomUUID();
   await supabaseAdmin
     .from("anonymous_tailor_uses")
-    .upsert([{ device_hash: prefix + id.deviceHash, ip_hash: prefix + id.ipHash }], { onConflict: "device_hash" });
+    .insert([{ device_hash: prefix + id.deviceHash + suffix, ip_hash: prefix + id.ipHash + suffix }]);
+}
+
+/** Rolling-window usage count: true when uses in the last `hours` >= max. */
+export async function pronetUsedRolling(prefix: string, id: PronetIdentity, max: number, hours = 24): Promise<boolean> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const iso = new Date(Date.now() - hours * 3600 * 1000).toISOString();
+  const { count: byDevice } = await supabaseAdmin
+    .from("anonymous_tailor_uses")
+    .select("id", { count: "exact", head: true })
+    .like("device_hash", prefix + id.deviceHash + ":%")
+    .gte("created_at", iso);
+  if ((byDevice ?? 0) >= max) return true;
+  const { count: byIp } = await supabaseAdmin
+    .from("anonymous_tailor_uses")
+    .select("id", { count: "exact", head: true })
+    .like("ip_hash", prefix + id.ipHash + ":%")
+    .gte("created_at", iso);
+  return (byIp ?? 0) >= max;
 }

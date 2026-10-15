@@ -55,6 +55,10 @@ const DEFAULTS = {
   'job_anon_global': { limit: 300, windowSeconds: 86400, tier: 'public', message: 'Free logged-out job searches are paused for today. Create a free account to keep searching.' },
   // ProNet public bridge: per-network guards on top of the per-device caps (same spirit as the anon buckets above).
   'pronet_interview': { limit: 12, windowSeconds: 600, tier: 'public', message: 'Too many interview starts from this network. Please wait a few minutes and try again.' },
+  'pronet_search': { limit: 30, windowSeconds: 3600, tier: 'public', message: 'Too many searches from this network. Please wait a little and try again.' },
+  'pronet_search_global': { limit: 1000, windowSeconds: 86400, tier: 'public', message: 'ProNet job search is very busy today. Please try again a little later.' },
+  'pronet_tailor': { limit: 20, windowSeconds: 3600, tier: 'public', message: 'Too many rewrites from this network. Please wait a little and try again.' },
+  'pronet_tailor_global': { limit: 500, windowSeconds: 86400, tier: 'public', message: 'ProNet resume tailor is very busy today. Please try again a little later.' },
   'pronet_alert': { limit: 10, windowSeconds: 3600, tier: 'public', message: 'Too many alert changes from this network. Please wait and try again.' },
   'job-search': { limit: 30, windowSeconds: 600, tier: 'authenticated', message: 'Too many searches in a short time. Please wait a few minutes and try again.' },
   'job-alert-write': { limit: 30, windowSeconds: 600, tier: 'authenticated', message: 'Too many alert updates. Please wait a moment and try again.' },

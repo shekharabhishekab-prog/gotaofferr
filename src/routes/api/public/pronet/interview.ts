@@ -18,7 +18,8 @@ const setupSchema = z.object({
 /**
  * ProNet AI interview - terbey.com's makeQuestions / makeFeedback chains.
  * Terbey gates interviews behind login (free tier: 1/month); the ProNet
- * equivalent for a logged-out visitor is 1 interview per device per month.
+ * equivalent for a logged-out visitor: ProNet gets its own generous counter
+ * (10/day, owner-approved 2026-10-15), terbey.com counters untouched.
  * One interview = questions + one feedback call, so only "questions" consumes
  * the monthly use.
  */
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/api/public/pronet/interview")({
     handlers: {
       OPTIONS: async ({ request }) => (await import("@/lib/pronet-public.server")).pronetOptions(request),
       POST: async ({ request }) => {
-        const { pronetJson, pronetIdentity, pronetUsedThisMonth, pronetRecordUse } = await import("@/lib/pronet-public.server");
+        const { pronetJson, pronetIdentity, pronetUsedRolling, pronetRecordUse } = await import("@/lib/pronet-public.server");
         try {
           const body = setupSchema.parse(await request.json());
           const { enforcePolicy } = await import("@/lib/rate-limit.server");
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/api/public/pronet/interview")({
 
           const { mode, qa, deviceId: _d, ...setup } = body;
           if (mode === "questions") {
-            if (await pronetUsedThisMonth("interview:", id)) {
+            if (await pronetUsedRolling("pronet:interview:", id, 10)) {
               return pronetJson(request, {
                 error: "You have used your free AI interview for this month. It resets next month - terbey.com accounts get more.",
                 used: true,
@@ -45,7 +46,7 @@ export const Route = createFileRoute("/api/public/pronet/interview")({
             }
             const { makeQuestions } = await import("@/lib/interview.server");
             const questions = await makeQuestions(setup);
-            await pronetRecordUse("interview:", id);
+            await pronetRecordUse("pronet:interview:", id);
             return pronetJson(request, { questions });
           }
 
