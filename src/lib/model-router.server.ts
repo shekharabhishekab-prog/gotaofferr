@@ -7,6 +7,10 @@ export type RoutingTier = "free" | "starter" | "job_hunt" | "career_pro";
 
 // Daily request caps (requests per day, Pacific-time reset) from the AI Studio rate-limit page.
 export const MODEL_DAILY_CAP: Record<string, number> = {
+  // Cerebras trial: 5 requests/min, no daily cap. 429s fall back to Gemini automatically;
+  // this daily number is only a safety net + usage visibility. gpt-oss-120b = the API's
+  // own model id (the chain id "cerebras-gpt-oss-120b" maps to it in ai-gateway).
+  "gpt-oss-120b": 1000,
   "cf-melotts": 490,
   // Azure Speech F0 backup voice. F0 stops at 500K characters a month; 140 calls x ~100 chars x 31 days stays under it.
   "azure-speech": 140,
@@ -39,11 +43,18 @@ function proChain(): string[] {
   ];
 }
 
+// Cerebras first for everyone during the 30-day trial (owner decision 2026-10-13):
+// Tailor, Builder and Interview try gpt-oss-120b first, Gemini chain is the backup.
+// Offered only when the worker actually holds the key.
+function cerebrasFirst(): string[] {
+  return process.env.CEREBRAS_API_KEY ? ["cerebras-gpt-oss-120b"] : [];
+}
+
 export function chainForTier(tier: RoutingTier): string[] {
   // Career Pro only gets the full-quality models. Free, Starter and Job Hunt use the lower models.
   // Career Pro tries the strong models first; when their daily limits run out it switches to
   // the lower models (never "come back tomorrow"). Output on those is tuned to match.
-  return tier === "career_pro" ? [...proChain(), ...FREE_CHAIN] : FREE_CHAIN;
+  return tier === "career_pro" ? [...cerebrasFirst(), ...proChain(), ...FREE_CHAIN] : [...cerebrasFirst(), ...FREE_CHAIN];
 }
 
 export function isQuotaError(error: unknown): boolean {
