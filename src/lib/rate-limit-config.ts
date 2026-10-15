@@ -53,6 +53,9 @@ const DEFAULTS = {
   'tailor': { limit: 10, windowSeconds: 600, tier: 'authenticated', message: "You're rewriting resumes very quickly. Please wait a few minutes and try again." },
   'job_anon': { limit: 3, windowSeconds: 3600, tier: 'public', message: 'Too many free searches from this network. Please create a free account to continue.' },
   'job_anon_global': { limit: 300, windowSeconds: 86400, tier: 'public', message: 'Free logged-out job searches are paused for today. Create a free account to keep searching.' },
+  // ProNet public bridge: per-network guards on top of the per-device caps (same spirit as the anon buckets above).
+  'pronet_interview': { limit: 12, windowSeconds: 600, tier: 'public', message: 'Too many interview starts from this network. Please wait a few minutes and try again.' },
+  'pronet_alert': { limit: 10, windowSeconds: 3600, tier: 'public', message: 'Too many alert changes from this network. Please wait and try again.' },
   'job-search': { limit: 30, windowSeconds: 600, tier: 'authenticated', message: 'Too many searches in a short time. Please wait a few minutes and try again.' },
   'job-alert-write': { limit: 30, windowSeconds: 600, tier: 'authenticated', message: 'Too many alert updates. Please wait a moment and try again.' },
   'profile-write': { limit: 20, windowSeconds: 600, tier: 'authenticated', message: 'Too many profile updates. Please wait a moment and try again.' },

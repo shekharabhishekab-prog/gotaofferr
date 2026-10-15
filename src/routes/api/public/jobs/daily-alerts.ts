@@ -23,7 +23,17 @@ export const Route = createFileRoute("/api/public/jobs/daily-alerts")({
 
         try {
           const { runDueDigests } = await import("@/lib/job-alert-digest.server");
-          return Response.json(await runDueDigests());
+          const terbey = await runDueDigests();
+          // ProNet anonymous alerts ride the same cron. A missing table (migration not
+          // applied yet) must never break terbey's own alert run, so it is isolated.
+          let pronet: unknown = { skipped: "not_ready" };
+          try {
+            const { runDuePronetDigests } = await import("@/lib/pronet-alerts.server");
+            pronet = await runDuePronetDigests();
+          } catch (e) {
+            console.error("ProNet alert run failed (terbey run unaffected):", e);
+          }
+          return Response.json({ terbey, pronet });
         } catch (error) {
           console.error("Daily job alert run failed:", error);
           return new Response("Alert run failed", { status: 500 });
