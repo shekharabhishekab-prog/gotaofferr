@@ -19,9 +19,16 @@ const ALLOWED_ORIGINS = new Set([
   "https://pronet-75o.pages.dev",
 ]);
 
+/** ProNet production origin plus its Cloudflare Pages preview subdomains
+    (branch aliases and per-deploy URLs), so preview testing hits the same bridge. */
+function pronetOriginAllowed(origin: string): boolean {
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  return /^https:\/\/[a-z0-9-]+\.pronet-75o\.pages\.dev$/.test(origin);
+}
+
 export function pronetCors(request: Request): Record<string, string> {
   const origin = request.headers.get("origin") ?? "";
-  if (!ALLOWED_ORIGINS.has(origin)) return {};
+  if (!pronetOriginAllowed(origin)) return {};
   return {
     "access-control-allow-origin": origin,
     "access-control-allow-methods": "POST, GET, OPTIONS",
