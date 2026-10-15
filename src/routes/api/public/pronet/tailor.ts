@@ -44,7 +44,17 @@ export const Route = createFileRoute("/api/public/pronet/tailor")({
           return pronetJson(request, { result });
         } catch (error) {
           const { safeErrorMessage } = await import("@/lib/safe-error.server");
-          return pronetJson(request, { error: safeErrorMessage("pronet.tailor", error, "Could not tailor this resume. Please try again.") });
+          const msg = safeErrorMessage("pronet.tailor", error, "Could not tailor this resume. Please try again.");
+          // Temporary debug hook (2026-10-15): dbg- devices see the real error so the
+          // bridge-vs-engine failure can be pinned without worker log access. Redacted.
+          let dbgId = "";
+          try { dbgId = String((await request.clone().json())?.deviceId ?? ""); } catch { /* already consumed */ }
+          if (dbgId.startsWith("dbg-")) {
+            const raw = String((error as Error)?.stack || (error as Error)?.message || error);
+            const clean = raw.replace(/AIza[\w-]{10,}|csk-[\w-]{10,}|eyJ[\w.-]{10,}|[0-9a-f]{32,}/gi, "[redacted]").slice(0, 400);
+            return pronetJson(request, { error: msg, debug: clean });
+          }
+          return pronetJson(request, { error: msg });
         }
       },
     },
