@@ -90,12 +90,12 @@ const SF_CSS = `
 .sf-cta{display:flex;flex-direction:column;gap:1rem;align-items:flex-start}
 .sf-btn{display:inline-flex;background:var(--highlight,oklch(0.86 0.19 96));color:#fffffd;font-weight:700;border-radius:999px;padding:.8rem 1.5rem;font-size:.95rem;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .sf-btn:hover{transform:translateY(-3px) rotate(-1.5deg)}
-.sf-blurb{max-width:26rem;font-size:.88rem;line-height:1.55;color:rgba(0,0,0,.55);margin:0}
+.sf-blurb{max-width:26rem;font-size:.88rem;line-height:1.55;color:rgba(246,241,214,.55);margin:0}
 .sf-cols{display:grid;gap:2.2rem;margin-top:3.5rem;grid-template-columns:1fr 1fr}
 .sf-col:first-child{grid-column:1/-1}
 .sf-col ul{list-style:none;margin:.9rem 0 0;padding:0;display:grid;gap:.45rem}
 .sf-h2{margin:0;font-family:ui-monospace,Menlo,monospace;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--highlight,oklch(0.86 0.19 96));font-weight:500}
-.sf-a{position:relative;display:inline-block;font-size:.98rem;color:rgba(0,0,0,.72);transition:color .25s,transform .3s cubic-bezier(.2,.8,.2,1)}
+.sf-a{position:relative;display:inline-block;font-size:.98rem;color:rgba(246,241,214,.72);transition:color .25s,transform .3s cubic-bezier(.2,.8,.2,1)}
 .sf-a:hover{color:oklch(0.86 0.19 96);transform:translateX(8px)}
 .sf-a::before{content:"→";position:absolute;left:-1.1rem;opacity:0;color:var(--highlight,oklch(0.86 0.19 96));transition:opacity .25s}
 .sf-a:hover::before{opacity:1}
@@ -163,7 +163,7 @@ const SF_CSS = `
 .sf-top{display:grid;gap:2rem;align-items:end}
 .sf-grp{margin-top:3rem;display:grid;gap:2.4rem}
 .sf-grp .sf-col ul{display:flex;flex-wrap:wrap;gap:.5rem .5rem;margin-top:1rem}
-.sf-a{display:inline-flex;align-items:center;font-size:.92rem;color:rgba(0,0,0,.8)}
+.sf-a{display:inline-flex;align-items:center;font-size:.92rem;color:rgba(246,241,214,.8)}
 .sf-a::before{content:none}
 .sf-col ul.sf-list{display:grid;gap:.55rem}
 .sf-col ul.sf-chips li a{border:0;background:rgba(249,216,11,.07);padding:.5rem .95rem;border-radius:999px;transition:background .25s,color .25s,transform .3s cubic-bezier(.2,.8,.2,1)}

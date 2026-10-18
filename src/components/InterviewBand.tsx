@@ -66,7 +66,7 @@ const CSS = `
 .ivb-it{font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:400;text-transform:none;color:oklch(0.86 0.19 96);letter-spacing:0;font-size:1.12em}
 .ivb-out{color:transparent;-webkit-text-stroke:1.5px oklch(0.86 0.19 96)}
 .ivb-mk{background:oklch(0.86 0.19 96);color:#fffffd;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.ivb-sub{margin:22px 0 0;max-width:34rem;font-size:1.05rem;line-height:1.5;color:rgba(0,0,0,.75)}
+.ivb-sub{margin:22px 0 0;max-width:34rem;font-size:1.05rem;line-height:1.5;color:rgba(246,241,214,.75)}
 .ivb-cta{display:inline-flex;align-items:center;gap:10px;margin-top:26px;background:oklch(0.86 0.19 96);color:#fffffd;font-weight:800;border-radius:999px;padding:15px 26px;text-decoration:none;font-size:1.02rem;transition:transform .2s}
 .ivb-cta:hover{transform:translateY(-3px) rotate(-1deg)}
 .ivb-chat{position:relative;display:flex;flex-direction:column;gap:12px;padding:26px 20px 20px;border:1px solid rgba(249,216,11,.35);border-radius:22px;background:rgba(249,216,11,.04)}
