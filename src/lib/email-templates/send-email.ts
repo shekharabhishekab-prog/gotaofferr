@@ -70,7 +70,7 @@ export async function sendTemplateEmail(
 
   if (resendKey) {
     // Copy mode: send through the owner's own Resend account (free tier).
-    const fromDomain = process.env.RESEND_FROM_DOMAIN || "notify.gotaofferr.com"
+    const fromDomain = process.env.RESEND_FROM_DOMAIN || "gotaofferr.com"
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },

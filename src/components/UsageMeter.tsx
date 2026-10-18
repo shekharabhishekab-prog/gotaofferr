@@ -11,7 +11,7 @@ export function UsageMeter({ usage, fun = false }: { usage: UsageValue; fun?: bo
     ? 100
     : Math.min(100, Math.round((usage.used / Math.max(1, usage.limit)) * 100));
   const empty = !unlimited && usage.remaining <= 0;
-  const tone = fun ? (empty ? "bg-[#ff6b35]" : pct >= 80 ? "bg-[oklch(0.86 0.19 96)]" : "bg-hero") : "bg-hero";
+  const tone = fun ? (empty ? "bg-[#ff6b35]" : pct >= 80 ? "bg-[#ffb300]" : "bg-hero") : "bg-hero";
 
 
   if (unlimited) {

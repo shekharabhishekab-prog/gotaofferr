@@ -3,17 +3,17 @@ import { useEffect, useRef } from "react";
 import { WIP_ENABLED, WIP_LAUNCH_AT } from "@/lib/wip";
 
 const LANGS = [
-  { code: "en", chip: "EN", line: "Something big is cooking.", sub: "GotaOfferr is getting a glow-up. Back very soon.", soon: "Launch date soon", enter: "peek inside", units: ["days", "hrs", "min", "sec"] },
-  { code: "hi", chip: "Hinglish", line: "Kuch bada pak raha hai.", sub: "GotaOfferr ka glow-up chal raha hai. Bas thodi der mein wapas.", soon: "Date jaldi aayegi", enter: "andar jhaanko", units: ["din", "ghante", "min", "sec"] },
-  { code: "zh", chip: "中文", line: "大事正在酝酿中", sub: "GotaOfferr 正在大升级，马上回来。", soon: "上线日期即将公布", enter: "先进去看看", units: ["天", "时", "分", "秒"] },
-  { code: "ja", chip: "日本語", line: "なにかスゴいこと、準備中。", sub: "GotaOfferr がパワーアップ中。もうすぐ戻ります。", soon: "公開日はもうすぐ", enter: "のぞいてみる", units: ["日", "時間", "分", "秒"] },
-  { code: "ko", chip: "한국어", line: "엄청난 게 오고 있어요", sub: "GotaOfferr가 새롭게 변신 중이에요. 곧 돌아올게요.", soon: "오픈 날짜는 곧 공개", enter: "먼저 둘러보기", units: ["일", "시간", "분", "초"] },
+  { code: "en", chip: "EN", line: "Something big is cooking.", sub: "Gotaofferr is getting a glow-up. Back very soon.", soon: "Launch date soon", enter: "peek inside", units: ["days", "hrs", "min", "sec"] },
+  { code: "hi", chip: "Hinglish", line: "Kuch bada pak raha hai.", sub: "Gotaofferr ka glow-up chal raha hai. Bas thodi der mein wapas.", soon: "Date jaldi aayegi", enter: "andar jhaanko", units: ["din", "ghante", "min", "sec"] },
+  { code: "zh", chip: "中文", line: "大事正在酝酿中", sub: "Gotaofferr 正在大升级，马上回来。", soon: "上线日期即将公布", enter: "先进去看看", units: ["天", "时", "分", "秒"] },
+  { code: "ja", chip: "日本語", line: "なにかスゴいこと、準備中。", sub: "Gotaofferr がパワーアップ中。もうすぐ戻ります。", soon: "公開日はもうすぐ", enter: "のぞいてみる", units: ["日", "時間", "分", "秒"] },
+  { code: "ko", chip: "한국어", line: "엄청난 게 오고 있어요", sub: "Gotaofferr가 새롭게 변신 중이에요. 곧 돌아올게요.", soon: "오픈 날짜는 곧 공개", enter: "먼저 둘러보기", units: ["일", "시간", "분", "초"] },
 ] as const;
 
 const CSS = `
 @font-face{font-family:"Covered Grace";src:url(/fonts/covered-grace.ttf) format("truetype");font-display:swap}
 @font-face{font-family:"Caveat Brush";src:url(/fonts/caveat-brush.woff2) format("woff2");font-display:swap}
-#wip{display:none;position:fixed;inset:0;z-index:2147483000;background:radial-gradient(ellipse at 50% 120%,#0b0a1c 0%,#fffffd 60%);color:oklch(0.86 0.19 96);overflow:hidden;
+#wip{display:none;position:fixed;inset:0;z-index:2147483000;background:radial-gradient(ellipse at 50% 120%,#0b0a1c 0%,#000 60%);color:#ffd60a;overflow:hidden;
 font-family:"Caveat Brush","Segoe Print","Comic Sans MS","Hiragino Maru Gothic ProN","PingFang SC","Noto Sans CJK JP","Malgun Gothic",cursive,sans-serif}
 html[data-wip=on] #wip{display:flex;align-items:center;justify-content:center}
 html[data-wip=on] body{overflow:hidden}
@@ -26,28 +26,28 @@ html[data-wip=on] #wip p{font-family:"Caveat Brush","Segoe Print","Comic Sans MS
 #wip h2{margin:0;font-weight:400;font-size:clamp(3.2rem,14vw,7.4rem);line-height:1.06;letter-spacing:.01em;transform:rotate(-2deg);text-wrap:balance}
 #wip .wip-sub{margin:28px auto 0;max-width:30ch;font-size:clamp(1.35rem,3.4vw,2rem);line-height:1.45;opacity:.92;text-wrap:balance}
 #wip .wip-line{display:block;margin:10px auto 0;width:min(70%,420px);height:22px;overflow:visible}
-#wip .wip-line path{fill:none;stroke:oklch(0.86 0.19 96);stroke-width:5;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;animation:wipDraw 1.4s .4s ease-out forwards}
-#wip .wip-star{position:absolute;color:oklch(0.86 0.19 96);animation:wipBob 4s ease-in-out infinite}
+#wip .wip-line path{fill:none;stroke:#ffd60a;stroke-width:5;stroke-linecap:round;stroke-dasharray:420;stroke-dashoffset:420;animation:wipDraw 1.4s .4s ease-out forwards}
+#wip .wip-star{position:absolute;color:#ffd60a;animation:wipBob 4s ease-in-out infinite}
 #wip .wip-timer{position:absolute;top:clamp(40px,8vh,84px);right:clamp(28px,5vw,72px);display:flex;gap:8px;align-items:flex-start}
-#wip .wip-box{min-width:46px;padding:5px 7px 4px;border:2px solid oklch(0.86 0.19 96);border-radius:13px;text-align:center}
+#wip .wip-box{min-width:46px;padding:5px 7px 4px;border:2px solid #ffd60a;border-radius:13px;text-align:center}
 #wip .wip-box b{display:block;font-weight:400;font-size:1.35rem;line-height:1;font-variant-numeric:tabular-nums}
 #wip .wip-box i{display:block;font-style:normal;font-size:.75rem;opacity:.85;margin-top:2px}
 #wip .wip-soon-wrap{display:contents}
-#wip .wip-soon{position:absolute;top:clamp(40px,8vh,84px);right:clamp(28px,5vw,72px);padding:8px 18px;border:3px solid oklch(0.86 0.19 96);border-radius:999px;font-size:1.25rem}
-#wip .wip-enter{position:absolute;right:22px;bottom:22px;display:flex;align-items:center;gap:10px;background:none;border:0;color:oklch(0.86 0.19 96);font:inherit;font-size:1.3rem;cursor:pointer;padding:6px}
-#wip .wip-enter span.wip-arrow{display:grid;place-items:center;width:52px;height:52px;border:3px solid oklch(0.86 0.19 96);border-radius:50%;transition:transform .2s ease}
+#wip .wip-soon{position:absolute;top:clamp(40px,8vh,84px);right:clamp(28px,5vw,72px);padding:8px 18px;border:3px solid #ffd60a;border-radius:999px;font-size:1.25rem}
+#wip .wip-enter{position:absolute;right:22px;bottom:22px;display:flex;align-items:center;gap:10px;background:none;border:0;color:#ffd60a;font:inherit;font-size:1.3rem;cursor:pointer;padding:6px}
+#wip .wip-enter span.wip-arrow{display:grid;place-items:center;width:52px;height:52px;border:3px solid #ffd60a;border-radius:50%;transition:transform .2s ease}
 #wip .wip-enter:hover span.wip-arrow,#wip .wip-enter:focus-visible span.wip-arrow{transform:translate(4px,4px) rotate(8deg)}
-#wip .wip-enter:focus-visible,#wip .wip-chip:focus-visible{outline:3px solid oklch(0.86 0.19 96);outline-offset:3px}
+#wip .wip-enter:focus-visible,#wip .wip-chip:focus-visible{outline:3px solid #fff;outline-offset:3px}
 #wip .wip-langs{position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:0 120px 0 20px}
-#wip .wip-chip{background:none;border:2px solid rgba(255,214,10,.45);color:oklch(0.86 0.19 96);font:inherit;font-size:1.05rem;border-radius:999px;padding:3px 14px;cursor:pointer}
-html[data-wl=en] #wip .wip-chip[data-c=en],html[data-wl=hi] #wip .wip-chip[data-c=hi],html[data-wl=zh] #wip .wip-chip[data-c=zh],html[data-wl=ja] #wip .wip-chip[data-c=ja],html[data-wl=ko] #wip .wip-chip[data-c=ko]{background:oklch(0.86 0.19 96);color:#fffffd;border-color:oklch(0.86 0.19 96)}
+#wip .wip-chip{background:none;border:2px solid rgba(255,214,10,.45);color:#ffd60a;font:inherit;font-size:1.05rem;border-radius:999px;padding:3px 14px;cursor:pointer}
+html[data-wl=en] #wip .wip-chip[data-c=en],html[data-wl=hi] #wip .wip-chip[data-c=hi],html[data-wl=zh] #wip .wip-chip[data-c=zh],html[data-wl=ja] #wip .wip-chip[data-c=ja],html[data-wl=ko] #wip .wip-chip[data-c=ko]{background:#ffd60a;color:#000;border-color:#ffd60a}
 
 #wip .wip-sky{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #wip .wip-st{position:absolute;left:0;top:0;border-radius:50%;background:transparent;will-change:opacity}
-#wip .wip-st.a{width:2px;height:2px;box-shadow:var(--s);color:oklch(0.86 0.19 96);animation:wipTw 3.6s ease-in-out infinite}
+#wip .wip-st.a{width:2px;height:2px;box-shadow:var(--s);color:#ffe98a;animation:wipTw 3.6s ease-in-out infinite}
 #wip .wip-st.b{width:3px;height:3px;box-shadow:var(--s);animation:wipTw 5.2s -2s ease-in-out infinite}
 #wip .wip-st.c{width:2px;height:2px;box-shadow:var(--s);animation:wipTw 4.4s -1s ease-in-out infinite}
-#wip .wip-sh{position:absolute;width:140px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,233,138,0),oklch(0.86 0.19 96));opacity:0;transform:rotate(35deg);will-change:transform,opacity;animation:wipShoot 9s linear infinite}
+#wip .wip-sh{position:absolute;width:140px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,233,138,0),#ffe98a);opacity:0;transform:rotate(35deg);will-change:transform,opacity;animation:wipShoot 9s linear infinite}
 #wip .wip-sub{animation:wipFloat 7s -2s ease-in-out infinite}
 #wip .wip-box{animation:wipGlow 3.5s ease-in-out infinite}
 #wip .wip-box:nth-child(2){animation-delay:-.9s}#wip .wip-box:nth-child(3){animation-delay:-1.8s}#wip .wip-box:nth-child(4){animation-delay:-2.7s}
@@ -85,7 +85,7 @@ function field(n: number, seed: number) {
   let x = seed;
   const r = () => ((x = (x * 1664525 + 1013904223) % 4294967296) / 4294967296);
   const out: string[] = [];
-  for (let i = 0; i < n; i++) out.push(`${(r() * 100).toFixed(1)}vw ${(r() * 100).toFixed(1)}vh oklch(0.86 0.19 96)`);
+  for (let i = 0; i < n; i++) out.push(`${(r() * 100).toFixed(1)}vw ${(r() * 100).toFixed(1)}vh #ffe98a`);
   return out.join(",");
 }
 const SKY_A = field(70, 11), SKY_B = field(36, 29), SKY_C = field(22, 47);
@@ -131,7 +131,7 @@ export function WipSplash() {
   };
 
   return (
-    <div id="wip" ref={root} role="dialog" aria-label="GotaOfferr is coming back soon">
+    <div id="wip" ref={root} role="dialog" aria-label="Gotaofferr is coming back soon">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
 
       <div className="wip-sky" aria-hidden="true">

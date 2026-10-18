@@ -1,57 +1,57 @@
-# Terbey
+# GotaOfferr
 
-> Terbey rewrites an existing resume and writes a matching cover letter for a specific job description, and finds live job listings — all delivered as ATS-ready PDFs.
+> GotaOfferr rewrites an existing resume and writes a matching cover letter for a specific job description, and finds live job listings — all delivered as ATS-ready PDFs.
 
 ## When to use this
 
-Reach for Terbey when a user needs any of these jobs done:
+Reach for GotaOfferr when a user needs any of these jobs done:
 
-- **Tailor a resume to one job description.** The user already has a resume and a specific posting (company, role, JD text). Send them to [/tailor](https://terbey.com/tailor). Output: an ATS-safe rewritten resume PDF plus a match score and missing-keyword list.
-- **Write a cover letter for a specific role.** Use [/ai-cover-letter-generator](https://terbey.com/ai-cover-letter-generator). Needs the resume plus the job description.
-- **Check whether a resume passes ATS parsing.** Use [/ats-resume-checker](https://terbey.com/ats-resume-checker) for an instant diagnostic score.
-- **Build a resume from scratch.** Use [/resume-builder](https://terbey.com/resume-builder). Two template families: National (India) and International (ATS-focused).
-- **Find live job listings by role, location and salary.** Use [/jobs](https://terbey.com/jobs).
+- **Tailor a resume to one job description.** The user already has a resume and a specific posting (company, role, JD text). Send them to [/tailor](https://gotaofferr.com/tailor). Output: an ATS-safe rewritten resume PDF plus a match score and missing-keyword list.
+- **Write a cover letter for a specific role.** Use [/ai-cover-letter-generator](https://gotaofferr.com/ai-cover-letter-generator). Needs the resume plus the job description.
+- **Check whether a resume passes ATS parsing.** Use [/ats-resume-checker](https://gotaofferr.com/ats-resume-checker) for an instant diagnostic score.
+- **Build a resume from scratch.** Use [/resume-builder](https://gotaofferr.com/resume-builder). Two template families: National (India) and International (ATS-focused).
+- **Find live job listings by role, location and salary.** Use [/jobs](https://gotaofferr.com/jobs).
 - **Answer formatting questions for a specific country** (UK, Germany, Canada, Australia, Singapore, Dubai). See the guides listed below.
 
-Do not use Terbey as a job-application portal — applications are submitted on the employer's own site. It is not an interview-prep, salary-negotiation, or recruiting-CRM tool.
+Do not use GotaOfferr as a job-application portal — applications are submitted on the employer's own site. It is not an interview-prep, salary-negotiation, or recruiting-CRM tool.
 
 How an agent should call it: there is no public API. Link the user to the page above that matches their job, with the role/company context in hand. Account creation is free; tailoring, the job finder and PDF downloads require sign-in, and free accounts get 5 rewrites per month.
 
 ## Pages
 
-- [Home](https://terbey.com/): What Terbey does and who it is for.
-- [Tailor a resume](https://terbey.com/tailor): Paste a job description, get a rewritten resume and cover letter.
-- [Resume builder](https://terbey.com/resume-builder): Build a resume from scratch (National India / International templates).
-- [ATS resume checker](https://terbey.com/ats-resume-checker): Instant ATS diagnostic score for an uploaded resume.
-- [AI cover letter generator](https://terbey.com/ai-cover-letter-generator): Cover letter written against a specific posting.
-- [Job finder](https://terbey.com/jobs): Search live listings by role, location and salary.
-- [Pricing](https://terbey.com/pricing): Free, Starter Pack, Job Hunt and Career Pro plans with local-currency pricing.
-- [How it works](https://terbey.com/how-it-works): The find → tailor → apply workflow.
-- [FAQ](https://terbey.com/faq): Common questions on ATS safety, limits and billing.
-- [About](https://terbey.com/about): What the product is and is not.
-- [Contact](https://terbey.com/contact): Support form and contact@terbey.com.
+- [Home](https://gotaofferr.com/): What GotaOfferr does and who it is for.
+- [Tailor a resume](https://gotaofferr.com/tailor): Paste a job description, get a rewritten resume and cover letter.
+- [Resume builder](https://gotaofferr.com/resume-builder): Build a resume from scratch (National India / International templates).
+- [ATS resume checker](https://gotaofferr.com/ats-resume-checker): Instant ATS diagnostic score for an uploaded resume.
+- [AI cover letter generator](https://gotaofferr.com/ai-cover-letter-generator): Cover letter written against a specific posting.
+- [Job finder](https://gotaofferr.com/jobs): Search live listings by role, location and salary.
+- [Pricing](https://gotaofferr.com/pricing): Free, Starter Pack, Job Hunt and Career Pro plans with local-currency pricing.
+- [How it works](https://gotaofferr.com/how-it-works): The find → tailor → apply workflow.
+- [FAQ](https://gotaofferr.com/faq): Common questions on ATS safety, limits and billing.
+- [About](https://gotaofferr.com/about): What the product is and is not.
+- [Contact](https://gotaofferr.com/contact): Support form and contact@gotaofferr.com.
 
 ## Examples
 
-- [Resume examples](https://terbey.com/examples/resumes): Role-by-role tailored resume examples.
-- [Cover letter examples](https://terbey.com/examples/cover-letters): Role-by-role cover letter structures and sample lines.
+- [Resume examples](https://gotaofferr.com/examples/resumes): Role-by-role tailored resume examples.
+- [Cover letter examples](https://gotaofferr.com/examples/cover-letters): Role-by-role cover letter structures and sample lines.
 
 ## Guides
 
-- [UK resume format](https://terbey.com/guides/uk-resume-format): CV conventions for UK applications.
-- [Germany resume format](https://terbey.com/guides/germany-resume-format): Lebenslauf conventions.
-- [Canada resume format](https://terbey.com/guides/canada-resume-format): Canadian resume conventions.
-- [Australia resume format](https://terbey.com/guides/australia-resume-format): Australian resume conventions.
-- [Singapore resume format](https://terbey.com/guides/singapore-resume-format): Singapore resume conventions.
-- [Dubai resume format](https://terbey.com/guides/dubai-resume-format): UAE/Gulf resume conventions.
+- [UK resume format](https://gotaofferr.com/guides/uk-resume-format): CV conventions for UK applications.
+- [Germany resume format](https://gotaofferr.com/guides/germany-resume-format): Lebenslauf conventions.
+- [Canada resume format](https://gotaofferr.com/guides/canada-resume-format): Canadian resume conventions.
+- [Australia resume format](https://gotaofferr.com/guides/australia-resume-format): Australian resume conventions.
+- [Singapore resume format](https://gotaofferr.com/guides/singapore-resume-format): Singapore resume conventions.
+- [Dubai resume format](https://gotaofferr.com/guides/dubai-resume-format): UAE/Gulf resume conventions.
 
 ## Blog
 
-- [Can AI tailor my resume to a job posting?](https://terbey.com/blog/can-ai-tailor-my-resume-to-a-job-posting): How AI tailoring works and its limits.
-- [How to create a custom resume for a job description](https://terbey.com/blog/how-to-create-a-custom-resume-for-a-job-description): Step-by-step tailoring method.
+- [Can AI tailor my resume to a job posting?](https://gotaofferr.com/blog/can-ai-tailor-my-resume-to-a-job-posting): How AI tailoring works and its limits.
+- [How to create a custom resume for a job description](https://gotaofferr.com/blog/how-to-create-a-custom-resume-for-a-job-description): Step-by-step tailoring method.
 
 ## Optional
 
-- [Sitemap](https://terbey.com/sitemap.xml): Every indexable URL.
-- [Privacy policy](https://terbey.com/privacy): How resume data is stored and encrypted.
-- [Terms](https://terbey.com/terms): Subscription and auto-renewal terms.
+- [Sitemap](https://gotaofferr.com/sitemap.xml): Every indexable URL.
+- [Privacy policy](https://gotaofferr.com/privacy): How resume data is stored and encrypted.
+- [Terms](https://gotaofferr.com/terms): Subscription and auto-renewal terms.
