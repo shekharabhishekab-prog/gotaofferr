@@ -45,7 +45,7 @@ export function UpgradePopup({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ width: "100%", maxWidth: 420, background: "#fffffd", color: "oklch(0.86 0.19 96)", border: "2px solid oklch(0.86 0.19 96)", borderRadius: 20, padding: "28px 24px", textAlign: "center", boxShadow: "0 0 60px -10px rgba(7,63,137,.35)" }}
+        style={{ width: "100%", maxWidth: 420, background: "#fffffd", color: "oklch(0.86 0.19 96)", border: "2px solid oklch(0.86 0.19 96)", borderRadius: 20, padding: "28px 24px", textAlign: "center", boxShadow: "0 0 60px -10px rgba(249,216,11,.35)" }}
       >
         <div style={{ fontSize: 44, lineHeight: 1 }}>🐾</div>
         <p style={{ margin: "14px 0 0", fontSize: "1.15rem", fontWeight: 800, lineHeight: 1.35 }}>{MEME[feature]}</p>

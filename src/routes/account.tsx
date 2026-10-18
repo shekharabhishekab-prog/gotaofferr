@@ -271,7 +271,7 @@ function Account() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "terbey-my-data.json";
+      a.download = "gotaofferr-my-data.json";
       a.click();
       URL.revokeObjectURL(url);
       toast.success("Your data export has been downloaded.");

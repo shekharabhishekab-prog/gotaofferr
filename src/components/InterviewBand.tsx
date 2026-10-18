@@ -69,7 +69,7 @@ const CSS = `
 .ivb-sub{margin:22px 0 0;max-width:34rem;font-size:1.05rem;line-height:1.5;color:rgba(0,0,0,.75)}
 .ivb-cta{display:inline-flex;align-items:center;gap:10px;margin-top:26px;background:oklch(0.86 0.19 96);color:#fffffd;font-weight:800;border-radius:999px;padding:15px 26px;text-decoration:none;font-size:1.02rem;transition:transform .2s}
 .ivb-cta:hover{transform:translateY(-3px) rotate(-1deg)}
-.ivb-chat{position:relative;display:flex;flex-direction:column;gap:12px;padding:26px 20px 20px;border:1px solid rgba(7,63,137,.35);border-radius:22px;background:rgba(7,63,137,.04)}
+.ivb-chat{position:relative;display:flex;flex-direction:column;gap:12px;padding:26px 20px 20px;border:1px solid rgba(249,216,11,.35);border-radius:22px;background:rgba(249,216,11,.04)}
 .ivb-cat{position:absolute;top:-26px;right:18px;width:58px;height:58px;border-radius:50%;background:oklch(0.86 0.19 96);display:flex;align-items:center;justify-content:center;font-size:32px;transform:rotate(8deg)}
 .ivb-b{max-width:88%;padding:11px 15px;border-radius:16px;font-size:.95rem;line-height:1.35}
 .ivb-b1{background:oklch(0.86 0.19 96);color:#fffffd;border-bottom-left-radius:4px;align-self:flex-start}

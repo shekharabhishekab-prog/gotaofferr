@@ -250,7 +250,7 @@ function AdminPage() {
                 try {
                   const res = await marketingFn({});
                   downloadCsv(
-                    `terbey-marketing-emails-${stamp()}.csv`,
+                    `gotaofferr-marketing-emails-${stamp()}.csv`,
                     ["email", "source", "captured_at"],
                     res.rows.map((r) => [r.email, r.source, r.createdAt]),
                   );
@@ -281,7 +281,7 @@ function AdminPage() {
                   size="sm"
                   onClick={() =>
                     downloadCsv(
-                      `terbey-all-users-${stamp()}.csv`,
+                      `gotaofferr-all-users-${stamp()}.csv`,
                       [
                         "user_id",
                         "email",
@@ -362,7 +362,7 @@ function AdminPage() {
                   size="sm"
                   onClick={() =>
                     downloadCsv(
-                      `terbey-paid-subscribers-${stamp()}.csv`,
+                      `gotaofferr-paid-subscribers-${stamp()}.csv`,
                       [
                         "user_id",
                         "email",

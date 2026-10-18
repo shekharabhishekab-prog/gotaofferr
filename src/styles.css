@@ -652,13 +652,13 @@
 .ab-tab i{color:inherit !important}
 
 /* ai-labels */
-.ai-lab,.ai-dt,.ai-dh,.ai-wrap label>span,.ai-wrap label span:not([class*=bg-]){color:#000000 !important}
+.ai-lab,.ai-dt,.ai-dh,.ai-wrap label>span,.ai-wrap label span:not([class*=bg-]){color:oklch(0.95 0.03 96) !important}
 
 /* on-blue: text on solid blue is off-white */
-.tl-gchip.y,.ak-chip.y,.ak-pin.bad,.bg-primary,.bg-primary *{color:#fffffd !important}
+.tl-gchip.y,.ak-chip.y,.bg-primary,.bg-primary *{color:#000000 !important}
 
 /* on-blue-2 */
-.bg-primary.text-primary-foreground,.bg-primary.font-display{color:#fffffd !important}
+.bg-primary.text-primary-foreground,.bg-primary.font-display{color:#000000 !important}
 
 /* hero-dark */
 .hp-hero .hx-meta,.hp-hero .hx-meta *,.hp-hero .pill-d,.hp-hero .hp-sub,.hp-hero .hp-sub *{color:rgba(255,255,255,.85)!important}
@@ -689,7 +689,7 @@ header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
 /* cards-white */
 .hp-stackcard h3 a,.hp-stackcard h3 a *,.hp-stackcard .hp-tlink{color:#fffffd!important}
 .hp-stackcard .hp-tlink:hover,.hp-stackcard h3 a:hover{color:#fffffd!important}
-.hp-stackcard .hp-btn{background:#fffffd!important;color:oklch(0.86 0.19 96)!important;border-color:#fffffd!important}
+.hp-stackcard .hp-btn{background:oklch(0.86 0.19 96)!important;color:#000!important;border-color:oklch(0.86 0.19 96)!important}
 .hp-stackcard .hp-btn *{color:oklch(0.86 0.19 96)!important}
 .hp-stackcard ::selection{background:#fffffd;color:oklch(0.86 0.19 96)}
 
@@ -718,11 +718,11 @@ header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
 .hdm-rows{position:absolute;inset:-10% 0;display:flex;flex-direction:column;justify-content:space-around}
 .hdm-row{display:flex;width:max-content;gap:4rem;white-space:nowrap;font-family:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;font-weight:700;font-size:clamp(4rem,11vw,9rem);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(255,255,253,.2);animation:hdm-l linear infinite}
 .hdm-rr{animation-name:hdm-r}
-.hdm-fill{color:rgba(7,63,137,.55);-webkit-text-stroke:0}
+.hdm-fill{color:rgba(249,216,11,.55);-webkit-text-stroke:0}
 @keyframes hdm-l{to{transform:translateX(-50%)}}
 @keyframes hdm-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}
 .hdm-orb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.hdm-glow{position:absolute;width:60vmin;height:60vmin;border-radius:50%;background:radial-gradient(circle,rgba(7,63,137,.55),transparent 68%);animation:hdm-b 9s ease-in-out infinite}
+.hdm-glow{position:absolute;width:60vmin;height:60vmin;border-radius:50%;background:radial-gradient(circle,rgba(249,216,11,.55),transparent 68%);animation:hdm-b 9s ease-in-out infinite}
 @keyframes hdm-b{50%{transform:scale(1.25);opacity:.7}}
 .hdm-ring{position:absolute;border-radius:50%;border:1px solid rgba(255,255,253,.18);animation:hdm-s linear infinite}
 .hdm-dot{position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%}
@@ -732,7 +732,7 @@ header.sticky{--hs:clamp(0,calc((var(--hd,1) - .985)*70),1)}
 /* hero-demos-2 */
 .hdm-line{stroke-width:1.8!important;filter:brightness(1.8)}
 .hdm-row{-webkit-text-stroke:1.5px rgba(255,255,253,.42)!important}
-.hdm-fill{color:rgba(7,63,137,.8)!important;-webkit-text-stroke:0!important}
+.hdm-fill{color:rgba(249,216,11,.8)!important;-webkit-text-stroke:0!important}
 .hdm-ring{border:1.5px solid rgba(255,255,253,.38)!important}
 .hdm-dot{width:10px;height:10px;top:-5px}
 
@@ -754,17 +754,12 @@ p.text-\[11px\].text-muted-foreground{color:#000 !important}
 .ak-res .ak-ft.a{color:#fffffd !important}
 
 /* insights-fix */
-.tl-ins-score small{color:#fffffd !important}
+.tl-ins-score small{color:oklch(0.95 0.03 96) !important}
 .tl-ins-h.tl-ins-h-gap,.tl-ins-warn .tl-ins-h{color:oklch(0.86 0.19 96) !important}
-.tl-chip.tl-chip-no{color:#000 !important}
+.tl-chip.tl-chip-no{color:oklch(0.95 0.03 96) !important}
 
 /* layout-apply-btn: long external Apply buttons must not overflow narrow screens */
 @media (max-width: 640px) {
   a.inline-flex.whitespace-nowrap[target="_blank"] { max-width: 100%; white-space: normal; overflow-wrap: anywhere; text-align: left; height: auto; min-height: 2.5rem; }
 }
 
-/* hero-light (terbey-rebrand: static white hero replaces dark video hero) */
-.hp-hero .hx-meta,.hp-hero .hx-meta *,.hp-hero .pill-d,.hp-hero .hp-sub,.hp-hero .hp-sub *{color:rgba(15,23,42,.75)!important}
-.hp-hero .i3-pill,.hp-hero .i3-pill *{color:#0f172a!important}
-.hp-hero .text-highlight,.hp-hero .hp-chip-y{color:oklch(0.86 0.19 96)!important}
-.hp-hero .hx-meta b{color:#0f172a!important}
