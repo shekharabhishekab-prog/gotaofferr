@@ -165,10 +165,10 @@ export async function buildYearlyReports(year: number): Promise<ReportFile[]> {
   const months = await monthsForYear(year);
   const d = await detailPdfs(year);
   return [
-    { filename: `terbey-${year}-1-yearly-totals.pdf`, bytes: totalsPdf(year, months) },
-    { filename: `terbey-${year}-2-insight-report.pdf`, bytes: insightPdf(year, months) },
-    { filename: `terbey-${year}-3-user-details.pdf`, bytes: d.users },
-    { filename: `terbey-${year}-4-subscription-details.pdf`, bytes: d.subs },
+    { filename: `gotaofferr-${year}-1-yearly-totals.pdf`, bytes: totalsPdf(year, months) },
+    { filename: `gotaofferr-${year}-2-insight-report.pdf`, bytes: insightPdf(year, months) },
+    { filename: `gotaofferr-${year}-3-user-details.pdf`, bytes: d.users },
+    { filename: `gotaofferr-${year}-4-subscription-details.pdf`, bytes: d.subs },
   ];
 }
 

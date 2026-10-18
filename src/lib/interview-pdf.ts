@@ -65,5 +65,5 @@ export async function makeInterviewPdf(fb: Fb, questions: string[], answers: str
   });
   y += 6;
   para("AI coaching, not a verdict. Made in your browser by gotaofferr.com. Nothing was stored.", 9, false, [90, 90, 90], 0, 0);
-  d.save("terbey-interview-feedback.pdf");
+  d.save("gotaofferr-interview-feedback.pdf");
 }
