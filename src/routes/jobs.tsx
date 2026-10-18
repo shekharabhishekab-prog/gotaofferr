@@ -49,7 +49,7 @@ import {
 
 const JB_CSS = `
 @font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-display:swap}
-.tlp{--y:#073f89;--cream:#073f89;background:#fffffd;color:var(--cream)}
+.tlp{--y:oklch(0.86 0.19 96);--cream:oklch(0.86 0.19 96);background:#fffffd;color:var(--cream)}
 .tl-hero{position:relative;padding:44px 20px 40px;text-align:center;background:radial-gradient(55% 60% at 50% 0%,rgba(7,63,137,.14),transparent 72%)}
 .tl-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(7,63,137,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(7,63,137,.045) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:linear-gradient(#fffffd 20%,transparent);mask-image:linear-gradient(#fffffd 20%,transparent)}
 .tl-hero>*{position:relative}
@@ -63,7 +63,7 @@ const JB_CSS = `
 @keyframes tl-rise{to{opacity:1;transform:none}}
 .tl-cur{display:inline-block;transition:transform .3s}
 .tl-h1:hover .tl-cur{transform:rotate(-2deg) scale(1.04)}
-.tl-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#fffffd;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 #073f89,0 0 0 2px var(--y);transition:transform .25s}
+.tl-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#fffffd;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 oklch(0.86 0.19 96),0 0 0 2px var(--y);transition:transform .25s}
 .tl-sticker:hover{animation:tl-wig .55s}
 @keyframes tl-wig{25%{transform:rotate(-8deg) scale(1.08)}60%{transform:rotate(6deg) scale(1.08)}100%{transform:rotate(-2deg)}}
 @keyframes tl-wig2{25%{transform:translateY(-3px) rotate(-1.2deg)}60%{transform:translateY(-3px) rotate(1.2deg)}100%{transform:translateY(-3px) rotate(0)}}
@@ -103,21 +103,21 @@ export const Route = createFileRoute("/jobs")({
   }),
   head: () => ({
     meta: [
-      { title: "AI Job Finder — Find & Apply Faster | Terbey" },
+      { title: "AI Job Finder — Find & Apply Faster | GotaOfferr" },
       {
         name: "description",
         content:
           "Type a role, set your filters, and get one clean list of live job openings from across the web — plus an email of new matches every 3 days.",
       },
-      { property: "og:title", content: "AI Job Finder — Find & Apply Faster | Terbey" },
+      { property: "og:title", content: "AI Job Finder — Find & Apply Faster | GotaOfferr" },
       {
         property: "og:description",
         content:
           "One search across job boards, your filters saved, and an email every 3 days with only the new matches.",
       },
-      { property: "og:url", content: "https://terbey.com/jobs" },
+      { property: "og:url", content: "https://gotaofferr.com/jobs" },
     ],
-    links: [{ rel: "canonical", href: "https://terbey.com/jobs" }],
+    links: [{ rel: "canonical", href: "https://gotaofferr.com/jobs" }],
   }),
   component: Jobs,
   errorComponent: RouteError,
@@ -855,7 +855,7 @@ function Jobs() {
           </ul>
           <p className="tl-more">
             Every plan includes job alerts: each alert emails you new matches 3 times, every 3 days. New to
-            Terbey? Read <a href="/how-it-works">how it works</a>, try the{" "}
+            GotaOfferr? Read <a href="/how-it-works">how it works</a>, try the{" "}
             <a href="/resume-builder">resume builder</a> or see the <a href="/faq">FAQ</a>.
           </p>
         </section></>

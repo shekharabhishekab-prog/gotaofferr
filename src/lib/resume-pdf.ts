@@ -129,7 +129,7 @@ async function createDoc() {
 
 export async function buildResumePdf(r: TailoredResume) {
   const d = await createDoc();
-  d.doc.setProperties({ title: `${r.name || "Resume"} - Resume`, subject: "Resume", creator: "Terbey" });
+  d.doc.setProperties({ title: `${r.name || "Resume"} - Resume`, subject: "Resume", creator: "GotaOfferr" });
 
   d.text(r.name || "Resume", { size: 21, style: "bold", color: [0, 0, 0] });
   if (r.headline) d.text(r.headline, { size: 11, color: [80, 90, 105] });
@@ -233,7 +233,7 @@ export async function buildExampleResumePdf(example: {
 
   d.text(`${example.role} — Resume Example`, { size: 19, style: "bold", color: [0, 0, 0] });
   d.text(example.summaryLine, { size: 10, color: [80, 90, 105] });
-  d.text("Sample template from Terbey — replace every line with your own detail.", {
+  d.text("Sample template from GotaOfferr — replace every line with your own detail.", {
     size: 8.5,
     color: [105, 112, 125],
   });

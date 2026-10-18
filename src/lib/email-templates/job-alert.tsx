@@ -64,14 +64,14 @@ const JobAlertEmail = ({
   experience,
   salaryRange,
   jobs = [],
-  jobsUrl = 'https://terbey.com/jobs?alert=1',
+  jobsUrl = 'https://gotaofferr.com/jobs?alert=1',
   emailNumber,
   unsubscribeUrl,
 }: Props) => (
   <EmailLayout
     preview={`${jobs.length} new ${role ?? 'job'} openings matched your job alert`}
     heading={`${jobs.length} new matches for ${role ?? 'your role'}`}
-    footerNote={`You're receiving this because you set a job alert in your Terbey account.${emailNumber ? ` This is email ${emailNumber} of 3.` : ''}`}
+    footerNote={`You're receiving this because you set a job alert in your GotaOfferr account.${emailNumber ? ` This is email ${emailNumber} of 3.` : ''}`}
   >
     <Text style={styles.text}>
       Here are fresh openings picked using the exact filters you saved in the AI job finder.
@@ -124,7 +124,7 @@ const JobAlertEmail = ({
 export const template = {
   component: JobAlertEmail,
   subject: (data: Record<string, any>) =>
-    `${data?.jobs?.length ?? 0} new ${data?.role ?? 'job'} openings today — Terbey`,
+    `${data?.jobs?.length ?? 0} new ${data?.role ?? 'job'} openings today — GotaOfferr`,
   displayName: 'Job alert (every 3 days)',
   previewData: {
     role: 'Brand Manager',

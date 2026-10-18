@@ -19,21 +19,21 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in — Terbey" },
+      { title: "Sign in — GotaOfferr" },
       { name: "robots", content: "noindex" },
       {
         name: "description",
         content:
-          "Create a free Terbey account to tailor 5 resumes and cover letters every month with AI.",
+          "Create a free GotaOfferr account to tailor 5 resumes and cover letters every month with AI.",
       },
-      { property: "og:title", content: "Sign in — Terbey" },
+      { property: "og:title", content: "Sign in — GotaOfferr" },
       {
         property: "og:description",
-        content: "Create a free Terbey account to tailor 5 resumes every month with AI.",
+        content: "Create a free GotaOfferr account to tailor 5 resumes every month with AI.",
       },
-      { property: "og:url", content: "https://terbey.com/auth" },
+      { property: "og:url", content: "https://gotaofferr.com/auth" },
     ],
-    links: [{ rel: "canonical", href: "https://terbey.com/auth" }],
+    links: [{ rel: "canonical", href: "https://gotaofferr.com/auth" }],
   }),
   component: AuthPage,
 });
@@ -215,7 +215,7 @@ function AuthPage() {
           <Sparkles className="size-3 text-highlight" /> 5 free tailored resumes every month
         </span>
         <h1 className="mt-4 font-display text-3xl font-bold text-foreground">
-          Sign in to Terbey
+          Sign in to GotaOfferr
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Your account keeps track of your monthly free tailoring credits.

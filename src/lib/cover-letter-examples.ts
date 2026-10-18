@@ -29,7 +29,7 @@ export const coverLetterExamples: CoverLetterExample[] = [
     slug: "software-engineer",
     role: "Software engineer",
     title: "Software engineer cover letter example and structure",
-    metaTitle: "Software Engineer Cover Letter Example (2026) | Terbey",
+    metaTitle: "Software Engineer Cover Letter Example (2026) | GotaOfferr",
     metaDescription:
       "A short software engineer cover letter structure with sample lines, phrases that work, and clichés to cut. Written for Indian and international applications.",
     summaryLine:
@@ -98,7 +98,7 @@ export const coverLetterExamples: CoverLetterExample[] = [
     slug: "fresher",
     role: "Fresher",
     title: "Fresher cover letter example with no work experience",
-    metaTitle: "Fresher Cover Letter Example (No Experience) | Terbey",
+    metaTitle: "Fresher Cover Letter Example (No Experience) | GotaOfferr",
     metaDescription:
       "A fresher cover letter structure with sample lines for your first job: what to write instead of experience, phrases that work, and clichés to avoid.",
     summaryLine:
@@ -165,7 +165,7 @@ export const coverLetterExamples: CoverLetterExample[] = [
     slug: "business-analyst",
     role: "Business analyst",
     title: "Business analyst cover letter example and structure",
-    metaTitle: "Business Analyst Cover Letter Example (2026) | Terbey",
+    metaTitle: "Business Analyst Cover Letter Example (2026) | GotaOfferr",
     metaDescription:
       "A business analyst cover letter structure with sample lines, domain phrases that work, and the generic openers to cut. India and international variants.",
     summaryLine:
@@ -232,7 +232,7 @@ export const coverLetterExamples: CoverLetterExample[] = [
     slug: "digital-marketing-executive",
     role: "Digital marketing executive",
     title: "Digital marketing executive cover letter example",
-    metaTitle: "Digital Marketing Cover Letter Example (2026) | Terbey",
+    metaTitle: "Digital Marketing Cover Letter Example (2026) | GotaOfferr",
     metaDescription:
       "A digital marketing executive cover letter structure with sample lines, metric-led phrases that work, and buzzwords to cut before you send it.",
     summaryLine:
@@ -300,7 +300,7 @@ export const coverLetterExamples: CoverLetterExample[] = [
     slug: "customer-support",
     role: "Customer support",
     title: "Customer support cover letter example and structure",
-    metaTitle: "Customer Support Cover Letter Example (2026) | Terbey",
+    metaTitle: "Customer Support Cover Letter Example (2026) | GotaOfferr",
     metaDescription:
       "A customer support cover letter structure with sample lines, metric-led phrases like CSAT and AHT, and the generic sentences to cut before applying.",
     summaryLine:

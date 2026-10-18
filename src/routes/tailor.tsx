@@ -8,21 +8,21 @@ import { RouteNotFound } from "@/components/RouteNotFound";
 export const Route = createFileRoute("/tailor")({
   head: () => ({
     meta: [
-      { title: "Tailor Your Resume — Terbey" },
+      { title: "Tailor Your Resume — GotaOfferr" },
       {
         name: "description",
         content:
           "Paste your resume and a job description. Get a tailored, ATS-friendly resume and cover letter PDF in seconds. Free to start.",
       },
-      { property: "og:title", content: "Tailor Your Resume — Terbey" },
+      { property: "og:title", content: "Tailor Your Resume — GotaOfferr" },
       {
         property: "og:description",
         content:
           "Paste your resume and a job description. Get a tailored, ATS-friendly resume and cover letter PDF in seconds. Free to start.",
       },
-      { property: "og:url", content: "https://terbey.com/tailor" },
+      { property: "og:url", content: "https://gotaofferr.com/tailor" },
     ],
-    links: [{ rel: "canonical", href: "https://terbey.com/tailor" }],
+    links: [{ rel: "canonical", href: "https://gotaofferr.com/tailor" }],
   }),
   component: TailorPage,
   errorComponent: RouteError,
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/tailor")({
 
 const TL_CSS = `
 @font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-display:swap}
-.tlp{--y:#073f89;--cream:#073f89;background:#fffffd;color:var(--cream)}
+.tlp{--y:oklch(0.86 0.19 96);--cream:oklch(0.86 0.19 96);background:#fffffd;color:var(--cream)}
 .tl-hero{position:relative;padding:44px 20px 40px;text-align:center;background:radial-gradient(55% 60% at 50% 0%,rgba(7,63,137,.14),transparent 72%)}
 .tl-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(7,63,137,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(7,63,137,.045) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:linear-gradient(#fffffd 20%,transparent);mask-image:linear-gradient(#fffffd 20%,transparent)}
 .tl-hero>*{position:relative}
@@ -66,7 +66,7 @@ const TL_CSS = `
 .tl button.rounded-full:not(:disabled):hover{transform:translateY(-3px) scale(1.02)}
 .tl-cur{display:inline-block;transition:transform .3s}
 .tl-h1:hover .tl-cur{transform:rotate(-2deg) scale(1.04)}
-.tl-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#fffffd;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 #073f89,0 0 0 2px var(--y);transition:transform .25s}
+.tl-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#fffffd;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 oklch(0.86 0.19 96),0 0 0 2px var(--y);transition:transform .25s}
 .tl-sticker:hover{animation:tl-wig .55s}
 @keyframes tl-wig{25%{transform:rotate(-8deg) scale(1.08)}60%{transform:rotate(6deg) scale(1.08)}100%{transform:rotate(-2deg)}}
 .tl-card:hover .tl-ic{transform:rotate(-10deg) scale(1.12)}
@@ -79,7 +79,7 @@ const TL_CSS = `
 #result .bg-hero{animation:tl-pop .7s cubic-bezier(.3,1.6,.5,1) .15s backwards}
 @keyframes tl-up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}@keyframes tl-pop{from{transform:scale(.3) rotate(-12deg);opacity:0}}
 .tl-ins-hero{display:flex;align-items:center;gap:18px;padding:20px 22px;border:1px solid rgba(7,63,137,.5);border-radius:22px;background:linear-gradient(135deg,rgba(7,63,137,.16),rgba(7,63,137,.03))}
-.tl-ins-score small{display:block;font-size:.8rem;line-height:1;font-weight:800;opacity:.8}.tl-ins-score{flex-direction:column !important;flex:none;width:76px;height:76px;border-radius:20px;background:var(--y);color:#fffffd;font-family:var(--font-display,inherit);font-weight:800;font-size:2.4rem;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg);box-shadow:4px 4px 0 #073f89,0 0 0 2px var(--y)}
+.tl-ins-score small{display:block;font-size:.8rem;line-height:1;font-weight:800;opacity:.8}.tl-ins-score{flex-direction:column !important;flex:none;width:76px;height:76px;border-radius:20px;background:var(--y);color:#fffffd;font-family:var(--font-display,inherit);font-weight:800;font-size:2.4rem;display:flex;align-items:center;justify-content:center;transform:rotate(-4deg);box-shadow:4px 4px 0 oklch(0.86 0.19 96),0 0 0 2px var(--y)}
 .tl-ins-verdict{font-family:var(--font-display,inherit);font-weight:700;font-size:1.35rem;line-height:1.15}
 .tl-ins-sub{margin-top:4px;font-size:.85rem;color:rgba(0,0,0,.65)}
 .tl-ins-card{background:linear-gradient(160deg,rgba(7,63,137,.06),rgba(7,63,137,.012));border:1px solid rgba(7,63,137,.3);border-radius:20px;padding:22px;box-shadow:none;transition:transform .2s,border-color .2s}
@@ -89,7 +89,7 @@ const TL_CSS = `
 .tl-ins-h-gap,.tl-ins-warn .tl-ins-h{color:#ffa94d}
 .tl-ins-num{font-family:ui-monospace,Menlo,monospace;color:var(--y)}
 .tl-ins-bar{margin-top:5px;height:9px;border-radius:99px;background:rgba(7,63,137,.08);overflow:hidden}
-.tl-ins-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#073f89,var(--y));transform-origin:left;animation:tl-grow .8s cubic-bezier(.2,.8,.2,1) calc(var(--i,0)*.1s + .2s) backwards}
+.tl-ins-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,oklch(0.86 0.19 96),var(--y));transform-origin:left;animation:tl-grow .8s cubic-bezier(.2,.8,.2,1) calc(var(--i,0)*.1s + .2s) backwards}
 @keyframes tl-grow{from{transform:scaleX(0)}}
 .tl-chip{display:inline-block;font-size:.8rem;padding:4px 11px;border-radius:999px;transition:transform .15s}
 .tl-chip:hover{transform:scale(1.08) rotate(-2deg)}
@@ -214,7 +214,7 @@ function TailorPage() {
       <section id="tl-how" className="tl-seo2">
         <h2>What happens when you <mark>tailor</mark> a resume</h2>
         <p className="tl-lead">
-          Terbey reads the job description, finds the skills, keywords and responsibilities the
+          GotaOfferr reads the job description, finds the skills, keywords and responsibilities the
           employer cares about, and rewrites your summary, skills and experience bullets around
           them. It keeps your real experience. Anything the job asks for that your resume does not
           show appears in a missing keywords list, so you know what to add honestly.

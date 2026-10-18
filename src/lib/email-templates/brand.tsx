@@ -13,11 +13,11 @@ import {
 } from '@react-email/components'
 
 export const BRAND = {
-  name: 'Terbey',
-  supportEmail: 'contact@terbey.com',
+  name: 'GotaOfferr',
+  supportEmail: 'contact@gotaofferr.com',
   // Version the public URL so Gmail does not reuse its cached copy of an older email header.
-  logoUrl: 'https://terbey.com/favicon.png?v=email-logo-20261014',
-  yellow: '#073f89',
+  logoUrl: 'https://gotaofferr.com/favicon.png?v=email-logo-20261014',
+  yellow: 'oklch(0.86 0.19 96)',
   black: '#0a0a0a',
   muted: '#55575d',
   faint: '#9b9b9b',
@@ -144,11 +144,11 @@ export const EmailLayout = ({
               src={BRAND.logoUrl}
               width="64"
               height="64"
-              alt="Terbey logo"
+              alt="GotaOfferr logo"
               style={styles.logo}
             />
             <Text style={styles.wordmark}>
-              Terbey
+              GotaOfferr
             </Text>
           </Section>
           <Text style={styles.tagline}>Find → Tailor → Apply</Text>
@@ -159,7 +159,7 @@ export const EmailLayout = ({
           <Section style={styles.hr} />
           <Text style={styles.footer}>
             {footerNote ? `${footerNote} ` : ''}
-            Sent by {BRAND.name} · terbey.com · Need help? {BRAND.supportEmail}
+            Sent by {BRAND.name} · gotaofferr.com · Need help? {BRAND.supportEmail}
           </Text>
         </Section>
       </Container>

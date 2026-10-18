@@ -9,7 +9,7 @@ export interface ResumeExample {
   slug: string;
   role: string;
   title: string;
-  /** True when the example is a real resume rebuilt with Terbey (used for the showcase). */
+  /** True when the example is a real resume rebuilt with GotaOfferr (used for the showcase). */
   builtWithAi?: boolean;
   metaTitle: string;
   metaDescription: string;
@@ -30,7 +30,7 @@ export const resumeExamples: ResumeExample[] = [
     slug: "software-engineer",
     role: "Software Engineer",
     title: "Software Engineer Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "Software Engineer Resume Example — Terbey",
+    metaTitle: "Software Engineer Resume Example — GotaOfferr",
     metaDescription:
       "A full ATS-optimized software engineer resume example with section order, keyword list, and bullet formulas you can copy into your own master resume.",
     summaryLine:
@@ -123,7 +123,7 @@ export const resumeExamples: ResumeExample[] = [
     slug: "product-manager",
     role: "Product Manager",
     title: "Product Manager Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "Product Manager Resume Example — Terbey",
+    metaTitle: "Product Manager Resume Example — GotaOfferr",
     metaDescription:
       "An ATS-friendly product manager resume example showing outcome-first bullets, the right section order, and the keywords hiring teams screen for.",
     summaryLine:
@@ -210,7 +210,7 @@ export const resumeExamples: ResumeExample[] = [
     slug: "sales-associate",
     role: "Sales Associate",
     title: "Sales Associate Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "Sales Associate Resume Example — Terbey",
+    metaTitle: "Sales Associate Resume Example — GotaOfferr",
     metaDescription:
       "A clean, ATS-optimized sales associate resume example with quota numbers, service keywords, and the exact section order recruiters expect.",
     summaryLine:
@@ -297,12 +297,12 @@ export const resumeExamples: ResumeExample[] = [
     slug: "social-media-manager",
     role: "Social Media Manager",
     builtWithAi: true,
-    title: "Social Media Manager Resume Example (Built With Terbey)",
-    metaTitle: "Social Media Manager Resume Example — Terbey",
+    title: "Social Media Manager Resume Example (Built With GotaOfferr)",
+    metaTitle: "Social Media Manager Resume Example — GotaOfferr",
     metaDescription:
-      "A real ATS-optimized social media manager resume rebuilt with Terbey — impressions, ROAS, and paid social keywords in the order recruiters scan.",
+      "A real ATS-optimized social media manager resume rebuilt with GotaOfferr — impressions, ROAS, and paid social keywords in the order recruiters scan.",
     summaryLine:
-      "Real resume rebuilt with Terbey: 6 years across agency, e-commerce, and non-profit, with 27M+ impressions and 2.5x ROAS on the page.",
+      "Real resume rebuilt with GotaOfferr: 6 years across agency, e-commerce, and non-profit, with 27M+ impressions and 2.5x ROAS on the page.",
     atsKeywords: [
       "Social media strategy",
       "Meta Ads Manager",
@@ -395,12 +395,12 @@ export const resumeExamples: ResumeExample[] = [
     slug: "brand-manager",
     role: "Brand Manager",
     builtWithAi: true,
-    title: "Brand Manager Resume Example (Built With Terbey)",
-    metaTitle: "Brand Manager Resume Example — Terbey",
+    title: "Brand Manager Resume Example (Built With GotaOfferr)",
+    metaTitle: "Brand Manager Resume Example — GotaOfferr",
     metaDescription:
       "See the same career rebuilt for a brand manager job description: positioning, campaign P&L, and brand-health keywords in ATS-safe order.",
     summaryLine:
-      "The same social media career, rebuilt by Terbey for a brand manager posting — positioning, campaign ownership, and budget language up front.",
+      "The same social media career, rebuilt by GotaOfferr for a brand manager posting — positioning, campaign ownership, and budget language up front.",
     atsKeywords: [
       "Brand strategy",
       "Brand positioning",
@@ -499,12 +499,12 @@ export const resumeExamples: ResumeExample[] = [
     slug: "marketing-manager",
     role: "Marketing Manager",
     builtWithAi: true,
-    title: "Marketing Manager Resume Example (Built With Terbey)",
-    metaTitle: "Marketing Manager Resume Example — Terbey",
+    title: "Marketing Manager Resume Example (Built With GotaOfferr)",
+    metaTitle: "Marketing Manager Resume Example — GotaOfferr",
     metaDescription:
       "The same resume rebuilt for a marketing manager role: full-funnel ownership, budget and ROAS numbers, and the keywords marketing ATS filters look for.",
     summaryLine:
-      "One career, rewritten by Terbey for a marketing manager posting — full-funnel ownership, budget accountability, and team leadership first.",
+      "One career, rewritten by GotaOfferr for a marketing manager posting — full-funnel ownership, budget accountability, and team leadership first.",
     atsKeywords: [
       "Marketing strategy",
       "Full-funnel marketing",
@@ -603,7 +603,7 @@ export const resumeExamples: ResumeExample[] = [
     slug: "finance-analyst",
     role: "Finance Analyst",
     title: "Finance Analyst Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "Finance Analyst Resume Example — Terbey",
+    metaTitle: "Finance Analyst Resume Example — GotaOfferr",
     metaDescription:
       "An ATS-optimized finance analyst resume example with FP&A keywords, variance-analysis bullets, and the section order recruiters and parsers expect.",
     summaryLine:
@@ -696,7 +696,7 @@ export const resumeExamples: ResumeExample[] = [
     slug: "hr-manager",
     role: "HR Manager",
     title: "HR Manager Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "HR Manager Resume Example — Terbey",
+    metaTitle: "HR Manager Resume Example — GotaOfferr",
     metaDescription:
       "A recruiter-ready HR manager resume example with HRBP keywords, retention and hiring metrics, and the section order that clears ATS.",
     summaryLine:
@@ -789,7 +789,7 @@ export const resumeExamples: ResumeExample[] = [
     slug: "graphic-designer",
     role: "Graphic Designer",
     title: "Graphic Designer Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "Graphic Designer Resume Example — Terbey",
+    metaTitle: "Graphic Designer Resume Example — GotaOfferr",
     metaDescription:
       "An ATS-safe graphic designer resume example — plain text, portfolio link placement, brand and campaign keywords, and bullets that show measurable design impact.",
     summaryLine:

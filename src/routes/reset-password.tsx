@@ -15,15 +15,15 @@ import { passwordProblem } from "@/lib/password";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Choose a new password — Terbey" },
+      { title: "Choose a new password — GotaOfferr" },
       {
         name: "description",
-        content: "Set a new password for your Terbey account and get back to tailoring resumes.",
+        content: "Set a new password for your GotaOfferr account and get back to tailoring resumes.",
       },
-      { property: "og:title", content: "Choose a new password — Terbey" },
+      { property: "og:title", content: "Choose a new password — GotaOfferr" },
       {
         property: "og:description",
-        content: "Set a new password for your Terbey account.",
+        content: "Set a new password for your GotaOfferr account.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],

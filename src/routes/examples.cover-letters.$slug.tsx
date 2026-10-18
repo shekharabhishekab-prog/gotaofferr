@@ -15,13 +15,13 @@ export const Route = createFileRoute("/examples/cover-letters/$slug")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "Cover letter example not found — Terbey" },
+          { title: "Cover letter example not found — GotaOfferr" },
           { name: "robots", content: "noindex" },
         ],
       };
     }
     const { example } = loaderData;
-    const url = `https://terbey.com/examples/cover-letters/${example.slug}`;
+    const url = `https://gotaofferr.com/examples/cover-letters/${example.slug}`;
     return {
       meta: [
         { title: example.metaTitle },
@@ -42,7 +42,7 @@ export const Route = createFileRoute("/examples/cover-letters/$slug")({
             description: example.metaDescription,
             image: [SITE_IMAGE],
             mainEntityOfPage: url,
-            author: { "@type": "Organization", name: "Terbey" },
+            author: { "@type": "Organization", name: "GotaOfferr" },
             publisher: SITE_PUBLISHER,
           }),
         },
@@ -52,12 +52,12 @@ export const Route = createFileRoute("/examples/cover-letters/$slug")({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: "https://terbey.com/" },
+              { "@type": "ListItem", position: 1, name: "Home", item: "https://gotaofferr.com/" },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Cover letter examples",
-                item: "https://terbey.com/examples/cover-letters",
+                item: "https://gotaofferr.com/examples/cover-letters",
               },
               {
                 "@type": "ListItem",

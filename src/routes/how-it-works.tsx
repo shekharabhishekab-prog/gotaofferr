@@ -6,21 +6,21 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
     meta: [
-      { title: "How Terbey Works — Resume Tailoring in 3 Steps" },
+      { title: "How GotaOfferr Works — Resume Tailoring in 3 Steps" },
       {
         name: "description",
         content:
-          "See how Terbey reads your resume and a job description, rewrites your experience around the role, and exports polished PDFs.",
+          "See how GotaOfferr reads your resume and a job description, rewrites your experience around the role, and exports polished PDFs.",
       },
-      { property: "og:title", content: "How Terbey Works — Resume Tailoring in 3 Steps" },
+      { property: "og:title", content: "How GotaOfferr Works — Resume Tailoring in 3 Steps" },
       {
         property: "og:description",
         content:
-          "See how Terbey reads your resume and a job description, rewrites your experience around the role, and exports polished PDFs.",
+          "See how GotaOfferr reads your resume and a job description, rewrites your experience around the role, and exports polished PDFs.",
       },
-      { property: "og:url", content: "https://terbey.com/how-it-works" },
+      { property: "og:url", content: "https://gotaofferr.com/how-it-works" },
     ],
-    links: [{ rel: "canonical", href: "https://terbey.com/how-it-works" }],
+    links: [{ rel: "canonical", href: "https://gotaofferr.com/how-it-works" }],
   }),
   component: HowItWorks,
 });
@@ -53,7 +53,7 @@ function HowItWorks() {
     <main className="mx-auto max-w-4xl px-6 py-16 sm:py-24">
       <h1 className="font-display text-4xl font-bold text-foreground">How it works</h1>
       <p className="mt-4 max-w-2xl text-muted-foreground">
-        Terbey isn't a resume builder or a job board. It finds the right roles for you and turns
+        GotaOfferr isn't a resume builder or a job board. It finds the right roles for you and turns
         one master resume into a targeted application — resume and cover letter — for every company.
       </p>
 
@@ -80,7 +80,7 @@ function HowItWorks() {
             read, the better the keywords line up.
           </li>
           <li>
-            Keep one honest master resume. Terbey reframes what you already have and lists
+            Keep one honest master resume. GotaOfferr reframes what you already have and lists
             missing requirements as keyword gaps instead of inventing experience.
           </li>
           <li>

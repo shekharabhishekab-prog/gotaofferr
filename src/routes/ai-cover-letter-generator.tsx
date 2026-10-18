@@ -62,9 +62,9 @@ export const Route = createFileRoute("/ai-cover-letter-generator")({
       { name: "description", content: DESCRIPTION },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: "https://terbey.com/ai-cover-letter-generator" },
+      { property: "og:url", content: "https://gotaofferr.com/ai-cover-letter-generator" },
     ],
-    links: [{ rel: "canonical", href: "https://terbey.com/ai-cover-letter-generator" }],
+    links: [{ rel: "canonical", href: "https://gotaofferr.com/ai-cover-letter-generator" }],
     scripts: [
       {
         type: "application/ld+json",

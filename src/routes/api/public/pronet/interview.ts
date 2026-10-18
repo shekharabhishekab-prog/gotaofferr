@@ -16,10 +16,10 @@ const setupSchema = z.object({
 });
 
 /**
- * ProNet AI interview - terbey.com's makeQuestions / makeFeedback chains.
- * Terbey gates interviews behind login (free tier: 1/month); the ProNet
+ * ProNet AI interview - gotaofferr.com's makeQuestions / makeFeedback chains.
+ * GotaOfferr gates interviews behind login (free tier: 1/month); the ProNet
  * equivalent for a logged-out visitor: ProNet gets its own generous counter
- * (10/day, owner-approved 2026-10-15), terbey.com counters untouched.
+ * (10/day, owner-approved 2026-10-15), gotaofferr.com counters untouched.
  * One interview = questions + one feedback call, so only "questions" consumes
  * the monthly use.
  */
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/api/public/pronet/interview")({
           if (mode === "questions") {
             if (await pronetUsedRolling("pronet:interview:", id, 10)) {
               return pronetJson(request, {
-                error: "You have used your free AI interview for this month. It resets next month - terbey.com accounts get more.",
+                error: "You have used your free AI interview for this month. It resets next month - gotaofferr.com accounts get more.",
                 used: true,
               });
             }

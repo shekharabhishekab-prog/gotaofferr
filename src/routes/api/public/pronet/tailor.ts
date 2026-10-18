@@ -8,9 +8,9 @@ const inputSchema = tailorInputSchema.extend({
 });
 
 /**
- * ProNet resume tailor - the same AI chain as terbey.com's logged-out free
+ * ProNet resume tailor - the same AI chain as gotaofferr.com's logged-out free
  * rewrite. ProNet has its own generous counter (25/day, owner-approved
- * 2026-10-15); terbey.com's one-free-rewrite counter is untouched.
+ * 2026-10-15); gotaofferr.com's one-free-rewrite counter is untouched.
  */
 export const Route = createFileRoute("/api/public/pronet/tailor")({
   server: {
@@ -28,12 +28,12 @@ export const Route = createFileRoute("/api/public/pronet/tailor")({
           await enforcePolicy("pronet_tailor_global", "site");
           await enforcePolicy("pronet_tailor", hashValue(ip));
 
-          // Same identity shape as terbey.com's anon tailor: device fingerprint + IP.
+          // Same identity shape as gotaofferr.com's anon tailor: device fingerprint + IP.
           // ProNet's deviceId stands in for the cookie id (cross-site cookies don't stick).
           const identity = { deviceHash: hashValue(body.deviceId), ipHash: hashValue(ip), cookieId: body.deviceId };
           const pid = { ip, ipHash: identity.ipHash, deviceHash: identity.deviceHash };
           if (await pronetUsedRolling("pronet:tailor:", pid, 25)) {
-            return pronetJson(request, { error: "You've used your free rewrite. Create a free account on terbey.com for 5 rewrites every month.", used: true });
+            return pronetJson(request, { error: "You've used your free rewrite. Create a free account on gotaofferr.com for 5 rewrites every month.", used: true });
           }
 
           const { runTailor } = await import("@/lib/tailor.server");

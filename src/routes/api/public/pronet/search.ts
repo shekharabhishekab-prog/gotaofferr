@@ -9,8 +9,8 @@ const inputSchema = jobSearchInputSchema.extend({
 
 /**
  * ProNet live job search - the same firecrawl + AI pipeline a logged-out
- * terbey.com visitor gets. ProNet has its own generous counter (50/day,
- * owner-approved 2026-10-15) so testing never hits a wall; terbey.com's
+ * gotaofferr.com visitor gets. ProNet has its own generous counter (50/day,
+ * owner-approved 2026-10-15) so testing never hits a wall; gotaofferr.com's
  * one-free-search counter is untouched.
  */
 export const Route = createFileRoute("/api/public/pronet/search")({
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/api/public/pronet/search")({
 
           const id = await pronetIdentity(request, body.deviceId);
           if (await pronetUsedRolling("pronet:jobs:", id, 50)) {
-            return pronetJson(request, { error: "You've used your free job search. Create a free account on terbey.com to keep searching.", used: true });
+            return pronetJson(request, { error: "You've used your free job search. Create a free account on gotaofferr.com to keep searching.", used: true });
           }
 
           const c = request.headers.get("cf-ipcountry");

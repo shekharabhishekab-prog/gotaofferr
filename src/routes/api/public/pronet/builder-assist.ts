@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { assistInputSchema } from "@/lib/resume-assist-schema";
 
-/** ProNet builder inline "Improve with AI" - same assistField chain and IP budgets as terbey.com. */
+/** ProNet builder inline "Improve with AI" - same assistField chain and IP budgets as gotaofferr.com. */
 export const Route = createFileRoute("/api/public/pronet/builder-assist")({
   server: {
     handlers: {

@@ -3,8 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { SITE_IMAGE, SITE_PUBLISHER } from "@/lib/seo";
 
-const URL = "https://terbey.com/blog/can-ai-tailor-my-resume-to-a-job-posting";
-const TITLE = "Can AI Tailor My Resume to a Job Posting? | Terbey";
+const URL = "https://gotaofferr.com/blog/can-ai-tailor-my-resume-to-a-job-posting";
+const TITLE = "Can AI Tailor My Resume to a Job Posting? | GotaOfferr";
 const DESCRIPTION =
   "Yes — here's exactly how AI tailors a resume to a job posting: keyword matching, ATS parsing, and rewritten bullets, and why it beats editing by hand.";
 
@@ -23,7 +23,7 @@ const FAQS = [
   },
   {
     q: "Does AI tailoring mean lying on my resume?",
-    a: "It shouldn't. Good tailoring re-frames real experience using the posting's vocabulary and moves the most relevant achievements up the page. Terbey keeps every section of your original resume and never fabricates employers, dates, or titles.",
+    a: "It shouldn't. Good tailoring re-frames real experience using the posting's vocabulary and moves the most relevant achievements up the page. GotaOfferr keeps every section of your original resume and never fabricates employers, dates, or titles.",
   },
 ];
 
@@ -48,7 +48,7 @@ export const Route = createFileRoute("/blog/can-ai-tailor-my-resume-to-a-job-pos
           description: DESCRIPTION,
           image: [SITE_IMAGE],
           mainEntityOfPage: URL,
-          author: { "@type": "Organization", name: "Terbey" },
+          author: { "@type": "Organization", name: "GotaOfferr" },
           publisher: SITE_PUBLISHER,
         }),
       },
@@ -224,7 +224,7 @@ function CanAiTailorGuide() {
             </li>
             <li>
               <a className="underline" href="/how-it-works">
-                How Terbey works
+                How GotaOfferr works
               </a>{" "}
               and the{" "}
               <a className="underline" href="/faq">

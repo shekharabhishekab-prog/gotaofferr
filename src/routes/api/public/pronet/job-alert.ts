@@ -12,7 +12,7 @@ const inputSchema = jobAlertInputSchema.extend({
  * ProNet "Alert me" bell - LinkedIn-style email alerts on the current search.
  * Anonymous (ProNet has no login): keyed by email, free-tier limit of 1 alert
  * per month (ProNet-loose: 5, owner-approved 2026-10-15), same 3-email cycle
- * powered by the same digest engine and Adzuna source as terbey.com alerts.
+ * powered by the same digest engine and Adzuna source as gotaofferr.com alerts.
  */
 export const Route = createFileRoute("/api/public/pronet/job-alert")({
   server: {
@@ -55,7 +55,7 @@ export const Route = createFileRoute("/api/public/pronet/job-alert")({
             .gte("created_at", since.toISOString());
           if ((count ?? 0) >= 5) {
             return pronetJson(request, {
-              error: `You have used your free job alert for this month. Your count resets next month - terbey.com plans give up to ${ALERT_ATTEMPT_LIMIT.career_pro}.`,
+              error: `You have used your free job alert for this month. Your count resets next month - gotaofferr.com plans give up to ${ALERT_ATTEMPT_LIMIT.career_pro}.`,
               used: true,
             });
           }

@@ -45,21 +45,21 @@ export const Route = createFileRoute("/pricing")({
   loader: () => getVisitorCountry(),
   head: () => ({
     meta: [
-      { title: "Pricing — Terbey Resume Tailoring Plans" },
+      { title: "Pricing — GotaOfferr Resume Tailoring Plans" },
       {
         name: "description",
         content:
           "Start tailoring resumes for free. Upgrade for more rewrites, cover letters, and match insights while job hunting.",
       },
-      { property: "og:title", content: "Pricing — Terbey Resume Tailoring Plans" },
+      { property: "og:title", content: "Pricing — GotaOfferr Resume Tailoring Plans" },
       {
         property: "og:description",
         content:
           "Start tailoring resumes for free. Upgrade for more rewrites, cover letters, and match insights while job hunting.",
       },
-      { property: "og:url", content: "https://terbey.com/pricing" },
+      { property: "og:url", content: "https://gotaofferr.com/pricing" },
     ],
-    links: [{ rel: "canonical", href: "https://terbey.com/pricing" }],
+    links: [{ rel: "canonical", href: "https://gotaofferr.com/pricing" }],
   }),
   component: Pricing,
 });
@@ -200,7 +200,7 @@ const plans: Record<PlanKey, {
 
 const PR_CSS = `
 @font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-display:swap}
-.tlp{--y:#073f89;--cream:#073f89;background:#fffffd;color:var(--cream)}
+.tlp{--y:oklch(0.86 0.19 96);--cream:oklch(0.86 0.19 96);background:#fffffd;color:var(--cream)}
 .tl-hero{position:relative;padding:44px 20px 40px;text-align:center;background:radial-gradient(55% 60% at 50% 0%,rgba(7,63,137,.14),transparent 72%)}
 .tl-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(7,63,137,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(7,63,137,.045) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:linear-gradient(#fffffd 20%,transparent);mask-image:linear-gradient(#fffffd 20%,transparent)}
 .tl-hero>*{position:relative}
@@ -220,7 +220,7 @@ const PR_CSS = `
 .tl-chips i:hover{transform:rotate(0) scale(1.08);background:rgba(7,63,137,.12)}
 .tl-cur{display:inline-block;transition:transform .3s}
 .tl-h1:hover .tl-cur{transform:rotate(-2deg) scale(1.04)}
-.tl-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#fffffd;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 #073f89,0 0 0 2px var(--y);transition:transform .25s}
+.tl-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#fffffd;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 oklch(0.86 0.19 96),0 0 0 2px var(--y);transition:transform .25s}
 .tl-sticker:hover{animation:tl-wig .55s}
 @keyframes tl-wig{25%{transform:rotate(-8deg) scale(1.08)}60%{transform:rotate(6deg) scale(1.08)}100%{transform:rotate(-2deg)}}
 .tl button.rounded-full:not(:disabled):hover{animation:tl-wig2 .5s}

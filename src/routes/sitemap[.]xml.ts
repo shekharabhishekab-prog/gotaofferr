@@ -5,7 +5,7 @@ import { coverLetterExamples } from "@/lib/cover-letter-examples";
 import { resumeExamples } from "@/lib/resume-examples";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = "https://terbey.com";
+const BASE_URL = "https://gotaofferr.com";
 
 interface SitemapEntry {
   path: string;

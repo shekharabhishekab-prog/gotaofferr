@@ -6,10 +6,10 @@ import { TEMPLATES } from './registry'
 // Server-only: reads LOVABLE_API_KEY. Never import from client components.
 
 // Configuration baked in at scaffold time
-const SITE_NAME = "Terbey"
+const SITE_NAME = "GotaOfferr"
 // SENDER_DOMAIN is the verified sender subdomain FQDN (e.g., "notify.example.com").
 // It MUST match the subdomain delegated to Lovable's nameservers. NEVER use the root domain.
-const SENDER_DOMAIN = "notify.terbey.com"
+const SENDER_DOMAIN = "notify.gotaofferr.com"
 // Keep the visible From address on the same verified sender subdomain so SPF,
 // DKIM and DMARC alignment are unambiguous to strict mailbox filters.
 const FROM_DOMAIN = SENDER_DOMAIN
@@ -70,7 +70,7 @@ export async function sendTemplateEmail(
 
   if (resendKey) {
     // Copy mode: send through the owner's own Resend account (free tier).
-    const fromDomain = process.env.RESEND_FROM_DOMAIN || "notify.terbey.com"
+    const fromDomain = process.env.RESEND_FROM_DOMAIN || "notify.gotaofferr.com"
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },

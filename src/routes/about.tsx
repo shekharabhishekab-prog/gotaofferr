@@ -4,21 +4,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Terbey — Why We Built a Resume Rewriter" },
+      { title: "About GotaOfferr — Why We Built a Resume Rewriter" },
       {
         name: "description",
         content:
-          "Terbey was built for job seekers tired of manually rewriting the same resume for every company they apply to.",
+          "GotaOfferr was built for job seekers tired of manually rewriting the same resume for every company they apply to.",
       },
-      { property: "og:title", content: "About Terbey — Why We Built a Resume Rewriter" },
+      { property: "og:title", content: "About GotaOfferr — Why We Built a Resume Rewriter" },
       {
         property: "og:description",
         content:
-          "Terbey was built for job seekers tired of manually rewriting the same resume for every company they apply to.",
+          "GotaOfferr was built for job seekers tired of manually rewriting the same resume for every company they apply to.",
       },
-      { property: "og:url", content: "https://terbey.com/about" },
+      { property: "og:url", content: "https://gotaofferr.com/about" },
     ],
-    links: [{ rel: "canonical", href: "https://terbey.com/about" }],
+    links: [{ rel: "canonical", href: "https://gotaofferr.com/about" }],
   }),
   component: About,
 });
@@ -26,14 +26,14 @@ export const Route = createFileRoute("/about")({
 
 const AB_CSS = `
 @font-face{font-family:"HPInst";src:url("/m/inst.ttf") format("truetype");font-style:italic;font-display:swap}
-.abp{--y:#073f89;--cream:#073f89;background:#fffffd;color:var(--cream);padding-bottom:70px}
+.abp{--y:oklch(0.86 0.19 96);--cream:oklch(0.86 0.19 96);background:#fffffd;color:var(--cream);padding-bottom:70px}
 .abp *{box-sizing:border-box}
 .abp .site-container-x{max-width:1180px;margin:0 auto}
 .ab-hero{position:relative;padding:48px 20px 34px;text-align:center;background:radial-gradient(55% 60% at 50% 0%,rgba(7,63,137,.16),transparent 72%)}
 .ab-hero:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(7,63,137,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(7,63,137,.045) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:linear-gradient(#fffffd 20%,transparent);mask-image:linear-gradient(#fffffd 20%,transparent)}
 .ab-hero>*{position:relative}
 .ab-mono{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;letter-spacing:.04em;color:var(--y)}
-.ab-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#fffffd;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 #073f89,0 0 0 2px var(--y);transition:transform .25s}
+.ab-sticker{display:inline-block;margin-bottom:14px;background:var(--y);color:#fffffd;font-weight:700;font-size:.82rem;padding:6px 14px;border-radius:999px;transform:rotate(-2deg);box-shadow:3px 3px 0 oklch(0.86 0.19 96),0 0 0 2px var(--y);transition:transform .25s}
 .ab-sticker:hover{animation:ab-wig .55s}
 @keyframes ab-wig{25%{transform:rotate(-8deg) scale(1.08)}60%{transform:rotate(6deg) scale(1.08)}100%{transform:rotate(-2deg)}}
 .ab-h1{margin:16px auto 0;font-family:var(--font-display,inherit);font-weight:700;text-transform:uppercase;line-height:.95;letter-spacing:-.015em;font-size:clamp(2.3rem,7.4vw,4.8rem);max-width:15em}
@@ -82,8 +82,8 @@ const AB_CSS = `
 .ab-calc label{font-size:1.05rem}
 .ab-calc output{font-family:var(--font-display,inherit);font-size:2rem;color:var(--y);margin-left:8px}
 .ab-range{-webkit-appearance:none;appearance:none;width:min(520px,100%);height:8px;border-radius:99px;background:rgba(7,63,137,.14);outline:none}
-.ab-range::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--y);border:3px solid #073f89;box-shadow:0 0 0 2px var(--y);cursor:grab}
-.ab-range::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--y);border:3px solid #073f89;box-shadow:0 0 0 2px var(--y);cursor:grab}
+.ab-range::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;background:var(--y);border:3px solid oklch(0.86 0.19 96);box-shadow:0 0 0 2px var(--y);cursor:grab}
+.ab-range::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--y);border:3px solid oklch(0.86 0.19 96);box-shadow:0 0 0 2px var(--y);cursor:grab}
 .ab-race{margin-top:26px;display:grid;gap:14px}
 .ab-row{display:grid;grid-template-columns:150px minmax(0,1fr) 150px;gap:16px;align-items:center;font-size:.95rem}
 .ab-track{height:30px;border-radius:99px;background:rgba(7,63,137,.07);overflow:hidden}
@@ -91,9 +91,9 @@ const AB_CSS = `
 .ab-row b{font-family:var(--font-display,inherit);font-size:1.2rem;text-align:right}
 .ab-note{margin:18px 0 0;font-size:.82rem;color:rgba(0,0,0,.5)}
 .ab-coco{display:grid;grid-template-columns:auto minmax(0,1fr);gap:34px;align-items:center;margin-top:34px;border:1px dashed rgba(7,63,137,.45);border-radius:26px;padding:34px 38px}
-.ab-cat{all:unset;cursor:pointer;width:150px;height:150px;border-radius:50%;background:var(--y);display:grid;place-items:center;font-size:76px;box-shadow:0 0 0 6px #073f89,0 0 0 8px var(--y);transition:transform .25s}
+.ab-cat{all:unset;cursor:pointer;width:150px;height:150px;border-radius:50%;background:var(--y);display:grid;place-items:center;font-size:76px;box-shadow:0 0 0 6px oklch(0.86 0.19 96),0 0 0 8px var(--y);transition:transform .25s}
 .ab-cat:hover{transform:rotate(-6deg) scale(1.06)}
-.ab-cat:focus-visible{outline:3px solid #073f89;outline-offset:6px}
+.ab-cat:focus-visible{outline:3px solid oklch(0.86 0.19 96);outline-offset:6px}
 .ab-cat.ab-pop{animation:ab-pop .45s}
 @keyframes ab-pop{30%{transform:scale(1.18) rotate(8deg)}100%{transform:none}}
 .ab-say{font-family:var(--font-display,inherit);text-transform:uppercase;font-size:clamp(1.4rem,3vw,2.3rem);line-height:1.1;min-height:2.3em}
@@ -135,7 +135,7 @@ const CHAPTERS = [
   {
     t: "One master resume",
     e: "resume",
-    p: "Terbey closes that gap. You keep one master resume. We rebuild it for each specific company and role, complete with a cover letter, a match score, and the keywords you're missing.",
+    p: "GotaOfferr closes that gap. You keep one master resume. We rebuild it for each specific company and role, complete with a cover letter, a match score, and the keywords you're missing.",
   },
   {
     t: "Same truth, new angle",
@@ -245,7 +245,7 @@ function About() {
         <span className="ab-mono ab-rise" style={{ ["--d" as string]: "0s" }}>
           ( about terbey, the short story )
         </span>
-        <h1 className="ab-h1" aria-label="About Terbey. Built for people who hate waiting for replies.">
+        <h1 className="ab-h1" aria-label="About GotaOfferr. Built for people who hate waiting for replies.">
           <span className="ab-rise" style={{ ["--d" as string]: ".06s" }}>
             Built for people who hate <mark>waiting</mark>
           </span>
@@ -254,7 +254,7 @@ function About() {
           </span>
         </h1>
         <p className="ab-sub ab-rise" style={{ ["--d" as string]: ".26s" }}>
-          Terbey was built for job seekers tired of waiting for replies that never come.
+          GotaOfferr was built for job seekers tired of waiting for replies that never come.
         </p>
       </section>
 
@@ -343,7 +343,7 @@ function About() {
               </b>
             </div>
             <div className="ab-row">
-              <span className="lbl">With Terbey</span>
+              <span className="lbl">With GotaOfferr</span>
               <div className="ab-track">
                 <div className="ab-fill" style={{ width: "9%", background: "var(--y)" }} />
               </div>
@@ -425,7 +425,7 @@ function About() {
 
       <div className="ab-end ab-rv">
         <p>
-          Terbey is a sole proprietorship business.
+          GotaOfferr is a sole proprietorship business.
         </p>
         <Link to="/tailor" className="ab-cta">
           Tailor my resume

@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { SITE_IMAGE, SITE_PUBLISHER } from "@/lib/seo";
 
 const URL =
-  "https://terbey.com/blog/how-to-create-a-custom-resume-for-a-job-description";
-const TITLE = "How to Write a Custom Resume for a Job | Terbey";
+  "https://gotaofferr.com/blog/how-to-create-a-custom-resume-for-a-job-description";
+const TITLE = "How to Write a Custom Resume for a Job | GotaOfferr";
 const DESCRIPTION =
   "A step-by-step guide to writing a custom resume to the job description: requirement mapping, keyword optimisation, and an ATS-safe layout that scores.";
 
@@ -49,7 +49,7 @@ export const Route = createFileRoute("/blog/how-to-create-a-custom-resume-for-a-
           description: DESCRIPTION,
           image: [SITE_IMAGE],
           mainEntityOfPage: URL,
-          author: { "@type": "Organization", name: "Terbey" },
+          author: { "@type": "Organization", name: "GotaOfferr" },
           publisher: SITE_PUBLISHER,
         }),
       },
@@ -211,7 +211,7 @@ function CustomResumeGuide() {
             candidates lose.
           </p>
           <p className="mt-4 text-muted-foreground">
-            Terbey runs the same six steps in under a minute: it parses your master resume,
+            GotaOfferr runs the same six steps in under a minute: it parses your master resume,
             extracts the posting's requirements, maps them against your real experience, rewrites
             the summary, core skills, and achievement bullets in the posting's vocabulary, and
             exports a single-column ATS-safe PDF with every original section preserved. You still
@@ -270,7 +270,7 @@ function CustomResumeGuide() {
             </li>
             <li>
               <a className="underline" href="/how-it-works">
-                How Terbey works
+                How GotaOfferr works
               </a>{" "}
               and the{" "}
               <a className="underline" href="/faq">

@@ -37,15 +37,15 @@ import { toast } from "@/lib/toast";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin dashboard — Terbey" },
+      { title: "Admin dashboard — GotaOfferr" },
       {
         name: "description",
-        content: "Internal Terbey admin dashboard for users, subscriptions and usage.",
+        content: "Internal GotaOfferr admin dashboard for users, subscriptions and usage.",
       },
-      { property: "og:title", content: "Admin dashboard — Terbey" },
+      { property: "og:title", content: "Admin dashboard — GotaOfferr" },
       {
         property: "og:description",
-        content: "Internal Terbey admin dashboard for users, subscriptions and usage.",
+        content: "Internal GotaOfferr admin dashboard for users, subscriptions and usage.",
       },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -141,7 +141,7 @@ function AdminPage() {
         <ShieldAlert className="h-10 w-10 text-muted-foreground" />
         <h1 className="text-2xl font-bold">Restricted area</h1>
         <p className="text-muted-foreground">
-          This dashboard is only available to Terbey administrators.
+          This dashboard is only available to GotaOfferr administrators.
         </p>
         <Button asChild>
           <Link to={user ? "/account" : "/auth"}>{user ? "Back to account" : "Sign in"}</Link>

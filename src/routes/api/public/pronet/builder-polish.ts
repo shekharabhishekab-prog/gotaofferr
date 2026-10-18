@@ -7,7 +7,7 @@ const inputSchema = resumeDraftSchema.extend({
   deviceId: z.string().trim().min(6).max(200),
 });
 
-/** ProNet builder final polish - same polishDraft chain, region rules and budgets as terbey.com. */
+/** ProNet builder final polish - same polishDraft chain, region rules and budgets as gotaofferr.com. */
 export const Route = createFileRoute("/api/public/pronet/builder-polish")({
   server: {
     handlers: {
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/api/public/pronet/builder-polish")({
           await enforcePolicy("resume_builder_global", "site");
           await enforcePolicy("resume_builder", ip);
 
-          // Same first-run upgrade as terbey.com's builder: strong models once per person.
+          // Same first-run upgrade as gotaofferr.com's builder: strong models once per person.
           const id = await pronetIdentity(request, body.deviceId);
           let tier: "free" | "career_pro" = "free";
           let firstRunIdentity: { cookieId: string; ipHash: string } | null = null;

@@ -10,7 +10,7 @@ export const extraResumeExamples: ResumeExample[] = [
     slug: "fresher",
     role: "Fresher",
     title: "Fresher Resume Format & Sample (ATS-Friendly, 2026)",
-    metaTitle: "Fresher Resume Format & Sample PDF — Terbey",
+    metaTitle: "Fresher Resume Format & Sample PDF — GotaOfferr",
     metaDescription:
       "A complete fresher resume format with a full sample you can copy, the sections campus and ATS recruiters expect, and a free PDF download.",
     summaryLine:
@@ -115,7 +115,7 @@ export const extraResumeExamples: ResumeExample[] = [
     slug: "business-analyst",
     role: "Business Analyst",
     title: "Business Analyst Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "Business Analyst Resume Example — Terbey",
+    metaTitle: "Business Analyst Resume Example — GotaOfferr",
     metaDescription:
       "A business analyst resume example with requirement, SQL and stakeholder keywords, quantified bullets, and a downloadable ATS-safe PDF.",
     summaryLine:
@@ -214,7 +214,7 @@ export const extraResumeExamples: ResumeExample[] = [
     slug: "digital-marketing-executive",
     role: "Digital Marketing Executive",
     title: "Digital Marketing Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "Digital Marketing Resume Example — Terbey",
+    metaTitle: "Digital Marketing Resume Example — GotaOfferr",
     metaDescription:
       "A digital marketing resume example with paid, SEO and analytics keywords, ROAS and CPL numbers in every bullet, and a free ATS-safe PDF.",
     summaryLine:
@@ -313,7 +313,7 @@ export const extraResumeExamples: ResumeExample[] = [
     slug: "accountant",
     role: "Accountant",
     title: "Accountant Resume Format & Example (ATS-Optimized)",
-    metaTitle: "Accountant Resume Format & Example — Terbey",
+    metaTitle: "Accountant Resume Format & Example — GotaOfferr",
     metaDescription:
       "An accountant resume format with GST, TDS, Tally and reconciliation keywords, quantified bullets, and a downloadable ATS-safe PDF sample.",
     summaryLine:
@@ -412,7 +412,7 @@ export const extraResumeExamples: ResumeExample[] = [
     slug: "customer-support",
     role: "Customer Support",
     title: "Customer Support Resume Example (ATS-Optimized Master Resume)",
-    metaTitle: "Customer Support Resume Example — Terbey",
+    metaTitle: "Customer Support Resume Example — GotaOfferr",
     metaDescription:
       "A customer support resume example with CSAT, ticket volume and CRM keywords, plus an ATS-safe PDF you can download and adapt.",
     summaryLine:

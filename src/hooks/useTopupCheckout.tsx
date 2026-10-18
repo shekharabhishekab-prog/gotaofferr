@@ -50,7 +50,7 @@ export function useTopupCheckout(onPurchased?: () => void) {
           order_id: order.orderId,
           amount: order.amount,
           currency: order.currency,
-          name: 'Terbey',
+          name: 'GotaOfferr',
           description: order.name,
           image: `${window.location.origin}/favicon.png`,
           prefill: order.prefill,
